@@ -22,7 +22,7 @@ class Api::SessionsController < ApplicationController
   end
 
   private
-
+  
   def find_employee
     @employee = Employee.find_by("lower(email) = ?", params[:email]&.downcase)
   end
