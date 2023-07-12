@@ -3,7 +3,13 @@ Rails.application.routes.draw do
   namespace :api do
     resources :clients
     resources :employees, only: [:index, :show, :create, :destroy]
-    resources :invoices
+    resources :invoices do
+      member do
+        post :finalize
+        post :send_reject_mail
+        get :download_attachment
+      end
+    end
     resources :products
 
     resources :inventories, only: [:index, :create, :update, :destroy] do
@@ -30,10 +36,6 @@ Rails.application.routes.draw do
     delete '/logout', to: 'sessions#destroy'
     patch '/updateproduct/:id', to: 'products#update'
     post '/products/new', to: 'products#create'
-    post '/invoices/new', to: 'invoices#create'
-    post '/invoices/:id/finalize', to: 'invoices#finalize'
-    post '/invoices/:id/send_reject_mail', to: 'invoices#send_reject_mail'
-    patch '/invoices/:id/', to: 'invoices#update'
     post '/employees/new', to: 'employees#create'
     get '/employees/:id/send_reset_password_link', to: 'employees#send_reset_password_link'
     patch '/employees/:id', to: 'employees#update'

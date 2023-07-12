@@ -78,8 +78,6 @@ class Invoice < ApplicationRecord
     save!
 
     SendNotificationPdfToAdminsMailer.with(invoice: self).send_mail.deliver
-
-    document.purge
     File.delete("public/#{employee.name}-Non-Finalized-Invoice-#{id}.pdf")
   end
 
@@ -129,6 +127,8 @@ class Invoice < ApplicationRecord
     pdf.table(overhead_table_data, :cell_style => { inline_format: true }, position: :left, :column_widths => [200, 200])
 
     pdf_file = pdf.render_file("public/#{employee.name}-Finalized-Invoice-#{id}.pdf")
+
+    document.purge # To remove the non-finalized document
     document.attach(io: File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf"), filename: "#{employee.name}-Finalized-Invoice-#{id}.pdf", content_type: "application/pdf")
 
     update!(is_finalized: true)

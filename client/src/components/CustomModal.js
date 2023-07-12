@@ -206,6 +206,33 @@ function CustomModal(props) {
       });
   };
 
+  const downloadInvoice = () => {
+    fetch(`/api/invoices/${invoiceID}/download_attachment`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => {
+      if (res.ok) {
+        toast.success("Invoice Downloaded successfully.");
+      } else if (res.status === 404) {
+        res.json().then((json) => {
+          toast.error("Please provide a client.");
+        });
+      } else {
+        res.json().then((json) => {
+          toast.error("Failed to Download the Invoice");
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      toast.error("An error occured.");
+    });
+  };
+  
+
   const rejectSubmit = () => {
     // console.log({ textAreaInput });
     fetch(`/api/invoices/${invoiceID}/send_reject_mail`, {
@@ -387,6 +414,10 @@ function CustomModal(props) {
           <Modal.Footer>
             {userProfile?.is_admin === true && (
               <>
+                <Button onClick={downloadInvoice}>
+                  Download
+                </Button>
+
                 <Button
                   variant="danger"
                   onClick={() => {
@@ -404,7 +435,9 @@ function CustomModal(props) {
                   settextAreaInput={settextAreaInput}
                   textAreaInput={textAreaInput}
                 />
+
               </>
+
             )}
             {fiInvoiceList === false && (
               <>
