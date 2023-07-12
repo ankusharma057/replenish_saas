@@ -24,7 +24,7 @@ class Api::SessionsController < ApplicationController
   private
 
   def find_employee
-    @employee = Employee.find_by(email: params[:email])        
+    @employee = Employee.find_by("lower(email) = ?", params[:email]&.downcase)
   end
 
   def trying_with_temp_password?

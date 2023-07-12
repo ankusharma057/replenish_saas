@@ -1,5 +1,7 @@
 class Employee < ApplicationRecord
   validates_uniqueness_of :name
+  validates_uniqueness_of :email, case_sensitive: false
+
   has_many :invoices
   has_many :products
   has_many :clients
