@@ -2,6 +2,7 @@ import Modal from "react-bootstrap/Modal";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form } from "react-bootstrap";
+import { saveAs } from 'file-saver';
 
 const UpdateInvoiceModal = ({
   showUpdateModal,
@@ -185,25 +186,25 @@ function CustomModal(props) {
       },
       body: JSON.stringify({overhead_fee_type: nestedInputModal.overheadFeeType, overhead_fee_value: nestedInputModal.overheadFeeValue, charge: nestedInputModal.charge}),
     })
-      .then((res) => {
-        if (res.ok) {
-          toast.success("Invoice Updated successfully.");
+    .then((res) => {
+      if (res.ok) {
+        toast.success("Invoice Updated successfully.");
 
-          window.location.reload();
-        } else if (res.status === 404) {
-          res.json().then((json) => {
-            toast.error("Please provide a client.");
-          });
-        } else {
-          res.json().then((json) => {
-            toast.error("Failed to Update Invoice");
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        toast.error("An error occured.");
-      });
+        window.location.reload();
+      } else if (res.status === 404) {
+        res.json().then((json) => {
+          toast.error("Please provide a client.");
+        });
+      } else {
+        res.json().then((json) => {
+          toast.error("Failed to Update Invoice");
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      toast.error("An error occured.");
+    });
   };
 
   const downloadInvoice = () => {
@@ -213,17 +214,15 @@ function CustomModal(props) {
         "Content-Type": "application/json",
       },
     })
-    .then((res) => {
-      if (res.ok) {
-        toast.success("Invoice Downloaded successfully.");
-      } else if (res.status === 404) {
-        res.json().then((json) => {
-          toast.error("Please provide a client.");
-        });
-      } else {
+    .then(async(res) => {
+      if(res.status === 404) {
         res.json().then((json) => {
           toast.error("Failed to Download the Invoice");
         });
+      } else {
+        toast.success("Invoice Downloaded successfully.");
+        const blob = await res.blob();
+        saveAs(blob, `${invoiceData?.employee?.name}${invoiceData?.is_finalized ? '-Finalized' : '-Non-Finalized'}-Invoice-${invoiceID}.pdf`);
       }
     })
     .catch((error) => {
@@ -414,10 +413,6 @@ function CustomModal(props) {
           <Modal.Footer>
             {userProfile?.is_admin === true && (
               <>
-                <Button onClick={downloadInvoice}>
-                  Download
-                </Button>
-
                 <Button
                   variant="danger"
                   onClick={() => {
@@ -459,6 +454,9 @@ function CustomModal(props) {
                 />
               </>
             )}
+            <Button onClick={downloadInvoice}>
+              Download
+            </Button>
             <Button onClick={props.onHide}>Close</Button>
           </Modal.Footer>
         </div>
