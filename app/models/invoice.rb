@@ -118,19 +118,20 @@ class Invoice < ApplicationRecord
       <body>
         <div class="container" style="color: blue;">
           <div style="text-align: left;"> Invoice: '"#{id}"' </div>  
-          <div style="text-align: right;">  Provider: '"#{employee.name}"'  </div> 
+          <div style="text-align: right;"> Charge: '"#{charge}"' </div>  
+          <div style="text-align: left;">  Provider: '"#{employee.name}"'  </div> 
 
-          <div style="text-align: left;">  Client Name: '"#{client.name}"' </div>  
-          <div style="text-align: right;">  Date of Service: '"#{date_of_service}"' </div> 
+          <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
+          <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
 
-          <div style="text-align: left;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-          <div style="text-align: right;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
+          <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+          <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
-          <div style="text-align: left;">  Paid By Client Cash: '"#{paid_by_client_cash}"'</div>  
-          <div style="text-align: right;">  Paid By Client Credit: '"#{paid_by_client_credit}"'</div>  
+          <div style="text-align: right;">  Paid By Client Cash: '"#{paid_by_client_cash}"'</div>  
+          <div style="text-align: left;">  Paid By Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-          <div style="text-align: left;">  Total Paid by Credit: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
-          <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>  
+          <div style="text-align: right;">  Total Paid by Credit: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+          <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
         </div>
 
         <div></div>
