@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::InventoriesController < ApplicationController
-  before_action :find_inventory, only: %i(update destroy assign)
+  before_action :find_inventory, only: %i(update destroy)
   before_action :find_product, only: %i(create update)
   before_action :find_receiver_employee, only: :assign
 
@@ -68,15 +68,15 @@ class Api::InventoriesController < ApplicationController
     params.require(:inventory).permit(:quantity)
   end
 
-  def find_inventory
-    @inventory = Inventory.find_by(id: params[:id])
-  end
-
   def find_product
     @product = Product.find_by(name: params[:product_name])
   end
 
   def find_receiver_employee
     @receiver_employee = Employee.find_by(name: params[:employee_name])
+  end
+  
+  def find_inventory
+    @inventory = Inventory.find_by(id: params[:id])
   end
 end

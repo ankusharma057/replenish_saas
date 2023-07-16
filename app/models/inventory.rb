@@ -8,4 +8,8 @@ class Inventory < ApplicationRecord
     current_inventory.update!(quantity: current_inventory.quantity.to_i - quantity.to_i)
     employee.inventory_prompts.create!(product: self.product, quantity: quantity.to_i)
   end
+
+  def request_for_inventory(requestor_employee, quantity, data_of_use)
+    binding.irb
+  end
 end

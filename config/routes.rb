@@ -22,7 +22,14 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :inventory_prompts, only: [] do
+    resources :inventory_prompts, only: :create do
+      member do
+        post 'accept'
+        post 'reject'
+      end
+    end
+
+    resources :inventory_requests, only: :create do
       member do
         post 'accept'
         post 'reject'
