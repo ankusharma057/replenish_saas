@@ -297,7 +297,7 @@ function CustomModal(props) {
                 </div>
               </div>
 
-              {invoiceData?.products_hash?.products.length > 0 &&
+              {invoiceData?.products_hash?.products?.length > 0 &&
                 (<div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
                   <div>
                     <p><b>Products</b></p>
@@ -325,7 +325,7 @@ function CustomModal(props) {
                 </div>)
               }
 
-              {invoiceData?.products_hash?.retail_products.length > 0 &&
+              {invoiceData?.products_hash?.retail_products?.length > 0 &&
                 (<div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
                   <div>
                     <p><b>Retail Products</b></p>
