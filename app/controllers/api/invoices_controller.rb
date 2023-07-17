@@ -3,7 +3,7 @@
 class Api::InvoicesController < ApplicationController
   skip_before_action :authorized_employee
   before_action :initialize_objects, only: :create
-  before_action :find_invoice, only: [:finalize, :update, :send_reject_mail]
+  before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment)
 
   def index
     invoices = Invoice.all
@@ -48,6 +48,15 @@ class Api::InvoicesController < ApplicationController
 
   def send_reject_mail
     @invoice.reject_and_send_mail(params[:feedback])
+  end
+
+  def download_attachment
+    if @invoice.document.attached?
+      path = ActiveStorage::Blob.service.path_for(@invoice.document.key)
+      send_data File.open(path, 'rb').read, type: 'application/pdf', disposition: 'attachment', filename: 'Note.pdf'
+    else
+      return render json: {'error' => 'Invoice not found'}, status: :not_found
+    end
   end
 
   private
