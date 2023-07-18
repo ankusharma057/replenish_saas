@@ -193,7 +193,7 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
     })
       .then((res) => {
         if (res.ok) {
-            toast.success("Prompted Employee for the inventory.");
+            toast.success(userProfile.is_admin ? "Assigned the Inventory to the Employee" : "Prompted Employee for the inventory.");
           setTimeout(() =>{
             window.location.reload();
           }, 1000);

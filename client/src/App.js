@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import Login from "./components/Login";
 import AddInvoice from "./components/AddInvoice";
 import AddInvoices from "./components/AddInvoices";
@@ -26,6 +32,7 @@ function App() {
   const [clientsList, setClientsList] = useState();
   const [employeeList, setEmployeeList] = useState([]);
 
+  const navigate = useNavigate();
   useEffect(() => {
     fetch("/api/invoices")
       .then((r) => r.json())
@@ -35,11 +42,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/clients")
-      .then((r) => r.json())
-      .then((data) => {
-        setClientsList(data);
-      });
+    fetch("/api/clients").then((res) => {
+      if (res.ok) {
+        res.json().then((data) => {
+          setClientsList(data);
+        });
+      } else {
+        navigate("/");
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -47,6 +58,7 @@ function App() {
       if (res.ok) {
         res.json().then((userProfile) => setUserProfile(userProfile));
       } else {
+        navigate("/");
         setUserProfile(null);
       }
     });
@@ -98,11 +110,11 @@ function App() {
   };
   return (
     <div>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login updateEmployee={updateEmployee} />} />
-          {userProfile && userProfile.is_inv_manager &&
-            (
+      <Routes>
+        <Route path="/" element={<Login updateEmployee={updateEmployee} />} />
+        {userProfile && (
+          <>
+            {userProfile && (userProfile.is_inv_manager || userProfile.is_admin) && (
               <>
                 <Route
                   path="/inventories"
@@ -116,123 +128,131 @@ function App() {
                 />
                 <Route
                   path="/employees"
-                  element={<EmployeeList userProfile={userProfile} />}
+                  element={
+                    <EmployeeList
+                      userProfile={userProfile}
+                      employeeList={employeeList}
+                      productList={productList}
+                    />
+                  }
                 />
               </>
-            )
-          }
+            )}
 
-          <Route path="/resetPassword" element={<ResetPassword updateEmployee={updateEmployee} />} />
+            <Route
+              path="/resetPassword"
+              element={<ResetPassword updateEmployee={updateEmployee} />}
+            />
 
-          {userProfile && userProfile.is_admin ? (
-            <>
-
-              <Route
-                path="/addproduct"
-                element={
-                  <AddProduct
-                    addProduct={addProduct}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="/employees"
-                element={<EmployeeList userProfile={userProfile} />}
-              />
-              <Route
-                path="/invoicelist"
-                element={
-                  <InvoiceList
-                    invoiceList={invoiceList}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <ProductList
-                    onSave={handleProductSave}
-                    productList={productList}
-                    onDeleteProduct={onDeleteProduct}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="/addinvoice"
-                element={
-                  <AddInvoices
-                    productList={productList}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="/signup"
-                element={<Signup userProfile={userProfile} />}
-              />
-              <Route
-                path="/myprofile"
-                element={
-                  <MyProfile
-                    employeeList={employeeList}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="*"
-                element={
-                  <MyProfile
-                    userProfile={userProfile}
-                    employeeList={employeeList}
-                  />
-                }
-              />
-            </>
-          ) : (
-            <>
-              <Route
-                path="/myprofile"
-                element={
-                  <MyProfile
-                    employeeList={employeeList}
-                    userProfile={userProfile}
-                   />
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <ProductList
-                    onSave={handleProductSave}
-                    productList={productList}
-                    onDeleteProduct={onDeleteProduct}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="/addinvoice"
-                element={
-                  <AddInvoices
-                    productList={productList}
-                    clientsList={clientsList}
-                    userProfile={userProfile}
-                  />
-                }
-              />
-              <Route
-                path="*"
-                element={<MyProfile userProfile={userProfile} />}
-              />
-            </>
-          )}
-        </Routes>
-        <ToastContainer position="top-center" />
-      </BrowserRouter>
+            {userProfile && userProfile.is_admin ? (
+              <>
+                <Route
+                  path="/addproduct"
+                  element={
+                    <AddProduct
+                      addProduct={addProduct}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/employees"
+                  element={<EmployeeList userProfile={userProfile} />}
+                />
+                <Route
+                  path="/invoicelist"
+                  element={
+                    <InvoiceList
+                      invoiceList={invoiceList}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/products"
+                  element={
+                    <ProductList
+                      onSave={handleProductSave}
+                      productList={productList}
+                      onDeleteProduct={onDeleteProduct}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/addinvoice"
+                  element={
+                    <AddInvoices
+                      productList={productList}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={<Signup userProfile={userProfile} />}
+                />
+                <Route
+                  path="/myprofile"
+                  element={
+                    <MyProfile
+                      employeeList={employeeList}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <MyProfile
+                      userProfile={userProfile}
+                      employeeList={employeeList}
+                    />
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <Route
+                  path="/myprofile"
+                  element={
+                    <MyProfile
+                      employeeList={employeeList}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/products"
+                  element={
+                    <ProductList
+                      onSave={handleProductSave}
+                      productList={productList}
+                      onDeleteProduct={onDeleteProduct}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="/addinvoice"
+                  element={
+                    <AddInvoices
+                      productList={productList}
+                      clientsList={clientsList}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+                <Route
+                  path="*"
+                  element={<MyProfile userProfile={userProfile} />}
+                />
+              </>
+            )}
+          </>
+        )}
+      </Routes>
+      <ToastContainer position="top-center" />
     </div>
   );
 }

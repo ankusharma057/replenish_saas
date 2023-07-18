@@ -6,7 +6,7 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { toast } from "react-toastify";
 import InventoryModal from "./InventoryModal";
 
-export default function Employee({ employee, invoiceList, userProfile }) {
+export default function Employee({ employee, invoiceList, userProfile , employeeList, productList}) {
   const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [showInventories, setShowInventories] = useState(false);
@@ -22,7 +22,6 @@ export default function Employee({ employee, invoiceList, userProfile }) {
     );
     setEmployeeInvoices(filteredInvoices);
   }, [invoiceList, employee]);
-//test
   function handleClick() {
     setModalShow(!modalShow);
   }
@@ -158,7 +157,7 @@ export default function Employee({ employee, invoiceList, userProfile }) {
 
   const tailWindEmployeeCard = (
     <Card className="text-center w-[20rem] sm:w-[25rem]" border="info">
-      <Card.Header as="h5">Employee: {employee?.name}</Card.Header>
+      <Card.Header as="h5">{employee?.name}</Card.Header>
       <Card.Body className="">
     
         {userProfile?.is_admin === true ? (
@@ -244,10 +243,10 @@ export default function Employee({ employee, invoiceList, userProfile }) {
         inventoryList={employee}
         showModal={showModal}
         setshowModal={setShowModal}
-        // updateQtySubmit={updateQtySubmit}
-        // updateQtyInput={updateQtyInput}
-        // setUpdateQtyInput={setUpdateQtyInput}
         isQtyUpdate={false}
+        employeeList={employeeList}
+        userProfile={userProfile}
+        productList={productList}
       />
     </div>
   );
