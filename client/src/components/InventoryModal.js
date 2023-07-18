@@ -19,7 +19,7 @@ const InventoryModal = ({
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Employee Id: {inventoryList?.id}
+          {inventoryList?.name}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="text-center flex  flex-col gap-4">

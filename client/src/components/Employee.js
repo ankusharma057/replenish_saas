@@ -158,7 +158,7 @@ export default function Employee({ employee, invoiceList, userProfile }) {
 
   const tailWindEmployeeCard = (
     <Card className="text-center w-[20rem] sm:w-[25rem]" border="info">
-      <Card.Header as="h5">Employee: {employee?.name}</Card.Header>
+      <Card.Header as="h5">{employee?.name}</Card.Header>
       <Card.Body className="">
     
         {userProfile?.is_admin === true ? (
