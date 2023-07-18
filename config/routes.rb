@@ -2,7 +2,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :clients
-    resources :employees, only: [:index, :show, :create, :destroy]
+    resources :employees, only: %i(index show create destroy update) do
+      member do
+        patch :update_inventories
+      end
+    end
     resources :invoices do
       member do
         post :finalize

@@ -61,6 +61,10 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def update_inventories
+    
+  end
+
   private
 
   def employee_params
