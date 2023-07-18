@@ -18,8 +18,8 @@ class Invoice < ApplicationRecord
 
   def save_pdf_and_send_mail(products, retail_products)
     # TODO: Refactor the duplicate code to generate the pdf in this and the later method (before the overhead section) 
-    products_hash["Products"] = products
-    products_hash["Retail Products"] = retail_products
+    products_hash["products"] = products
+    products_hash["retail_products"] = retail_products
     
     if products_hash && products_hash.any?
       products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
@@ -43,7 +43,7 @@ class Invoice < ApplicationRecord
 
   def finalize_and_send_pdf_mail
     products_hash["Products"] = products_hash["products"]
-    products_hash["Retail Products"] = products_hash["products"]
+    products_hash["Retail Products"] = products_hash["retail_products"]
     products_hash.except!("products", "retail_products")
 
     pdf = WickedPdf.new.pdf_from_string(get_html(products_hash, overhead_table_data: true))
@@ -86,7 +86,7 @@ class Invoice < ApplicationRecord
   end
 
   def get_html(products_hash, overhead_table_data: false)
-    products_hash = products_hash.select{|has| !products_hash[has].blank? }
+    products_hash = products_hash.reject{|hash| products_hash[hash].blank? }
 
     str = '<html lang="ko">
 
@@ -138,10 +138,10 @@ class Invoice < ApplicationRecord
         <div class="main-table" style="margin: 30px auto;max-width: 800px">
         <div class="page-break">'
 
-      products_hash&.each do |k, v|
+      products_hash&.each do |key, value|
         table_str = ""
         table_str += '<hr color="#323aa8">
-          <h1 style="margin-bottom: 10px; color: #323aa8">'"#{k}"':</h1>
+          <h1 style="margin-bottom: 10px; color: #323aa8">'"#{key}"':</h1>
 
           <table style="width: 100%;margin: 50px 0">
             <tbody>
@@ -151,7 +151,7 @@ class Invoice < ApplicationRecord
                 <th width="20%">Price</th>
                 <th width="20%">Total Price</th>
               </tr>'
-        v&.each do |data|
+        value&.each do |data|
           table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
                 <td width="40%">'"#{data.first}"'</td>
                 <td width="20%">'"#{data.second}"'</td>
