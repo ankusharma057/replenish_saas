@@ -3,7 +3,7 @@
 class Api::InventoriesController < ApplicationController
   before_action :find_inventory, only: %i(update destroy assign)
   before_action :find_product, only: %i(create update)
-  before_action :find_employee, only: :assign
+  before_action :find_receiver_employee, only: :assign
 
   def index
     @inventories = Inventory.all
@@ -37,7 +37,13 @@ class Api::InventoriesController < ApplicationController
 
   def assign
     if @inventory
-      @inventory.prompt_to_employee(@receiver_employee, params[:inventory][:quantity])
+      if @employee.is_admin
+        inventory = @receiver_employee.employees_inventories.find_or_create_by(product: @inventory.product)
+        inventory.update!(quantity: inventory.quantity.to_i + params[:inventory][:quantity].to_i)
+      else
+        @inventory.prompt_to_employee(@receiver_employee, params[:inventory][:quantity])
+      end
+
       render json: @inventory, status: :ok
     else
       render json: { 'error' => 'Could not find Inventory' }, status: :bad_request
@@ -70,7 +76,7 @@ class Api::InventoriesController < ApplicationController
     @product = Product.find_by(name: params[:product_name])
   end
 
-  def find_employee
+  def find_receiver_employee
     @receiver_employee = Employee.find_by(name: params[:employee_name])
   end
 end

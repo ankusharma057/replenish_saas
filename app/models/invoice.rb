@@ -27,7 +27,7 @@ class Invoice < ApplicationRecord
         emp_product_quantity.update(quantity: (emp_product_quantity.quantity - product_quantity.values.first.to_i))
       end
     end
-    
+
     pdf = WickedPdf.new.pdf_from_string(get_html(products_hash))
     File.open("public/#{employee.name}-Non-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
       file << pdf
