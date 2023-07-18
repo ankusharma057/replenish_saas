@@ -6,7 +6,7 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { toast } from "react-toastify";
 import InventoryModal from "./InventoryModal";
 
-export default function Employee({ employee, invoiceList, userProfile , employeeList}) {
+export default function Employee({ employee, invoiceList, userProfile , employeeList, productList}) {
   const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [showInventories, setShowInventories] = useState(false);
@@ -246,6 +246,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
         isQtyUpdate={false}
         employeeList={employeeList}
         userProfile={userProfile}
+        productList={productList}
       />
     </div>
   );

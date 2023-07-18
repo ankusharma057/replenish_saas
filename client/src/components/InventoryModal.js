@@ -3,57 +3,55 @@ import { Button, Form, Modal, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import AssignModal from "./AssignModal";
 
-const UpdateModal = ({
-  updateModalShow,
-  setUpdateModalShow,
-  employeeList,
+const InventoryModal = ({
+  showModal,
+  setshowModal,
+  inventoryList,
+  updateQtySubmit,
+  updateQtyInput,
+  setUpdateQtyInput,
+  invList,
   userProfile,
+  employeeList,
+  productList,
 }) => {
-  const [entireInventory, setEntireInventory] = useState([]);
-  const [assignProductData, setAssignProductData] = useState({});
-  const [showAssignMadal, setShowAssignMadal] = useState(false);
+  const dataList = inventoryList?.employees_inventories || invList;
 
-  const [assignInput, setAssignInput] = useState({
+  const [updateModalShow, setUpdateModalShow] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [updateData, setUpdateData] = useState({
+    quantity: 0,
+    product: "",
+    id: "",
+  });
+  const [updatedList, setUpdatedList] = useState([]);
+
+  const [showAddNew, setShowAddNew] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    product_name: "",
     quantity: 0,
   });
-  useEffect(() => {
-    fetch("/api/inventories")
-      .then((r) => r.json())
-      .then((data) => {
-        // console.log({data});
-        setEntireInventory(data);
-      });
-  }, []);
 
-  const assignSubmit = (e) => {
-    e.preventDefault();
-    const productData = {
-      ...assignInput,
-      product_name: assignProductData?.product?.name,
-      is_admin: true,
-      userProfile_id: userProfile?.id,
-    };
-
-    fetch(`/api/inventories/${assignProductData?.id}/assign`, {
-      method: "POST",
+  const updateSubmit = () => {
+    fetch(`/api/employees/${updatedList?.employee_id}/update_inventories`, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...productData }),
+      body: JSON.stringify({ ...updatedList, newProduct }),
     })
       .then((res) => {
         if (res.ok) {
-          toast.success("Prompted Employee for the inventory.");
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          toast.success(" Updated successfully.");
+
+          window.location.reload();
         } else if (res.status === 404) {
           res.json().then((json) => {
             toast.error("Please provide a client.");
           });
         } else {
           res.json().then((json) => {
-            toast.error("Failed to assign the inventory.");
+            toast.error("Failed to Update ");
           });
         }
       })
@@ -62,104 +60,27 @@ const UpdateModal = ({
         toast.error("An error occured.");
       });
   };
+  useEffect(() => {}, []);
 
-  return (
-    <>
-      <AssignModal
-        showAssignMadal={showAssignMadal}
-        setShowAssignMadal={setShowAssignMadal}
-        assignSubmit={assignSubmit}
-        assignProductData={assignProductData}
-        setAssignProductData={setAssignProductData}
-        setAssignInput={setAssignInput}
-        assignInput={assignInput}
-        employeeList={employeeList}
-        employee={userProfile}
-      />
-      <Modal
-        show={updateModalShow}
-        onHide={() => setUpdateModalShow(false)}
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Inventories
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-center flex  flex-col gap-4">
-          <div className="max-h-96 overflow-auto">
-            <Table bordered hover responsive className="w-full text-center ">
-              <thead>
-                <tr>
-                  <th className="w-1/2">Product </th>
-                  <th>Quantity</th>
-                  <th>Assign</th>
-                </tr>
-              </thead>
+  // useEffect(() => {
+  //   for (let index = 0; index < dataList.length; index++) {
+  //     const element = dataList[index].product;
 
-              <tbody>
-                {entireInventory?.map((data) => {
-                  return (
-                    <tr key={data?.product?.id}>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.product?.name} </span>
-                          {/* <span>Product Name: Product </span> */}
-                        </div>
-                      </td>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity} </span>
-                        </div>
-                      </td>
+  //     console.log(element);
+  //   }
 
-                      <td className="align-middle">
-                        <Button
-                          variant="info"
-                          onClick={() => {
-                            setAssignProductData(data);
-                            setShowAssignMadal(true);
-                            setUpdateModalShow(false);
-                          }}
-                        >
-                          Assign
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={() => setUpdateModalShow(false)}>Close</Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
-};
-const InventoryModal = ({
-  showModal,
-  setshowModal,
-  inventoryList,
-  updateQtySubmit,
-  updateQtyInput,
-  isQtyUpdate,
-  setUpdateQtyInput,
-  invList,
-  userProfile,
-  employeeList,
-}) => {
-  const dataList = inventoryList?.employees_inventories || invList;
+  //   return () => {};
+  // }, []);
 
-  const [updateModalShow, setUpdateModalShow] = useState(false);
+  // console.log(JSON.stringify(updatedList, null, 2));
 
   return (
     <Modal
       show={showModal}
-      onHide={() => setshowModal(false)}
+      onHide={() => {
+        setIsUpdate(false);
+        setshowModal(false);
+      }}
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
@@ -175,69 +96,161 @@ const InventoryModal = ({
               <tr>
                 <th className="w-1/2">Product </th>
                 <th>Quantity</th>
-                {/* <th>Assign</th> */}
+                <th>Update</th>
               </tr>
             </thead>
 
             <tbody>
               {dataList?.map((data) => {
                 return (
-                  <tr key={data?.product?.id}>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.product?.name} </span>
-                        {/* <span>Product Name: Product </span> */}
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      {isQtyUpdate ? (
-                        <Form className="flex flex-col gap-4">
-                          <Form.Control
-                            type="number"
-                            defaultValue={data?.quantity}
-                            onChange={(e) => {
-                              setUpdateQtyInput({
-                                ...updateQtyInput,
-                                [data?.product?.id]: {
-                                  quantity: e.target.value,
-                                },
+                  <>
+                    <tr key={data?.product.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <div className="flex flex-col justify-center gap-2">
+                            <span>
+                              <span>{data?.product?.name} </span>
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        {isUpdate ? (
+                          <Form className="flex flex-col gap-4">
+                            <Form.Control
+                              type="number"
+                              defaultValue={data?.quantity}
+                              onChange={(e) => {
+                                console.log(data?.product?.id);
+                                setUpdatedList({
+                                  ...updatedList,
+                                  employee_id: data?.employee.id,
+                                  [data?.product?.id]: {
+                                    quantity: e.target.value,
+                                  },
+                                });
+                              }}
+                              min={1}
+                              required
+                            />
+                          </Form>
+                        ) : (
+                          <div className="flex flex-col justify-center gap-2">
+                            <span>
+                              {updateData.quantity || data?.quantity}{" "}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="align-middle">
+                        {isUpdate ? (
+                          <div
+                            onClick={() => {
+                              setIsUpdate(true);
+                              setUpdateData({
+                                product: data?.product?.name,
+                                quantity: data?.quantity - 1,
                               });
                             }}
-                            min={1}
-                            required
-                          />
-                        </Form>
-                      ) : (
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity} </span>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+                            className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                          >
+                            -
+                          </div>
+                        ) : (
+                          <div className="flex gap-4 justify-center">
+                            <div
+                              onClick={() => {
+                                setIsUpdate(true);
+                                setUpdateData({
+                                  product: data?.product?.name,
+                                  quantity: data?.quantity - 1,
+                                });
+                              }}
+                              className="px-3 text-2xl text-white cursor-pointer  font-bold rounded-md  bg-blue-400"
+                            >
+                              -
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  </>
                 );
               })}
             </tbody>
           </Table>
+          {showAddNew && (
+            <Table bordered hover responsive className="w-full text-center">
+              <thead>
+                <tr>
+                  <th className="w-1/2">Product </th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <th>
+                    <Form.Select
+                      aria-label="Default select example"
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          product_name: e.target.value,
+                        })
+                      }
+                      required
+                    >
+                      <option>Select Product</option>
+                      {productList
+                        ?.filter(
+                          (product) => product.name !== updateData.product
+                        )
+                        .map((product) => {
+                          return (
+                            <option key={product?.name} value={product.name}>
+                              {product?.name}
+                            </option>
+                          );
+                        })}
+                    </Form.Select>
+                  </th>
+                  <th>
+                    <Form className="flex flex-col gap-4">
+                      <Form.Control
+                        type="number"
+                        onChange={(e) => {
+                          setNewProduct({
+                            ...newProduct,
+                            quantity: e.target.value,
+                          });
+                        }}
+                        min={1}
+                        required
+                      />
+                    </Form>
+                  </th>
+                </tr>
+              </tbody>
+            </Table>
+          )}
+          <Button
+            className="w-full"
+            onClick={() => {
+              setIsUpdate(true);
+              setShowAddNew(true);
+            }}
+          >
+            Add New
+          </Button>
         </div>
       </Modal.Body>
       <Modal.Footer>
-        {isQtyUpdate && <Button onClick={updateQtySubmit}>Update</Button>}
-        <Button
-          onClick={() => {
-            return setUpdateModalShow(true);
-          }}
-        >
-          Update
-        </Button>
+        {isUpdate && <Button onClick={updateSubmit}>Update</Button>}
+
         <Button onClick={() => setshowModal(false)}>Close</Button>
       </Modal.Footer>
-
-      <UpdateModal
-        setUpdateModalShow={setUpdateModalShow}
-        updateModalShow={updateModalShow}
-        employeeList={employeeList}
-        userProfile={userProfile}
-      />
     </Modal>
   );
 };

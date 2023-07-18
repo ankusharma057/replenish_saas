@@ -132,6 +132,7 @@ function App() {
                     <EmployeeList
                       userProfile={userProfile}
                       employeeList={employeeList}
+                      productList={productList}
                     />
                   }
                 />

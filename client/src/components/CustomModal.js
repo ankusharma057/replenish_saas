@@ -297,62 +297,6 @@ function CustomModal(props) {
                 </div>
               </div>
 
-              {invoiceData?.products_hash?.products?.length > 0 &&
-                (<div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
-                  <div>
-                    <p><b>Products</b></p>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Product</th>
-                          <th>Quantity</th>
-                          <th>Price</th>
-                          <th>Total Price</th>
-                        </tr>
-                      </thead>
-                      {invoiceData?.products_hash?.products.map((product) => (
-                        <tbody>
-                          <tr>
-                            <td>{product[0]}</td>
-                            <td>{product[1]}</td>
-                            <td>{product[2]}</td>
-                            <td>{+(product[1] * product[2])}</td>
-                          </tr>
-                        </tbody>
-                      ))}
-                    </table>
-                  </div>
-                </div>)
-              }
-
-              {invoiceData?.products_hash?.retail_products?.length > 0 &&
-                (<div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
-                  <div>
-                    <p><b>Retail Products</b></p>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th scope="col">Product</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Price</th>
-                          <th scope="col">Total Price</th>
-                        </tr>
-                      </thead>
-                      {invoiceData?.products_hash?.retail_products.map((product) => (
-                        <tbody>
-                          <tr>
-                            <td>{product[0]}</td>
-                            <td>{product[1]}</td>
-                            <td>{product[2]}</td>
-                            <td>{+(product[1] * product[2])}</td>
-                          </tr>
-                        </tbody>
-                      ))}
-                    </table>
-                  </div>
-                </div>)
-              }
-
               <div className="border rounded-sm p-2 mb-4 flex justify-content-around">
                 <div>
                   <p>Concierge Fee Paid:</p>

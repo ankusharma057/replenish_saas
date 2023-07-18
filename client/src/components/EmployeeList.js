@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Employee from "./Employee";
 import Header from "./Header";
-export default function EmployeeList({ userProfile }) {
+export default function EmployeeList({ userProfile, productList }) {
   const [invoiceList, setInvoiceList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
 
@@ -36,6 +36,7 @@ export default function EmployeeList({ userProfile }) {
               employeeList={employeeList}
               employee={employee}
               invoiceList={invoiceList}
+              productList={productList}
               userProfile={userProfile}
             />
           </div>

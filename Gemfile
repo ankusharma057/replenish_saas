@@ -51,8 +51,8 @@ group :development do
 end
 
 # html to pdf:
-gem "prawn-rails"
-gem "prawn-html"
+# gem "prawn-rails"
+# gem "prawn-html"
 
 gem "active_model_serializers", "~> 0.10.13"
 gem "wicked_pdf"
