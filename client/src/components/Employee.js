@@ -6,7 +6,7 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { toast } from "react-toastify";
 import InventoryModal from "./InventoryModal";
 
-export default function Employee({ employee, invoiceList, userProfile }) {
+export default function Employee({ employee, invoiceList, userProfile , employeeList}) {
   const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [showInventories, setShowInventories] = useState(false);
@@ -22,7 +22,6 @@ export default function Employee({ employee, invoiceList, userProfile }) {
     );
     setEmployeeInvoices(filteredInvoices);
   }, [invoiceList, employee]);
-//test
   function handleClick() {
     setModalShow(!modalShow);
   }
@@ -244,10 +243,9 @@ export default function Employee({ employee, invoiceList, userProfile }) {
         inventoryList={employee}
         showModal={showModal}
         setshowModal={setShowModal}
-        // updateQtySubmit={updateQtySubmit}
-        // updateQtyInput={updateQtyInput}
-        // setUpdateQtyInput={setUpdateQtyInput}
         isQtyUpdate={false}
+        employeeList={employeeList}
+        userProfile={userProfile}
       />
     </div>
   );

@@ -641,7 +641,7 @@ export default function AddInvoices(props) {
                 <table className="w-full table-auto ">
                   <thead className="whitespace-normal">
                     <tr>
-                      <th>Products Used</th>
+                      <th>Products/Services</th>
                       <th>Product Quantity</th>
                       <th>Price</th>
                       <th>Total Price</th>

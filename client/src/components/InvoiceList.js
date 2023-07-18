@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Invoice from "./Invoice";
+import { Form } from "react-bootstrap";
 
 export default function InvoiceList({ userProfile }) {
   const [finalizedInvoiceList, setFinalizedInvoiceList] = useState([]);
   const [nonFinalizedInvoiceList, setNonFinalizedInvoiceList] = useState([]);
-
+  const [invoiceList, setInvoiceList] = useState({
+    finalizedInvoiceList: [],
+    nonFinalizedInvoiceList: [],
+  });
+  const [setselectList, setSetselectList] = useState("nonFinalizedInvoiceList");
   useEffect(() => {
     const fiInvoiceList = [];
     const nonFiInvoiceList = [];
@@ -20,41 +25,48 @@ export default function InvoiceList({ userProfile }) {
             nonFiInvoiceList.push(invoice);
           }
         });
-        setFinalizedInvoiceList(fiInvoiceList);
-        setNonFinalizedInvoiceList(nonFiInvoiceList);
+
+        setInvoiceList({
+          finalizedInvoiceList: fiInvoiceList,
+          nonFinalizedInvoiceList: nonFiInvoiceList,
+        });
+        // setFinalizedInvoiceList(fiInvoiceList);
+        // setNonFinalizedInvoiceList(nonFiInvoiceList);
       })
       .catch((error) => {
         console.log(error);
       });
   }, []); // Empty dependency array to run the effect only once
+
   return (
     <div>
       <Header userProfile={userProfile} />
       <br />
+      <div className="flex justify-content-center">
+        <div className="w-full sm:w-1/2 md:w-1/4">
+          <Form.Select
+            defaultValue={setselectList}
+            size="md"
+            aria-label="Default select example"
+            onChange={(e) => setSetselectList(e.target.value)}
+          >
+            <option value={"finalizedInvoiceList"}>Finalized Invoices</option>
+            <option value="nonFinalizedInvoiceList">
+              Non Finalized Invoices
+            </option>
+          </Form.Select>
+        </div>
+      </div>
       <div>
-        <h2 className="text-center">Finalized Invoices:</h2>
         <hr />
+
         <div className="justify-center flex flex-wrap gap-3">
-          {finalizedInvoiceList?.map((invoice, i) => (
-            <Invoice invoice={invoice} key={i} fiInvoiceList={true} />
+          {invoiceList[setselectList]?.map((invoice, i) => (
+            <Invoice invoice={invoice} key={i} fiInvoiceList={invoice?.is_finalized} userProfile={userProfile} />
           ))}
         </div>
       </div>
       <br />
-      <div>
-        <h2 className="text-center">Non Finalized Invoices:</h2>
-        <hr />
-        <div className="justify-center flex flex-wrap gap-3">
-          {nonFinalizedInvoiceList?.map((invoice, i) => (
-            <Invoice
-              userProfile={userProfile}
-              invoice={invoice}
-              key={i}
-              fiInvoiceList={false}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -411,7 +411,7 @@ function CustomModal(props) {
             </form>
           </Modal.Body>
           <Modal.Footer>
-            {userProfile?.is_admin === true && (
+            {userProfile?.is_admin === true && fiInvoiceList === false && (
               <>
                 <Button
                   variant="danger"

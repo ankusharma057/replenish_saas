@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import Employee from './Employee'
-import Header from './Header';
-export default function EmployeeList({userProfile}){
+import React, { useEffect, useState } from "react";
+import Employee from "./Employee";
+import Header from "./Header";
+export default function EmployeeList({ userProfile }) {
   const [invoiceList, setInvoiceList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
 
   useEffect(() => {
     // Fetch the invoice list from the API
-    fetch('/api/invoices')
+    fetch("/api/invoices")
       .then((response) => response.json())
       .then((data) => {
         setInvoiceList(data); // Update the state with the fetched data
@@ -16,7 +16,7 @@ export default function EmployeeList({userProfile}){
         console.log(error);
       });
     // Fetch the employee list from the API
-    fetch('/api/employees')
+    fetch("/api/employees")
       .then((response) => response.json())
       .then((data) => {
         setEmployeeList(data); // Update the state with the fetched data
@@ -26,16 +26,21 @@ export default function EmployeeList({userProfile}){
       });
   }, []); // Empty dependency array to run the effect only once
 
-  return(
+  return (
     <div>
       <Header userProfile={userProfile} />
       <div className="mt-3 mb-3 mx-1 flex justify-center flex-wrap gap-3">
         {employeeList.map((employee) => (
           <div key={employee?.id} className=" ">
-            <Employee employee={employee} invoiceList={invoiceList} userProfile={userProfile} />
+            <Employee
+              employeeList={employeeList}
+              employee={employee}
+              invoiceList={invoiceList}
+              userProfile={userProfile}
+            />
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
