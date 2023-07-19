@@ -152,7 +152,7 @@ const InventoryModal = ({
               {dataList?.map((data) => {
                 return (
                   <>
-                    <tr key={data?.product.id}>
+                    <tr key={data?.product?.id}>
                       <td className="align-middle">
                         <div className="flex flex-col  gap-2">
                           <div className="flex flex-col justify-center gap-2">
