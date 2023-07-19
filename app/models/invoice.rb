@@ -52,8 +52,6 @@ class Invoice < ApplicationRecord
     pdf_string = get_html_finalized(products_hash)
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-
-    pdf = WickedPdf.new.pdf_from_string()
     File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
       file << pdf
     end
