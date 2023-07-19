@@ -7,7 +7,7 @@ class SendPdfToInvoiceMailer < ApplicationMailer
 
     emails = Employee.admins.pluck(&:email)
     emails << @invoice.employee.email
-    emails << "patrick.lc17@icloud.com"
+    emails << "replenishmd_527@invoicesmelio.com"
 
     emails.each do |email|
       mail(
