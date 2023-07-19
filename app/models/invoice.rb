@@ -44,8 +44,7 @@ class Invoice < ApplicationRecord
     File.delete("public/#{employee.name}-Non-Finalized-Invoice-#{id}.pdf")
   end
 
-  def finalize_and_send_pdf_mail
-    binding.irb 
+  def finalize_and_send_pdf_mail 
     # products_hash["Products"] = products_hash["products"]
     # products_hash["Retail Products"] = products_hash["retail_products"]
     # products_hash.except!("products", "retail_products")
