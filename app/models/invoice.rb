@@ -29,7 +29,9 @@ class Invoice < ApplicationRecord
       end
     end
 
-    pdf = WickedPdf.new.pdf_from_string(get_html(products_hash))
+    pdf_string = get_html(products_hash)
+    pdf_modified_string = pdf_string.blank? "<div>No Data</div>" : pdf_string
+    pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
     File.open("public/#{employee.name}-Non-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
       file << pdf
     end
@@ -48,7 +50,11 @@ class Invoice < ApplicationRecord
     # products_hash["Retail Products"] = products_hash["retail_products"]
     # products_hash.except!("products", "retail_products")
 
-    pdf = WickedPdf.new.pdf_from_string(get_html_finalized(products_hash))
+    pdf_string = get_html_finalized(products_hash)
+    pdf_modified_string = pdf_string.blank? "<div>No Data</div>" : pdf_string
+    pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
+    
+    pdf = WickedPdf.new.pdf_from_string()
     File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
       file << pdf
     end
