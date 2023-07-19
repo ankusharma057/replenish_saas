@@ -62,7 +62,6 @@ class Api::EmployeesController < ApplicationController
   end
 
   def update_inventories
-    binding.irb
   end
 
   private
