@@ -351,7 +351,6 @@ function CustomModal(props) {
                   <p>Overhead Fee Value:</p>
                   <div>{overheadFeeValue}</div>
                 </div>
-                
               </div>
             </form>
           </Modal.Body>
