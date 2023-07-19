@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Header from "./Header";
 import { Button, Card } from "react-bootstrap";
-import CustomInvoiceModal from "./CustomInvoiceModal.js";
+import CustomModal from "./CustomModal.js";
 import Table from "react-bootstrap/Table";
 import AssignModal from "./AssignModal";
 import { toast } from "react-toastify";
@@ -225,7 +225,7 @@ function UserPage({ userProfile, employeeList }) {
 
       {/* showing the modal once */}
       {modalShow && (
-        <CustomInvoiceModal
+        <CustomModal
           show={modalShow}
           onHide={handleClick}
           invoiceData={invoiceData}

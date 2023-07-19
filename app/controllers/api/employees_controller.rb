@@ -2,7 +2,7 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy send_reset_password_link reset_password)
+  before_action :find_employee, only: %i(update update_inventories destroy send_reset_password_link reset_password)
 
   def index
     employees = Employee.all 
@@ -62,6 +62,15 @@ class Api::EmployeesController < ApplicationController
   end
 
   def update_inventories
+    params[:updated_products].each do |product_id, quantity_hash|
+      @employee.employees_inventories.where(product_id: product_id)
+        .update!(quantity: quantity_hash["quantity"])
+    end
+
+    params["new_products"].each do |product|
+      @employee.employees_inventories
+        .create!(product: Product.where(name: product["product_name"]).first, quantity: product["quantity"])
+    end
   end
 
   private

@@ -458,9 +458,12 @@ function CustomModal(props) {
                 />
               </>
             )}
-            <Button onClick={downloadInvoice}>
-              Download
-            </Button>
+
+            {invoiceData?.is_finalized && (
+              <Button onClick={downloadInvoice}>
+                Download
+              </Button>
+            )}
             <Button onClick={props.onHide}>Close</Button>
           </Modal.Footer>
         </div>
