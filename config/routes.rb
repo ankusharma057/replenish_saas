@@ -29,7 +29,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :inventory_requests, only: :create do
+    resources :inventory_requests, only: [:index, :create] do
       member do
         post 'accept'
         post 'reject'

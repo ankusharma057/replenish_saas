@@ -3,6 +3,12 @@ class Api::InventoryRequestsController < ApplicationController
   before_action :find_employee, only: :create
   before_action :find_inventory_request, except: :create
 
+  
+  def index
+    @inventory_request = InventoryRequest.all
+    render json: @inventory_request, status: :ok
+  end
+
   def create
     if @inventory
       @inventory.request_for_inventory(@requestor_employee, params[:quantity], params[:date_of_use])
