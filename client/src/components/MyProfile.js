@@ -328,7 +328,7 @@ function UserPage({ userProfile, employeeList }) {
             {employee?.employees_inventories?.map((data) => {
               // console.log(data);
               return (
-                <tr key={data?.product.id}>
+                <tr key={data?.product?.id}>
                   <td className="align-middle">
                     <div className="flex flex-col  gap-2">
                       <span>{data?.product?.name} </span>
