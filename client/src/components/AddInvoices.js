@@ -295,7 +295,7 @@ export default function AddInvoices(props) {
           );
 
     // console.log({ matchedProducts });
-    setMatchingProducts(matchedProducts);
+    setMatchingProducts(matchedProducts); 
   };
   const handleProductSelection = (selectedProductName) => {
     // change to only user
