@@ -13,6 +13,7 @@ const initialFormState = {
   tip: null,
   conciergeFeePaid: false,
   gfe: false,
+  semaglitudeConsultation: false,
   products: [],
   retailProducts: [],
   //Client States
@@ -61,6 +62,14 @@ export default function AddInvoices(props) {
         }));
       }
     }
+
+    if (name === "semaglitudeConsultation") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: checked,
+      }));
+    }
+  
 
     if (name === "dateOfService") {
       setFormData((prevFormData) => ({
@@ -203,8 +212,12 @@ export default function AddInvoices(props) {
       conciergeFee: 0,
     };
     let gfeFee = 0;
+    let semagConsultFee = 0;
     if (formData?.gfe) {
       gfeFee = 30;
+    }
+    if (formData?.semaglitudeConsultation) {
+      semagConsultFee = 75;
     }
     if (formData?.conciergeFeePaid) {
       afterTax.conciergeFee = 50;
@@ -219,11 +232,12 @@ export default function AddInvoices(props) {
         afterTax.conciergeFee -
         totalProductPriceSum -
         gfeFee -
+        semagConsultFee -
         afterTax.retailTotal) *
       (userProfile?.service_percentage / 100); //(replace with injector percentage)
     // console.log("gfe:" + userProfile?.gfe);
     if (userProfile?.gfe) 
-      total += gfeFee;
+      total += gfeFee + semagConsultFee;
     total =
       total -
       afterTax.discount +
@@ -233,9 +247,14 @@ export default function AddInvoices(props) {
      //console.log(selectedProduct?.product.cost_price);
      //console.log ("actual:" + getActualReplenishIncome());
     //console.log ("expected:" + getExpectedReplenishIncome());
+    
     if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT == 0)
         total = 30;
     if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() == 30)
+        total = 0;
+    if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT == 0)
+        total = 75;
+    if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() ==75)
         total = 0;
     return total.toFixed(2);
   };
@@ -445,6 +464,7 @@ export default function AddInvoices(props) {
       date_of_service: event.target.dateOfService.value,
       concierge_fee_paid: event.target.conciergeFeePaid.value == "on",
       gfe: event.target?.gfe.value == "on",
+      semaglitudeConsultation: event.target?.semaglitudeConsultation.value == "on",
       paid_by_client_cash: event.target.paidByClientCash.value,
       paid_by_client_credit: event.target.paidByClientCredit.value,
       personal_discount: event.target.personalDiscount.value,
@@ -490,13 +510,13 @@ export default function AddInvoices(props) {
     setMatchingProducts([]);
   };
 
-  console.log(
-    // matchingRetailProducts?.filter((matchProduct) => {
-    //   return matchProduct.name !== currentRetailProduct?.name;
-    // })
-    formData,
-    matchingRetailProducts
-  );
+  // console.log(
+  //   // matchingRetailProducts?.filter((matchProduct) => {
+  //   //   return matchProduct.name !== currentRetailProduct?.name;
+  //   // })
+  //   formData,
+  //   matchingRetailProducts
+  // );
   return (
     <div>
       <Header userProfile={userProfile} />
@@ -560,6 +580,16 @@ export default function AddInvoices(props) {
                     type="checkbox"
                     name="gfe"
                     checked={formData?.gfe}
+                    onChange={(event) => handleInputChange(event)}
+                    className="ml-2"
+                  />
+                </label>
+                <label className="block">
+                  Semaglitude Consulation:
+                  <input
+                    type="checkbox"
+                    name="semaglitudeConsultation"
+                    checked={formData?.semaglitudeConsultation}
                     onChange={(event) => handleInputChange(event)}
                     className="ml-2"
                   />
