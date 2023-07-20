@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Header from "./Header";
-import { Button, Card } from "react-bootstrap";
 import CustomModal from "./CustomModal.js";
+import { Button, Card, Modal, Form } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import AssignModal from "./AssignModal";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert"; // Import
 
-function UserPage({ userProfile, employeeList }) {
+function UserPage({ userProfile, employeeList, productList }) {
   const [employee, setEmployee] = useState();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState(false);
@@ -20,14 +20,18 @@ function UserPage({ userProfile, employeeList }) {
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
+  const [showRequestInvetory, setshowRequestInvetory] = useState(false);
+  const [requestInvetroryInput, setRequestInvetroryInput] = useState({
+    quantity: 0,
+    product_name: "",
+    date_of_use: "",
+  });
 
   const otherEmployeesList = employeeList?.filter(
     (employee) => employee?.id != userProfile?.id
   );
 
-  console.log({ userProfile });
   function handleClick(invoice) {
-    // setinvoiceData();
     setModalShow(!modalShow);
   }
 
@@ -88,7 +92,6 @@ function UserPage({ userProfile, employeeList }) {
       });
   };
 
-  // console.log({ userProfile });
   const acceptSubmit = (data) => {
     const productData = {
       id: data?.id,
@@ -118,7 +121,7 @@ function UserPage({ userProfile, employeeList }) {
                   );
                   setTimeout(() => {
                     window.location.reload();
-                  }, 1000)
+                  }, 1000);
                 } else if (res.status == 404) {
                   res.json().then((json) => {
                     toast.error("Please provide a client.");
@@ -170,9 +173,7 @@ function UserPage({ userProfile, employeeList }) {
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success(
-                    "You have reject this inventory."
-                  );
+                  toast.success("You have reject this inventory.");
                   setTimeout(() => {
                     window.location.reload();
                   }, 1000);
@@ -203,13 +204,48 @@ function UserPage({ userProfile, employeeList }) {
     });
   };
 
+  const requestInvetorySubmit = (e) => {
+    e.preventDefault();
+
+    fetch(`/api/inventory_requests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...requestInvetroryInput,
+        employee_id: userProfile.id,
+        employee_name: userProfile.name,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          toast.success("You have requested inventory successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else if (res.status === 404) {
+          res.json().then((json) => {
+            toast.error("Please provide a client.");
+          });
+        } else {
+          res.json().then((json) => {
+            toast.error("Failed to request this inventory.");
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        toast.error("An error occured.");
+      });
+  };
+
   if (loading) return <Header></Header>;
   if (errors) return <h1>{errors}</h1>;
 
   return (
     <div>
       <Header userProfile={userProfile} />
-
       {/* showing the Assign Product modal once */}
       <AssignModal
         showAssignMadal={showAssignMadal}
@@ -222,7 +258,76 @@ function UserPage({ userProfile, employeeList }) {
         assignInput={assignInput}
         employee={employee}
       />
+      <Modal
+        show={showRequestInvetory}
+        onHide={() => setshowRequestInvetory(false)}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Request Inventory
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="flex justify-between flex-col items-center gap-2">
+          <div className="w-full">
+            <Form
+              className="flex flex-col gap-4"
+              onSubmit={requestInvetorySubmit}
+            >
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) =>
+                  setRequestInvetroryInput({
+                    ...requestInvetroryInput,
+                    product_name: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">Select The Product</option>
+                {productList?.map((product) => {
+                  return (
+                    <option key={product?.id} value={product?.name}>
+                      {product?.name}
+                    </option>
+                  );
+                })}
+              </Form.Select>
+              <Form.Control
+                type="number"
+                placeholder={`Type Quantity`}
+                onChange={(e) =>
+                  setRequestInvetroryInput({
+                    ...requestInvetroryInput,
+                    quantity: e.target.value,
+                  })
+                }
+                max={requestInvetroryInput?.quantity}
+                min={1}
+                required
+              />
 
+              <Form.Control
+                type="date"
+                // placeholder={`Type Quantity`}
+                onChange={(e) =>
+                  setRequestInvetroryInput({
+                    ...requestInvetroryInput,
+                    date_of_use: e.target.value,
+                  })
+                }
+                required
+              />
+
+              <Button type="submit">Submit</Button>
+            </Form>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowAssignMadal(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
       {/* showing the modal once */}
       {modalShow && (
         <CustomModal
@@ -233,11 +338,22 @@ function UserPage({ userProfile, employeeList }) {
         />
       )}
       <br />
-      <h1 className="text-4xl font-bold text-center text-blue-600">
-        {employee?.name}
-      </h1>
-
-      {userProfile?.inventory_prompts?.filter((prompt) => !prompt.is_accepted === true)?.length > 0 && (
+      <div className="flex justify-center">
+        <h1 className="text-4xl font-bold text-center text-blue-600">
+          {employee?.name}
+        </h1>
+      </div>
+      <div className="flex  justify-end mr-8">
+        <Button
+          onClick={() => setshowRequestInvetory(true)}
+          className="text-4xl font-bold text-center text-blue-600"
+        >
+          Request Inventory
+        </Button>
+      </div>
+      {userProfile?.inventory_prompts?.filter(
+        (prompt) => !prompt.is_accepted === true
+      )?.length > 0 && (
         <>
           <h2 className="text-4xl font-bold text-center text-blue-400">
             Inventory Assigned
@@ -254,7 +370,6 @@ function UserPage({ userProfile, employeeList }) {
             </thead>
             <tbody>
               {userProfile?.inventory_prompts?.map((data) => {
-                console.log(data?.is_accepted);
                 return (
                   <>
                     {!data?.is_accepted && (
@@ -310,7 +425,6 @@ function UserPage({ userProfile, employeeList }) {
           </Table>
         </>
       )}
-
       <div className=" container mx-auto my-3">
         <h2 className="text-4xl font-bold text-center text-blue-400">
           Products

@@ -114,30 +114,31 @@ function App() {
         <Route path="/" element={<Login updateEmployee={updateEmployee} />} />
         {userProfile && (
           <>
-            {userProfile && (userProfile.is_inv_manager || userProfile.is_admin) && (
-              <>
-                <Route
-                  path="/inventories"
-                  element={
-                    <Inventory
-                      userProfile={userProfile}
-                      employeeList={employeeList}
-                      productList={productList}
-                    />
-                  }
-                />
-                <Route
-                  path="/employees"
-                  element={
-                    <EmployeeList
-                      userProfile={userProfile}
-                      employeeList={employeeList}
-                      productList={productList}
-                    />
-                  }
-                />
-              </>
-            )}
+            {userProfile &&
+              (userProfile.is_inv_manager || userProfile.is_admin) && (
+                <>
+                  <Route
+                    path="/inventories"
+                    element={
+                      <Inventory
+                        userProfile={userProfile}
+                        employeeList={employeeList}
+                        productList={productList}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/employees"
+                    element={
+                      <EmployeeList
+                        userProfile={userProfile}
+                        employeeList={employeeList}
+                        productList={productList}
+                      />
+                    }
+                  />
+                </>
+              )}
 
             <Route
               path="/resetPassword"
@@ -198,6 +199,7 @@ function App() {
                     <MyProfile
                       employeeList={employeeList}
                       userProfile={userProfile}
+                      productList={productList}
                     />
                   }
                 />
@@ -207,6 +209,7 @@ function App() {
                     <MyProfile
                       userProfile={userProfile}
                       employeeList={employeeList}
+                      productList={productList}
                     />
                   }
                 />
@@ -219,6 +222,7 @@ function App() {
                     <MyProfile
                       employeeList={employeeList}
                       userProfile={userProfile}
+                      productList={productList}
                     />
                   }
                 />
@@ -245,7 +249,12 @@ function App() {
                 />
                 <Route
                   path="*"
-                  element={<MyProfile userProfile={userProfile} />}
+                  element={
+                    <MyProfile
+                      userProfile={userProfile}
+                      productList={productList}
+                    />
+                  }
                 />
               </>
             )}

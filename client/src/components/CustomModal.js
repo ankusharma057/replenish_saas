@@ -2,7 +2,7 @@ import Modal from "react-bootstrap/Modal";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form } from "react-bootstrap";
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 
 const UpdateInvoiceModal = ({
   showUpdateModal,
@@ -136,7 +136,6 @@ const RejectInvoiceModal = ({
 };
 
 function CustomModal(props) {
-  console.log(props)
   var invoiceData = props.invoiceData;
   var invoiceID = invoiceData.id;
   var employeeName = invoiceData.employee_name;
@@ -184,27 +183,31 @@ function CustomModal(props) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({overhead_fee_type: nestedInputModal.overheadFeeType, overhead_fee_value: nestedInputModal.overheadFeeValue, charge: nestedInputModal.charge}),
+      body: JSON.stringify({
+        overhead_fee_type: nestedInputModal.overheadFeeType,
+        overhead_fee_value: nestedInputModal.overheadFeeValue,
+        charge: nestedInputModal.charge,
+      }),
     })
-    .then((res) => {
-      if (res.ok) {
-        toast.success("Invoice Updated successfully.");
+      .then((res) => {
+        if (res.ok) {
+          toast.success("Invoice Updated successfully.");
 
-        window.location.reload();
-      } else if (res.status === 404) {
-        res.json().then((json) => {
-          toast.error("Please provide a client.");
-        });
-      } else {
-        res.json().then((json) => {
-          toast.error("Failed to Update Invoice");
-        });
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      toast.error("An error occured.");
-    });
+          window.location.reload();
+        } else if (res.status === 404) {
+          res.json().then((json) => {
+            toast.error("Please provide a client.");
+          });
+        } else {
+          res.json().then((json) => {
+            toast.error("Failed to Update Invoice");
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        toast.error("An error occured.");
+      });
   };
 
   const downloadInvoice = () => {
@@ -214,23 +217,27 @@ function CustomModal(props) {
         "Content-Type": "application/json",
       },
     })
-    .then(async(res) => {
-      if(res.status === 404) {
-        res.json().then((json) => {
-          toast.error("Failed to Download the Invoice");
-        });
-      } else {
-        toast.success("Invoice Downloaded successfully.");
-        const blob = await res.blob();
-        saveAs(blob, `${invoiceData?.employee?.name}${invoiceData?.is_finalized ? '-Finalized' : '-Non-Finalized'}-Invoice-${invoiceID}.pdf`);
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      toast.error("An error occured.");
-    });
+      .then(async (res) => {
+        if (res.status === 404) {
+          res.json().then((json) => {
+            toast.error("Failed to Download the Invoice");
+          });
+        } else {
+          toast.success("Invoice Downloaded successfully.");
+          const blob = await res.blob();
+          saveAs(
+            blob,
+            `${invoiceData?.employee?.name}${
+              invoiceData?.is_finalized ? "-Finalized" : "-Non-Finalized"
+            }-Invoice-${invoiceID}.pdf`
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        toast.error("An error occured.");
+      });
   };
-  
 
   const rejectSubmit = () => {
     // console.log({ textAreaInput });
@@ -262,6 +269,8 @@ function CustomModal(props) {
       });
   };
 
+  console.log(invoiceData?.products_hash);
+
   return (
     <>
       <Modal
@@ -279,137 +288,139 @@ function CustomModal(props) {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className="text-center">
-            <form className="max-w-4xl mx-auto bg-white p-4 rounded-md">
-              <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-                <div>
-                  <p>Provider:</p>
-                  <div>{employeeName}</div>
+            <form className="max-w-4xl mx-auto bg-white md:p-4 rounded-md">
+              <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Provider:</span>
+                  <span>{employeeName}</span>
                 </div>
 
-                <div>
-                  <p>Client Name:</p>
-                  <div>{clientName}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Client Name:</span>
+                  <span>{clientName}</span>
                 </div>
 
-                <div>
-                  <p>Date of Service:</p>
-                  <div>{dateOfService}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Date of Service:</span>
+                  <span>{dateOfService}</span>
                 </div>
               </div>
 
-              {invoiceData?.products_hash?.products?.length > 0 &&
-                (
-                  <div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
-                    <div>
-                      <p><b>Retail Products</b></p>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total Price</th>
-                          </tr>
-                        </thead>
+              {invoiceData?.products_hash?.products?.length > 0 && (
+                <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                  <p>
+                    <b>Products</b>
+                  </p>
+
+                  <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                    <table className="table-auto  w-full ">
+                      <thead className="whitespace-normal">
+                        <tr>
+                          <th className="min-w-[6rem]">Product</th>
+                          <th className="min-w-[6rem]">Quantity</th>
+                          <th className="min-w-[6rem]">Price</th>
+                          <th className="min-w-[6rem]">Total Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="whitespace-normal">
                         {invoiceData?.products_hash?.products.map((product) => (
-                          <tbody>
-                            <tr>
-                              <td>{product[0]}</td>
-                              <td>{product[1]}</td>
-                              <td>{product[2]}</td>
-                              <td>{+(product[1] * product[2])}</td>
-                            </tr>
-                          </tbody>
-                        ))}
-                      </table>
-                    </div>
-                  </div>
-                )
-              }
-
-              {invoiceData?.products_hash?.retail_products?.length > 0 &&
-                (
-                  <div className=" border rounded-sm p-2 mb-4 flex justify-content-center">
-                    <div>
-                      <p><b>Retail Products</b></p>
-                      <table>
-                        <thead>
                           <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total Price</th>
+                            <td>{product[0]}</td>
+                            <td>{product[1]}</td>
+                            <td>{product[2]}</td>
+                            <td>{+(product[1] * product[2])}</td>
                           </tr>
-                        </thead>
-                        {invoiceData?.products_hash?.retail_products.map((product) => (
-                          <tbody>
-                            <tr>
-                              <td>{product[0]}</td>
-                              <td>{product[1]}</td>
-                              <td>{product[2]}</td>
-                              <td>{+(product[1] * product[2])}</td>
-                            </tr>
-                          </tbody>
                         ))}
-                      </table>
-                    </div>
+                      </tbody>
+                    </table>
                   </div>
-                )
-              }
+                </div>
+              )}
 
-              <div className="border rounded-sm p-2 mb-4 flex justify-content-around">
-                <div>
-                  <p>Concierge Fee Paid:</p>
-                  <div>{conciergeFeePaid ? "Yes" : "No"}</div>
+              {invoiceData?.products_hash?.retail_products?.length > 0 && (
+                <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                  <p>
+                    <b>Retali Products</b>
+                  </p>
+
+                  <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                    <table className="table-auto  w-full ">
+                      <thead className="whitespace-normal">
+                        <tr>
+                          <th className="min-w-[6rem]">Product</th>
+                          <th className="min-w-[6rem]">Quantity</th>
+                          <th className="min-w-[6rem]">Price</th>
+                          <th className="min-w-[6rem]">Total Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="whitespace-normal">
+                        {invoiceData?.products_hash?.products.map((product) => (
+                          <tr>
+                            <td>{product[0]}</td>
+                            <td>{product[1]}</td>
+                            <td>{product[2]}</td>
+                            <td>{+(product[1] * product[2])}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Concierge Fee Paid:</span>
+                  <span>{conciergeFeePaid ? "Yes" : "No"}</span>
                 </div>
 
-                <div>
-                  <p>GFE:</p>
-                  <div>{gfe ? "Yes" : "No"}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">GFE:</span>
+                  <span>{gfe ? "Yes" : "No"}</span>
                 </div>
 
-                <div>
-                  <p>Paid By Client Cash:</p>
-                  <div>{paidByClientCash}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Paid By Client Cash:</span>
+                  <span>{paidByClientCash}</span>
                 </div>
 
-                <div>
-                  <p>Paid By Client Credit:</p>
-                  <div>{paidByClientCredit}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Paid By Client Credit:</span>
+                  <span>{paidByClientCredit}</span>
                 </div>
 
-                <div>
-                  <p>Total Paid by Client:</p>
-                  <div>{paidByClientCredit + paidByClientCash}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Total Paid by Client:</span>
+                  <span>{paidByClientCredit + paidByClientCash}</span>
+                </div>
+              </div>
+
+              <div className="border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Personal Discount:</span>
+                  <span>{personalDiscount}</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Tip:</span>
+                  <span>{tip}</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Comments:</span>
+                  <span>{comments}</span>
                 </div>
               </div>
 
               <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-                <div>
-                  <p>Personal Discount:</p>
-                  <div>{personalDiscount}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Overhead Fee Type:</span>
+                  <span>{overheadFeeType}</span>
                 </div>
 
-                <div>
-                  <p>Tip:</p>
-                  <div>{tip}</div>
-                </div>
-
-                <div>
-                  <p>Comments:</p>
-                  <div>{comments}</div>
-                </div>
-              </div>
-
-              <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-                <div>
-                  <p>Overhead Fee Type:</p>
-                  <div>{overheadFeeType}</div>
-                </div>
-
-                <div>
-                  <p>Overhead Fee Value:</p>
-                  <div>{overheadFeeValue}</div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Overhead Fee Value:</span>
+                  <span>{overheadFeeValue}</span>
                 </div>
               </div>
             </form>
@@ -434,9 +445,7 @@ function CustomModal(props) {
                   settextAreaInput={settextAreaInput}
                   textAreaInput={textAreaInput}
                 />
-
               </>
-
             )}
             {fiInvoiceList === false && (
               <>
@@ -458,7 +467,6 @@ function CustomModal(props) {
                 />
               </>
             )}
-
             {invoiceData?.is_finalized && (
               <Button onClick={downloadInvoice}>
                 Download
