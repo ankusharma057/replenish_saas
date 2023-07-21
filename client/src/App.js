@@ -31,15 +31,8 @@ function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [clientsList, setClientsList] = useState();
   const [employeeList, setEmployeeList] = useState([]);
-
+  const [inventoryList, setInventoryList] = useState([]);
   const navigate = useNavigate();
-  useEffect(() => {
-    fetch("/api/invoices")
-      .then((r) => r.json())
-      .then((data) => {
-        setInvoiceList(data);
-      });
-  }, []);
 
   useEffect(() => {
     fetch("/api/clients").then((res) => {
@@ -67,12 +60,28 @@ function App() {
   const updateEmployee = (employee) => setUserProfile(employee);
 
   useEffect(() => {
+    fetch("/api/invoices")
+      .then((r) => r.json())
+      .then((data) => {
+        setInvoiceList(data);
+      });
+  }, [userProfile]);
+
+  useEffect(() => {
+    fetch("/api/inventories")
+      .then((r) => r.json())
+      .then((data) => {
+        setInventoryList(data);
+      });
+  }, [userProfile]);
+
+  useEffect(() => {
     fetch("/api/products")
       .then((r) => r.json())
       .then((data) => {
         setProductList(data);
       });
-  }, []);
+  }, [userProfile]);
 
   useEffect(() => {
     fetch("/api/employees")
@@ -81,7 +90,7 @@ function App() {
         // console.log({ data });
         setEmployeeList(data);
       });
-  }, []);
+  }, [userProfile]);
 
   const addProduct = (newProduct) => {
     const updatedProducts = [...productList, newProduct];
@@ -114,30 +123,32 @@ function App() {
         <Route path="/" element={<Login updateEmployee={updateEmployee} />} />
         {userProfile && (
           <>
-            {userProfile && (userProfile.is_inv_manager || userProfile.is_admin) && (
-              <>
-                <Route
-                  path="/inventories"
-                  element={
-                    <Inventory
-                      userProfile={userProfile}
-                      employeeList={employeeList}
-                      productList={productList}
-                    />
-                  }
-                />
-                <Route
-                  path="/employees"
-                  element={
-                    <EmployeeList
-                      userProfile={userProfile}
-                      employeeList={employeeList}
-                      productList={productList}
-                    />
-                  }
-                />
-              </>
-            )}
+            {userProfile &&
+              (userProfile.is_inv_manager || userProfile.is_admin) && (
+                <>
+                  <Route
+                    path="/inventories"
+                    element={
+                      <Inventory
+                        userProfile={userProfile}
+                        employeeList={employeeList}
+                        productList={productList}
+                        inventoryList={inventoryList}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/employees"
+                    element={
+                      <EmployeeList
+                        userProfile={userProfile}
+                        employeeList={employeeList}
+                        productList={productList}
+                      />
+                    }
+                  />
+                </>
+              )}
 
             <Route
               path="/resetPassword"
@@ -198,6 +209,8 @@ function App() {
                     <MyProfile
                       employeeList={employeeList}
                       userProfile={userProfile}
+                      productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />
@@ -207,6 +220,8 @@ function App() {
                     <MyProfile
                       userProfile={userProfile}
                       employeeList={employeeList}
+                      productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />
@@ -219,6 +234,8 @@ function App() {
                     <MyProfile
                       employeeList={employeeList}
                       userProfile={userProfile}
+                      productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />
@@ -245,7 +262,12 @@ function App() {
                 />
                 <Route
                   path="*"
-                  element={<MyProfile userProfile={userProfile} />}
+                  element={
+                    <MyProfile
+                      userProfile={userProfile}
+                      productList={productList}
+                    />
+                  }
                 />
               </>
             )}

@@ -38,8 +38,9 @@ class Api::InventoriesController < ApplicationController
   def assign
     if @inventory
       if @employee.is_admin
-        inventory = @receiver_employee.employees_inventories.find_or_create_by(product: @inventory.product)
-        inventory.update!(quantity: inventory.quantity.to_i + params[:inventory][:quantity].to_i)
+        receiver_inventory = @receiver_employee.employees_inventories.find_or_create_by(product: @inventory.product)
+        receiver_inventory.update!(quantity: @inventory.quantity.to_i + params[:inventory][:quantity].to_i)
+        @inventory.update!(quantity: @inventory.quantity.to_i - params[:inventory][:quantity].to_i)
       else
         @inventory.prompt_to_employee(@receiver_employee, params[:inventory][:quantity])
       end
@@ -68,15 +69,15 @@ class Api::InventoriesController < ApplicationController
     params.require(:inventory).permit(:quantity)
   end
 
-  def find_inventory
-    @inventory = Inventory.find_by(id: params[:id])
-  end
-
   def find_product
     @product = Product.find_by(name: params[:product_name])
   end
 
   def find_receiver_employee
     @receiver_employee = Employee.find_by(name: params[:employee_name])
+  end
+
+  def find_inventory
+    @inventory = Inventory.find_by(id: params[:id])
   end
 end

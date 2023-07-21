@@ -18,7 +18,6 @@ class Invoice < ApplicationRecord
   scope :non_finalized, -> { where(is_finalized: false) }
 
   def save_pdf_and_send_mail(products, retail_products)
-    # TODO: Refactor the duplicate code to generate the pdf in this and the later method (before the overhead section) 
     products_hash["products"] = products
     products_hash["retail_products"] = retail_products
     
@@ -45,10 +44,6 @@ class Invoice < ApplicationRecord
   end
 
   def finalize_and_send_pdf_mail 
-    # products_hash["Products"] = products_hash["products"]
-    # products_hash["Retail Products"] = products_hash["retail_products"]
-    # products_hash.except!("products", "retail_products")
-
     pdf_string = get_html_finalized(products_hash)
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)

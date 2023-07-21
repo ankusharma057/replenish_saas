@@ -6,12 +6,16 @@ import { Button, Card, Modal, Table, Form } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import AssignModal from "./AssignModal";
 
-const Inventory = ({ userProfile, employeeList, productList }) => {
+const Inventory = ({
+  userProfile,
+  employeeList,
+  productList,
+  inventoryList,
+}) => {
   const navigate = useNavigate();
   const [showModal, setshowModal] = useState(false);
   const [productInfoInput, setproductInfoInput] = useState({});
   const [updateQtyInput, setUpdateQtyInput] = useState({});
-  const [entireInventory, setEntireInventory] = useState([]);
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
 
   const [showAssignMadal, setShowAssignMadal] = useState(false);
@@ -22,12 +26,14 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
 
   const [searchInput, setSearchInput] = useState("");
 
+  const [requestedInventoryData, setRequestedInventoryData] = useState([]);
+
   useEffect(() => {
-    fetch("/api/inventories")
+    fetch("/api/inventory_requests")
       .then((r) => r.json())
       .then((data) => {
-        console.log(data)
-        setEntireInventory(data);
+        console.log(data);
+        setRequestedInventoryData(data);
       });
   }, []);
 
@@ -193,8 +199,12 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
     })
       .then((res) => {
         if (res.ok) {
-            toast.success(userProfile.is_admin ? "Assigned the Inventory to the Employee" : "Prompted Employee for the inventory.");
-          setTimeout(() =>{
+          toast.success(
+            userProfile.is_admin
+              ? "Assigned the Inventory to the Employee"
+              : "Prompted Employee for the inventory."
+          );
+          setTimeout(() => {
             window.location.reload();
           }, 1000);
         } else if (res.status == 404) {
@@ -213,7 +223,95 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
       });
   };
 
-  // console.log({showAssignMadal});
+  const acceptRequestInventorySubmit = (data) => {
+    confirmAlert({
+      title: "Confirm to submit",
+      message: `Are you sure to Accept Invetory `,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            fetch(`/api/inventory_requests/${data?.id}/accept`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              }
+            })
+              .then((res) => {
+                if (res.ok) {
+                  toast.success("You have accept this inventory Successfully.");
+                  window.location.reload();
+                } else if (res.status === 404) {
+                  res.json().then((json) => {
+                    toast.error("Please provide a client.");
+                  });
+                } else {
+                  res.json().then((json) => {
+                    toast.error("Failed to Accept the Inventory ");
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                toast.error("An error occured.");
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+            //  setShowUpdateProductModal(true);
+            console.log("Click No");
+          },
+        },
+      ],
+    });
+  };
+
+  const rejectRequestInventorySubmit = (data) => {
+    confirmAlert({
+      title: "Confirm to submit",
+      message: `Are you sure to Reject Invetory `,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            fetch(`/api/inventory_requests/${data?.id}/reject`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              }
+            })
+              .then((res) => {
+                if (res.ok) {
+                  window.location.reload();
+                } else if (res.status === 404) {
+                  res.json().then((json) => {
+                    toast.error("Please provide a client.");
+                  });
+                } else {
+                  res.json().then((json) => {
+                    toast.error("Failed to Reject the Inventory ");
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                toast.error("An error occured.");
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+            //  setShowUpdateProductModal(true);
+            console.log("Click No");
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <>
       <Header userProfile={userProfile} />
@@ -228,7 +326,58 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
         assignInput={assignInput}
         employee={userProfile}
       />
+      {requestedInventoryData?.filter(
+        (request) => !request?.is_approved
+      )?.length > 0 &&
+        (userProfile?.is_inv_manager || userProfile?.is_admin) && (
+          <div className="px-4">
+            <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
+              Inventory Request
+            </h2>
+            <ul className=" container  mx-auto text-lg pl-0 px-4 mx-auto font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
+              {requestedInventoryData?.map((data) => {
+                const dateObj = new Date(data?.date_of_use);
+                const year = dateObj.getFullYear();
+                const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                const day = String(dateObj.getDate()).padStart(2, "0");
+                const formattedDate = `${year}-${month}-${day}`;
 
+                return (
+                  <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
+                    <span className="text-red-500 text-xl ">*</span>
+                    <span className="text-blue-700 mx-2">
+                      {data?.requestor?.name}
+                    </span>
+                    has asked for
+                    <span className="text-blue-700 mx-2">
+                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}
+                    </span>
+                    to be used on
+                    <span className="text-blue-700 mx-2">
+                      {formattedDate}.
+                    </span>
+                    <Button
+                      onClick={() => acceptRequestInventorySubmit(data)}
+                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                      title="Click To Accept this Requested Inventory"
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      onClick={() => rejectRequestInventorySubmit(data)}
+                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                      title="Click To Reject this Requested Inventory"
+                      variant="danger"
+                    >
+                      Reject
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+    
       <Modal
         show={showUpdateProductModal}
         onHide={() => setShowUpdateProductModal(false)}
@@ -250,25 +399,27 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
                   : createProductSubmit
               }
             >
-              {!productInfoInput?.update && (<Form.Select
-                                            aria-label="Default select example"
-                                            onChange={(e) =>
-                                              setproductInfoInput({
-                                                ...productInfoInput,
-                                                product_name: e.target.value,
-                                              })
-                                            }
-                                            required
-                                          >
-                                            <option>Select Product</option>
-                                            {productList?.map((product) => {
-                                              return (
-                                                <option key={product?.name} value={product.name}>
-                                                  {product?.name}
-                                                </option>
-                                              );
-                                            })}
-                                          </Form.Select>)}
+              {!productInfoInput?.update && (
+                <Form.Select
+                  aria-label="Default select example"
+                  onChange={(e) =>
+                    setproductInfoInput({
+                      ...productInfoInput,
+                      product_name: e.target.value,
+                    })
+                  }
+                  required
+                >
+                  <option>Select Product</option>
+                  {productList?.map((product) => {
+                    return (
+                      <option key={product?.name} value={product.name}>
+                        {product?.name}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
+              )}
 
               <Form.Label style={{ marginBottom: "-1rem" }}>
                 Product Quantity
@@ -300,7 +451,6 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
           </Button>
         </Modal.Footer>
       </Modal>
-
       <div className=" container  mx-auto">
         <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
           Company Inventory
@@ -324,81 +474,78 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
             </tr>
           </thead>
           <tbody>
-            {entireInventory &&
-                entireInventory?.filter((data) => {
-                  return (
-                    data?.product?.name?.toLowerCase().includes(searchInput?.toLocaleLowerCase()) 
-                  );
+            {inventoryList &&
+              inventoryList
+                ?.filter((data) => {
+                  return data?.product?.name
+                    ?.toLowerCase()
+                    .includes(searchInput?.toLocaleLowerCase());
                 })
                 ?.map((data) => {
-                return (
-                  <tr key={data?.product?.id}>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>
-                          {data?.product?.name}{" "}
-                        </span>
-                        {/* <span>Product Name: Product </span> */}
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>
-                          {data?.product?.product_type}{" "}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col   gap-2">
-                        <span>{data?.quantity} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <Button
-                        variant="info"
-                        onClick={() => {
-                          setAssignProductData(data);
-                          setShowAssignMadal(true);
-                        }}
-                      >
-                        Assign
-                      </Button>
-                    </td>
+                  return (
+                    <tr key={data?.product?.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.product?.name} </span>
+                          {/* <span>Product Name: Product </span> */}
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.product?.product_type} </span>
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col   gap-2">
+                          <span>{data?.quantity} </span>
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <Button
+                          variant="info"
+                          onClick={() => {
+                            setAssignProductData(data);
+                            setShowAssignMadal(true);
+                          }}
+                        >
+                          Assign
+                        </Button>
+                      </td>
 
-                    <td className="align-middle flex  justify-around items-center">
-                      <Button
-                        variant="info"
-                        onClick={() => {
-                          console.log(data);
+                      <td className="align-middle flex  justify-around items-center">
+                        <Button
+                          variant="info"
+                          onClick={() => {
+                            console.log(data);
 
-                          setproductInfoInput({
-                            update: true,
-                            quantity: data.quantity,
-                            product_type: data?.product?.product_type,
-                            product_name: data?.product?.name,
-                            id: data?.product?.id,
-                            maxQty: data?.quantity,
-                          });
-                          setShowUpdateProductModal(true);
-                        }}
-                        title="Edit Product"
-                      >
-                        Update
-                      </Button>
+                            setproductInfoInput({
+                              update: true,
+                              quantity: data.quantity,
+                              product_type: data?.product?.product_type,
+                              product_name: data?.product?.name,
+                              id: data?.product?.id,
+                              maxQty: data?.quantity,
+                            });
+                            setShowUpdateProductModal(true);
+                          }}
+                          title="Edit Product"
+                        >
+                          Update
+                        </Button>
 
-                      <Button
-                        variant="danger"
-                        onClick={() => {
-                          deleteSubmit(data?.product);
-                        }}
-                        title="Delete Product"
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
+                        <Button
+                          variant="danger"
+                          onClick={() => {
+                            deleteSubmit(data?.product);
+                          }}
+                          title="Delete Product"
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
           </tbody>
         </Table>
 

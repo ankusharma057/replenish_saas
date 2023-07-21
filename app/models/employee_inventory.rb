@@ -6,4 +6,5 @@ class EmployeeInventory < ApplicationRecord
   include Storage
 
   belongs_to :employee
+  belongs_to :product
 end

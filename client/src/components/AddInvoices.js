@@ -319,7 +319,7 @@ export default function AddInvoices(props) {
   const handleProductSelection = (selectedProductName) => {
     // change to only user
     const selectedProduct = userProfile?.employees_inventories?.find(
-      (product) => product?.product.name === selectedProductName
+      (product) => product?.product?.name === selectedProductName
     );
     // console.log({ selectedProduct });
     if (selectedProduct.product) {
