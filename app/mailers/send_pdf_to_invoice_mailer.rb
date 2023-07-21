@@ -5,7 +5,7 @@ class SendPdfToInvoiceMailer < ApplicationMailer
     @invoice = params[:invoice]
     attachments["#{@invoice.client.name}-Finalized-Invoice-#{@invoice.id}.pdf"] = @invoice.document.download
 
-    emails = Employee.admins.pluck(&:email)
+    emails = Employee.admins.map(&:email)
     emails << @invoice.employee.email
     emails << "replenishmd_527@invoicesmelio.com"
 
