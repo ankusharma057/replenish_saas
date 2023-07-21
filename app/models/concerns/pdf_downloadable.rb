@@ -32,10 +32,10 @@ module PdfDownloadable
         </style>
       </head>
       <body>
-        <h1 style="text-align: center; color: blue;"> Replenish Aesthetics and Wellness</h1>
+        <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>
         <div class="container" style="color: blue;">
           <div style="text-align: left;"> Invoice: '"#{id}"' </div>  
-          <div style="text-align: right; font-weight: bold; font-size: 20px;"> Charge: '"#{charge}"' </div>
+          <div style="text-align: right;"> Charge: '"#{charge}"' </div>
           <div style="text-align: left;">  Provider: '"#{employee.name}"'  </div> 
 
           <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
@@ -44,10 +44,10 @@ module PdfDownloadable
           <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
           <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
-          <div style="text-align: right;">  Paid By Client Cash: '"#{paid_by_client_cash}"'</div>  
-          <div style="text-align: left;">  Paid By Client Credit: '"#{paid_by_client_credit}"'</div>  
+          <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
+          <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-          <div style="text-align: right;">  Total Paid by Client: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+          <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
           <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
         </div>
 
@@ -118,7 +118,7 @@ module PdfDownloadable
         <h1 style="text-align: center; color: blue;"> Replenish Aesthetics and Wellness</h1>
         <div class="container" style="color: blue;">
           <div style="text-align: left;"> Invoice: '"#{id}"' </div>  
-          <div style="text-align: right; font-weight: bold; font-size: 20px;"> Charge: '"#{charge}"' </div>
+          <div style="text-align: right;"> Charge: '"#{charge}"' </div>
           <div style="text-align: left;">  Provider: '"#{employee.name}"'  </div> 
 
           <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
@@ -127,12 +127,13 @@ module PdfDownloadable
           <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
           <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
-          <div style="text-align: right;">  Paid By Client Cash: '"#{paid_by_client_cash}"'</div>  
-          <div style="text-align: left;">  Paid By Client Credit: '"#{paid_by_client_credit}"'</div>  
+          <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
+          <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-          <div style="text-align: right;">  Total Paid by Credit: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+          <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
           <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
-          <div style="text-align: right;">  Overhead Fee Type: '"#{overhead_fee_type}"'</div>
+
+          <div style="text-align: right;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
           <div style="text-align: left;">  Overhead Fee Value: '"#{overhead_fee_value}"'</div>
         </div>
 

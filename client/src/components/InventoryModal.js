@@ -64,11 +64,11 @@ const InventoryModal = ({
 
     // Remove the "employee_id" field from the copied object
     delete modifiedObject?.employee_id;
-
+    
     let updatedProductData = {
       updated_products: modifiedObject,
       new_products: newProductArr,
-      employee_id: updatedList["employee_id"],
+      employee_id: inventoryList?.id,
     };
 
     confirmAlert({
@@ -169,10 +169,10 @@ const InventoryModal = ({
                               type="number"
                               defaultValue={data?.quantity}
                               onChange={(e) => {
-                                console.log(data?.product?.id);
+                                console.log("THIS IS THE WANTED ID:", data);
                                 setUpdatedList({
                                   ...updatedList,
-                                  employee_id: data?.employee.id,
+                                  employee_id: data?.employee?.id,
                                   [data?.product?.id]: {
                                     quantity: e.target.value,
                                   },
@@ -298,7 +298,7 @@ const InventoryModal = ({
                       product_name: e.target.value,
                     })
                   }
-                  value={newProduct.product_name}
+                  value={newProduct?.product_name}
                   required
                 >
                   <option value="">Select Product</option>
@@ -306,18 +306,18 @@ const InventoryModal = ({
                     ?.filter(
                       (item1) =>
                         !newProductArr.some(
-                          (item2) => item2.product_name === item1.name
+                          (item2) => item2?.product_name === item1?.name
                         )
                     )
                     ?.filter(
                       (item1) =>
                         !dataList.some(
-                          (item2) => item2.product.name === item1.name
+                          (item2) => item2.product?.name === item1?.name
                         )
                     )
                     ?.map((product) => {
                       return (
-                        <option key={product?.id} value={product.name}>
+                        <option key={product?.id} value={product?.name}>
                           {product?.name}
                         </option>
                       );
