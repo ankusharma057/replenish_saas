@@ -276,15 +276,12 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        {userProfile?.is_inv_manager === false && userProfile?.is_admin === false &&
-          (
-            <Modal.Header closeButton>
-              <Modal.Title id="contained-modal-title-vcenter">
-                Request Inventory
-              </Modal.Title>
-            </Modal.Header>
-          )
-        }
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Request Inventory
+          </Modal.Title>
+        </Modal.Header>
+
         <Modal.Body className="flex justify-between flex-col items-center gap-2">
           <div className="w-full">
             <Form
@@ -373,12 +370,16 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         </h1>
       </div>
       <div className="flex  justify-end mr-8">
-        <Button
-          onClick={() => setshowRequestInvetory(true)}
-          className="text-4xl font-bold text-center text-blue-600"
-        >
-          Request Inventory
-        </Button>
+        {!userProfile?.is_inv_manager && !userProfile?.is_admin &&
+          (
+            <Button
+              onClick={() => setshowRequestInvetory(true)}
+              className="text-4xl font-bold text-center text-blue-600"
+            >
+              Request Inventory
+            </Button>
+          )
+        }
       </div>
       {userProfile?.inventory_prompts?.filter(
         (prompt) => !prompt.is_accepted === true

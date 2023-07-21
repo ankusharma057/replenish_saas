@@ -266,6 +266,7 @@ function App() {
                     <MyProfile
                       userProfile={userProfile}
                       productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />

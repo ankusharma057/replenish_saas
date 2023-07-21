@@ -398,7 +398,7 @@ export default function AddInvoices(props) {
   };
   const handleRetailProductSelection = (selectedRetailProductName) => {
     const selectedProduct = userProfile?.employees_inventories?.find(
-      (product) => product?.product.name === selectedRetailProductName
+      (product) => product?.product?.name === selectedRetailProductName
     );
     if (selectedProduct) {
       setCurrentRetailProduct({
