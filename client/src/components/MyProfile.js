@@ -276,11 +276,15 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Request Inventory
-          </Modal.Title>
-        </Modal.Header>
+        {userProfile?.is_inv_manager === false && userProfile?.is_admin === false &&
+          (
+            <Modal.Header closeButton>
+              <Modal.Title id="contained-modal-title-vcenter">
+                Request Inventory
+              </Modal.Title>
+            </Modal.Header>
+          )
+        }
         <Modal.Body className="flex justify-between flex-col items-center gap-2">
           <div className="w-full">
             <Form

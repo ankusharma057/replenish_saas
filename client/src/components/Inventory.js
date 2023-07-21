@@ -326,7 +326,9 @@ const Inventory = ({
         assignInput={assignInput}
         employee={userProfile}
       />
-      {requestedInventoryData?.length > 0 &&
+      {requestedInventoryData?.filter(
+        (request) => !request?.is_approved
+      )?.length > 0 &&
         (userProfile?.is_inv_manager || userProfile?.is_admin) && (
           <div className="px-4">
             <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
