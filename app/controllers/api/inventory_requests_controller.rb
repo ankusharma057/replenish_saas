@@ -1,6 +1,5 @@
 class Api::InventoryRequestsController < ApplicationController
   before_action :find_inventory, only: :create
-  before_action :find_employee, only: :create
   before_action :find_inventory_request, except: :create
 
   def index
@@ -10,10 +9,10 @@ class Api::InventoryRequestsController < ApplicationController
 
   def create
     if @inventory
-      if @inventory.quantity.to_i < params[:quantity].to_i
+      if @inventory.quantity.to_i < params[:quantity_asked].to_i
         render json: @inventory, status: 403
       else
-        @inventory.request_for_inventory(@requestor_employee, params[:quantity], params[:date_of_use])
+        @inventory.request_for_inventory(current_employee, params[:quantity_asked], params[:date_of_use])
         render json: @inventory, status: :ok
       end
     else
@@ -30,8 +29,8 @@ class Api::InventoryRequestsController < ApplicationController
   end
 
   def reject
-    if @inventory_request.reject!
-      render json: { 'success' => 'Prompt Destroyed Successfully!'} , status: :ok
+    if @inventory_request.destroy!
+      render json: { 'success' => 'Request Removed Successfully!'} , status: :ok
     else
       render json: { 'error' => 'Error while destroying the prompt '} , status: :bad_request
     end
@@ -40,14 +39,10 @@ class Api::InventoryRequestsController < ApplicationController
   private
 
   def find_inventory
-    @inventory = Inventory.where(product: Product.where(name: params[:product_name]).first).first
+    @inventory = Inventory.find_by_id(params[:inventory][:id])
   end
 
   def find_inventory_request
     @inventory_request = InventoryRequest.find_by_id(params[:id])
-  end
-
-  def find_employee
-    @requestor_employee = Employee.find_by(name: params[:employee_name])
   end
 end

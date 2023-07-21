@@ -31,15 +31,8 @@ function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [clientsList, setClientsList] = useState();
   const [employeeList, setEmployeeList] = useState([]);
-
+  const [inventoryList, setInventoryList] = useState([]);
   const navigate = useNavigate();
-  useEffect(() => {
-    fetch("/api/invoices")
-      .then((r) => r.json())
-      .then((data) => {
-        setInvoiceList(data);
-      });
-  }, []);
 
   useEffect(() => {
     fetch("/api/clients").then((res) => {
@@ -67,12 +60,28 @@ function App() {
   const updateEmployee = (employee) => setUserProfile(employee);
 
   useEffect(() => {
+    fetch("/api/invoices")
+      .then((r) => r.json())
+      .then((data) => {
+        setInvoiceList(data);
+      });
+  }, [userProfile]);
+
+  useEffect(() => {
+    fetch("/api/inventories")
+      .then((r) => r.json())
+      .then((data) => {
+        setInventoryList(data);
+      });
+  }, [userProfile]);
+
+  useEffect(() => {
     fetch("/api/products")
       .then((r) => r.json())
       .then((data) => {
         setProductList(data);
       });
-  }, []);
+  }, [userProfile]);
 
   useEffect(() => {
     fetch("/api/employees")
@@ -81,7 +90,7 @@ function App() {
         // console.log({ data });
         setEmployeeList(data);
       });
-  }, []);
+  }, [userProfile]);
 
   const addProduct = (newProduct) => {
     const updatedProducts = [...productList, newProduct];
@@ -124,6 +133,7 @@ function App() {
                         userProfile={userProfile}
                         employeeList={employeeList}
                         productList={productList}
+                        inventoryList={inventoryList}
                       />
                     }
                   />
@@ -200,6 +210,7 @@ function App() {
                       employeeList={employeeList}
                       userProfile={userProfile}
                       productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />
@@ -210,6 +221,7 @@ function App() {
                       userProfile={userProfile}
                       employeeList={employeeList}
                       productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />
@@ -223,6 +235,7 @@ function App() {
                       employeeList={employeeList}
                       userProfile={userProfile}
                       productList={productList}
+                      inventoryList={inventoryList}
                     />
                   }
                 />

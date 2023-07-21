@@ -6,19 +6,9 @@ class InventoryRequest < ApplicationRecord
 
   def accept!
     update!(is_approved: true)
-    # requested_inventory = 
-  end
+    requestor_inventory = requestor.employees_inventories.find_or_create_by(product: inventory.product)
+    requestor_inventory.update!(quantity: (requestor_inventory.quantity.to_i + quantity_asked.to_i))
 
-  def reject!
-    # assignor =  case assigned_by
-    #             when "Inventory Manager"
-    #               Inventory
-    #             else
-    #               Employee.find_by(name: assigned_by).employees_inventories
-    #             end.find_or_create_by(product: product)
-
-    # assignor.update!(quantity: assignor.quantity.to_i + quantity.to_i)
-
-    # destroy!
+    inventory.update!(quantity: (inventory.quantity.to_i - quantity_asked.to_i))
   end
 end

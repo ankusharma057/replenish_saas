@@ -4,7 +4,7 @@ class Product < ApplicationRecord
   has_many :invoices, through: :products_invoices
   has_one  :inventory, class_name: 'Inventory', dependent: :destroy
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
-  has_many :employees_inventories, class_name: 'EmployeeInventory'
+  has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
 
   def create_or_update_inventory(quantity: nil)
     inventory.nil? ? create_inventory(quantity: quantity.to_i) : 

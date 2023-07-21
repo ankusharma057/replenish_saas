@@ -6,12 +6,16 @@ import { Button, Card, Modal, Table, Form } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import AssignModal from "./AssignModal";
 
-const Inventory = ({ userProfile, employeeList, productList }) => {
+const Inventory = ({
+  userProfile,
+  employeeList,
+  productList,
+  inventoryList,
+}) => {
   const navigate = useNavigate();
   const [showModal, setshowModal] = useState(false);
   const [productInfoInput, setproductInfoInput] = useState({});
   const [updateQtyInput, setUpdateQtyInput] = useState({});
-  const [entireInventory, setEntireInventory] = useState([]);
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
 
   const [showAssignMadal, setShowAssignMadal] = useState(false);
@@ -25,17 +29,10 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
 
   useEffect(() => {
-    fetch("/api/inventories")
-      .then((r) => r.json())
-      .then((data) => {
-        setEntireInventory(data);
-      });
-  }, []);
-
-  useEffect(() => {
     fetch("/api/inventory_requests")
       .then((r) => r.json())
       .then((data) => {
+        console.log(data);
         setRequestedInventoryData(data);
       });
   }, []);
@@ -234,12 +231,11 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
         {
           label: "Yes",
           onClick: () => {
-            fetch(`/api/inventory_requests`, {
+            fetch(`/api/inventory_requests/${data?.id}/accept`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
+              }
             })
               .then((res) => {
                 if (res.ok) {
@@ -280,18 +276,14 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
         {
           label: "Yes",
           onClick: () => {
-            fetch(`/api/inventory_requests`, {
+            fetch(`/api/inventory_requests/${data?.id}/reject`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
+              }
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success(
-                    "You have rejected this inventory Successfully."
-                  );
                   window.location.reload();
                 } else if (res.status === 404) {
                   res.json().then((json) => {
@@ -336,72 +328,54 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
       />
       {requestedInventoryData?.length > 0 &&
         (userProfile?.is_inv_manager || userProfile?.is_admin) && (
-          <Table bordered hover responsive className="w-full mt-4 text-center">
-            <thead>
-              <tr>
-                <th>Employee Name </th>
-                <th>Product </th>
-                <th>Quantity </th>
-                <th>Date</th>
-                <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="px-4">
+            <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
+              Inventory Request
+            </h2>
+            <ul className=" container  mx-auto text-lg pl-0 px-4 mx-auto font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
               {requestedInventoryData?.map((data) => {
+                const dateObj = new Date(data?.date_of_use);
+                const year = dateObj.getFullYear();
+                const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                const day = String(dateObj.getDate()).padStart(2, "0");
+                const formattedDate = `${year}-${month}-${day}`;
+
                 return (
-                  <tr key={data?.product?.id}>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.product?.name} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.product?.product_type} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col   gap-2">
-                        <span>{data?.quantity} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <Button
-                        variant="info"
-                        onClick={() => {
-                          setAssignProductData(data);
-                          setShowAssignMadal(true);
-                        }}
-                      >
-                        Assign
-                      </Button>
-                    </td>
-
-                    <td className="align-middle flex  justify-around items-center">
-                      <Button
-                        variant="info"
-                        onClick={() => acceptRequestInventorySubmit(data)}
-                        title="Accept Inventory Request"
-                      >
-                        Accept
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        onClick={() => {
-                          rejectRequestInventorySubmit(data);
-                        }}
-                        title="Deny Inventory Request"
-                      >
-                        Reject
-                      </Button>
-                    </td>
-                  </tr>
+                  <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
+                    <span className="text-red-500 text-xl ">*</span>
+                    <span className="text-blue-700 mx-2">
+                      {data?.requestor?.name}
+                    </span>
+                    has asked for
+                    <span className="text-blue-700 mx-2">
+                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}
+                    </span>
+                    to be used on
+                    <span className="text-blue-700 mx-2">
+                      {formattedDate}.
+                    </span>
+                    <Button
+                      onClick={() => acceptRequestInventorySubmit(data)}
+                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                      title="Click To Accept this Requested Inventory"
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      onClick={() => rejectRequestInventorySubmit(data)}
+                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                      title="Click To Reject this Requested Inventory"
+                      variant="danger"
+                    >
+                      Reject
+                    </Button>
+                  </li>
                 );
               })}
-            </tbody>
-          </Table>
+            </ul>
+          </div>
         )}
+    
       <Modal
         show={showUpdateProductModal}
         onHide={() => setShowUpdateProductModal(false)}
@@ -498,8 +472,8 @@ const Inventory = ({ userProfile, employeeList, productList }) => {
             </tr>
           </thead>
           <tbody>
-            {entireInventory &&
-              entireInventory
+            {inventoryList &&
+              inventoryList
                 ?.filter((data) => {
                   return data?.product?.name
                     ?.toLowerCase()

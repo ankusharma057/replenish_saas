@@ -6,7 +6,8 @@
   </head>
   <body>
     <p>
-      Hi, <%= @invoice.employee.name %>, Please find the PDF of the new invoice attached.
+      The Invoice: <%= @invoice.id %> has been finalized!
+      Employee Name: <%= @invoice.employee.name&.capitalize %>  
     </p>
   </body>
 </html>

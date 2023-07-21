@@ -1,28 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Header from "./Header";
-import CustomModal from "./CustomModal.js";
 import { Button, Card, Modal, Form } from "react-bootstrap";
+import CustomModal from "./CustomModal.js";
 import Table from "react-bootstrap/Table";
 import AssignModal from "./AssignModal";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert"; // Import
 
-function UserPage({ userProfile, employeeList, productList }) {
+function UserPage({ userProfile, employeeList, productList, inventoryList }) {
+  console.log(inventoryList)
   const [employee, setEmployee] = useState();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState(false);
   const [modalShow, setModalShow] = useState(false);
   const [invoiceData, setinvoiceData] = useState(null);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
-  const [assignProductData, setAssignProductData] = useState({});
-  const [acceptInventories, setAcceptInventories] = useState({});
+  const [assigninventory_object, setAssigninventory_object] = useState({});
+  const [requestInveytoryList, setRequestInveytoryList] = useState([]);
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
-  const [requestInvetroryInput, setRequestInvetroryInput] = useState({
-    quantity: 0,
+  const [requestInvetoryInput, setRequestInvetoryInput] = useState({
+    quantity_asked: 0,
     product_name: "",
     date_of_use: "",
   });
@@ -52,13 +53,24 @@ function UserPage({ userProfile, employeeList, productList }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    fetch(`/api/inventory_requests`).then((res) => {
+      if (res.ok) {
+        res.json().then((inventory) => {
+          setRequestInveytoryList(inventory);
+        });
+      } else {
+        res.json().then((data) => setErrors(data.error));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const assignSubmit = (e, data) => {
     e.preventDefault();
-    const productData = {
+    const inventory_object = {
       ...assignInput,
-      product_id: assignProductData?.product.id,
-      product_name: assignProductData?.product.name,
-      employee_id: assignProductData?.employee.id,
+      employee_id: assigninventory_object?.employee.id,
     };
 
     fetch(`/api/employee_inventories/transfer`, {
@@ -66,7 +78,7 @@ function UserPage({ userProfile, employeeList, productList }) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(productData),
+      body: JSON.stringify(inventory_object),
     })
       .then((res) => {
         if (res.ok) {
@@ -93,7 +105,7 @@ function UserPage({ userProfile, employeeList, productList }) {
   };
 
   const acceptSubmit = (data) => {
-    const productData = {
+    const inventory_object = {
       id: data?.id,
       employee_id: data?.employee.id,
       product_name: data?.product?.name,
@@ -112,7 +124,7 @@ function UserPage({ userProfile, employeeList, productList }) {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(productData),
+              body: JSON.stringify(inventory_object),
             })
               .then((res) => {
                 if (res.ok) {
@@ -150,7 +162,7 @@ function UserPage({ userProfile, employeeList, productList }) {
   };
 
   const denySubmit = (data) => {
-    const productData = {
+    const inventory_object = {
       id: data?.id,
       employee_id: data?.employee.id,
       product_name: data?.product?.name,
@@ -169,7 +181,7 @@ function UserPage({ userProfile, employeeList, productList }) {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(productData),
+              body: JSON.stringify(inventory_object),
             })
               .then((res) => {
                 if (res.ok) {
@@ -213,9 +225,9 @@ function UserPage({ userProfile, employeeList, productList }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        ...requestInvetroryInput,
-        employee_id: userProfile.id,
-        employee_name: userProfile.name,
+        inventory: requestInvetoryInput?.inventory_object,
+        quantity_asked: requestInvetoryInput.quantity_asked,
+        date_of_use:requestInvetoryInput.date_of_use
       }),
     })
       .then((res) => {
@@ -251,8 +263,8 @@ function UserPage({ userProfile, employeeList, productList }) {
         showAssignMadal={showAssignMadal}
         setShowAssignMadal={setShowAssignMadal}
         assignSubmit={assignSubmit}
-        assignProductData={assignProductData}
-        setAssignProductData={setAssignProductData}
+        assigninventory_object={assigninventory_object}
+        setAssigninventory_object={setAssigninventory_object}
         employeeList={otherEmployeesList}
         setAssignInput={setAssignInput}
         assignInput={assignInput}
@@ -277,49 +289,62 @@ function UserPage({ userProfile, employeeList, productList }) {
             >
               <Form.Select
                 aria-label="Default select example"
-                onChange={(e) =>
-                  setRequestInvetroryInput({
-                    ...requestInvetroryInput,
+                onChange={(e) => {
+                  const selectedInventory = inventoryList.find(
+                    (inventory) =>
+                      String(inventory.id) === String(e.target.value)
+                  );
+                  setRequestInvetoryInput({
+                    ...requestInvetoryInput,
                     product_name: e.target.value,
-                  })
-                }
+                    inventory_object: selectedInventory,
+                  });
+                }}
                 required
               >
                 <option value="">Select The Product</option>
-                {productList?.map((product) => {
-                  return (
-                    <option key={product?.id} value={product?.name}>
-                      {product?.name}
-                    </option>
-                  );
-                })}
+                {inventoryList?.length > 0 &&
+                  inventoryList?.map((inventory) => {
+                    return (
+                      <option key={inventory?.id} value={inventory?.id}>
+                        {inventory?.product.name}
+                      </option>
+                    );
+                  })}
               </Form.Select>
               <Form.Control
                 type="number"
-                placeholder={`Type Quantity`}
+                placeholder={` ${
+                  requestInvetoryInput?.inventory_object?.quantity
+                    ? ` Type Quantity: max Quantity: ${requestInvetoryInput?.inventory_object?.quantity} `
+                    : "Select Product First"
+                }`}
                 onChange={(e) =>
-                  setRequestInvetroryInput({
-                    ...requestInvetroryInput,
-                    quantity: e.target.value,
+                  setRequestInvetoryInput({
+                    ...requestInvetoryInput,
+                    quantity_asked: e.target.value,
                   })
                 }
-                max={requestInvetroryInput?.quantity}
-                min={1}
+                max={+requestInvetoryInput?.inventory_object?.quantity || 0}
+                // min={1}
+                disabled={
+                  requestInvetoryInput?.inventory_object?.quantity
+                    ? false
+                    : true
+                }
                 required
               />
-
               <Form.Control
                 type="date"
                 // placeholder={`Type Quantity`}
                 onChange={(e) =>
-                  setRequestInvetroryInput({
-                    ...requestInvetroryInput,
+                  setRequestInvetoryInput({
+                    ...requestInvetoryInput,
                     date_of_use: e.target.value,
                   })
                 }
                 required
               />
-
               <Button type="submit">Submit</Button>
             </Form>
           </div>
@@ -333,8 +358,8 @@ function UserPage({ userProfile, employeeList, productList }) {
         <CustomModal
           show={modalShow}
           onHide={handleClick}
+          userProfile={userProfile}
           invoiceData={invoiceData}
-          // show={true}
         />
       )}
       <br />
@@ -425,57 +450,59 @@ function UserPage({ userProfile, employeeList, productList }) {
           </Table>
         </>
       )}
-      <div className=" container mx-auto my-3">
-        <h2 className="text-4xl font-bold text-center text-blue-400">
-          Products
-        </h2>
-        <Table bordered hover responsive className="w-full mt-4 text-center">
-          <thead>
-            <tr>
-              <th>Product </th>
-              <th>Product Type</th>
-              <th>Quantity</th>
-              <th>Assign</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employee?.employees_inventories?.map((data) => {
-              // console.log(data);
-              return (
-                <tr key={data?.product?.id}>
-                  <td className="align-middle">
-                    <div className="flex flex-col  gap-2">
-                      <span>{data?.product?.name} </span>
-                      {/* <span>Product Name: Product </span> */}
-                    </div>
-                  </td>
-                  <td className="align-middle">
-                    <div className="flex flex-col  gap-2">
-                      <span>{data?.product?.product_type} </span>
-                    </div>
-                  </td>
-                  <td className="align-middle">
-                    <div className="flex flex-col  gap-2">
-                      <span>{data?.quantity} </span>
-                    </div>
-                  </td>
-                  <td className="align-middle">
-                    <Button
-                      variant="info"
-                      onClick={() => {
-                        setAssignProductData(data);
-                        setShowAssignMadal(true);
-                      }}
-                    >
-                      Assign
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
+      {employee?.employees_inventories?.length > 0 && (
+        <div className=" container mx-auto my-3">
+          <h2 className="text-4xl font-bold text-center text-blue-400">
+            Products
+          </h2>
+          <Table bordered hover responsive className="w-full mt-4 text-center">
+            <thead>
+              <tr>
+                <th>Product </th>
+                <th>Product Type</th>
+                <th>Quantity</th>
+                <th>Assign</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employee?.employees_inventories?.map((data) => {
+                // console.log(data);
+                return (
+                  <tr key={data?.product?.id}>
+                    <td className="align-middle">
+                      <div className="flex flex-col  gap-2">
+                        <span>{data?.product?.name} </span>
+                        {/* <span>Product Name: Product </span> */}
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <div className="flex flex-col  gap-2">
+                        <span>{data?.product?.product_type} </span>
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <div className="flex flex-col  gap-2">
+                        <span>{data?.quantity} </span>
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <Button
+                        variant="info"
+                        onClick={() => {
+                          setAssigninventory_object(data);
+                          setShowAssignMadal(true);
+                        }}
+                      >
+                        Assign
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        </div>
+      )}
       <br />
       <h2 className="text-4xl font-bold text-center text-blue-400">
         My invoices
@@ -483,9 +510,8 @@ function UserPage({ userProfile, employeeList, productList }) {
       <br />
       <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
         {employee?.invoices.map((invoice) => {
-          // //console.log({ invoice });
           return (
-            <li key={invoice.id}>
+            <li key={invoice?.id}>
               <Card
                 className="text-center"
                 border="info"
