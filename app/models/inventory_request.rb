@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 class InventoryRequest < ApplicationRecord
-  belongs_to :employee, foreign_key: :requestor_id
-  belongs_to :product
+  belongs_to :requestor, foreign_key: :requestor_id, class_name: "Employee"
+  belongs_to :inventory
 
   def accept!
-    binding.irb
-    # update!(is_accepted: true)
-    # assigned_inventory = employee.employees_inventories.find_or_create_by(product: product)
-    # assigned_inventory.update!(quantity: (assigned_inventory.quantity.to_i + self.quantity.to_i))
+    update!(is_approved: true)
+    # requested_inventory = 
   end
 
   def reject!

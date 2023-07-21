@@ -47,7 +47,7 @@ module PdfDownloadable
           <div style="text-align: right;">  Paid By Client Cash: '"#{paid_by_client_cash}"'</div>  
           <div style="text-align: left;">  Paid By Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-          <div style="text-align: right;">  Total Paid by Credit: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+          <div style="text-align: right;">  Total Paid by Client: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
           <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
         </div>
 

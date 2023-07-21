@@ -1,3 +1,3 @@
 class InventoryRequestSerializer < ActiveModel::Serializer
-  attributes :id, :requestor, :product, :quantity, :date_of_use
+  attributes :id, :requestor, :inventory, :quantity_asked, :date_of_use
 end
