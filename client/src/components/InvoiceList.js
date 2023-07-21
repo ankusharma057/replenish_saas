@@ -61,7 +61,7 @@ export default function InvoiceList({ userProfile }) {
         <hr />
 
         <div className="justify-center flex flex-wrap gap-3">
-          {invoiceList[setselectList]?.map((invoice, i) => (
+          {invoiceList[setselectList]?.sort((a, b) => a?.id - b?.id)?.map((invoice, i) => (
             <Invoice invoice={invoice} key={i} fiInvoiceList={invoice?.is_finalized} userProfile={userProfile} />
           ))}
         </div>

@@ -30,7 +30,7 @@ export default function EmployeeList({ userProfile, productList }) {
     <div>
       <Header userProfile={userProfile} />
       <div className="mt-3 mb-3 mx-1 flex justify-center flex-wrap gap-3">
-        {employeeList.map((employee) => (
+        {employeeList?.sort((a, b) => a?.name?.localeCompare(b?.name))?.map((employee) => (
           <div key={employee?.id} className=" ">
             <Employee
               employeeList={employeeList}
