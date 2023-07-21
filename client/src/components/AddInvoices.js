@@ -472,7 +472,7 @@ export default function AddInvoices(props) {
       comments: event.target.comments.value,
       products: formData.products,
       retail_products: formData.retailProducts,
-      charge: getTotal(),
+      charge: Number(getTotal()).toFixed(2),
       expected_income: getExpectedReplenishIncome(),
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag()
@@ -657,7 +657,7 @@ export default function AddInvoices(props) {
                 </label>
               </div>
               <div className="border rounded-sm p-2 mb-4 w-100">
-                <label className="block">Total: {getTotal()}</label>
+                <label className="block">Total: {Number(getTotal()).toFixed(2)}</label>
               </div>
               <button
                 type="submit"

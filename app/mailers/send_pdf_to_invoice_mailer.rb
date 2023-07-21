@@ -9,14 +9,12 @@ class SendPdfToInvoiceMailer < ApplicationMailer
     emails << @invoice.employee.email
     emails << "replenishmd_527@invoicesmelio.com"
 
-    emails.each do |email|
-      mail(
-        from: 'patrick@test.com',
-        to: email,
-        subject: "Invoice Attachment."
-      ) do |format|
-        format.html { render "layouts/invoice_email" }
-      end
+    mail(
+      from: 'patrick@test.com',
+      to: emails,
+      subject: "Invoice Attachment."
+    ) do |format|
+      format.html { render "layouts/invoice_email" }
     end
   end
 end
