@@ -350,9 +350,9 @@ const Inventory = ({
                     </span>
                     has asked for
                     <span className="text-blue-700 mx-2">
-                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}
+                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}.
                     </span>
-                    to be used on
+                    Date Needed:
                     <span className="text-blue-700 mx-2">
                       {formattedDate}.
                     </span>

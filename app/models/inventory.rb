@@ -2,7 +2,7 @@ class Inventory < ApplicationRecord
   self.table_name = 'inventories'
 
   belongs_to :product
-  has_many :inventory_requests
+  has_many :inventory_requests, dependent: :destroy
 
   include Storage
 
