@@ -14,6 +14,8 @@ class InvoiceSerializer < ActiveModel::Serializer
   end
 
   attribute :fellow_invoices do
-    object.fellow_invoices&.ids
+    if object.invoice_group
+      object.fellow_invoices&.ids
+    end
   end
 end
