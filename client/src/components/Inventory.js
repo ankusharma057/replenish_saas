@@ -185,6 +185,7 @@ const Inventory = ({
 
   const assignSubmit = (e) => {
     e.preventDefault();
+    debugger
     const productData = {
       ...assignInput,
       product_name: assignProductData?.product?.name,
@@ -496,9 +497,29 @@ const Inventory = ({
                         </div>
                       </td>
                       <td className="align-middle">
-                        <div className="flex flex-col   gap-2">
-                          <span>{data?.quantity} </span>
-                        </div>
+                        <table>
+                          <tr>
+                            <th>
+                              Available
+                            </th>
+                            <th>
+                              Replenish
+                            </th>
+                          </tr>
+
+                          <tr>
+                            <td className="align-middle">
+                              <div className=" flex-col   gap-1">
+                                <span>{data?.available_inventory} </span>
+                              </div>
+                            </td>
+                            <td className="align-middle">
+                              <div className=" flex-col   gap-1">
+                                <span>{data?.quantity} </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
                       </td>
                       <td className="align-middle">
                         <Button

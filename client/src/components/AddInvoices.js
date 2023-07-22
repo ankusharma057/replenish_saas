@@ -1,28 +1,26 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { toast } from "react-toastify";
-import { Alert } from "react-bootstrap";
-import { getDropdownMenuPlacement } from "react-bootstrap/esm/DropdownMenu";
+import { Alert, Button } from "react-bootstrap";
+import AddInvoiceTemplate from "./AddInvoiceTemplate";
+import { confirmAlert } from "react-confirm-alert"; // Import
 
 const initialFormState = {
+  clientName: "",
   dateOfService: "",
-  paidByClientCash: null,
-  paidByClientCredit: null,
-  comments: "",
-  personalDiscount: null,
-  tip: null,
   conciergeFeePaid: false,
   gfe: false,
   semaglitudeConsultation: false,
+  paidByClientCash: 0,
+  paidByClientCredit: 0,
+  personalDiscount: 0,
+  tip: 0,
+  comments: "",
   products: [],
   retailProducts: [],
-  //Client States
-  client: { name: "" },
 };
 
-export default function AddInvoices(props) {
-  const { productList, userProfile } = props;
-  const [formData, setFormData] = useState(initialFormState);
+export default function AddInvoices({ userProfile }) {
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     price: null,
@@ -38,79 +36,36 @@ export default function AddInvoices(props) {
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
+  const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
+
+  const [formData, setFormData] = useState({
+    ...initialFormState,
+  });
+  const [invoiceArray, setInvoiceArray] = useState([]);
+  const totalRef = useRef();
   const [isAlert, setIsAlert] = useState({
     retailShow: false,
     productUsedShow: false,
     message: "",
+    isClient: false,
+    maxInvoice: false,
   });
 
-  const handleInputChange = (event, index) => {
+  const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
-    if (type === "checkbox") {
-      if (name === "conciergeFeePaid") {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: checked,
-        }));
-        // setConciergeFeePaid(checked);
-      }
+    const inputValue =
+      type === "checkbox" ? checked : isNaN(value) ? value : +value;
 
-      if (name === "gfe") {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: checked,
-        }));
-      }
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: inputValue,
+    }));
 
-    if (name === "semaglitudeConsultation") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: checked,
-      }));
-    }
-  
-
-    if (name === "dateOfService") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-      }));
-    }
-
-    if (name === "paidByClientCash") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: +value,
-      }));
-    }
-
-    if (name === "paidByClientCredit") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: +value,
-      }));
-    }
-
-    if (name === "comments") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-      }));
-    }
-
-    if (name === "personalDiscount") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: +value,
-      }));
-    }
-
-    if (name === "tip") {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: +value,
-      }));
+    if (name === "clientName" && !value) {
+      setIsAlert({
+        isClient: false,
+        message: "",
+      });
     }
   };
 
@@ -119,7 +74,7 @@ export default function AddInvoices(props) {
     updatedProducts.splice(index, 1);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      ["products"]: updatedProducts,
+      products: updatedProducts,
     }));
   };
 
@@ -128,7 +83,7 @@ export default function AddInvoices(props) {
     updatedProducts.splice(index, 1);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      ["retailProducts"]: updatedProducts,
+      retailProducts: updatedProducts,
     }));
   };
   const getTotalPaidByClient = () => {
@@ -154,7 +109,7 @@ export default function AddInvoices(props) {
       sum += getTotalCostPrice(product);
     });
     return sum;
-  }; 
+  };
 
   const getTotalRetailPrice = (product) => {
     return +product.retail_price * +product.quantity;
@@ -174,7 +129,7 @@ export default function AddInvoices(props) {
       sum += getTotalRetailPrice(product);
     });
     return sum;
-  }; 
+  };
 
   const calculateTax = (amountPaid) => {
     let afterTaxprice = amountPaid - amountPaid * 0.031;
@@ -236,26 +191,25 @@ export default function AddInvoices(props) {
         afterTax.retailTotal) *
       (userProfile?.service_percentage / 100); //(replace with injector percentage)
     // console.log("gfe:" + userProfile?.gfe);
-    if (userProfile?.gfe) 
-      total += gfeFee + semagConsultFee;
+    if (userProfile?.gfe) total += (gfeFee + semagConsultFee);
     total =
       total -
       afterTax.discount +
       (afterTax.retailTotal * (parseInt(userProfile?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
-     //console.log(selectedProduct?.product.cost_price);
-     //console.log ("actual:" + getActualReplenishIncome());
-    //console.log ("expected:" + getExpectedReplenishIncome());
-    
-    if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT == 0)
-        total = 30;
-    if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() == 30)
-        total = 0;
+
+    if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0)
+      total = 30;
     if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT == 0)
-        total = 75;
+      total = 75;
     if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() ==75)
-        total = 0;
+      total = 0;
+    if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() == 30) {
+      total = 0;
+    }
+
+    // totalRef.current.charge =
     return total.toFixed(2);
   };
 
@@ -263,26 +217,27 @@ export default function AddInvoices(props) {
     let totalRetail = getConsumableRetailPrice() + getRetailCostPrice();
     let totalCost = getConsumableCostPrice() + getRetailCostPrice();
     let expectedIncome = totalRetail - totalCost;
-    if (formData.paidByClientCash = 0)
-      expectedIncome = expectedIncome - (expectedIncome * 0.031);
-    expectedIncome = expectedIncome * ((100 - userProfile?.service_percentage )/ 100);
+    if ((formData.paidByClientCash = 0))
+      expectedIncome = expectedIncome - expectedIncome * 0.031;
+    expectedIncome =
+      expectedIncome * ((100 - userProfile?.service_percentage) / 100);
     console.log(expectedIncome);
-    return expectedIncome
-  }
+    return expectedIncome;
+  };
 
   const getActualReplenishIncome = () => {
     let injectorPay = getTotal();
-    let actualIncome =  injectorPay / (userProfile?.service_percentage / 100) * ((100 - userProfile?.service_percentage )/ 100);
-    console.log(actualIncome)
+    let actualIncome =
+      (injectorPay / (userProfile?.service_percentage / 100)) *
+      ((100 - userProfile?.service_percentage) / 100);
+    console.log(actualIncome);
     return actualIncome;
-  }
+  };
 
-  
   const replenishIncomeFlag = () => {
-    if (getExpectedReplenishIncome > getActualReplenishIncome)
-      return false;
+    if (getExpectedReplenishIncome > getActualReplenishIncome) return false;
     else return true;
-  }
+  };
 
   /// Product selection functions
   const handleProductNameChange = (e) => {
@@ -310,11 +265,11 @@ export default function AddInvoices(props) {
       input == ""
         ? productList
         : productList?.filter((product) =>
-            product.name.toLowerCase().includes(input.toLowerCase())
+            product?.name.toLowerCase().includes(input.toLowerCase())
           );
 
     // console.log({ matchedProducts });
-    setMatchingProducts(matchedProducts); 
+    setMatchingProducts(matchedProducts);
   };
   const handleProductSelection = (selectedProductName) => {
     // change to only user
@@ -327,7 +282,16 @@ export default function AddInvoices(props) {
         name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity: selectedProduct.quantity,
+        maxQtantity:
+          selectedProduct.quantity -
+          Number(
+            (allInvoiceProductsList &&
+              allInvoiceProductsList?.productQuantities[
+                selectedProduct?.product?.id
+              ]?.sumofQuantity) ||
+              0
+          ),
+        id: selectedProduct.product?.id,
       });
       setSelectedProduct(selectedProduct?.product);
       setMatchingProducts([]);
@@ -345,6 +309,13 @@ export default function AddInvoices(props) {
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
+      if (currentProduct?.quantity > currentProduct?.maxQtantity) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Unable to add ${currentProduct?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
       setIsAlert({
         productUsedShow: false,
         retailShow: false,
@@ -390,7 +361,7 @@ export default function AddInvoices(props) {
       input == ""
         ? retailProductList
         : retailProductList?.filter((product) =>
-            product.name.toLowerCase().includes(input.toLowerCase())
+            product?.name.toLowerCase().includes(input.toLowerCase())
           );
 
     // console.log({ matchedProducts });
@@ -405,7 +376,16 @@ export default function AddInvoices(props) {
         name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity: selectedProduct.quantity,
+        maxQtantity:
+          selectedProduct.quantity -
+          Number(
+            (allInvoiceProductsList &&
+              allInvoiceProductsList?.productQuantities[
+                selectedProduct?.product?.id
+              ]?.sumofQuantity) ||
+              0
+          ),
+        id: selectedProduct.product?.id,
       });
       setSelectedRetailProduct(selectedProduct?.product);
       setMatchingRetailProducts([]);
@@ -427,6 +407,13 @@ export default function AddInvoices(props) {
 
   const handleAddRetailProduct = () => {
     if (selectedRetailProduct) {
+      if (currentRetailProduct?.quantity > currentRetailProduct?.maxQtantity) {
+        setIsAlert({
+          retailShow: true,
+          message: `Unable to add ${currentRetailProduct?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
       setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
       let retailProductToBeAdded = {
         ...selectedRetailProduct,
@@ -435,525 +422,703 @@ export default function AddInvoices(props) {
       setSelectedRetailProduct(null);
       setFormData((prevFormData) => ({
         ...prevFormData,
-        ["retailProducts"]: [
-          ...formData.retailProducts,
-          retailProductToBeAdded,
-        ],
-
-        
+        retailProducts: [...formData.retailProducts, retailProductToBeAdded],
       }));
 
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
+    }
+  };
+
+  const handleDeleteInvoice = (id) => {
+    const filterArr = invoiceArray.filter((invoice) => invoice.id !== id);
+    setAllInvoiceProductsList(calculateProductQuantities(filterArr));
+    setInvoiceArray(filterArr);
+    setIsAlert({
+      productUsedShow: false,
+      retailShow: false,
+      message: "",
+    });
+    setCurrentProduct({ name: "", price: 0, quantity: 1 });
+    setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
+  };
+
+  function calculateProductQuantities(data) {
+    const productQuantities = {};
+    const retailProductQuantities = {};
+
+    function calculateQuantities(arr, quantityMap) {
+      for (const product of arr) {
+        const { id, name, quantity } = product;
+        if (quantityMap[id]) {
+          quantityMap[id].sumofQuantity += quantity;
+        } else {
+          quantityMap[id] = { product_name: name, id, sumofQuantity: quantity };
+        }
+      }
+    }
+
+    for (const obj of data) {
+      calculateQuantities(obj.products, productQuantities);
+      calculateQuantities(obj.retail_products, retailProductQuantities);
+    }
+
+    // console.log(productQuantities, retailProductQuantities);
+    // // const productsList = Object.values(productQuantities);
+    // // const retailProductList = Object.values(retailProductQuantities);
+
+    return { productQuantities, retailProductQuantities };
+  }
+
+  const addMoreInvoice = (submit) => {
+    // clientName
+    if (!clientName) {
+      setIsAlert({
+        isClient: true,
+        message: "Please Add Client Name",
+      });
+      return;
+    }
+    let invoice = {
+      employee_id: userProfile.id,
+      user_name: userProfile?.name,
+      clientname: clientName,
+      
+      date_of_service: formData?.dateOfService,
+      concierge_fee_paid: formData?.conciergeFeePaid,
+      gfe: formData?.gfe,
+      semag_consult_fee: formData?.semaglitudeConsultation.value == "on",
+      paid_by_client_cash: formData?.paidByClientCash,
+      paid_by_client_credit: formData?.paidByClientCredit,
+      personal_discount: formData?.personalDiscount,
+      tip: formData?.tip,
+      comments: formData?.comments,
+      products: formData.products,
+      retail_products: formData.retailProducts,
+      charge: Number(getTotal()).toFixed(2),
+      expected_income: getExpectedReplenishIncome(),
+      actual_income: getActualReplenishIncome(),
+      income_flag: replenishIncomeFlag(),
+      get_total_price_by_client: getTotalPaidByClient(),
+      total_consumable_cost: getConsumableCostPrice(),
+    };
+    const invoiceList = [
+      ...invoiceArray,
+      {
+        ...invoice,
+        id: Date.now(),
+      },
+    ];
+
+    setAllInvoiceProductsList(() => calculateProductQuantities(invoiceList));
+
+    if (invoiceList?.length >= 4) {
+      setIsAlert({
+        maxInvoice: true,
+        message: `You Can Not Add More then 5 Invoice`,
+      });
+
+      setTimeout(() => {
         setIsAlert({
-          productUsedShow: false,
-          retailShow: false,
-          message: "",
+          maxInvoice: false,
+          message: ``,
         });
+      }, 5000);
+    }
+    if (submit === "submit") {
+      return invoiceList;
+    } else {
+      setInvoiceArray(invoiceList);
+      setFormData(initialFormState);
+      setCurrentProduct({ name: "", price: 0, quantity: 1 });
+      setSelectedProduct(null);
+      setMatchingProducts([]);
+      setClientName("");
+
+      window.scrollTo({
+        top: document.body.scrollHeight + 500,
+        behavior: "smooth",
+      });
+
+      return invoice;
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const retail_products = document.querySelectorAll(
-      ".retail-products table tbody tr"
-    );
+    // let invoice = {
+    //   employee_id: userProfile.id,
+    //   user_name: userProfile?.name,
+    //   clientname: clientName,
+    //   formData,
+    //   date_of_service: formData?.dateOfService,
+    //   concierge_fee_paid: formData?.conciergeFeePaid,
+    //   gfe: formData?.gfe,
+    //   paid_by_client_cash: formData?.paidByClientCash,
+    //   paid_by_client_credit: formData?.paidByClientCredit,
+    //   personal_discount: formData?.personalDiscount,
+    //   tip: formData?.tip,
+    //   comments: formData?.comments,
+    //   products: formData.products,
+    //   retail_products: formData.retailProducts,
+    //   charge: getTotal(),
+    //   expected_income: getExpectedReplenishIncome(),
+    //   actual_income: getActualReplenishIncome(),
+    //   income_flag: replenishIncomeFlag(),
+    //   get_total_price_by_client: getTotalPaidByClient(),
+    //   total_consumable_cost: getConsumableCostPrice(),
+    // };
+    const invoiceData = addMoreInvoice("submit");
+    confirmAlert({
+      title: "Confirm to submit",
+      message: `Are you sure add ${invoiceData?.length} Invoices `,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            fetch("/api/invoice_groups/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              // for single invoice
+              // body: JSON.stringify(invoice),
+              // for multiple invoice
+              body: JSON.stringify(invoiceData),
+            })
+              .then((res) => {
+                if (res.ok) {
+                  toast.success("Invoice created successfully.");
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
+                } else if (res.status === 404) {
+                  res.json().then((json) => {
+                    toast.error("Please provide a client.");
+                  });
+                } else {
+                  res.json().then((json) => {
+                    toast.error("Failed to create Invoice");
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                toast.error("An error occured.");
+              });
 
-    let invoice = {
-      employee_id: userProfile.id,
-      client_name: event.target.clientName.value,
-      date_of_service: event.target.dateOfService.value,
-      concierge_fee_paid: event.target.conciergeFeePaid.value == "on",
-      gfe: event.target?.gfe.value == "on",
-      semaglitudeConsultation: event.target?.semaglitudeConsultation.value == "on",
-      paid_by_client_cash: event.target.paidByClientCash.value,
-      paid_by_client_credit: event.target.paidByClientCredit.value,
-      personal_discount: event.target.personalDiscount.value,
-      tip: event.target.tip.value,
-      comments: event.target.comments.value,
-      products: formData.products,
-      retail_products: formData.retailProducts,
-      charge: Number(getTotal()).toFixed(2),
-      expected_income: getExpectedReplenishIncome(),
-      actual_income: getActualReplenishIncome(),
-      income_flag: replenishIncomeFlag()
-    };
-    // console.log(userProfile?.service_percentage);
-    // console.log("invoice:", invoice);
-    fetch("/api/invoices/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(invoice),
-    })
-      .then((res) => {
-        if (res.ok) {
-          toast.success("Invoice created successfully.");
-        } else if (res.status == 404) {
-          res.json().then((json) => {
-            toast.error("Please provide a client.");
-          });
-        } else {
-          res.json().then((json) => {
-            toast.error("Failed to create Invoice");
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        toast.error("An error occured.");
-      });
-
-    setFormData(initialFormState);
-    setCurrentProduct({ name: "", price: 0, quantity: 1 });
-    setSelectedProduct(null);
-    setMatchingProducts([]);
+            setFormData(initialFormState);
+            setCurrentProduct({ name: "", price: 0, quantity: 1 });
+            setSelectedProduct(null);
+            setMatchingProducts([]);
+          },
+        },
+        {
+          label: "No",
+          onClick: () => console.log("Click No"),
+        },
+      ],
+    });
   };
 
-  // console.log(
-  //   // matchingRetailProducts?.filter((matchProduct) => {
-  //   //   return matchProduct.name !== currentRetailProduct?.name;
-  //   // })
-  //   formData,
-  //   matchingRetailProducts
-  // );
   return (
-    <div>
+    <>
       <Header userProfile={userProfile} />
-      <div className="bg-blue-200 min-h-screen flex items-center justify-center md:p-4">
-        <form
-          className="max-w-full md:max-w-4xl mx-auto bg-white md:p-4 rounded-md"
-          onSubmit={handleSubmit}
-        >
-          <div className="border rounded-sm p-2 mb-4 flex flex-wrap justify-start md:justify-around">
-            <div>
-              <h4>Provider:</h4>
-              <div>{userProfile?.name}</div>
-            </div>
-            <div className="flex gap-4 mt-2 md:mt-0">
-              <label className=" mb-3 block">
-                Client Name:
-                <input
-                  type="text"
-                  name="clientName"
-                  id="clientName"
-                  onChange={(event) => setClientName(event.target.value)}
-                  autoComplete="off"
-                  className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  required
-                />
-              </label>
-              <label className="mb-2 block">
-                Date of Service:
-                <input
-                  type="date"
-                  name="dateOfService"
-                  value={formData.dateOfService}
-                  onChange={(event) => handleInputChange(event)}
-                  className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                />
-              </label>
-            </div>
-          </div>
-          <div
-            style={{
-              gridTemplateColumns: "1fr 2fr",
-              gap: "20px",
-            }}
-            className="flex flex-col-reverse md:grid"
+
+      <div className="bg-blue-200 p-1 sm:p-4 ">
+        <div className="bg-blue-200 min-h-screen pb-8 flex items-center justify-center flex-col md:p-4">
+          {isAlert.maxInvoice && (
+            <Alert variant="warning">{isAlert.message}</Alert>
+          )}
+          <form
+            className="max-w-full md:max-w-4xl mx-auto bg-white md:p-4 rounded-md"
+            onSubmit={handleSubmit}
           >
-            <div className="px-2">
-              <div className="border rounded-sm p-2 mb-4 w-100">
-                <label className="mb-2 block">
-                  Concierge Fee Paid:
-                  <input
-                    type="checkbox"
-                    name="conciergeFeePaid"
-                    checked={formData.conciergeFeePaid}
-                    onChange={(event) => handleInputChange(event)}
-                    className="ml-1"
-                  />
-                </label>
-                <label className="block">
-                  GFE:
-                  <input
-                    type="checkbox"
-                    name="gfe"
-                    checked={formData?.gfe}
-                    onChange={(event) => handleInputChange(event)}
-                    className="ml-2"
-                  />
-                </label>
-                <label className="block">
-                  Semaglitude Consulation:
-                  <input
-                    type="checkbox"
-                    name="semaglitudeConsultation"
-                    checked={formData?.semaglitudeConsultation}
-                    onChange={(event) => handleInputChange(event)}
-                    className="ml-2"
-                  />
-                </label>
-                <label className="mb-2 block">
-                  Paid by Client Cash:
-                  <input
-                    type="number"
-                    name="paidByClientCash"
-                    value={Number(formData.paidByClientCash).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-                <label className="mb-2 block">
-                  Paid by Client Credit:
-                  <input
-                    type="number"
-                    name="paidByClientCredit"
-                    value={Number(formData.paidByClientCredit).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-                <label className="block">
-                  Total paid by client: {getTotalPaidByClient()}
-                </label>
-              </div>
-              <div className="border rounded-sm p-2 mb-4 w-100">
-                <label className="mb-2 block">
-                  Personal Discount:
-                  <input
-                    type="number"
-                    name="personalDiscount"
-                    value={Number(formData.personalDiscount).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-                <label className="mb-2 block">
-                  Tip:
-                  <input
-                    type="number"
-                    name="tip"
-                    value={Number(formData.tip).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-              </div>
-              <div className="border rounded-sm p-2 mb-4">
-                <label className="mb-2 block ">
-                  Comments:
-                  <input
-                    type="string"
-                    name="comments"
-                    value={formData.comments}
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-              </div>
-              <div className="border rounded-sm p-2 mb-4 w-100">
-                <label className="block">Total: {Number(getTotal()).toFixed(2)}</label>
-              </div>
-              <button
-                type="submit"
-                className="w-full md:hidden bg-blue-500 text-white px-4 py-2 rounded-md"
+            <div className="flex justify-end  mr-4 my-2 ">
+              <Button
+                onClick={() => {
+                  addMoreInvoice(true);
+                }}
+                disabled={invoiceArray?.length >= 4}
               >
-                Submit
-              </button>
+                Add Invoice
+              </Button>
             </div>
-            <div className="px-2">
-              <div className="border overflow-x-auto rounded-sm p-2 mb-4 products-used">
-                <table className="w-full table-auto ">
-                  <thead className="whitespace-normal">
-                    <tr>
-                      <th>Products/Services</th>
-                      <th>Product Quantity</th>
-                      <th>Price</th>
-                      <th>Total Price</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody className="whitespace-normal">
-                    <tr key={1}>
-                      <td>
-                        <input
-                          type="text"
-                          name="productName"
-                          id="product_name"
-                          placeholder="Select Product Name"
-                          autoComplete="off"
-                          value={currentProduct.name}
-                          onClick={handleProductNameChange}
-                          onChange={handleProductNameChange}
-                          className="w-full p-1 border-gray-500 border rounded-md"
-                        />
-                        {matchingProducts?.length >= 0 && (
-                          <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
-                            {matchingProducts
-                              ?.filter(
-                                (item1) =>
-                                  !formData?.products.some(
-                                    (item2) => item2.name === item1.name
-                                  )
-                              )
-                              ?.map((product) => (
-                                <p
-                                  key={product.id}
-                                  className="p-2 cursor-pointer hover:bg-gray-100"
-                                  onClick={() =>
-                                    handleProductSelection(product.name)
-                                  }
-                                >
-                                  {product.name}
-                                </p>
-                              ))}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          name="productQuantity"
-                          placeholder={`max:${currentProduct?.maxQtantity}`}
-                          value={currentProduct.quantity}
-                          onChange={(e) => {
-                            setIsAlert({
-                              productUsedShow: false,
-                              retailShow: false,
-                              message: "",
-                            });
-                            +e.target.value <= currentProduct?.maxQtantity
-                              ? handleQuantityChange(e)
-                              : setIsAlert({
-                                  productUsedShow: true,
-                                  message: ` Your can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct.name}`,
-                                });
-                          }}
-                          min="1"
-                          max={currentProduct.maxQtantity}
-                          onKeyDown="return false"
-                          className="w-full p-1 
+            <div className="border rounded-sm p-2 mb-4 flex flex-wrap justify-start md:justify-around">
+              <div className="text-center">
+                <h4>Provider:</h4>
+                <div>{userProfile?.name}</div>
+              </div>
+              <div className="flex gap-4 mt-2 md:mt-0">
+                <label className=" mb-3 block relative">
+                  Client Name:
+                  <input
+                    type="text"
+                    name="clientName"
+                    placeholder={
+                      isAlert.isClient === true ? isAlert.message : undefined
+                    }
+                    id="clientName"
+                    value={clientName}
+                    onChange={(event) => setClientName(event.target.value)}
+                    autoComplete="off"
+                    className="w-full placeholder:text-red-600 mt-1 p-1 border-gray-300 border rounded-md"
+                    required
+                  />
+                </label>
+
+                <label className="mb-2 block">
+                  Date of Service:
+                  <input
+                    type="date"
+                    name="dateOfService"
+                    value={formData.dateOfService}
+                    onChange={(event) => handleInputChange(event)}
+                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                  />
+                </label>
+              </div>
+            </div>
+            <div
+              style={{
+                gridTemplateColumns: "1fr 2fr",
+                gap: "20px",
+              }}
+              className="flex flex-col-reverse md:grid"
+            >
+              <div className=" pb-4 md:pb-1 px-2">
+                <div className="border rounded-sm p-2 mb-4 w-100">
+                  <label className="mb-2 block">
+                    Concierge Fee Paid:
+                    <input
+                      type="checkbox"
+                      name="conciergeFeePaid"
+                      checked={formData.conciergeFeePaid}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-1"
+                    />
+                  </label>
+                  <label className="block">
+                    GFE:
+                    <input
+                      type="checkbox"
+                      name="gfe"
+                      checked={formData?.gfe}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-2"
+                    />
+                  </label>
+                  <label className="block">
+                    Semaglitude Consulation:
+                    <input
+                      type="checkbox"
+                      name="semaglitudeConsultation"
+                      checked={formData?.semaglitudeConsultation}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-2"
+                    />
+                  </label>
+                  <label className="mb-2 block">
+                    Paid by Client Cash:
+                    <input
+                      type="number"
+                      name="paidByClientCash"
+                      value={Number(formData.paidByClientCash).toString()}
+                      min="0"
+                      onChange={(event) => handleInputChange(event)}
+                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                    />
+                  </label>
+                  <label className="mb-2 block">
+                    Paid by Client Credit:
+                    <input
+                      type="number"
+                      name="paidByClientCredit"
+                      value={Number(formData.paidByClientCredit).toString()}
+                      min="0"
+                      onChange={(event) => handleInputChange(event)}
+                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                    />
+                  </label>
+                  <label className="block">
+                    Total paid by client: {getTotalPaidByClient()}
+                  </label>
+                </div>
+                <div className="border rounded-sm p-2 mb-4 w-100">
+                  <label className="mb-2 block">
+                    Personal Discount:
+                    <input
+                      type="number"
+                      name="personalDiscount"
+                      value={Number(formData.personalDiscount).toString()}
+                      min="0"
+                      onChange={(event) => handleInputChange(event)}
+                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                    />
+                  </label>
+                  <label className="mb-2 block">
+                    Tip:
+                    <input
+                      type="number"
+                      name="tip"
+                      // value={Number(formData.tip).toString()}
+                      min="0"
+                      onChange={(event) => handleInputChange(event)}
+                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                    />
+                  </label>
+                </div>
+                <div className="border rounded-sm p-2 mb-4">
+                  <label className="mb-2 block ">
+                    Comments:
+                    <input
+                      type="text"
+                      name="comments"
+                      value={formData.comments}
+                      onChange={(event) => handleInputChange(event)}
+                      className="w-full p-1 border-gray-300 border rounded-md"
+                    />
+                  </label>
+                </div>
+                <div className="border rounded-sm p-2 mb-4 w-100">
+                  <label className="block">
+                    Total:
+                    <span ref={totalRef}>{Number(getTotal()).toFixed(2)}</span>
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full md:hidden bg-blue-500 text-white px-4 py-2 rounded-md"
+                >
+                  Submit
+                </button>
+              </div>
+              <div className="px-2">
+                <div className="border overflow-x-auto rounded-sm p-2 mb-4 products-used">
+                  <table className="w-full table-auto ">
+                    <thead className="whitespace-normal">
+                      <tr>
+                        <th>Products/Services</th>
+                        <th>Product Quantity</th>
+                        <th>Price</th>
+                        <th>Total Price</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="whitespace-normal">
+                      <tr key={1}>
+                        <td>
+                          <input
+                            type="text"
+                            name="productName"
+                            id="product_name"
+                            placeholder="Select Product Name"
+                            autoComplete="off"
+                            value={currentProduct?.name}
+                            onClick={handleProductNameChange}
+                            onChange={handleProductNameChange}
+                            className="w-full p-1 border-gray-500 border rounded-md"
+                          />
+                          {matchingProducts?.length >= 0 && (
+                            <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
+                              {matchingProducts
+                                ?.filter(
+                                  (item1) =>
+                                    !formData?.products.some(
+                                      (item2) => item2?.name === item1?.name
+                                    )
+                                )
+                                ?.map((product) => (
+                                  <p
+                                    key={product.id}
+                                    className="p-2 cursor-pointer hover:bg-gray-100"
+                                    onClick={() =>
+                                      handleProductSelection(product?.name)
+                                    }
+                                  >
+                                    {product?.name}
+                                  </p>
+                                ))}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            name="productQuantity"
+                            placeholder={`max:${currentProduct?.maxQtantity}`}
+                            value={currentProduct.quantity}
+                            onChange={(e) => {
+                              setIsAlert({
+                                productUsedShow: false,
+                                retailShow: false,
+                                message: "",
+                              });
+                              +e.target.value <= currentProduct?.maxQtantity
+                                ? handleQuantityChange(e)
+                                : setIsAlert({
+                                    productUsedShow: true,
+                                    message: ` Your can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
+                                  });
+                            }}
+                            min="1"
+                            max={currentProduct.maxQtantity}
+                            className="w-full p-1 
                           border-gray-300 border rounded-md"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="string"
-                          name="productPrice"
-                          autoComplete="off"
-                          value={currentProduct.price}
-                          className="w-full p-1 border-gray-300 border rounded-md"
-                        />
-                      </td>
-                      <td>{currentProduct.quantity * currentProduct.price}</td>
-                      <td>
-                        <button
-                          type="button"
-                          onClick={handleAddProduct}
-                          className={`${
-                            selectedProduct
-                              ? "text-green-500 border-green-500"
-                              : "text-gray-500 border-gray-500"
-                          } border-2 px-2`}
-                          disabled={!selectedProduct}
-                        >
-                          &#x2713;
-                        </button>
-                      </td>
-                    </tr>
-                    {formData.products?.map((product, index) => (
-                      <tr key={index}>
-                        <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.name}
-                          </p>
+                          />
                         </td>
                         <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.quantity}
-                          </p>
+                          <input
+                            type="string"
+                            name="productPrice"
+                            autoComplete="off"
+                            value={currentProduct.price}
+                            className="w-full p-1 border-gray-300 border rounded-md"
+                          />
                         </td>
                         <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.cost_price}
-                          </p>
+                          {currentProduct.quantity * currentProduct.price}
                         </td>
-                        <td>{product.quantity * product.cost_price}</td>
                         <td>
                           <button
                             type="button"
-                            onClick={() => removeProduct(index)}
-                            className="text-red-500   border-2 border-red-500 px-2"
+                            onClick={handleAddProduct}
+                            className={`${
+                              selectedProduct
+                                ? "text-green-500 border-green-500"
+                                : "text-gray-500 border-gray-500"
+                            } border-2 px-2`}
+                            disabled={!selectedProduct}
                           >
-                            &#10005;
+                            &#x2713;
                           </button>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {isAlert.productUsedShow && (
-                  <span className="text-sm">{isAlert?.message}</span>
-                )}
-              </div>
-              <div className="border rounded-sm p-2 overflow-x-auto mb-4 retail-products">
-                <table className="w-full table-autol">
-                  <thead>
-                    <tr>
-                      <th>Retail Products</th>
-                      <th>Product Quantity</th>
-                      <th>Price</th>
-                      <th>Total Price</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr key={1}>
-                      <td>
-                        <input
-                          type="text"
-                          name="productName"
-                          id="retail_product_name"
-                          autoComplete="off"
-                          value={currentRetailProduct.name}
-                          onClick={handleRetailProductNameChange}
-                          onChange={handleRetailProductNameChange}
-                          className="w-full p-1 border-gray-500 border rounded-md"
-                          // required
-                        />
-                        {matchingRetailProducts?.length > 0 && (
-                          <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
-                            {matchingRetailProducts
-                              ?.filter(
-                                (item1) =>
-                                  !formData?.retailProducts.some(
-                                    (item2) => item2.name === item1.name
-                                  )
-                              )
-                              ?.map((product) => (
-                                <p
-                                  key={product.id}
-                                  className="p-2 cursor-pointer hover:bg-gray-100"
-                                  onClick={() =>
-                                    handleRetailProductSelection(product.name)
-                                  }
-                                >
-                                  {product.name}
-                                </p>
-                              ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="">
-                        <input
-                          type="number"
-                          name="productQuantity"
-                          placeholder={`max:${currentRetailProduct?.maxQtantity}`}
-                          value={currentRetailProduct.quantity}
-                          onChange={(e) => {
-                            setIsAlert({
-                              productUsedShow: false,
-                              retailShow: false,
-                              message: "",
-                            });
-                            +e.target.value <= currentRetailProduct?.maxQtantity
-                              ? handleRetailQuantityChange(e)
-                              : setIsAlert({
-                                  retailShow: true,
-                                  message: ` Your can select upto ${currentRetailProduct?.maxQtantity} quantity`,
-                                });
-                          }}
-                          min="1"
-                          max={currentRetailProduct?.maxQtantity}
-                          className="w-full p-1 border-gray-300 border rounded-md"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="string"
-                          name="productPrice"
-                          autoComplete="off"
-                          value={currentRetailProduct.price}
-                          className="w-full p-1 border-gray-300 border rounded-md"
-                        />
-                      </td>
-                      <td>
-                        {currentRetailProduct.quantity *
-                          currentRetailProduct.price}
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          onClick={handleAddRetailProduct}
-                          className={`${
-                            selectedRetailProduct
-                              ? "text-green-500 border-green-500"
-                              : "text-gray-500 border-gray-500"
-                          } border-2 px-2`}
-                          disabled={!selectedRetailProduct}
-                        >
-                          &#x2713;
-                        </button>
-                      </td>
-                    </tr>
+                      {formData.products?.map((product, index) => (
+                        <tr key={index}>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product?.name}
+                            </p>
+                          </td>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product.quantity}
+                            </p>
+                          </td>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product.cost_price}
+                            </p>
+                          </td>
+                          <td>{product.quantity * product.cost_price}</td>
+                          <td>
+                            <button
+                              type="button"
+                              onClick={() => removeProduct(index)}
+                              className="text-red-500   border-2 border-red-500 px-2"
+                            >
+                              &#10005;
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {isAlert.productUsedShow && (
+                    <span className="text-sm">{isAlert?.message}</span>
+                  )}
+                </div>
+                <div className="border rounded-sm p-2 overflow-x-auto mb-4 retail-products">
+                  <table className="w-full table-autol">
+                    <thead>
+                      <tr>
+                        <th>Retail Products</th>
+                        <th>Product Quantity</th>
+                        <th>Price</th>
+                        <th>Total Price</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            name="productName"
+                            id="retail_product_name"
+                            autoComplete="off"
+                            value={currentRetailProduct?.name}
+                            onClick={handleRetailProductNameChange}
+                            onChange={handleRetailProductNameChange}
+                            className="w-full p-1 border-gray-500 border rounded-md"
+                            // required
+                          />
+                          {matchingRetailProducts?.length > 0 && (
+                            <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
+                              {matchingRetailProducts
+                                ?.filter(
+                                  (item1) =>
+                                    !formData?.retailProducts.some(
+                                      (item2) => item2?.name === item1?.name
+                                    )
+                                )
+                                ?.map((product) => (
+                                  <p
+                                    key={product.id}
+                                    className="p-2 cursor-pointer hover:bg-gray-100"
+                                    onClick={() =>
+                                      handleRetailProductSelection(product?.name)
+                                    }
+                                  >
+                                    {product?.name}
+                                  </p>
+                                ))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="">
+                          <input
+                            type="number"
+                            name="productQuantity"
+                            placeholder={`max:${currentRetailProduct?.maxQtantity}`}
+                            value={currentRetailProduct.quantity}
+                            onChange={(e) => {
+                              setIsAlert({
+                                productUsedShow: false,
+                                retailShow: false,
+                                message: "",
+                              });
+                              +e.target.value <=
+                              currentRetailProduct?.maxQtantity
+                                ? handleRetailQuantityChange(e)
+                                : setIsAlert({
+                                    retailShow: true,
+                                    message: ` Your can select upto ${currentRetailProduct?.maxQtantity} quantity`,
+                                  });
+                            }}
+                            min="1"
+                            max={currentRetailProduct?.maxQtantity}
+                            className="w-full p-1 border-gray-300 border rounded-md"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="string"
+                            name="productPrice"
+                            autoComplete="off"
+                            value={currentRetailProduct.price}
+                            className="w-full p-1 border-gray-300 border rounded-md"
+                          />
+                        </td>
+                        <td>
+                          {currentRetailProduct.quantity *
+                            currentRetailProduct.price}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={handleAddRetailProduct}
+                            className={`${
+                              selectedRetailProduct
+                                ? "text-green-500 border-green-500"
+                                : "text-gray-500 border-gray-500"
+                            } border-2 px-2`}
+                            disabled={!selectedRetailProduct}
+                          >
+                            &#x2713;
+                          </button>
+                        </td>
+                      </tr>
 
-                    {formData.retailProducts.map((product, index) => (
-                      <tr key={index}>
-                        <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.name}
-                          </p>
-                        </td>
-                        <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.quantity}
-                          </p>
-                        </td>
-                        <td>
-                          <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                            {product.cost_price}
-                          </p>
-                        </td>
-                        <td>{product.quantity * product.cost_price}</td>
-                        <td>
-                          <button
-                            type="button"
-                            onClick={() => removeRetailProduct(index)}
-                            className="text-red-500   border-2 border-red-500 px-2"
-                          >
-                            &#10005;
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {isAlert.retailShow && (
-                  <span className="text-sm">{isAlert?.message}</span>
-                )}
+                      {formData.retailProducts.map((product, index) => (
+                        <tr key={index}>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product?.name}
+                            </p>
+                          </td>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product.quantity}
+                            </p>
+                          </td>
+                          <td>
+                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                              {product.cost_price}
+                            </p>
+                          </td>
+                          <td>{product.quantity * product.cost_price}</td>
+                          <td>
+                            <button
+                              type="button"
+                              onClick={() => removeRetailProduct(index)}
+                              className="text-red-500   border-2 border-red-500 px-2"
+                            >
+                              &#10005;
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {isAlert.retailShow && (
+                    <span className="text-sm">{isAlert?.message}</span>
+                  )}
+                </div>
+                <div className="border rounded-sm p-2 mb-4">
+                  <label className="block">
+                    Total Product Price Sum: {getConsumableCostPrice()}
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full hidden md:block bg-blue-500 text-white px-4 py-2 rounded-md"
+                >
+                  Submit
+                </button>
               </div>
-              <div className="border rounded-sm p-2 mb-4">
-                <label className="block">
-                  Total Product Price Sum: {getConsumableCostPrice()}
-                </label>
-              </div>
-              <button
-                type="submit"
-                className="w-full hidden md:block bg-blue-500 text-white px-4 py-2 rounded-md"
-              >
-                Submit
-              </button>
             </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+          </form>
+        </div>
 
-  
+        <div className="flex flex-col gap-4">
+          {invoiceArray?.length > 0 &&
+            invoiceArray?.map((invoice) => {
+              // console.log({ invoice });
+              return (
+                <AddInvoiceTemplate
+                  key={invoice.id}
+                  id={invoice.id}
+                  user={invoice.user_name}
+                  employee_id={invoice.employee_id}
+                  clientname={invoice.clientname}
+                  dateOfService={invoice?.date_of_service}
+                  conciergeFeePaid={invoice?.concierge_fee_paid}
+                  gfe={invoice?.gfe}
+                  paidByClientCash={invoice?.paid_by_client_cash}
+                  paidByClientCredit={invoice?.paid_by_client_credit}
+                  personalDiscount={invoice?.personal_discount}
+                  tip={invoice?.tip}
+                  comments={invoice?.comments}
+                  products={invoice.products}
+                  retailProducts={invoice.retail_products}
+                  charge={invoice.charge}
+                  getTotalPriceByClient={invoice.get_total_price_by_client}
+                  totalConsumableCost={invoice.total_consumable_cost}
+                  actual_income={invoice.actual_income}
+                  income_flag={invoice.income_flag}
+                  expected_income={invoice.expected_income}
+                  handleDeleteInvoice={handleDeleteInvoice}
+                />
+              );
+            })}
+        </div>
+      </div>
+    </>
+  );
 }

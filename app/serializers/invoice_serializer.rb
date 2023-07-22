@@ -12,4 +12,10 @@ class InvoiceSerializer < ActiveModel::Serializer
   attribute :employee_name do
     object.employee&.name
   end
+
+  attribute :fellow_invoices do
+    if object.invoice_group
+      object.fellow_invoices&.ids
+    end
+  end
 end
