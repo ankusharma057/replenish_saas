@@ -36,6 +36,7 @@ export default function AddInvoices({ userProfile }) {
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
+  const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
 
   const [formData, setFormData] = useState({
     ...initialFormState,
@@ -278,10 +279,19 @@ export default function AddInvoices({ userProfile }) {
     // console.log({ selectedProduct });
     if (selectedProduct.product) {
       setCurrentProduct({
-        name: selectedProduct?.product?.name,
+        name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity: selectedProduct.quantity,
+        maxQtantity:
+          selectedProduct.quantity -
+          Number(
+            (allInvoiceProductsList &&
+              allInvoiceProductsList?.productQuantities[
+                selectedProduct?.product?.id
+              ]?.sumofQuantity) ||
+              0
+          ),
+        id: selectedProduct.product?.id,
       });
       setSelectedProduct(selectedProduct?.product);
       setMatchingProducts([]);
@@ -299,6 +309,13 @@ export default function AddInvoices({ userProfile }) {
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
+      if (currentProduct?.quantity > currentProduct?.maxQtantity) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Unable to add ${currentProduct?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
       setIsAlert({
         productUsedShow: false,
         retailShow: false,
@@ -356,10 +373,19 @@ export default function AddInvoices({ userProfile }) {
     );
     if (selectedProduct) {
       setCurrentRetailProduct({
-        name: selectedProduct?.product?.name,
+        name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity: selectedProduct.quantity,
+        maxQtantity:
+          selectedProduct.quantity -
+          Number(
+            (allInvoiceProductsList &&
+              allInvoiceProductsList?.productQuantities[
+                selectedProduct?.product?.id
+              ]?.sumofQuantity) ||
+              0
+          ),
+        id: selectedProduct.product?.id,
       });
       setSelectedRetailProduct(selectedProduct?.product);
       setMatchingRetailProducts([]);
@@ -381,6 +407,13 @@ export default function AddInvoices({ userProfile }) {
 
   const handleAddRetailProduct = () => {
     if (selectedRetailProduct) {
+      if (currentRetailProduct?.quantity > currentRetailProduct?.maxQtantity) {
+        setIsAlert({
+          retailShow: true,
+          message: `Unable to add ${currentRetailProduct?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
       setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
       let retailProductToBeAdded = {
         ...selectedRetailProduct,
@@ -401,8 +434,44 @@ export default function AddInvoices({ userProfile }) {
   };
 
   const handleDeleteInvoice = (id) => {
-    setInvoiceArray(invoiceArray.filter((invoice) => invoice.id !== id));
+    const filterArr = invoiceArray.filter((invoice) => invoice.id !== id);
+    setAllInvoiceProductsList(calculateProductQuantities(filterArr));
+    setInvoiceArray(filterArr);
+    setIsAlert({
+      productUsedShow: false,
+      retailShow: false,
+      message: "",
+    });
+    setCurrentProduct({ name: "", price: 0, quantity: 1 });
+    setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
   };
+
+  function calculateProductQuantities(data) {
+    const productQuantities = {};
+    const retailProductQuantities = {};
+
+    function calculateQuantities(arr, quantityMap) {
+      for (const product of arr) {
+        const { id, name, quantity } = product;
+        if (quantityMap[id]) {
+          quantityMap[id].sumofQuantity += quantity;
+        } else {
+          quantityMap[id] = { product_name: name, id, sumofQuantity: quantity };
+        }
+      }
+    }
+
+    for (const obj of data) {
+      calculateQuantities(obj.products, productQuantities);
+      calculateQuantities(obj.retail_products, retailProductQuantities);
+    }
+
+    // console.log(productQuantities, retailProductQuantities);
+    // // const productsList = Object.values(productQuantities);
+    // // const retailProductList = Object.values(retailProductQuantities);
+
+    return { productQuantities, retailProductQuantities };
+  }
 
   const addMoreInvoice = (submit) => {
     // clientName
@@ -443,6 +512,8 @@ export default function AddInvoices({ userProfile }) {
         id: Date.now(),
       },
     ];
+
+    setAllInvoiceProductsList(() => calculateProductQuantities(invoiceList));
 
     if (invoiceList?.length >= 4) {
       setIsAlert({
