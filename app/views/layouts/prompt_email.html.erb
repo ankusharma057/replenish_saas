@@ -7,8 +7,8 @@
   <body>
     <p>
       Hi, Admin, An Invoice has recently been created:
-      Employee: <%= @invoice.employee.name %>,
-      Client: <%= @invoice.client.name %>
+      Employee: <%= @invoice_group.invoices&.first&.employee&.name %>,
+      Client: <%= @invoice_group.invoices&.first&.client&.name %>
     </p>
   </body>
 </html>

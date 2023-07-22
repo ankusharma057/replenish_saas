@@ -6,8 +6,8 @@
   </head>
   <body>
     <p>
-      The Invoice: <%= @invoice.id %> has been finalized!
-      Employee Name: <%= @invoice.employee.name&.capitalize %>  
+      The Invoices: <%= @invoice_group.invoices.ids %> have been finalized!
+      Employee Name: <%= @invoice_group.invoices.first.employee.name&.capitalize %>  
     </p>
   </body>
 </html>

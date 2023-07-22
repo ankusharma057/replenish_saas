@@ -27,9 +27,13 @@ export default function Invoice({ invoice, fiInvoiceList, userProfile }) {
               .then((res) => {
                 if (res.ok) {
                   toast.success(
-                    "Invoice created successfully and the mail has been sent on the email id"
+                    "Invoice finalized successfully and the mail has been sent on the email id"
                   );
                   window.location.reload();
+                } else if (res.status === 422){
+                  toast.success(
+                    "Finalize Other Invoices:"+ invoice?.fellow_invoices + " to get the mail please."
+                  );
                 } else {
                   res.json().then((json) => {
                     toast.error("Failed to finalize the Invoice");

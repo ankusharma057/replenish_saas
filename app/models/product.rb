@@ -7,7 +7,7 @@ class Product < ApplicationRecord
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
 
   def create_or_update_inventory(quantity: nil)
-    inventory.nil? ? create_inventory(quantity: quantity.to_i) : 
-      inventory.update!(quantity: (inventory.quantity.to_i + quantity.to_i))
+    inventory.nil? ? create_inventory(quantity: quantity.to_f) : 
+      inventory.update!(quantity: (inventory.quantity.to_f + quantity.to_f))
   end
 end

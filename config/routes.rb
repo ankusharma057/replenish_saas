@@ -7,13 +7,17 @@ Rails.application.routes.draw do
         patch :update_inventories
       end
     end
-    resources :invoices do
+
+    resources :invoices, except: :create do
       member do
         post :finalize
         post :send_reject_mail
         get :download_attachment
       end
     end
+
+    resources :invoice_groups, only: %i(index create)
+
     resources :products
 
     resources :inventories, only: [:index, :create, :update, :destroy] do

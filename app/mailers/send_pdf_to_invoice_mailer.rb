@@ -2,11 +2,12 @@
 
 class SendPdfToInvoiceMailer < ApplicationMailer
   def send_mail
-    @invoice = params[:invoice]
-    attachments["#{@invoice.client.name}-Finalized-Invoice-#{@invoice.id}.pdf"] = @invoice.document.download
+    @invoice_group = params[:group]
+
+    attachments["#{@invoice_group.invoices.first.client.name}-Finalized-Invoices-#{@invoice_group.invoices.ids}.pdf"] = @invoice_group.document.download
 
     emails = Employee.admins.map(&:email)
-    emails << @invoice.employee.email
+    emails << @invoice_group.invoices.first.employee.email
     emails << "replenishmd_527@invoicesmelio.com"
 
     mail(

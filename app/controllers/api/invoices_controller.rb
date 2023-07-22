@@ -2,7 +2,7 @@
 
 class Api::InvoicesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :initialize_objects, only: :create
+  # before_action :find_employee, only: :create
   before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment)
 
   def index
@@ -15,19 +15,26 @@ class Api::InvoicesController < ApplicationController
     render json: invoice, status: :ok
   end
 
-  def create
-    if @client
-      @invoice = @client.invoices.new(invoice_params)
-      if @invoice.save
-        @invoice.save_pdf_and_send_mail(@products, @retail_products)
-        render json: @invoice, status: :created
-      else
-        render json: {'error' => @invoice.errors}, status: :bad_request
-      end
-    else
-      render json: {'error' => "Please provide a client."}, status: :not_found
-    end
-  end
+  # def create
+  #   @clients = params[:clientName].each do |client|
+  #     @employee.clients.find_or_create_by(name: client)
+  #   end
+
+  #   # @products = params[:products].pluck("name", "quantity", "retail_price")
+  #   # @retail_products = params[:retail_products].pluck("name", "quantity", "retail_price")
+
+  #   if @client
+  #     @invoice = @client.invoices.new(invoice_params)
+  #     if @invoice.save
+  #       @invoice.save_pdf_and_send_mail(@products, @retail_products)
+  #       render json: @invoices.last, status: :created
+  #     else
+  #       render json: {'error' => @invoice.errors}, status: :bad_request
+  #     end
+  #   else
+  #     render json: {'error' => "Please provide a client."}, status: :not_found
+  #   end
+  # end
 
   def update
     if @invoice.update!(invoice_params)
@@ -38,9 +45,13 @@ class Api::InvoicesController < ApplicationController
   end
 
   def finalize
-    if @invoice
-      @invoice.finalize_and_send_pdf_mail
-      return render json: @invoice, status: :ok
+    if @invoice.update!(is_finalized: true)
+      if @invoice.fellow_invoices_finalized?
+        @invoice.send_group_pdf_mail
+        return render json: @invoice, status: :ok
+      else
+        return render json: {'message' => "Finalize Invoices: #{@invoice.fellow_invoices.ids} to receive the mail"}, status: :unprocessable_entity
+      end
     else
       return render json: {'error' => 'Invoice not found'}, status: :not_found
     end
@@ -65,16 +76,9 @@ class Api::InvoicesController < ApplicationController
     params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :created_at, :updated_at, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :overhead_fee_type, :overhead_fee_value)
   end
 
-  def initialize_objects
-    @employee = Employee.find_by(id: params[:employee_id])
-
-    @client = if params[:client_name] && !params[:client_name].empty?
-      @employee.clients.find_or_create_by(name: params[:client_name])
-    end
-
-    @products = params[:products].pluck("name", "quantity", "retail_price")
-    @retail_products = params[:retail_products].pluck("name", "quantity", "retail_price")
-  end
+  # def find_employee
+  #   @employee = Employee.find_by(id: params[:employee_id])
+  # end
 
   def find_invoice
     @invoice = Invoice.find_by(id: params[:id])

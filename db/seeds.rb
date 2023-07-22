@@ -9,11 +9,10 @@
 require "faker"
 puts "Seeding data"
 
-
-Invoice.destroy_all
-Client.destroy_all
-Product.destroy_all
-Employee.destroy_all
+# Invoice.destroy_all
+# Client.destroy_all
+# Employee.destroy_all
+# Product.destroy_all
 
 Employee.create(
     name: "Replenish Test Admin",
@@ -30,7 +29,6 @@ Product.create(
     product_type: "Neurotoxins",
     cost_price: 6.44,
     retail_price: 12
-
 )
 
 
