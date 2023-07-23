@@ -25,7 +25,7 @@ class Api::InvoiceGroupsController < ApplicationController
         if invoice.products_hash && invoice.products_hash.any?
           invoice.products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
             emp_inventory = @employee.employees_inventories.where(product: Product.find_by(name: product_quantity.keys.first)).first
-            emp_inventory&.update(quantity: (emp_inventory.quantity - product_quantity.values.first.to_i))
+            emp_inventory&.update(quantity: (emp_inventory.quantity - product_quantity.values.first.to_f))
           end
         end
 

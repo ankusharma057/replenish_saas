@@ -70,7 +70,8 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
     e.preventDefault();
     const inventory_object = {
       ...assignInput,
-      employee_id: assigninventory_object?.employee.id,
+      employee_id: assigninventory_object?.employee?.id,
+      product_id: assigninventory_object?.product?.id
     };
 
     fetch(`/api/employee_inventories/transfer`, {
@@ -488,7 +489,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                     </td>
                     <td className="align-middle">
                       <div className="flex flex-col  gap-2">
-                        <span>{data?.quantity} </span>
+                        <span>{data?.quantity.toFixed(2)} </span>
                       </div>
                     </td>
                     <td className="align-middle">

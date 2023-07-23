@@ -52,7 +52,7 @@ module PdfGroupDownloadable
                   <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
                   <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
 
-                  <div style="text-align: right;">  Client Paid: '"#{invoice.paid_by_client_cash.to_i + invoice.paid_by_client_credit.to_i if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
+                  <div style="text-align: right;">  Client Paid: '"#{invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
                   <div style="text-align: left;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
                 </div>
 
@@ -78,7 +78,7 @@ module PdfGroupDownloadable
                           <td width="40%">'"#{data.first}"'</td>
                           <td width="20%">'"#{data.second}"'</td>
                           <td width="20%">'"#{data.last}"'</td>
-                          <td width="20%">'"#{(data.second.to_i * data.last.to_i)}"'</td>
+                          <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
                         </tr>'
                   end
 
@@ -143,7 +143,7 @@ module PdfGroupDownloadable
                 <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
                 <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
 
-                <div style="text-align: right;">  Client Paid: '"#{invoice.paid_by_client_cash.to_i + invoice.paid_by_client_credit.to_i if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
+                <div style="text-align: right;">  Client Paid: '"#{invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
                 <div style="text-align: left;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
 
                 <div style="text-align: right;">  Overhead Fee Type: '"#{invoice.overhead_fee_type&.capitalize}"'</div>
@@ -172,7 +172,7 @@ module PdfGroupDownloadable
                         <td width="40%">'"#{data.first}"'</td>
                         <td width="20%">'"#{data.second}"'</td>
                         <td width="20%">'"#{data.last}"'</td>
-                        <td width="20%">'"#{(data.second.to_i * data.last.to_i)}"'</td>
+                        <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
                       </tr>'
                 end
 

@@ -18,7 +18,7 @@ export default function InvoiceList({ userProfile }) {
     fetch("/api/invoices")
       .then((response) => response.json())
       .then((data) => {
-        data.forEach((invoice) => {
+        data?.forEach((invoice) => {
           if (invoice.is_finalized == true) {
             fiInvoiceList.push(invoice);
           } else {
@@ -38,6 +38,7 @@ export default function InvoiceList({ userProfile }) {
       });
   }, []); // Empty dependency array to run the effect only once
 
+  console.log('invoiceList' , invoiceList);
   return (
     <div>
       <Header userProfile={userProfile} />

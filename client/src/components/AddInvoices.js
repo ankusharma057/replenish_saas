@@ -849,6 +849,7 @@ export default function AddInvoices({ userProfile }) {
                         <td>
                           <input
                             type="number"
+                            step="0.01"
                             name="productQuantity"
                             placeholder={`max:${currentProduct?.maxQtantity}`}
                             value={currentProduct.quantity}
@@ -865,8 +866,8 @@ export default function AddInvoices({ userProfile }) {
                                     message: ` Your can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
                                   });
                             }}
-                            min="1"
-                            max={currentProduct.maxQtantity}
+                            min="0"
+                            max={currentProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 
                           border-gray-300 border rounded-md"
                           />
@@ -985,6 +986,7 @@ export default function AddInvoices({ userProfile }) {
                           <input
                             type="number"
                             name="productQuantity"
+                            step="0.01"
                             placeholder={`max:${currentRetailProduct?.maxQtantity}`}
                             value={currentRetailProduct.quantity}
                             onChange={(e) => {
@@ -1001,8 +1003,8 @@ export default function AddInvoices({ userProfile }) {
                                     message: ` Your can select upto ${currentRetailProduct?.maxQtantity} quantity`,
                                   });
                             }}
-                            min="1"
-                            max={currentRetailProduct?.maxQtantity}
+                            min="0"
+                            max={currentRetailProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 border-gray-300 border rounded-md"
                           />
                         </td>

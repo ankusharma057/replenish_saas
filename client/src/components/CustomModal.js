@@ -270,7 +270,6 @@ function CustomModal(props) {
   };
 
   console.log(invoiceData?.products_hash);
-
   return (
     <>
       <Modal
@@ -322,7 +321,7 @@ function CustomModal(props) {
                           <th className="min-w-[6rem]">Total Price</th>
                         </tr>
                       </thead>
-                      <tbody className="whitespace-normal">
+                      <tbody clasfiInvoiceListsName="whitespace-normal">
                         {invoiceData?.products_hash?.products.map((product) => (
                           <tr>
                             <td>{product[0]}</td>

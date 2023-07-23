@@ -47,7 +47,7 @@ module PdfDownloadable
             <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
             <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-            <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+            <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
             <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
           </div>
 
@@ -73,7 +73,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_i * data.last.to_i)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
                 </tr>'
           end
 
@@ -130,7 +130,7 @@ module PdfDownloadable
             <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
             <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-            <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_i + paid_by_client_credit.to_i if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+            <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
             <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
 
             <div style="text-align: right;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
@@ -159,7 +159,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_i * data.last.to_i)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
                 </tr>'
           end
 

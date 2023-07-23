@@ -313,7 +313,6 @@ const Inventory = ({
       ],
     });
   };
-  console.log('asdfasdasd', employeeList);
 
   const convertData = (data) => {
     const result = {};
@@ -525,6 +524,7 @@ const Inventory = ({
 
               <Form.Control
                 type="number"
+                step="0.1"
                 value={productInfoInput?.quantity}
                 placeholder={` Type Quantity `}
                 onChange={(e) =>
@@ -606,15 +606,16 @@ const Inventory = ({
 
                       <td className="align-middle">
                         <div className="flex flex-col  gap-2">
-                          <span>{data?.available_inventory} </span>
+                          <span>{data?.quantity}</span>
                         </div>
                       </td>
 
                       <td className="align-middle">
                         <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity} </span>
+                          <span>{data?.replenish_total_inventory} </span>
                         </div>
                       </td>
+
                       <td className="align-middle">
                         <Button
                           variant="info"

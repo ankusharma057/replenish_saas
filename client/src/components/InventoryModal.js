@@ -167,6 +167,7 @@ const InventoryModal = ({
                           <Form className="flex flex-col gap-4">
                             <Form.Control
                               type="number"
+                              step="0.01"
                               defaultValue={data?.quantity}
                               onChange={(e) => {
                                 console.log("THIS IS THE WANTED ID:", data);
@@ -253,7 +254,7 @@ const InventoryModal = ({
                         </td>
                         <td className="align-middle">
                           <div className="flex flex-col justify-center gap-2">
-                            <span>{product.quantity}</span>
+                            <span>{product?.quantity}</span>
                           </div>
                         </td>
 
@@ -327,6 +328,7 @@ const InventoryModal = ({
               <div className="md:w-2/4 flex justify-between gap-2">
                 <Form.Control
                   type="number"
+                  step="0.01"
                   className="w-[80%]"
                   placeholder="Add Quantity"
                   onChange={(e) => {

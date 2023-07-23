@@ -29,13 +29,14 @@ const AssignModal = ({
           <Form className="flex flex-col gap-4" onSubmit={assignSubmit}>
             <Form.Control
               type="number"
+              step="0.01"
+              min="0"
               placeholder={` Type Quantity. maximum: ${assignProductData?.quantity}`}
               onChange={(e) =>
                 setAssignInput({ ...assignInput, quantity: e.target.value })
               }
               max={assignProductData?.quantity}
               title={` You can select upto ${assignProductData?.quantity} Quantity`}
-              min={1}
               required
             />
 
