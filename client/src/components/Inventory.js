@@ -17,12 +17,16 @@ const Inventory = ({
   const [productInfoInput, setproductInfoInput] = useState({});
   const [updateQtyInput, setUpdateQtyInput] = useState({});
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
-
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assignProductData, setAssignProductData] = useState({});
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
+
+  const [showTotalEmpInventory, setShowTotalEmpInventory] = useState(false);
+  const [totalEmpInventory, settotalEmpInventory] = useState({});
+  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
+    useState("");
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -32,7 +36,6 @@ const Inventory = ({
     fetch("/api/inventory_requests")
       .then((r) => r.json())
       .then((data) => {
-        console.log(data);
         setRequestedInventoryData(data);
       });
   }, []);
@@ -69,7 +72,6 @@ const Inventory = ({
                 console.error("Error:", error);
                 toast.error("An error occured.");
               });
-            //  fetch("employees/" + employee.id + "/send_reset_password_link");
           },
         },
         {
@@ -90,7 +92,7 @@ const Inventory = ({
 
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure to Update Quantity for ${productInfoInput.name} `,
+      message: `Are you sure to Update Quantity for ${productInfoInput?.name} `,
       buttons: [
         {
           label: "Yes",
@@ -185,7 +187,6 @@ const Inventory = ({
 
   const assignSubmit = (e) => {
     e.preventDefault();
-    debugger
     const productData = {
       ...assignInput,
       product_name: assignProductData?.product?.name,
@@ -312,6 +313,44 @@ const Inventory = ({
       ],
     });
   };
+  console.log('asdfasdasd', employeeList);
+
+  const convertData = (data) => {
+    const result = {};
+
+    // Loop through the data
+    data?.forEach((employee) => {
+      // Loop through each employee's inventories
+      employee.employees_inventories.forEach((inventory) => {
+        // const { product } = inventory;
+        // const { name: inventory?.product?.name } = product;
+
+        // Check if the product is already in the result
+        if (!result[inventory?.product?.name]) {
+          result[inventory?.product?.name] = [];
+        }
+
+        // Check if the employee is already in the product's array
+        const existingEmployee = result[inventory?.product?.name].find(
+          (item) => item?.employee_name === employee?.name
+        );
+
+        // If the employee is not in the array, add them with quantity
+        if (!existingEmployee) {
+          result[inventory?.product?.name].push({
+            employee_name: employee?.name,
+            total_quantity: inventory?.quantity,
+          });
+        } else {
+          // If the employee is already in the array, update the quantity
+          existingEmployee.total_quantity += inventory?.quantity;
+        }
+      });
+    });
+
+    return result;
+  };
+
 
   return (
     <>
@@ -327,6 +366,64 @@ const Inventory = ({
         assignInput={assignInput}
         employee={userProfile}
       />
+
+      <Modal
+        show={showTotalEmpInventory}
+        onHide={() => setShowTotalEmpInventory(false)}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Empoyees Inventory
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="flex justify-between flex-col items-center gap-2  overflow-y-auto pb-4">
+          <Form.Control
+            className="w-full"
+            type="email"
+            placeholder="Seach Product"
+            onChange={(e) => settotalEmpInventorySearchInput(e.target.value)}
+          />
+          <div className="w-full max-h-[30rem]">
+            {Object.keys(totalEmpInventory)
+              ?.filter((data) => {
+                return data
+                  ?.toLowerCase()
+                  .includes(totalEmpInventorySearchInput?.toLocaleLowerCase());
+              })
+              .map((productName) => (
+                <div key={productName}>
+                  <h1 className="text-xl ml-2 mb-0">{productName}</h1>
+                  <Table
+                    bordered
+                    hover
+                    responsive
+                    className="w-full text-center"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Employee Name</th>
+                        <th>Total Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {totalEmpInventory[productName]?.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.employee_name}</td>
+                          <td>{item.total_quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              ))}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowTotalEmpInventory(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
       {requestedInventoryData?.filter(
         (request) => !request?.is_approved
       )?.length > 0 &&
@@ -378,7 +475,7 @@ const Inventory = ({
             </ul>
           </div>
         )}
-    
+
       <Modal
         show={showUpdateProductModal}
         onHide={() => setShowUpdateProductModal(false)}
@@ -414,7 +511,7 @@ const Inventory = ({
                   <option>Select Product</option>
                   {productList?.map((product) => {
                     return (
-                      <option key={product?.name} value={product.name}>
+                      <option key={product?.name} value={product?.name}>
                         {product?.name}
                       </option>
                     );
@@ -463,6 +560,15 @@ const Inventory = ({
             placeholder="Search Product Name here"
             onChange={(event) => setSearchInput(event.target.value)}
           />
+          <Button
+            onClick={() => {
+              settotalEmpInventory(convertData(employeeList));
+              setShowTotalEmpInventory(true);
+            }}
+            className="self-end inline"
+          >
+            Emp Inventories
+          </Button>
         </div>
         <Table bordered hover responsive className="w-full mt-4 text-center">
           <thead>
