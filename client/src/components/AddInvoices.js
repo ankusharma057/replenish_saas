@@ -304,7 +304,7 @@ export default function AddInvoices({ userProfile }) {
     }
   };
   const handleQuantityChange = (e) => {
-    const quantity = parseInt(e.target.value);
+    const quantity = parseFloat(e.target.value);
     setCurrentProduct({ ...currentProduct, quantity });
   };
   const handleAddProduct = () => {
@@ -401,7 +401,7 @@ export default function AddInvoices({ userProfile }) {
   };
 
   const handleRetailQuantityChange = (e) => {
-    const quantity = parseInt(e.target.value);
+    const quantity = parseFloat(e.target.value);
     setCurrentRetailProduct({ ...currentRetailProduct, quantity });
   };
 
