@@ -38,7 +38,6 @@ export default function InvoiceList({ userProfile }) {
       });
   }, []); // Empty dependency array to run the effect only once
 
-  console.log('invoiceList' , invoiceList);
   return (
     <div>
       <Header userProfile={userProfile} />

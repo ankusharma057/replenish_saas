@@ -29,6 +29,8 @@ class Api::InvoiceGroupsController < ApplicationController
           end
         end
 
+        invoice.is_finalized = false
+
         invoice.save!
       end
 

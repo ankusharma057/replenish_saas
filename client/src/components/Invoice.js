@@ -32,8 +32,11 @@ export default function Invoice({ invoice, fiInvoiceList, userProfile }) {
                   window.location.reload();
                 } else if (res.status === 422){
                   toast.success(
-                    "Finalize Other Invoices:"+ invoice?.fellow_invoices + " to get the mail please."
+                    "Finalize Other Invoices:"+ invoice?.fellow_non_finalized_invoices + " to get the mail please."
                   );
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
                 } else {
                   res.json().then((json) => {
                     toast.error("Failed to finalize the Invoice");
@@ -76,7 +79,6 @@ export default function Invoice({ invoice, fiInvoiceList, userProfile }) {
       </Card.Body>
     </Card>
   );
-
   return (
     <>
       <div className="p-4">

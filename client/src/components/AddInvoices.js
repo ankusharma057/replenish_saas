@@ -181,6 +181,7 @@ export default function AddInvoices({ userProfile }) {
     const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
+
     let total =
       (totalPaidByClientAT +
         afterTax.discount -
@@ -190,7 +191,7 @@ export default function AddInvoices({ userProfile }) {
         semagConsultFee -
         afterTax.retailTotal) *
       (userProfile?.service_percentage / 100); //(replace with injector percentage)
-    // console.log("gfe:" + userProfile?.gfe);
+
     if (userProfile?.gfe) total += (gfeFee + semagConsultFee);
     total =
       total -
@@ -490,7 +491,7 @@ export default function AddInvoices({ userProfile }) {
       date_of_service: formData?.dateOfService,
       concierge_fee_paid: formData?.conciergeFeePaid,
       gfe: formData?.gfe,
-      semag_consult_fee: formData?.semaglitudeConsultation.value == "on",
+      semag_consult_fee: formData?.semaglitudeConsultation,
       paid_by_client_cash: formData?.paidByClientCash,
       paid_by_client_credit: formData?.paidByClientCredit,
       personal_discount: formData?.personalDiscount,
@@ -882,7 +883,7 @@ export default function AddInvoices({ userProfile }) {
                           />
                         </td>
                         <td>
-                          {currentProduct.quantity * currentProduct.price}
+                          {(currentProduct.quantity * currentProduct.price).toFixed(2)}
                         </td>
                         <td>
                           <button
@@ -1018,8 +1019,8 @@ export default function AddInvoices({ userProfile }) {
                           />
                         </td>
                         <td>
-                          {currentRetailProduct.quantity *
-                            currentRetailProduct.price}
+                          {(currentRetailProduct.quantity *
+                                                      currentRetailProduct.price).toFixed(2)}
                         </td>
                         <td>
                           <button
@@ -1102,6 +1103,7 @@ export default function AddInvoices({ userProfile }) {
                   dateOfService={invoice?.date_of_service}
                   conciergeFeePaid={invoice?.concierge_fee_paid}
                   gfe={invoice?.gfe}
+                  semaglitudeConsultation={invoice?.semag_consult_fee}
                   paidByClientCash={invoice?.paid_by_client_cash}
                   paidByClientCredit={invoice?.paid_by_client_credit}
                   personalDiscount={invoice?.personal_discount}

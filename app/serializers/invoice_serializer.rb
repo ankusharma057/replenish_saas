@@ -13,9 +13,9 @@ class InvoiceSerializer < ActiveModel::Serializer
     object.employee&.name
   end
 
-  attribute :fellow_invoices do
+  attribute :fellow_non_finalized_invoices do
     if object.invoice_group
-      object.fellow_invoices&.ids
+      object.fellow_invoices.where(is_finalized: false)&.ids
     end
   end
 end

@@ -34,9 +34,10 @@ module PdfDownloadable
         <body>
           <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>
           <div class="container" style="color: blue;">
-            <div style="text-align: left;"> Invoice: '"#{id}"' </div>  
-            <div style="text-align: right;"> Charge: '"#{charge}"' </div>
-            <div style="text-align: left;">  Provider: '"#{employee.name}"'  </div> 
+            <div style="text-align: left;">  Vendor: '"#{employee.name}"'  </div> 
+
+            <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
+            <div style="text-align: left;"> Charge: '"#{charge}"' </div>
 
             <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
@@ -60,7 +61,7 @@ module PdfDownloadable
           table_str += '<hr color="#323aa8">
             <h1 style="margin-bottom: 10px; color: #323aa8">'"#{key.titleize}"':</h1>
 
-            <table style="width: 100%;margin: 50px 0">
+            <table style="width: 100%; margin: 50px 0">
               <tbody>
                 <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
                   <th width="40%">Product Name</th>
@@ -117,24 +118,25 @@ module PdfDownloadable
         <body>
           <h1 style="text-align: center; color: blue;"> Replenish Aesthetics and Wellness</h1>
           <div class="container" style="color: blue;">
-            <div style="text-align: left;"> Invoice: '"#{id}"' </div>  
-            <div style="text-align: right;"> Charge: '"#{charge}"' </div>
-            <div style="text-align: left;">  Provider: '"#{employee.name}"'  </div> 
+            <div style="text-align: left;">  Vendor: '"#{employee.name}"'  </div> 
 
-            <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
-            <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
+            <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
+            <div style="text-align: left;"> Charge: '"#{charge}"' </div>
 
-            <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: left;">  Client Name: '"#{client.name}"' </div>  
+            <div style="text-align: right;">  Date of Service: '"#{date_of_service}"' </div> 
 
-            <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
-            <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
+            <div style="text-align: left;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: right;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
-            <div style="text-align: right;">  Client Paid: '"#{paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
-            <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
+            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
+            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
 
-            <div style="text-align: right;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
-            <div style="text-align: left;">  Overhead Fee Value: '"#{overhead_fee_value}"'</div>
+            <div style="text-align: left;">  Client Paid: '"#{paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)}"'</div>  
+            <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>
+
+            <div style="text-align: left;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
+            <div style="text-align: right;">  Overhead Fee Value: '"#{overhead_fee_value}"'</div>
           </div>
 
           <div></div>

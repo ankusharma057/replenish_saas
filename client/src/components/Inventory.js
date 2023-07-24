@@ -92,7 +92,7 @@ const Inventory = ({
 
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure to Update Quantity for ${productInfoInput?.name} `,
+      message: `Are you sure to Update Quantity for ${productInfoInput?.product_name} `,
       buttons: [
         {
           label: "Yes",
