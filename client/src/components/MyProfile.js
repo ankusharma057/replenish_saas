@@ -336,7 +336,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                 required
               />
               <span>
-                <b>Date Of Use</b>
+                <b>Date Needed</b>
               </span>
               <Form.Control
                 type="date"
