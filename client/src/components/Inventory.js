@@ -457,7 +457,7 @@ const Inventory = ({
                       className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
                       title="Click To Accept this Requested Inventory"
                     >
-                      Accept
+                      Fulfill
                     </Button>
                     <Button
                       onClick={() => rejectRequestInventorySubmit(data)}
@@ -465,7 +465,7 @@ const Inventory = ({
                       title="Click To Reject this Requested Inventory"
                       variant="danger"
                     >
-                      Reject
+                      Deny
                     </Button>
                   </li>
                 );

@@ -8,7 +8,7 @@
     <p>
         Hi, Admin.
 
-        Employee: <%= @inventory_request.requestor.name %> has requested <%= @inventory_request.quantity_asked %> <%= @inventory_request.inventory.product.name %> inventories and is needed by <%= @inventory_request.date_of_use.strftime("%d/%m/%y") %>. Please check the website to approve or deny the request.
+        Employee: <%= @inventory_request.requestor.name %> has requested <%= @inventory_request.quantity_asked %> <%= @inventory_request.inventory.product.name %> inventories and is needed by <%= @inventory_request.date_of_use.strftime("%m/%d/%y") %>. Please check the website to approve or deny the request.
     </p>
   </body>
 </html>

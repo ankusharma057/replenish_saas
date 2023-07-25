@@ -199,7 +199,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
                 Send Password Reset Link
               </Button>
 
-              {employee?.is_admin === true && (
+              {employee?.is_admin === false && (
                 <>
                   <OverlayTrigger
                     trigger="click"
