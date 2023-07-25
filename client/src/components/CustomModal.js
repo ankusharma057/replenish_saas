@@ -12,6 +12,7 @@ const UpdateInvoiceModal = ({
   updateSubmit,
   setNestedInputModal,
 }) => {
+  console.log(nestedInputModal);
   return (
     <Modal
       show={showUpdateModal}
@@ -42,7 +43,7 @@ const UpdateInvoiceModal = ({
                   }
                   className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                 >
-                  <option>Select Type</option>
+                  <option value="">Select Type</option>
                   <option value="fixed">Fixed Amount</option>
                   <option value="percentage">Percentage</option>
                 </select>
@@ -269,8 +270,6 @@ function CustomModal(props) {
       });
   };
 
-  console.log(invoiceData?.products_hash);
-
   return (
     <>
       <Modal
@@ -323,14 +322,20 @@ function CustomModal(props) {
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
-                        {invoiceData?.products_hash?.products.map((product) => (
-                          <tr>
-                            <td>{product[0]}</td>
-                            <td>{product[1]}</td>
-                            <td>{product[2]}</td>
-                            <td>{+(product[1] * product[2])}</td>
-                          </tr>
-                        ))}
+                        {invoiceData?.products_hash?.products.map(
+                          (product, i) => (
+                            <tr key={i}>
+                              <td>{product[0]}</td>
+                              <td>{product[1]}</td>
+                              <td>{Number(product[2] || 0).toFixed(2)}</td>
+                              <td>
+                                {Number(product[1] * product[2] || 0).toFixed(
+                                  2
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -354,14 +359,16 @@ function CustomModal(props) {
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
-                        {invoiceData?.products_hash?.products.map((product) => (
-                          <tr>
-                            <td>{product[0]}</td>
-                            <td>{product[1]}</td>
-                            <td>{product[2]}</td>
-                            <td>{+(product[1] * product[2])}</td>
-                          </tr>
-                        ))}
+                        {invoiceData?.products_hash?.products.map(
+                          (product, i) => (
+                            <tr key={i}>
+                              <td>{product[0]}</td>
+                              <td>{product[1]}</td>
+                              <td>{product[2]}</td>
+                              <td>{+(product[1] * product[2])}</td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -391,7 +398,11 @@ function CustomModal(props) {
 
                 <div className="flex flex-col">
                   <span className="text-gray-700">Total Paid by Client:</span>
-                  <span>{paidByClientCredit + paidByClientCash}</span>
+                  <span>
+                    {Number(
+                      paidByClientCredit + paidByClientCash || 0
+                    )?.toFixed() || paidByClientCredit + paidByClientCash}
+                  </span>
                 </div>
               </div>
 
@@ -468,9 +479,7 @@ function CustomModal(props) {
               </>
             )}
             {invoiceData?.is_finalized && (
-              <Button onClick={downloadInvoice}>
-                Download
-              </Button>
+              <Button onClick={downloadInvoice}>Download</Button>
             )}
             <Button onClick={props.onHide}>Close</Button>
           </Modal.Footer>

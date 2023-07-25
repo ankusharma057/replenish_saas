@@ -26,7 +26,7 @@ class Invoice < ApplicationRecord
     # if products_hash && products_hash.any?
     #   products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
     #     emp_product_quantity = employee.employees_inventories.where(product: Product.find_by(name: product_quantity.keys.first)).first
-    #     emp_product_quantity.update(quantity: (emp_product_quantity.quantity - product_quantity.values.first.to_i))
+    #     emp_product_quantity.update(quantity: (emp_product_quantity.quantity - product_quantity.values.first.to_f))
     #   end
     # end
 
@@ -71,7 +71,7 @@ class Invoice < ApplicationRecord
   end
 
   def fellow_invoices_finalized?
-    fellow_invoices.map(&:is_finalized).include?(false || nil)
+    !fellow_invoices.map(&:is_finalized).include?(false)
   end
 
   def send_group_pdf_mail
@@ -97,7 +97,7 @@ class Invoice < ApplicationRecord
     if products_hash && products_hash.any?
       products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
         emp_product_quantity = employee.employees_inventories.find_or_create_by(product: Product.find_by(name: product_quantity.keys.first))
-        emp_product_quantity.update!(quantity: (emp_product_quantity.quantity.to_f + product_quantity.values.first.to_i))
+        emp_product_quantity.update!(quantity: (emp_product_quantity.quantity.to_f + product_quantity.values.first.to_f))
       end
     end
   end

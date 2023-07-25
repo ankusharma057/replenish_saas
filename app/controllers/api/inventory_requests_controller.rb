@@ -9,10 +9,10 @@ class Api::InventoryRequestsController < ApplicationController
 
   def create
     if @inventory
-      if @inventory.quantity.to_f < params[:quantity_asked].to_i
+      if @inventory.quantity.to_f < params[:quantity_asked].to_f
         render json: @inventory, status: 403
       else
-        @inventory.request_for_inventory(current_employee, params[:quantity_asked], params[:date_of_use])
+        @inventory.request_for_inventory_and_send_mail(current_employee, params[:quantity_asked], params[:date_of_use])
         render json: @inventory, status: :ok
       end
     else

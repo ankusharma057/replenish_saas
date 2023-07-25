@@ -17,12 +17,16 @@ const Inventory = ({
   const [productInfoInput, setproductInfoInput] = useState({});
   const [updateQtyInput, setUpdateQtyInput] = useState({});
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
-
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assignProductData, setAssignProductData] = useState({});
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
+
+  const [showTotalEmpInventory, setShowTotalEmpInventory] = useState(false);
+  const [totalEmpInventory, settotalEmpInventory] = useState({});
+  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
+    useState("");
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -32,7 +36,6 @@ const Inventory = ({
     fetch("/api/inventory_requests")
       .then((r) => r.json())
       .then((data) => {
-        console.log(data);
         setRequestedInventoryData(data);
       });
   }, []);
@@ -69,7 +72,6 @@ const Inventory = ({
                 console.error("Error:", error);
                 toast.error("An error occured.");
               });
-            //  fetch("employees/" + employee.id + "/send_reset_password_link");
           },
         },
         {
@@ -90,7 +92,7 @@ const Inventory = ({
 
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure to Update Quantity for ${productInfoInput.name} `,
+      message: `Are you sure to Update Quantity for ${productInfoInput?.product_name} `,
       buttons: [
         {
           label: "Yes",
@@ -185,7 +187,6 @@ const Inventory = ({
 
   const assignSubmit = (e) => {
     e.preventDefault();
-    debugger
     const productData = {
       ...assignInput,
       product_name: assignProductData?.product?.name,
@@ -236,7 +237,7 @@ const Inventory = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              }
+              },
             })
               .then((res) => {
                 if (res.ok) {
@@ -281,7 +282,7 @@ const Inventory = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              }
+              },
             })
               .then((res) => {
                 if (res.ok) {
@@ -313,6 +314,42 @@ const Inventory = ({
     });
   };
 
+  const convertData = (data) => {
+    const result = {};
+
+    // Loop through the data
+    data?.forEach((employee) => {
+      // Loop through each employee's inventories
+      employee.employees_inventories.forEach((inventory) => {
+        // const { product } = inventory;
+        // const { name: inventory?.product?.name } = product;
+
+        // Check if the product is already in the result
+        if (!result[inventory?.product?.name]) {
+          result[inventory?.product?.name] = [];
+        }
+
+        // Check if the employee is already in the product's array
+        const existingEmployee = result[inventory?.product?.name].find(
+          (item) => item?.employee_name === employee?.name
+        );
+
+        // If the employee is not in the array, add them with quantity
+        if (!existingEmployee) {
+          result[inventory?.product?.name].push({
+            employee_name: employee?.name,
+            total_quantity: inventory?.quantity,
+          });
+        } else {
+          // If the employee is already in the array, update the quantity
+          existingEmployee.total_quantity += inventory?.quantity;
+        }
+      });
+    });
+
+    return result;
+  };
+
   return (
     <>
       <Header userProfile={userProfile} />
@@ -327,9 +364,68 @@ const Inventory = ({
         assignInput={assignInput}
         employee={userProfile}
       />
-      {requestedInventoryData?.filter(
-        (request) => !request?.is_approved
-      )?.length > 0 &&
+
+      <Modal
+        show={showTotalEmpInventory}
+        onHide={() => setShowTotalEmpInventory(false)}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Empoyees Inventory
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="flex justify-between flex-col items-center gap-2  overflow-y-auto pb-4">
+          <Form.Control
+            className="w-full"
+            type="email"
+            placeholder="Seach Product"
+            onChange={(e) => settotalEmpInventorySearchInput(e.target.value)}
+          />
+          <div className="w-full max-h-[30rem]">
+            {Object.keys(totalEmpInventory)
+              ?.filter((data) => {
+                return data
+                  ?.toLowerCase()
+                  .includes(totalEmpInventorySearchInput?.toLocaleLowerCase());
+              })
+              .map((productName) => (
+                <div key={productName}>
+                  <h1 className="text-xl ml-2 mb-0">
+                    {productName || " Not Given"}
+                  </h1>
+                  <Table
+                    bordered
+                    hover
+                    responsive
+                    className="w-full text-center"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Employee Name</th>
+                        <th>Total Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {totalEmpInventory[productName]?.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.employee_name || "Not Given"}</td>
+                          <td>{item.total_quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              ))}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowTotalEmpInventory(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      {requestedInventoryData?.filter((request) => !request?.is_approved)
+        ?.length > 0 &&
         (userProfile?.is_inv_manager || userProfile?.is_admin) && (
           <div className="px-4">
             <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
@@ -351,12 +447,11 @@ const Inventory = ({
                     </span>
                     has asked for
                     <span className="text-blue-700 mx-2">
-                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}.
+                      {data?.quantity_asked} Quantity of{" "}
+                      {data?.inventory?.product?.name}.
                     </span>
                     Date Needed:
-                    <span className="text-blue-700 mx-2">
-                      {formattedDate}.
-                    </span>
+                    <span className="text-blue-700 mx-2">{formattedDate}.</span>
                     <Button
                       onClick={() => acceptRequestInventorySubmit(data)}
                       className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
@@ -378,7 +473,7 @@ const Inventory = ({
             </ul>
           </div>
         )}
-    
+
       <Modal
         show={showUpdateProductModal}
         onHide={() => setShowUpdateProductModal(false)}
@@ -414,7 +509,7 @@ const Inventory = ({
                   <option>Select Product</option>
                   {productList?.map((product) => {
                     return (
-                      <option key={product?.name} value={product.name}>
+                      <option key={product?.name} value={product?.name}>
                         {product?.name}
                       </option>
                     );
@@ -428,6 +523,7 @@ const Inventory = ({
 
               <Form.Control
                 type="number"
+                step="0.1"
                 value={productInfoInput?.quantity}
                 placeholder={` Type Quantity `}
                 onChange={(e) =>
@@ -463,13 +559,23 @@ const Inventory = ({
             placeholder="Search Product Name here"
             onChange={(event) => setSearchInput(event.target.value)}
           />
+          <Button
+            onClick={() => {
+              settotalEmpInventory(convertData(employeeList));
+              setShowTotalEmpInventory(true);
+            }}
+            className="self-end inline"
+          >
+            Emp Inventories
+          </Button>
         </div>
         <Table bordered hover responsive className="w-full mt-4 text-center">
           <thead>
             <tr>
               <th>Product </th>
               <th>Product Type </th>
-              <th>Quantity</th>
+              <th>Available Inv.</th>
+              <th>Replenish Inv.</th>
               <th>Assign</th>
               <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
             </tr>
@@ -496,31 +602,19 @@ const Inventory = ({
                           <span>{data?.product?.product_type} </span>
                         </div>
                       </td>
-                      <td className="align-middle">
-                        <table>
-                          <tr>
-                            <th>
-                              Available
-                            </th>
-                            <th>
-                              Replenish
-                            </th>
-                          </tr>
 
-                          <tr>
-                            <td className="align-middle">
-                              <div className=" flex-col   gap-1">
-                                <span>{data?.available_inventory} </span>
-                              </div>
-                            </td>
-                            <td className="align-middle">
-                              <div className=" flex-col   gap-1">
-                                <span>{data?.quantity} </span>
-                              </div>
-                            </td>
-                          </tr>
-                        </table>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.quantity}</span>
+                        </div>
                       </td>
+
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.replenish_total_inventory} </span>
+                        </div>
+                      </td>
+
                       <td className="align-middle">
                         <Button
                           variant="info"

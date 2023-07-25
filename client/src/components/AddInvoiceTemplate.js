@@ -7,6 +7,7 @@ const AddInvoiceTemplate = ({
   dateOfService,
   conciergeFeePaid,
   gfe,
+  semaglitudeConsultation,
   paidByClientCash,
   paidByClientCredit,
   personalDiscount,
@@ -27,6 +28,7 @@ const AddInvoiceTemplate = ({
     dateOfService,
     conciergeFeePaid,
     gfe,
+    semaglitudeConsultation,
     paidByClientCash,
     paidByClientCredit,
     personalDiscount,
@@ -75,10 +77,12 @@ const AddInvoiceTemplate = ({
                   {conciergeFeePaid ? "☑" : "▢"}
                 </div>
                 <div className="block">GFE: {gfe ? "☑" : "▢"}</div>
+                <div className="block">Semag Consult Fee: {semaglitudeConsultation ? "☑" : "▢"}</div>
                 <div className="mb-2 block">
                   Paid by Client Cash:
                   {Number(paidByClientCash).toString()}
                 </div>
+
                 <div className="mb-2 block">
                   Paid by Client Credit: {Number(paidByClientCredit).toString()}
                 </div>

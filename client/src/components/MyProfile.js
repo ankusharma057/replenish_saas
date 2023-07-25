@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert"; // Import
 
 function UserPage({ userProfile, employeeList, productList, inventoryList }) {
-  console.log(inventoryList)
   const [employee, setEmployee] = useState();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState(false);
@@ -29,7 +28,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   });
 
   const otherEmployeesList = employeeList?.filter(
-    (employee) => employee?.id != userProfile?.id
+    (employee) => employee?.id !== userProfile?.id
   );
 
   function handleClick(invoice) {
@@ -70,7 +69,8 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
     e.preventDefault();
     const inventory_object = {
       ...assignInput,
-      employee_id: assigninventory_object?.employee.id,
+      employee_id: assigninventory_object?.employee?.id,
+      product_id: assigninventory_object?.product?.id,
     };
 
     fetch(`/api/employee_inventories/transfer`, {
@@ -227,7 +227,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
       body: JSON.stringify({
         inventory: requestInvetoryInput?.inventory_object,
         quantity_asked: requestInvetoryInput.quantity_asked,
-        date_of_use:requestInvetoryInput.date_of_use
+        date_of_use: requestInvetoryInput.date_of_use,
       }),
     })
       .then((res) => {
@@ -335,7 +335,9 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                 }
                 required
               />
-              <span><b>Date Of Use</b></span>
+              <span>
+                <b>Date Of Use</b>
+              </span>
               <Form.Control
                 type="date"
                 // placeholder={`Type Quantity`}
@@ -371,16 +373,14 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         </h1>
       </div>
       <div className="flex  justify-end mr-8">
-        {!userProfile?.is_inv_manager && !userProfile?.is_admin &&
-          (
-            <Button
-              onClick={() => setshowRequestInvetory(true)}
-              className="text-4xl font-bold text-center text-blue-600"
-            >
-              Request Inventory
-            </Button>
-          )
-        }
+        {!userProfile?.is_inv_manager && !userProfile?.is_admin && (
+          <Button
+            onClick={() => setshowRequestInvetory(true)}
+            className="text-4xl font-bold text-center text-blue-600"
+          >
+            Request Inventory
+          </Button>
+        )}
       </div>
       {userProfile?.inventory_prompts?.filter(
         (prompt) => !prompt.is_accepted === true
@@ -488,7 +488,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                     </td>
                     <td className="align-middle">
                       <div className="flex flex-col  gap-2">
-                        <span>{data?.quantity} </span>
+                        <span>{data?.quantity.toFixed(2)} </span>
                       </div>
                     </td>
                     <td className="align-middle">

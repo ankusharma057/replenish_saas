@@ -181,6 +181,7 @@ export default function AddInvoices({ userProfile }) {
     const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
+
     let total =
       (totalPaidByClientAT +
         afterTax.discount -
@@ -190,8 +191,8 @@ export default function AddInvoices({ userProfile }) {
         semagConsultFee -
         afterTax.retailTotal) *
       (userProfile?.service_percentage / 100); //(replace with injector percentage)
-    // console.log("gfe:" + userProfile?.gfe);
-    if (userProfile?.gfe) total += (gfeFee + semagConsultFee);
+
+    if (userProfile?.gfe) total += gfeFee + semagConsultFee;
     total =
       total -
       afterTax.discount +
@@ -201,9 +202,17 @@ export default function AddInvoices({ userProfile }) {
 
     if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0)
       total = 30;
-    if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT == 0)
+    if (
+      userProfile?.gfe &&
+      formData?.semaglitudeConsultation &&
+      totalPaidByClientAT == 0
+    )
       total = 75;
-    if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() ==75)
+    if (
+      !userProfile?.gfe &&
+      formData?.semaglitudeConsultation &&
+      getTotalPaidByClient() == 75
+    )
       total = 0;
     if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() == 30) {
       total = 0;
@@ -304,8 +313,7 @@ export default function AddInvoices({ userProfile }) {
     }
   };
   const handleQuantityChange = (e) => {
-    const quantity = parseInt(e.target.value);
-    setCurrentProduct({ ...currentProduct, quantity });
+    setCurrentProduct({ ...currentProduct, quantity: e.target.value });
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
@@ -401,7 +409,7 @@ export default function AddInvoices({ userProfile }) {
   };
 
   const handleRetailQuantityChange = (e) => {
-    const quantity = parseInt(e.target.value);
+    const quantity = parseFloat(e.target.value);
     setCurrentRetailProduct({ ...currentRetailProduct, quantity });
   };
 
@@ -486,11 +494,11 @@ export default function AddInvoices({ userProfile }) {
       employee_id: userProfile.id,
       user_name: userProfile?.name,
       clientname: clientName,
-      
+
       date_of_service: formData?.dateOfService,
       concierge_fee_paid: formData?.conciergeFeePaid,
       gfe: formData?.gfe,
-      semag_consult_fee: formData?.semaglitudeConsultation.value == "on",
+      semag_consult_fee: formData?.semaglitudeConsultation,
       paid_by_client_cash: formData?.paidByClientCash,
       paid_by_client_credit: formData?.paidByClientCredit,
       personal_discount: formData?.personalDiscount,
@@ -546,6 +554,8 @@ export default function AddInvoices({ userProfile }) {
       return invoice;
     }
   };
+
+  // console.log((currentProduct.quantity * currentProduct.price).toFixed(2));
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -849,6 +859,7 @@ export default function AddInvoices({ userProfile }) {
                         <td>
                           <input
                             type="number"
+                            step="0.01"
                             name="productQuantity"
                             placeholder={`max:${currentProduct?.maxQtantity}`}
                             value={currentProduct.quantity}
@@ -865,8 +876,8 @@ export default function AddInvoices({ userProfile }) {
                                     message: ` Your can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
                                   });
                             }}
-                            min="1"
-                            max={currentProduct.maxQtantity}
+                            min="0"
+                            max={currentProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 
                           border-gray-300 border rounded-md"
                           />
@@ -881,7 +892,9 @@ export default function AddInvoices({ userProfile }) {
                           />
                         </td>
                         <td>
-                          {currentProduct.quantity * currentProduct.price}
+                          {Number(
+                            currentProduct.quantity * currentProduct.price || 0
+                          )?.toFixed(2)}
                         </td>
                         <td>
                           <button
@@ -907,7 +920,7 @@ export default function AddInvoices({ userProfile }) {
                           </td>
                           <td>
                             <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                              {product.quantity}
+                              {Number(product.quantity || 0).toFixed(2)}
                             </p>
                           </td>
                           <td>
@@ -915,7 +928,11 @@ export default function AddInvoices({ userProfile }) {
                               {product.cost_price}
                             </p>
                           </td>
-                          <td>{product.quantity * product.cost_price}</td>
+                          <td>
+                            {Number(
+                              product.quantity * product.cost_price || 0
+                            )?.toFixed(2)}
+                          </td>
                           <td>
                             <button
                               type="button"
@@ -972,7 +989,9 @@ export default function AddInvoices({ userProfile }) {
                                     key={product.id}
                                     className="p-2 cursor-pointer hover:bg-gray-100"
                                     onClick={() =>
-                                      handleRetailProductSelection(product?.name)
+                                      handleRetailProductSelection(
+                                        product?.name
+                                      )
                                     }
                                   >
                                     {product?.name}
@@ -985,6 +1004,7 @@ export default function AddInvoices({ userProfile }) {
                           <input
                             type="number"
                             name="productQuantity"
+                            step="0.01"
                             placeholder={`max:${currentRetailProduct?.maxQtantity}`}
                             value={currentRetailProduct.quantity}
                             onChange={(e) => {
@@ -1001,8 +1021,8 @@ export default function AddInvoices({ userProfile }) {
                                     message: ` Your can select upto ${currentRetailProduct?.maxQtantity} quantity`,
                                   });
                             }}
-                            min="1"
-                            max={currentRetailProduct?.maxQtantity}
+                            min="0"
+                            max={currentRetailProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 border-gray-300 border rounded-md"
                           />
                         </td>
@@ -1016,8 +1036,10 @@ export default function AddInvoices({ userProfile }) {
                           />
                         </td>
                         <td>
-                          {currentRetailProduct.quantity *
-                            currentRetailProduct.price}
+                          {Number(
+                            currentRetailProduct.quantity *
+                              currentRetailProduct.price || 0
+                          )?.toFixed(2)}
                         </td>
                         <td>
                           <button
@@ -1072,7 +1094,8 @@ export default function AddInvoices({ userProfile }) {
                 </div>
                 <div className="border rounded-sm p-2 mb-4">
                   <label className="block">
-                    Total Product Price Sum: {getConsumableCostPrice()}
+                    Total Product Price Sum:{" "}
+                    {Number(getConsumableCostPrice() || 0)?.toFixed(2)}
                   </label>
                 </div>
                 <button
@@ -1100,6 +1123,7 @@ export default function AddInvoices({ userProfile }) {
                   dateOfService={invoice?.date_of_service}
                   conciergeFeePaid={invoice?.concierge_fee_paid}
                   gfe={invoice?.gfe}
+                  semaglitudeConsultation={invoice?.semag_consult_fee}
                   paidByClientCash={invoice?.paid_by_client_cash}
                   paidByClientCredit={invoice?.paid_by_client_credit}
                   personalDiscount={invoice?.personal_discount}

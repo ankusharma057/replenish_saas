@@ -50,7 +50,7 @@ class Api::InvoicesController < ApplicationController
         @invoice.send_group_pdf_mail
         return render json: @invoice, status: :ok
       else
-        return render json: {'message' => "Finalize Invoices: #{@invoice.fellow_invoices.ids} to receive the mail"}, status: :unprocessable_entity
+        return render json: {'message' => "Finalize Invoices: #{@invoice.fellow_invoices.where(is_finalized: false).ids} to receive the mail"}, status: :unprocessable_entity
       end
     else
       return render json: {'error' => 'Invoice not found'}, status: :not_found
