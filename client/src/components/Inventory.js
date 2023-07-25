@@ -237,7 +237,7 @@ const Inventory = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              }
+              },
             })
               .then((res) => {
                 if (res.ok) {
@@ -282,7 +282,7 @@ const Inventory = ({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-              }
+              },
             })
               .then((res) => {
                 if (res.ok) {
@@ -350,7 +350,6 @@ const Inventory = ({
     return result;
   };
 
-
   return (
     <>
       <Header userProfile={userProfile} />
@@ -393,7 +392,9 @@ const Inventory = ({
               })
               .map((productName) => (
                 <div key={productName}>
-                  <h1 className="text-xl ml-2 mb-0">{productName}</h1>
+                  <h1 className="text-xl ml-2 mb-0">
+                    {productName || " Not Given"}
+                  </h1>
                   <Table
                     bordered
                     hover
@@ -409,7 +410,7 @@ const Inventory = ({
                     <tbody>
                       {totalEmpInventory[productName]?.map((item, index) => (
                         <tr key={index}>
-                          <td>{item.employee_name}</td>
+                          <td>{item.employee_name || "Not Given"}</td>
                           <td>{item.total_quantity}</td>
                         </tr>
                       ))}
@@ -423,9 +424,8 @@ const Inventory = ({
           <Button onClick={() => setShowTotalEmpInventory(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
-      {requestedInventoryData?.filter(
-        (request) => !request?.is_approved
-      )?.length > 0 &&
+      {requestedInventoryData?.filter((request) => !request?.is_approved)
+        ?.length > 0 &&
         (userProfile?.is_inv_manager || userProfile?.is_admin) && (
           <div className="px-4">
             <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
@@ -447,12 +447,11 @@ const Inventory = ({
                     </span>
                     has asked for
                     <span className="text-blue-700 mx-2">
-                      {data?.quantity_asked} Quantity of {data?.inventory?.product?.name}.
+                      {data?.quantity_asked} Quantity of{" "}
+                      {data?.inventory?.product?.name}.
                     </span>
                     Date Needed:
-                    <span className="text-blue-700 mx-2">
-                      {formattedDate}.
-                    </span>
+                    <span className="text-blue-700 mx-2">{formattedDate}.</span>
                     <Button
                       onClick={() => acceptRequestInventorySubmit(data)}
                       className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"

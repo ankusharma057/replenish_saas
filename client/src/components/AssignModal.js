@@ -11,7 +11,11 @@ const AssignModal = ({
   setAssignInput,
   employeeList,
   employee,
+  assigninventory_object,
 }) => {
+
+  // console.log(employeeList);
+  const assigninventoryData = assigninventory_object || assignProductData;
   return (
     <Modal
       show={showAssignMadal}
@@ -21,7 +25,7 @@ const AssignModal = ({
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Product Name: {assignProductData?.product?.name}
+          Product Name: {assigninventoryData?.product?.name}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="flex justify-between flex-col items-center gap-2">
@@ -31,12 +35,12 @@ const AssignModal = ({
               type="number"
               step="0.01"
               min="0"
-              placeholder={` Type Quantity. maximum: ${assignProductData?.quantity}`}
+              placeholder={` Type Quantity. maximum: ${assigninventoryData?.quantity}`}
               onChange={(e) =>
                 setAssignInput({ ...assignInput, quantity: e.target.value })
               }
-              max={assignProductData?.quantity}
-              title={` You can select upto ${assignProductData?.quantity} Quantity`}
+              max={assigninventoryData?.quantity}
+              title={` You can select upto ${assigninventoryData?.quantity} Quantity`}
               required
             />
 

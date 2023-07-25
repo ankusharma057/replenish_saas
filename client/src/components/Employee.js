@@ -14,7 +14,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
   const [showModal, setShowModal] = useState(false);
   const [servicePercentage, setServicePercentage] = useState(employee?.service_percentage, 0);
   const [retailPercentage, setRetailPercentage] = useState(employee?.retail_percentage, 0);
-  
+  const [employeeName, setEmployeeName] = useState(employee?.name, '');
 
   useEffect(() => {
     const filteredInvoices = invoiceList.filter(
@@ -51,7 +51,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ gfe, service_percentage: servicePercentage, retail_percentage: retailPercentage, id: employee?.id }),
+      body: JSON.stringify({ gfe, service_percentage: servicePercentage, retail_percentage: retailPercentage, name: employeeName}),
     })
       .then((res) => {
         if (res.ok) {
@@ -122,7 +122,10 @@ export default function Employee({ employee, invoiceList, userProfile , employee
       <Popover.Body>
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
-          <Form.Control type="text" readOnly disabled value={employee?.name} />
+          <Form.Control 
+            type="text" 
+            defaultValue={employee?.name} 
+            onChange={(e) => setEmployeeName(e.target.value)}/>
           <Form.Label className="mt-2">Email</Form.Label>
           <Form.Control type="text" readOnly disabled value={employee?.email} />
           <Form.Check
@@ -196,7 +199,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
                 Send Password Reset Link
               </Button>
 
-              {employee?.is_admin === false && (
+              {employee?.is_admin === true && (
                 <>
                   <OverlayTrigger
                     trigger="click"

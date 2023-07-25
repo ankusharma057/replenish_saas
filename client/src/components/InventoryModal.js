@@ -64,7 +64,7 @@ const InventoryModal = ({
 
     // Remove the "employee_id" field from the copied object
     delete modifiedObject?.employee_id;
-    
+
     let updatedProductData = {
       updated_products: modifiedObject,
       new_products: newProductArr,
@@ -151,49 +151,62 @@ const InventoryModal = ({
             <tbody>
               {dataList?.map((data) => {
                 return (
-                  <>
-                    <tr key={data?.product?.id}>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <div className="flex flex-col justify-center gap-2">
-                            <span>
-                              <span>{data?.product?.name} </span>
-                            </span>
-                          </div>
+                  <tr key={data?.product?.id}>
+                    <td className="align-middle">
+                      <div className="flex flex-col  gap-2">
+                        <div className="flex flex-col justify-center gap-2">
+                          <span>
+                            <span>{data?.product?.name} </span>
+                          </span>
                         </div>
-                      </td>
-                      <td className="align-middle">
-                        {isUpdate ? (
-                          <Form className="flex flex-col gap-4">
-                            <Form.Control
-                              type="number"
-                              step="0.01"
-                              defaultValue={data?.quantity}
-                              onChange={(e) => {
-                                console.log("THIS IS THE WANTED ID:", data);
-                                setUpdatedList({
-                                  ...updatedList,
-                                  employee_id: data?.employee?.id,
-                                  [data?.product?.id]: {
-                                    quantity: e.target.value,
-                                  },
-                                });
-                              }}
-                              min={1}
-                              required
-                            />
-                          </Form>
-                        ) : (
-                          <div className="flex flex-col justify-center gap-2">
-                            <span>
-                              {updateData.quantity || data?.quantity}{" "}
-                            </span>
-                          </div>
-                        )}
-                      </td>
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      {isUpdate ? (
+                        <Form className="flex flex-col gap-4">
+                          <Form.Control
+                            type="number"
+                            // step="0.01"
+                            defaultValue={data?.quantity}
+                            onChange={(e) => {
+                              console.log("THIS IS THE WANTED ID:", data);
+                              setUpdatedList({
+                                ...updatedList,
+                                employee_id: data?.employee?.id,
+                                [data?.product?.id]: {
+                                  quantity: Number(
+                                    e.target.value || 0
+                                  )?.toFixed(2),
+                                },
+                              });
+                            }}
+                            min={1}
+                            required
+                          />
+                        </Form>
+                      ) : (
+                        <div className="flex flex-col justify-center gap-2">
+                          <span>{updateData.quantity || data?.quantity} </span>
+                        </div>
+                      )}
+                    </td>
 
-                      <td className="align-middle">
-                        {isUpdate ? (
+                    <td className="align-middle">
+                      {isUpdate ? (
+                        <div
+                          onClick={() => {
+                            setIsUpdate(true);
+                            setUpdateData({
+                              product: data?.product?.name,
+                              quantity: data?.quantity - 1,
+                            });
+                          }}
+                          className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                        >
+                          -
+                        </div>
+                      ) : (
+                        <div className="flex gap-4 justify-center">
                           <div
                             onClick={() => {
                               setIsUpdate(true);
@@ -202,29 +215,14 @@ const InventoryModal = ({
                                 quantity: data?.quantity - 1,
                               });
                             }}
-                            className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                            className="px-3 text-2xl text-white cursor-pointer  font-bold rounded-md  bg-blue-400"
                           >
                             -
                           </div>
-                        ) : (
-                          <div className="flex gap-4 justify-center">
-                            <div
-                              onClick={() => {
-                                setIsUpdate(true);
-                                setUpdateData({
-                                  product: data?.product?.name,
-                                  quantity: data?.quantity - 1,
-                                });
-                              }}
-                              className="px-3 text-2xl text-white cursor-pointer  font-bold rounded-md  bg-blue-400"
-                            >
-                              -
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  </>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
@@ -241,45 +239,43 @@ const InventoryModal = ({
               <tbody>
                 {newProductArr?.map((product) => {
                   return (
-                    <>
-                      <tr key={product.id}>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <div className="flex flex-col justify-center gap-2">
-                              <span>
-                                <span>{product?.product_name} </span>
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="align-middle">
+                    <tr key={product.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
                           <div className="flex flex-col justify-center gap-2">
-                            <span>{product?.quantity}</span>
+                            <span>
+                              <span>{product?.product_name} </span>
+                            </span>
                           </div>
-                        </td>
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col justify-center gap-2">
+                          <span>{product?.quantity}</span>
+                        </div>
+                      </td>
 
-                        <td className="align-middle">
-                          <div className="flex gap-2 ">
-                            <div
-                              onClick={() => {
-                                updateNewProduct(product);
-                              }}
-                              className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
-                            >
-                              -
-                            </div>
-                            <div
-                              onClick={() => {
-                                deleteAddProduct(product.id);
-                              }}
-                              className="px-3 text-xl text-red-500 cursor-pointer font-bold rounded-md bg-blue-400"
-                            >
-                              x
-                            </div>
+                      <td className="align-middle">
+                        <div className="flex gap-2 ">
+                          <div
+                            onClick={() => {
+                              updateNewProduct(product);
+                            }}
+                            className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                          >
+                            -
                           </div>
-                        </td>
-                      </tr>
-                    </>
+                          <div
+                            onClick={() => {
+                              deleteAddProduct(product.id);
+                            }}
+                            className="px-3 text-xl text-red-500 cursor-pointer font-bold rounded-md bg-blue-400"
+                          >
+                            x
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -328,7 +324,7 @@ const InventoryModal = ({
               <div className="md:w-2/4 flex justify-between gap-2">
                 <Form.Control
                   type="number"
-                  step="0.01"
+                  // step="0.01"
                   className="w-[80%]"
                   placeholder="Add Quantity"
                   onChange={(e) => {
