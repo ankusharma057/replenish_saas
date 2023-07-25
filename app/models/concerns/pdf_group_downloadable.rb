@@ -39,10 +39,11 @@ module PdfGroupDownloadable
       invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                  <h3 style="text-align: left;">  Vendor: '"#{invoice.employee.name}"'  </h4> 
+                  <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.name}"'  </h2> 
+                  <div style="text-align: right;">  Email: '"#{invoice.employee.email}"'  </div>
 
-                  <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
-                  <div style="text-align: left;"> Charge: '"#{invoice.charge}"' </div>
+                  <div style="text-align: left;"> Invoice: '"#{invoice.id}"' </div>  
+                  <div style="text-align: right;"> Charge: '"#{invoice.charge}"' </div>
 
                   <div style="text-align: left;">  Client Name: '"#{invoice.client.name}"' </div>  
                   <div style="text-align: right;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
@@ -130,10 +131,11 @@ module PdfGroupDownloadable
       invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                <h4 style="text-align: left; ">  Vendor: '"#{invoice.employee.name}"'  </h4> 
+                <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.name}"'  </h2> 
+                <div style="text-align: right;">  Email: '"#{invoice.employee.email}"'  </div>
 
-                <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
-                <div style="text-align: left;"> Charge: '"#{invoice.charge}"' </div>
+                <div style="text-align: left;"> Invoice: '"#{invoice.id}"' </div>  
+                <div style="text-align: right;"> Charge: '"#{invoice.charge}"' </div>
 
                 <div style="text-align: left;">  Client Name: '"#{invoice.client.name}"' </div>  
                 <div style="text-align: right;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
