@@ -104,7 +104,7 @@ class Invoice < ApplicationRecord
   end
 
   def verify_fellow_invoices
-    unless fellow_invoices.where(is_finalized: false).any? 
+    unless fellow_invoices.any? 
       SendRejectInvoiceGroupMail.with(invoice: self).send_group_rejection_mail.deliver_now
     end
   end
