@@ -12,8 +12,8 @@ const AssignModal = ({
   employeeList,
   employee,
   assigninventory_object,
+  disabled,
 }) => {
-
   // console.log(employeeList);
   const assigninventoryData = assigninventory_object || assignProductData;
   return (
@@ -63,7 +63,9 @@ const AssignModal = ({
                 );
               })}
             </Form.Select>
-            <Button type="submit">Submit</Button>
+            <Button disabled={disabled} type="submit">
+              Submit
+            </Button>
           </Form>
         </div>
       </Modal.Body>

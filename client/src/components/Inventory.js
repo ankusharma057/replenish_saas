@@ -25,12 +25,35 @@ const Inventory = ({
 
   const [showTotalEmpInventory, setShowTotalEmpInventory] = useState(false);
   const [totalEmpInventory, settotalEmpInventory] = useState({});
-  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
-    useState("");
+  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] = useState("");
+
+  const [filterInventory, setFilterInventory] = useState([]);
 
   const [searchInput, setSearchInput] = useState("");
 
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
+
+  // console.log(userProfile);
+
+  useEffect(() => {
+    if (userProfile?.is_admin) {
+      setFilterInventory(inventoryList);
+      return;
+    } else {
+      if (userProfile?.is_inv_manager) {
+        if (userProfile.has_access_to?.length > 0) {
+          const filteredProducts = inventoryList.filter((item) =>
+            userProfile.has_access_to.includes(item?.product?.product_type)
+          );
+          setFilterInventory(filteredProducts);
+          // console.log(filteredProducts);
+        } else {
+          setFilterInventory(inventoryList);
+        }
+      }
+    }
+    return () => {};
+  }, [inventoryList, userProfile.has_access_to, userProfile?.is_admin, userProfile?.is_inv_manager]);
 
   useEffect(() => {
     fetch("/api/inventory_requests")
@@ -581,8 +604,8 @@ const Inventory = ({
             </tr>
           </thead>
           <tbody>
-            {inventoryList &&
-              inventoryList
+            {filterInventory &&
+              filterInventory
                 ?.filter((data) => {
                   return data?.product?.name
                     ?.toLowerCase()

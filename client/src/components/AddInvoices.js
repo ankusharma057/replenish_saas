@@ -318,6 +318,13 @@ export default function AddInvoices({ userProfile }) {
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
+      if (Number(currentProduct?.quantity) <= 0.009) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
       if (currentProduct?.quantity > currentProduct?.maxQtantity) {
         setIsAlert({
           productUsedShow: true,
@@ -416,6 +423,13 @@ export default function AddInvoices({ userProfile }) {
 
   const handleAddRetailProduct = () => {
     if (selectedRetailProduct) {
+      if (Number(currentRetailProduct?.quantity) <= 0.009) {
+        setIsAlert({
+          retailShow: true,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
       if (currentRetailProduct?.quantity > currentRetailProduct?.maxQtantity) {
         setIsAlert({
           retailShow: true,
@@ -463,9 +477,15 @@ export default function AddInvoices({ userProfile }) {
       for (const product of arr) {
         const { id, name, quantity } = product;
         if (quantityMap[id]) {
-          quantityMap[id].sumofQuantity += quantity;
+          // quantityMap[id].sumofQuantity += quantity;
+          quantityMap[id].sumofQuantity =
+            Number(quantityMap[id].sumofQuantity) + Number(quantity);
         } else {
-          quantityMap[id] = { product_name: name, id, sumofQuantity: quantity };
+          quantityMap[id] = {
+            product_name: name,
+            id,
+            sumofQuantity: Number(quantity),
+          };
         }
       }
     }
@@ -854,7 +874,7 @@ export default function AddInvoices({ userProfile }) {
                                     message: ` You can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
                                   });
                             }}
-                            min="0"
+                            min={0.01}
                             max={currentProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 
                           border-gray-300 border rounded-md"

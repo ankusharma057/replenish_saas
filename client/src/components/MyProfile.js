@@ -17,6 +17,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assigninventory_object, setAssigninventory_object] = useState({});
   const [requestInveytoryList, setRequestInveytoryList] = useState([]);
+  const [disabled, setDisabled] = useState(false);
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
@@ -269,6 +270,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         setAssignInput={setAssignInput}
         assignInput={assignInput}
         employee={employee}
+        disabled={disabled}
       />
       <Modal
         show={showRequestInvetory}
