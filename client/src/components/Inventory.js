@@ -411,7 +411,7 @@ const Inventory = ({
                       {totalEmpInventory[productName]?.map((item, index) => (
                         <tr key={index}>
                           <td>{item.employee_name || "Not Given"}</td>
-                          <td>{item.total_quantity}</td>
+                          <td>{item.total_quantity.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -523,7 +523,7 @@ const Inventory = ({
 
               <Form.Control
                 type="number"
-                step="0.1"
+                step="0.01"
                 value={productInfoInput?.quantity}
                 placeholder={` Type Quantity `}
                 onChange={(e) =>

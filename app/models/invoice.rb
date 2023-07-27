@@ -15,6 +15,7 @@ class Invoice < ApplicationRecord
 
   before_update :revise_charge
   before_destroy :return_inventory
+  before_destroy :verify_fellow_invoices
 
   scope :finalized, -> { where(is_finalized: true) }
   scope :non_finalized, -> { where(is_finalized: false) }
@@ -45,20 +46,20 @@ class Invoice < ApplicationRecord
     # File.delete("public/#{employee.name}-Non-Finalized-Invoice-#{id}.pdf")
   # end
 
-  # def finalize_and_send_pdf_mail 
-  #   pdf_string = get_html_finalized(products_hash)
-  #   pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
-  #   pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-  #   File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
-  #     file << pdf
-  #   end
+  def finalize_and_attach_pdf
+    pdf_string = get_html_finalized(products_hash)
+    pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
+    pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
 
-  #   document.purge # To remove the non-finalized document
-  #   document.attach(io: File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf"), filename: "#{employee.name}-Finalized-Invoice-#{id}.pdf", content_type: "application/pdf")
+    File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf", 'wb') do |file|
+      file << pdf
+    end
 
-  #   update!(is_finalized: true)
-  #   SendPdfToInvoiceMailer.with(invoice: self).send_mail.deliver
-  # end
+    # document.purge -- To remove the non-finalized document
+    document.attach(io: File.open("public/#{employee.name}-Finalized-Invoice-#{id}.pdf"), filename: "#{employee.name}-Finalized-Invoice-#{id}.pdf", content_type: "application/pdf")
+
+    update!(is_finalized: true)
+  end
 
   def reject_and_send_mail(feedback)
     if RejectInvoiceMailer.with(invoice: self, feedback: feedback).send_mail.deliver
@@ -99,6 +100,12 @@ class Invoice < ApplicationRecord
         emp_product_quantity = employee.employees_inventories.find_or_create_by(product: Product.find_by(name: product_quantity.keys.first))
         emp_product_quantity.update!(quantity: (emp_product_quantity.quantity.to_f + product_quantity.values.first.to_f))
       end
+    end
+  end
+
+  def verify_fellow_invoices
+    unless fellow_invoices.where(is_finalized: false).any? 
+      SendRejectInvoiceGroupMail.with(invoice: self).send_group_rejection_mail.deliver_now
     end
   end
 end

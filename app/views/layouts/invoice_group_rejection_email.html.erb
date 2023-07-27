@@ -6,9 +6,7 @@
   </head>
   <body>
     <p>
-      Hi. An Invoice has recently been created:
-      Employee: <%= @invoice_group.invoices&.first&.employee&.name %>,
-      Client: <%= @invoice_group.invoices&.first&.client&.name %>
+      Hi, All of the Invoices created by Employee: <%= @invoice&.employee&.name %> with this Invoice: <%= @invoice.id %> have been rejected.
     </p>
   </body>
 </html>

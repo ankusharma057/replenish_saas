@@ -372,7 +372,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           {employee?.name}
         </h1>
       </div>
-      <div className="flex  justify-end mr-8">
+      <div className="flex justify-end mr-8">
         {!userProfile?.is_inv_manager && !userProfile?.is_admin && (
           <Button
             onClick={() => setshowRequestInvetory(true)}

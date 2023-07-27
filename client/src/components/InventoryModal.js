@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
-import AssignModal from "./AssignModal";
 import { confirmAlert } from "react-confirm-alert";
 
 const InventoryModal = ({

@@ -40,22 +40,27 @@ module PdfGroupDownloadable
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
                   <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.name}"'  </h2> 
-                  <div style="text-align: right;">  Email: '"#{invoice.employee.email}"'  </div>
+                  <br>
 
-                  <div style="text-align: left;"> Invoice: '"#{invoice.id}"' </div>  
-                  <div style="text-align: right;"> Charge: '"#{invoice.charge}"' </div>
+                  <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
-                  <div style="text-align: left;">  Client Name: '"#{invoice.client.name}"' </div>  
-                  <div style="text-align: right;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
+                  <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
+                  <div style="text-align: left;"> Charge: '"#{invoice.charge.round(2)}"' </div>
 
-                  <div style="text-align: left;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-                  <div style="text-align: right;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
+                  <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
+                  <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
 
+                  <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+                  <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
+
+                  <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
                   <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
-                  <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
 
-                  <div style="text-align: left;">  Client Paid: '"#{invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
+                  <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
+                  <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)).round(2)}"'</div>  
+
                   <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
+                  <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
                 </div>
 
                 <div></div>
@@ -132,25 +137,30 @@ module PdfGroupDownloadable
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
                 <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.name}"'  </h2> 
-                <div style="text-align: right;">  Email: '"#{invoice.employee.email}"'  </div>
+                <br>
 
-                <div style="text-align: left;"> Invoice: '"#{invoice.id}"' </div>  
-                <div style="text-align: right;"> Charge: '"#{invoice.charge}"' </div>
+                <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
-                <div style="text-align: left;">  Client Name: '"#{invoice.client.name}"' </div>  
-                <div style="text-align: right;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
+                <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
+                <div style="text-align: left;"> Charge: '"#{invoice.charge.round(2)}"' </div>
 
-                <div style="text-align: left;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-                <div style="text-align: right;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
+                <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
+                <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
 
+                <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+                <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
+
+                <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
                 <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
+
                 <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
+                <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)).round(2)}"'</div>  
 
-                <div style="text-align: left;">  Client Paid: '"#{invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)}"'</div>  
                 <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
+                <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
 
-                <div style="text-align: left;">  Overhead Fee Type: '"#{invoice.overhead_fee_type&.capitalize}"'</div>
-                <div style="text-align: right;">  Overhead Fee Value: '"#{invoice.overhead_fee_value}"'</di>
+                <div style="text-align: right;">  Overhead Fee Type: '"#{invoice.overhead_fee_type&.capitalize}"'</div>
+                <div style="text-align: left;">  Overhead Fee Value: '"#{invoice.overhead_fee_value}"'</di>
               </div>
 
               <div></div>
