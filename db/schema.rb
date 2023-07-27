@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_04_023859) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,14 +66,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_04_023859) do
   create_table "employees_inventories", force: :cascade do |t|
     t.integer "employee_id"
     t.integer "product_id"
-    t.integer "quantity"
+    t.float "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "inventories", force: :cascade do |t|
     t.integer "product_id"
-    t.integer "quantity"
+    t.float "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -81,9 +81,25 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_04_023859) do
   create_table "inventory_prompts", force: :cascade do |t|
     t.integer "employee_id"
     t.integer "product_id"
-    t.integer "quantity"
+    t.float "quantity"
     t.string "assigned_by", default: "Inventory Manager"
     t.boolean "is_accepted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "inventory_requests", force: :cascade do |t|
+    t.integer "requestor_id"
+    t.float "quantity_asked"
+    t.datetime "date_of_use"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "is_approved", default: false
+    t.integer "inventory_id"
+  end
+
+  create_table "invoice_groups", force: :cascade do |t|
+    t.boolean "finalized_totally", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -104,8 +120,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_04_023859) do
     t.boolean "concierge_fee_paid"
     t.boolean "gfe"
     t.string "overhead_fee_type"
-    t.integer "overhead_fee_value"
+    t.float "overhead_fee_value"
     t.jsonb "products_hash", default: {}
+    t.boolean "semag_consult_fee", default: false
+    t.integer "invoice_group_id"
+    t.float "total_consumable_cost"
   end
 
   create_table "products", force: :cascade do |t|

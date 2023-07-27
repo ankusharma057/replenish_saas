@@ -310,7 +310,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                   inventoryList?.map((inventory) => {
                     return (
                       <option key={inventory?.id} value={inventory?.id}>
-                        {inventory?.product.name}
+                        {inventory?.product?.name}
                       </option>
                     );
                   })}
