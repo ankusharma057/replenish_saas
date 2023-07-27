@@ -14,10 +14,6 @@ class Api::EmployeesController < ApplicationController
     render json: employee, status: :ok
   end
 
-  def name
-    render json:{ greeting: "Hello #{params[:name]}" }, status: :ok
-  end
-
   def create
     @employee = Employee.new(employee_params)
     if @employee.save!

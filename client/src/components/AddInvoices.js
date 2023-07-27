@@ -37,6 +37,7 @@ export default function AddInvoices({ userProfile }) {
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
   const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
+  const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
 
   const [formData, setFormData] = useState({
     ...initialFormState,
@@ -205,16 +206,16 @@ export default function AddInvoices({ userProfile }) {
     if (
       userProfile?.gfe &&
       formData?.semaglitudeConsultation &&
-      totalPaidByClientAT == 0
+      totalPaidByClientAT === 0
     )
       total = 75;
     if (
       !userProfile?.gfe &&
       formData?.semaglitudeConsultation &&
-      getTotalPaidByClient() == 75
+      getTotalPaidByClient() === 75
     )
       total = 0;
-    if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() == 30) {
+    if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() === 30) {
       total = 0;
     }
 
@@ -255,10 +256,10 @@ export default function AddInvoices({ userProfile }) {
 
     userProfile?.employees_inventories.forEach((inventory) => {
       if (
-        inventory?.product != undefined &&
-        inventory?.product != null &&
-        inventory?.product != "" &&
-        inventory?.product?.product_type != undefined
+        inventory?.product !== undefined &&
+        inventory?.product !== null &&
+        inventory?.product !== "" &&
+        inventory?.product?.product_type !== undefined
       ) {
         // console.log(product.product_type);
         if (!inventory?.product.product_type.includes("Retail")) {
@@ -271,7 +272,7 @@ export default function AddInvoices({ userProfile }) {
     const input = e.target.value;
     setCurrentProduct({ name: input, price: 0, quantity: 1 });
     const matchedProducts =
-      input == ""
+      input === ""
         ? productList
         : productList?.filter((product) =>
             product?.name.toLowerCase().includes(input.toLowerCase())
@@ -317,6 +318,13 @@ export default function AddInvoices({ userProfile }) {
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
+      if (Number(currentProduct?.quantity) <= 0.009) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
       if (currentProduct?.quantity > currentProduct?.maxQtantity) {
         setIsAlert({
           productUsedShow: true,
@@ -350,10 +358,10 @@ export default function AddInvoices({ userProfile }) {
 
     userProfile?.employees_inventories.forEach((inventory) => {
       if (
-        inventory?.product != undefined &&
-        inventory?.product != null &&
-        inventory?.product != "" &&
-        inventory?.product?.product_type != undefined
+        inventory?.product !== undefined &&
+        inventory?.product !== null &&
+        inventory?.product !== "" &&
+        inventory?.product?.product_type !== undefined
       ) {
         // console.log(product.product_type);
         if (inventory?.product.product_type.includes("Retail")) {
@@ -366,7 +374,7 @@ export default function AddInvoices({ userProfile }) {
     const input = e.target.value;
     setCurrentRetailProduct({ name: input, price: 0, quantity: 1 });
     const matchedProducts =
-      input == ""
+      input === ""
         ? retailProductList
         : retailProductList?.filter((product) =>
             product?.name.toLowerCase().includes(input.toLowerCase())
@@ -415,6 +423,13 @@ export default function AddInvoices({ userProfile }) {
 
   const handleAddRetailProduct = () => {
     if (selectedRetailProduct) {
+      if (Number(currentRetailProduct?.quantity) <= 0.009) {
+        setIsAlert({
+          retailShow: true,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
       if (currentRetailProduct?.quantity > currentRetailProduct?.maxQtantity) {
         setIsAlert({
           retailShow: true,
@@ -462,9 +477,15 @@ export default function AddInvoices({ userProfile }) {
       for (const product of arr) {
         const { id, name, quantity } = product;
         if (quantityMap[id]) {
-          quantityMap[id].sumofQuantity += quantity;
+          // quantityMap[id].sumofQuantity += quantity;
+          quantityMap[id].sumofQuantity =
+            Number(quantityMap[id].sumofQuantity) + Number(quantity);
         } else {
-          quantityMap[id] = { product_name: name, id, sumofQuantity: quantity };
+          quantityMap[id] = {
+            product_name: name,
+            id,
+            sumofQuantity: Number(quantity),
+          };
         }
       }
     }
@@ -473,10 +494,6 @@ export default function AddInvoices({ userProfile }) {
       calculateQuantities(obj.products, productQuantities);
       calculateQuantities(obj.retail_products, retailProductQuantities);
     }
-
-    // console.log(productQuantities, retailProductQuantities);
-    // // const productsList = Object.values(productQuantities);
-    // // const retailProductList = Object.values(retailProductQuantities);
 
     return { productQuantities, retailProductQuantities };
   }
@@ -558,31 +575,10 @@ export default function AddInvoices({ userProfile }) {
   // console.log((currentProduct.quantity * currentProduct.price).toFixed(2));
 
   const handleSubmit = (event) => {
+    setSubmitButtonDisabled(true);
     event.preventDefault();
-
-    // let invoice = {
-    //   employee_id: userProfile.id,
-    //   user_name: userProfile?.name,
-    //   clientname: clientName,
-    //   formData,
-    //   date_of_service: formData?.dateOfService,
-    //   concierge_fee_paid: formData?.conciergeFeePaid,
-    //   gfe: formData?.gfe,
-    //   paid_by_client_cash: formData?.paidByClientCash,
-    //   paid_by_client_credit: formData?.paidByClientCredit,
-    //   personal_discount: formData?.personalDiscount,
-    //   tip: formData?.tip,
-    //   comments: formData?.comments,
-    //   products: formData.products,
-    //   retail_products: formData.retailProducts,
-    //   charge: getTotal(),
-    //   expected_income: getExpectedReplenishIncome(),
-    //   actual_income: getActualReplenishIncome(),
-    //   income_flag: replenishIncomeFlag(),
-    //   get_total_price_by_client: getTotalPaidByClient(),
-    //   total_consumable_cost: getConsumableCostPrice(),
-    // };
     const invoiceData = addMoreInvoice("submit");
+
     confirmAlert({
       title: "Confirm to submit",
       message: `Are you sure add ${invoiceData?.length} Invoices `,
@@ -633,6 +629,7 @@ export default function AddInvoices({ userProfile }) {
         },
       ],
     });
+    setSubmitButtonDisabled(true);
   };
 
   return (
@@ -802,6 +799,7 @@ export default function AddInvoices({ userProfile }) {
                 </div>
                 <button
                   type="submit"
+                  disabled={submitButtonDisabled}
                   className="w-full md:hidden bg-blue-500 text-white px-4 py-2 rounded-md"
                 >
                   Submit
@@ -873,10 +871,10 @@ export default function AddInvoices({ userProfile }) {
                                 ? handleQuantityChange(e)
                                 : setIsAlert({
                                     productUsedShow: true,
-                                    message: ` Your can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
+                                    message: ` You can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
                                   });
                             }}
-                            min="0"
+                            min={0.01}
                             max={currentProduct?.maxQtantity?.toFixed(2)}
                             className="w-full p-1 
                           border-gray-300 border rounded-md"

@@ -45,7 +45,7 @@ class Api::InvoicesController < ApplicationController
   end
 
   def finalize
-    if @invoice.update!(is_finalized: true)
+    if @invoice.finalize_and_attach_pdf
       if @invoice.fellow_invoices_finalized?
         @invoice.send_group_pdf_mail
         return render json: @invoice, status: :ok
@@ -59,6 +59,7 @@ class Api::InvoicesController < ApplicationController
 
   def send_reject_mail
     @invoice.reject_and_send_mail(params[:feedback])
+    @invoice.send_group_pdf_mail if @invoice.fellow_invoices_finalized?
   end
 
   def download_attachment
@@ -73,12 +74,8 @@ class Api::InvoicesController < ApplicationController
   private
 
   def invoice_params
-    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :created_at, :updated_at, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :overhead_fee_type, :overhead_fee_value)
+    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :overhead_fee_type, :overhead_fee_value)
   end
-
-  # def find_employee
-  #   @employee = Employee.find_by(id: params[:employee_id])
-  # end
 
   def find_invoice
     @invoice = Invoice.find_by(id: params[:id])
