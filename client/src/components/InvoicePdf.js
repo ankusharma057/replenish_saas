@@ -146,10 +146,10 @@ const InvoicePdf = ({
                     </td>
                     <td>
                       <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                        {product?.retail_price}
+                        {product?.cost_price}
                       </p>
                     </td>
-                    <td>{product?.quantity * product?.retail_price}</td>
+                    <td>{product?.quantity * product?.cost_price}</td>
                     {/* <td>
                         <button
                           type="button"
@@ -253,10 +253,10 @@ const InvoicePdf = ({
                     </td>
                     <td>
                       <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                        {product?.retail_price}
+                        {product?.cost_price}
                       </p>
                     </td>
-                    <td>{product?.quantity * product?.retail_price}</td>
+                    <td>{product?.quantity * product?.cost_price}</td>
                     {/* <td>
                         <button
                           type="button"

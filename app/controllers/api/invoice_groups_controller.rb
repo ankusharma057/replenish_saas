@@ -14,8 +14,8 @@ class Api::InvoiceGroupsController < ApplicationController
         invoice.invoice_group = @invoice_group
         invoice.client = client
 
-        products = invoice_param['products']&.pluck("name", "quantity", "retail_price")
-        retail_products = invoice_param['retail_products']&.pluck("name", "quantity", "retail_price")
+        products = invoice_param['products']&.pluck("name", "quantity", "cost_price")
+        retail_products = invoice_param['retail_products']&.pluck("name", "quantity", "cost_price")
         
         invoice.products_hash = {
           "products" => products,
