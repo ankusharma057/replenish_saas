@@ -145,9 +145,15 @@ export default function AddInvoices({ userProfile }) {
     if (cashRemaining > obj.discount && cashRemaining != 0)
       cashRemaining -= obj.retailTotal;
     else obj.discount = calculateTax(obj.discount);
-    if (cashRemaining >= obj.Tip && cashRemaining != 0)
+    if (cashRemaining >= obj.tip && cashRemaining != 0)
       cashRemaining -= obj.tip;
     else obj.tip = calculateTax(obj.tip);
+    if (cashRemaining >= obj.gfeFee && cashRemaining != 0)
+      cashRemaining -= obj.gfeFee;
+    else obj.gfeFee = calculateTax(obj.gfeFee);
+    if (cashRemaining >= obj.semagConsultFee && cashRemaining != 0)
+      cashRemaining -= obj.semagConsultFee;
+    else obj.semagConsultFee = calculateTax(obj.semagConsultFee);
     return;
   };
 
@@ -166,14 +172,14 @@ export default function AddInvoices({ userProfile }) {
       discount: formData.personalDiscount,
       retailTotal: getRetailCostPrice(),
       conciergeFee: 0,
+      gfeFee: 0,
+      semagConsultFee: 0
     };
-    let gfeFee = 0;
-    let semagConsultFee = 0;
     if (formData?.gfe) {
-      gfeFee = 30;
+      afterTax.gfeFee = 30;
     }
     if (formData?.semaglitudeConsultation) {
-      semagConsultFee = 75;
+      afterTax.semagConsultFee = 75;
     }
     if (formData?.conciergeFeePaid) {
       afterTax.conciergeFee = 50;
@@ -182,43 +188,34 @@ export default function AddInvoices({ userProfile }) {
     const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
-
     let total =
       (totalPaidByClientAT +
         afterTax.discount -
         afterTax.conciergeFee -
         totalProductPriceSum -
-        gfeFee -
-        semagConsultFee -
+        afterTax.gfeFee -
+        afterTax.semagConsultFee -
+        afterTax.tip -
         afterTax.retailTotal) *
       (userProfile?.service_percentage / 100); //(replace with injector percentage)
-
-    if (userProfile?.gfe) total += gfeFee + semagConsultFee;
+    if (userProfile?.gfe) total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =
       total -
-      afterTax.discount +
+      afterTax.discount + afterTax.tip +
       (afterTax.retailTotal * (parseInt(userProfile?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
 
     if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0)
       total = 30;
-    if (
-      userProfile?.gfe &&
-      formData?.semaglitudeConsultation &&
-      totalPaidByClientAT === 0
-    )
+    if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT === 0)
       total = 75;
-    if (
-      !userProfile?.gfe &&
-      formData?.semaglitudeConsultation &&
-      getTotalPaidByClient() === 75
-    )
+    if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() === 75)
       total = 0;
     if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() === 30) {
       total = 0;
     }
-
+    
     // totalRef.current.charge =
     return total.toFixed(2);
   };
@@ -652,7 +649,7 @@ export default function AddInvoices({ userProfile }) {
                 }}
                 disabled={invoiceArray?.length >= 4}
               >
-                Add Invoice
+                Add Client
               </Button>
             </div>
             <div className="border rounded-sm p-2 mb-4 flex flex-wrap justify-start md:justify-around">
