@@ -155,7 +155,7 @@ const AddInvoiceTemplate = ({
                     <tr>
                       <th className="min-w-[10rem]">Retail Products</th>
                       <th className="min-w-[10rem]">Product Quantity</th>
-                      <th className="min-w-[5rem]">Price</th>
+                      <th className="min-w-[5rem]">Price </th>
                       <th className="min-w-[5rem] md:text-left text-center">
                         Total Price
                       </th>
