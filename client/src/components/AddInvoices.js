@@ -114,6 +114,7 @@ export default function AddInvoices({ userProfile }) {
 
   const getTotalRetailPrice = (product) => {
     return +product.retail_price * +product.quantity;
+    
   };
 
   const getConsumableRetailPrice = () => {
