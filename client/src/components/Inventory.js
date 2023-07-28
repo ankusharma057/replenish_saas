@@ -79,7 +79,7 @@ const Inventory = ({
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success("Updated Product Quantity Successfully.");
+                  toast.success("Inventory Deleted Successfully.");
                   window.location.reload();
                 } else if (res.status == 404) {
                   res.json().then((json) => {
@@ -87,7 +87,7 @@ const Inventory = ({
                   });
                 } else {
                   res.json().then((json) => {
-                    toast.error("Failed to Update the Product Quantity");
+                    toast.error("Failed to delete the Inventory");
                   });
                 }
               })
