@@ -7,21 +7,17 @@ const InventoryModal = ({
   showModal,
   setshowModal,
   inventoryList,
-  updateQtySubmit,
-  updateQtyInput,
-  setUpdateQtyInput,
   invList,
-  userProfile,
-  employeeList,
   productList,
+  entireInventoryList,
 }) => {
   const dataList = inventoryList?.employees_inventories || invList;
   const initialNewProduct = {
     product_name: "",
-    quantity: 1,
+    quantity: 0,
     id: 0,
+    maxquantity: 0,
   };
-  const [updateModalShow, setUpdateModalShow] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [updateData, setUpdateData] = useState({
     quantity: 0,
@@ -46,7 +42,6 @@ const InventoryModal = ({
   };
 
   const updateNewProduct = (data) => {
-    console.log({ data, newProductArr });
     setNewProduct(data);
     setIsUpdate(true);
     setShowAddNew(true);
@@ -96,11 +91,11 @@ const InventoryModal = ({
                   toast.success(" Updated successfully.");
                   window.location.reload();
                 } else if (res.status === 404) {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Please provide a client.");
                   });
                 } else {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Failed to Update ");
                   });
                 }
@@ -168,7 +163,6 @@ const InventoryModal = ({
                             // step="0.01"
                             defaultValue={data?.quantity}
                             onChange={(e) => {
-                              console.log("THIS IS THE WANTED ID:", data);
                               setUpdatedList({
                                 ...updatedList,
                                 employee_id: data?.employee?.id,
@@ -288,33 +282,43 @@ const InventoryModal = ({
               <div className="  md:w-2/4">
                 <Form.Select
                   aria-label="Default select example"
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const selectedMaxQuantity =
+                      e.target.selectedOptions[0].getAttribute("maxquantity");
+
                     setNewProduct({
                       ...newProduct,
                       product_name: e.target.value,
-                    })
-                  }
+                      maxquantity: Number(selectedMaxQuantity),
+                    });
+                  }}
                   value={newProduct?.product_name}
                   required
                 >
                   <option value="">Select Product</option>
-                  {productList
+                  {entireInventoryList
                     ?.filter(
                       (item1) =>
                         !newProductArr.some(
-                          (item2) => item2?.product_name === item1?.name
+                          (item2) =>
+                            item2?.product_name === item1?.product?.name
                         )
                     )
                     ?.filter(
                       (item1) =>
                         !dataList.some(
-                          (item2) => item2.product?.name === item1?.name
+                          (item2) =>
+                            item2?.product?.name === item1?.product?.name
                         )
                     )
                     ?.map((product) => {
                       return (
-                        <option key={product?.id} value={product?.name}>
-                          {product?.name}
+                        <option
+                          key={product?.id}
+                          value={product?.product?.name}
+                          maxquantity={product?.quantity}
+                        >
+                          {product?.product?.name}
                         </option>
                       );
                     })}
@@ -323,9 +327,13 @@ const InventoryModal = ({
               <div className="md:w-2/4 flex justify-between gap-2">
                 <Form.Control
                   type="number"
-                  // step="0.01"
+                  step="0.01"
                   className="w-[80%]"
-                  placeholder="Add Quantity"
+                  placeholder={` ${
+                    newProduct?.maxquantity
+                      ? `Quantity. max ${newProduct?.maxquantity || 0}`
+                      : `Select the product first`
+                  } `}
                   onChange={(e) => {
                     setNewProduct({
                       ...newProduct,
@@ -333,7 +341,8 @@ const InventoryModal = ({
                     });
                   }}
                   value={newProduct.quantity}
-                  min={1}
+                  min={0.01}
+                  max={newProduct?.maxquantity}
                   required
                 />
                 <div className="w-[20%] text-right ">

@@ -7,9 +7,7 @@ function CustomEmployeeModal(props) {
   const { employeeInvoices } = props;
   const [modalShow, setModalShow] = useState(false);
   const [invoiceData, setinvoiceData] = useState(null);
-
-  function handleClick(invoice) {
-    // setinvoiceData();
+  function handleClick() {
     setModalShow(!modalShow);
   }
   return (
@@ -17,12 +15,13 @@ function CustomEmployeeModal(props) {
       {modalShow && (
         <CustomInvoiceModal
           show={modalShow}
-          onHide={handleClick}
+          onHide={() => setModalShow(false)}
           invoiceData={invoiceData}
         />
       )}
       <Modal
-        {...props}
+        show={props.show}
+        onHide={props.onHide}
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >

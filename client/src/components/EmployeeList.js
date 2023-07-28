@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Employee from "./Employee";
 import Header from "./Header";
-export default function EmployeeList({ userProfile, productList }) {
+export default function EmployeeList({
+  userProfile,
+  productList,
+  inventoryList,
+}) {
   const [invoiceList, setInvoiceList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
 
@@ -30,17 +34,20 @@ export default function EmployeeList({ userProfile, productList }) {
     <div>
       <Header userProfile={userProfile} />
       <div className="mt-3 mb-3 mx-1 flex justify-center flex-wrap gap-3">
-        {employeeList?.sort((a, b) => a?.name?.localeCompare(b?.name))?.map((employee) => (
-          <div key={employee?.id} className=" ">
-            <Employee
-              employeeList={employeeList}
-              employee={employee}
-              invoiceList={invoiceList}
-              productList={productList}
-              userProfile={userProfile}
-            />
-          </div>
-        ))}
+        {employeeList
+          ?.sort((a, b) => a?.name?.localeCompare(b?.name))
+          ?.map((employee) => (
+            <div key={employee?.id} className=" ">
+              <Employee
+                employeeList={employeeList}
+                employee={employee}
+                invoiceList={invoiceList}
+                productList={productList}
+                userProfile={userProfile}
+                inventoryList={inventoryList}
+              />
+            </div>
+          ))}
       </div>
     </div>
   );

@@ -6,15 +6,28 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { toast } from "react-toastify";
 import InventoryModal from "./InventoryModal";
 
-export default function Employee({ employee, invoiceList, userProfile , employeeList, productList}) {
+export default function Employee({
+  employee,
+  invoiceList,
+  userProfile,
+  employeeList,
+  productList,
+  inventoryList,
+}) {
   const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [showInventories, setShowInventories] = useState(false);
   const [gfe, setGfe] = useState(employee?.gfe || false);
   const [showModal, setShowModal] = useState(false);
-  const [servicePercentage, setServicePercentage] = useState(employee?.service_percentage, 0);
-  const [retailPercentage, setRetailPercentage] = useState(employee?.retail_percentage, 0);
-  const [employeeName, setEmployeeName] = useState(employee?.name, '');
+  const [servicePercentage, setServicePercentage] = useState(
+    employee?.service_percentage,
+    0
+  );
+  const [retailPercentage, setRetailPercentage] = useState(
+    employee?.retail_percentage,
+    0
+  );
+  const [employeeName, setEmployeeName] = useState(employee?.name, "");
 
   useEffect(() => {
     const filteredInvoices = invoiceList.filter(
@@ -34,7 +47,9 @@ export default function Employee({ employee, invoiceList, userProfile , employee
         {
           label: "Yes",
           onClick: () => {
-            fetch("/api/employees/" + employee?.id + "/send_reset_password_link");
+            fetch(
+              "/api/employees/" + employee?.id + "/send_reset_password_link"
+            );
           },
         },
         {
@@ -51,7 +66,12 @@ export default function Employee({ employee, invoiceList, userProfile , employee
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ gfe, service_percentage: servicePercentage, retail_percentage: retailPercentage, name: employeeName}),
+      body: JSON.stringify({
+        gfe,
+        service_percentage: servicePercentage,
+        retail_percentage: retailPercentage,
+        name: employeeName,
+      }),
     })
       .then((res) => {
         if (res.ok) {
@@ -73,7 +93,6 @@ export default function Employee({ employee, invoiceList, userProfile , employee
       });
   }
 
-
   function deleteEmployee() {
     confirmAlert({
       title: "Confirm to submit",
@@ -88,24 +107,24 @@ export default function Employee({ employee, invoiceList, userProfile , employee
                 "Content-Type": "application/json",
               },
             })
-            .then((res) => {
-              if (res.ok) {
-                toast.success("Employee has been deleted successfully.");
-                window.location.reload();
-              } else if (res.status === 404) {
-                res.json().then((json) => {
-                  toast.error("Please provide a client.");
-                });
-              } else {
-                res.json().then((json) => {
-                  toast.error("Failed to delete the Employee");
-                });
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              toast.error("An error occured.");
-            });
+              .then((res) => {
+                if (res.ok) {
+                  toast.success("Employee has been deleted successfully.");
+                  window.location.reload();
+                } else if (res.status === 404) {
+                  res.json().then((json) => {
+                    toast.error("Please provide a client.");
+                  });
+                } else {
+                  res.json().then((json) => {
+                    toast.error("Failed to delete the Employee");
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                toast.error("An error occured.");
+              });
           },
         },
         {
@@ -122,10 +141,11 @@ export default function Employee({ employee, invoiceList, userProfile , employee
       <Popover.Body>
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
-          <Form.Control 
-            type="text" 
-            defaultValue={employee?.name} 
-            onChange={(e) => setEmployeeName(e.target.value)}/>
+          <Form.Control
+            type="text"
+            defaultValue={employee?.name}
+            onChange={(e) => setEmployeeName(e.target.value)}
+          />
           <Form.Label className="mt-2">Email</Form.Label>
           <Form.Control type="text" readOnly disabled value={employee?.email} />
           <Form.Check
@@ -162,7 +182,6 @@ export default function Employee({ employee, invoiceList, userProfile , employee
     <Card className="text-center w-[20rem] sm:w-[25rem]" border="info">
       <Card.Header as="h5">{employee?.name}</Card.Header>
       <Card.Body className="">
-    
         {userProfile?.is_admin === true ? (
           <>
             <div className="flex justify-between gap-2">
@@ -207,12 +226,12 @@ export default function Employee({ employee, invoiceList, userProfile , employee
                     placement="bottom"
                     overlay={updatePopover}
                   >
-                  <Button
-                    // onClick={updateGfePercent}
-                    variant="info"
-                  >
-                    Update
-                  </Button>
+                    <Button
+                      // onClick={updateGfePercent}
+                      variant="info"
+                    >
+                      Update
+                    </Button>
                   </OverlayTrigger>
                   <Button
                     variant="danger"
@@ -250,6 +269,7 @@ export default function Employee({ employee, invoiceList, userProfile , employee
         employeeList={employeeList}
         userProfile={userProfile}
         productList={productList}
+        entireInventoryList={inventoryList}
       />
     </div>
   );

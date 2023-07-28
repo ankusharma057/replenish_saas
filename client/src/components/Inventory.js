@@ -25,15 +25,14 @@ const Inventory = ({
 
   const [showTotalEmpInventory, setShowTotalEmpInventory] = useState(false);
   const [totalEmpInventory, settotalEmpInventory] = useState({});
-  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] = useState("");
+  const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
+    useState("");
 
   const [filterInventory, setFilterInventory] = useState([]);
 
   const [searchInput, setSearchInput] = useState("");
 
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
-
-  // console.log(userProfile);
 
   useEffect(() => {
     if (userProfile?.is_admin) {
@@ -53,7 +52,12 @@ const Inventory = ({
       }
     }
     return () => {};
-  }, [inventoryList, userProfile.has_access_to, userProfile?.is_admin, userProfile?.is_inv_manager]);
+  }, [
+    inventoryList,
+    userProfile.has_access_to,
+    userProfile?.is_admin,
+    userProfile?.is_inv_manager,
+  ]);
 
   useEffect(() => {
     fetch("/api/inventory_requests")
@@ -79,15 +83,17 @@ const Inventory = ({
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success("Inventory Deleted Successfully.");
-                  window.location.reload();
-                } else if (res.status == 404) {
+                  toast.success(`${product?.name} Deleted  Successfully.`);
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
+                } else if (res.status === 404) {
                   res.json().then((json) => {
                     toast.error("Please provide a client.");
                   });
                 } else {
                   res.json().then((json) => {
-                    toast.error("Failed to delete the Inventory");
+                    toast.error("Failed to Delete the Product ");
                   });
                 }
               })

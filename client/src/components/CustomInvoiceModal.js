@@ -2,26 +2,30 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 function CustomInvoiceModal(props) {
-  var invoiceData = props.invoiceData;
-  var invoiceID = invoiceData.id;
-  var employeeName = invoiceData.employee_name;
-  var productName = invoiceData.product_name;
-  var clientName = invoiceData.client_name;
-  var charge = invoiceData.charge;
-  var dateOfService = invoiceData.date_of_service;
-  var conciergeFeePaid = invoiceData.concierge_fee_paid;
-  var gfe = invoiceData.gfe;
-  var paidByClientCash = invoiceData.paid_by_client_cash;
-  var paidByClientCredit = invoiceData.paid_by_client_credit;
-  var personalDiscount = invoiceData.personal_discount;
-  var tip = invoiceData.tip;
-  var comments = invoiceData.comments;
-  var overheadFeeType = invoiceData.overhead_fee_type;
-  var overheadFeeValue = invoiceData.overhead_fee_value;
+  let invoiceData = props.invoiceData;
+  let invoiceID = invoiceData.id;
+  let employeeName = invoiceData.employee_name;
+  let products_hash = invoiceData.products_hash;
+  let productName = invoiceData.product_name;
+  let clientName = invoiceData.client_name;
+  let charge = invoiceData.charge;
+  let dateOfService = invoiceData.date_of_service;
+  let conciergeFeePaid = invoiceData.concierge_fee_paid;
+  let gfe = invoiceData.gfe;
+  let paidByClientCash = invoiceData.paid_by_client_cash;
+  let paidByClientCredit = invoiceData.paid_by_client_credit;
+  let personalDiscount = invoiceData.personal_discount;
+  let tip = invoiceData.tip;
+  let comments = invoiceData.comments;
+  let overheadFeeType = invoiceData.overhead_fee_type;
+  let overheadFeeValue = invoiceData.overhead_fee_value;
+
+
   return (
     <Modal
-      {...props}
-      // fullscreen="sm-down"
+      // {...props}
+      show={props.show}
+      onHide={props.onHide}
       dialogClassName="addwidth px-0 sm:px-2"
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
@@ -36,95 +40,149 @@ function CustomInvoiceModal(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-center px-2 ">
-          <form className="max-w-4xl mx-auto bg-white p-4 rounded-md">
-            <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Provider:</p>
-                <div>{employeeName}</div>
+          <form className="max-w-4xl mx-auto bg-white md:p-4 rounded-md">
+            <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+              <div className="flex flex-col">
+                <span className="text-gray-700">Provider:</span>
+                <span>{employeeName}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Client Name:</p>
-                <div>{clientName}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Client Name:</span>
+                <span>{clientName}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Date of Service:
-                </p>
-                <div>{dateOfService}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Date of Service:</span>
+                <span>{dateOfService}</span>
               </div>
             </div>
 
-            <div className="border rounded-sm p-2 mb-4 flex justify-content-around">
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Concierge Fee Paid:
+            {invoiceData?.products_hash?.products?.length > 0 && (
+              <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                <p>
+                  <b>Products</b>
                 </p>
-                <div>{conciergeFeePaid ? "Yes" : "No"}</div>
+
+                <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                  <table className="table-auto  w-full ">
+                    <thead className="whitespace-normal">
+                      <tr>
+                        <th className="min-w-[6rem]">Product</th>
+                        <th className="min-w-[6rem]">Quantity</th>
+                        <th className="min-w-[6rem]">Price</th>
+                        <th className="min-w-[6rem]">Total Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="whitespace-normal">
+                      {invoiceData?.products_hash?.products.map(
+                        (product, i) => (
+                          <tr key={i}>
+                            <td>{product[0]}</td>
+                            <td>{product[1]}</td>
+                            <td>{Number(product[2] || 0).toFixed(2)}</td>
+                            <td>
+                              {Number(product[1] * product[2] || 0).toFixed(2)}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {invoiceData?.products_hash?.retail_products?.length > 0 && (
+              <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                <p>
+                  <b>Retali Products</b>
+                </p>
+
+                <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                  <table className="table-auto  w-full ">
+                    <thead className="whitespace-normal">
+                      <tr>
+                        <th className="min-w-[6rem]">Product</th>
+                        <th className="min-w-[6rem]">Quantity</th>
+                        <th className="min-w-[6rem]">Price</th>
+                        <th className="min-w-[6rem]">Total Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="whitespace-normal">
+                      {invoiceData?.products_hash?.products.map(
+                        (product, i) => (
+                          <tr key={i}>
+                            <td>{product[0]}</td>
+                            <td>{product[1]}</td>
+                            <td>{product[2]}</td>
+                            <td>{+(product[1] * product[2])}</td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+              <div className="flex flex-col">
+                <span className="text-gray-700">Concierge Fee Paid:</span>
+                <span>{conciergeFeePaid ? "Yes" : "No"}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">GFE:</p>
-                <div>{gfe ? "Yes" : "No"}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">GFE:</span>
+                <span>{gfe ? "Yes" : "No"}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Paid By Client Cash:
-                </p>
-                <div>{paidByClientCash}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Paid By Client Cash:</span>
+                <span>{paidByClientCash}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Paid By Client Credit:
-                </p>
-                <div>{paidByClientCredit}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Paid By Client Credit:</span>
+                <span>{paidByClientCredit}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Total Paid by Client:
-                </p>
-                <div>{paidByClientCredit + paidByClientCash}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Total Paid by Client:</span>
+                <span>
+                  {Number(
+                    paidByClientCredit + paidByClientCash || 0
+                  )?.toFixed() || paidByClientCredit + paidByClientCash}
+                </span>
+              </div>
+            </div>
+
+            <div className="border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+              <div className="flex flex-col">
+                <span className="text-gray-700">Personal Discount:</span>
+                <span>{personalDiscount}</span>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-gray-700">Tip:</span>
+                <span>{tip}</span>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-gray-700">Comments:</span>
+                <span>{comments}</span>
               </div>
             </div>
 
             <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">
-                  Personal Discount:
-                </p>
-                <div>{personalDiscount}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Overhead Fee Type:</span>
+                <span>{overheadFeeType || "Not given"}</span>
               </div>
 
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Tip:</p>
-                <div>{tip}</div>
-              </div>
-
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Comments:</p>
-                <div>{comments}</div>
-              </div>
-            </div>
-
-            <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-              <div>
-                <p className="text-sm md:text-base lg:text-lg font-semibold">
-                  Overhead:
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Fee Type:</p>
-                <div>{overheadFeeType}</div>
-              </div>
-
-              <div>
-                <p className="text-sm md:text-base lg:text-lg">Fee Value:</p>
-                <div>{overheadFeeValue}</div>
+              <div className="flex flex-col">
+                <span className="text-gray-700">Overhead Fee Value:</span>
+                <span>{overheadFeeValue || "Not given"}</span>
               </div>
             </div>
           </form>
