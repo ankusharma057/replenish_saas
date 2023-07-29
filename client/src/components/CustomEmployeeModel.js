@@ -1,6 +1,6 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import CustomInvoiceModal from "./CustomInvoiceModal";
+import CustomModal from "./CustomModal";
 import { useState } from "react";
 
 function CustomEmployeeModal(props) {
@@ -13,7 +13,7 @@ function CustomEmployeeModal(props) {
   return (
     <>
       {modalShow && (
-        <CustomInvoiceModal
+        <CustomModal
           show={modalShow}
           onHide={() => setModalShow(false)}
           invoiceData={invoiceData}

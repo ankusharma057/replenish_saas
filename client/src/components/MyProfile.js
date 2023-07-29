@@ -261,7 +261,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
       ? inventoryList
       : inventoryList?.filter(
           (inventory) =>
-            inventory?.product?.product_type === userProfile.has_access_only_to
+            inventory?.product?.product_type !== userProfile.has_access_only_to
         );
 
   if (loading) return <Header></Header>;

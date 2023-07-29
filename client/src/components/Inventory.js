@@ -42,7 +42,7 @@ const Inventory = ({
       if (userProfile?.is_inv_manager) {
         if (!(userProfile.has_access_only_to === "all")) {
           const filteredProducts = inventoryList?.filter((item) =>
-            userProfile.has_access_only_to.includes(item?.product?.product_type)
+            userProfile?.has_access_only_to?.includes(item?.product?.product_type)
           );
           setFilterInventory(filteredProducts);
         } else {
@@ -66,15 +66,15 @@ const Inventory = ({
       });
   }, []);
 
-  const deleteSubmit = (product) => {
+  const deleteSubmit = (inventory) => {
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure to delete ${product?.name} `,
+      message: `Are you sure to delete ${inventory?.product?.name} `,
       buttons: [
         {
           label: "Yes",
           onClick: () => {
-            fetch(`/api/inventories/${product?.id}`, {
+            fetch(`/api/inventories/${inventory?.id}`, {
               method: "DELETE",
               headers: {
                 "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const Inventory = ({
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success(`${product?.name} Deleted  Successfully.`);
+                  toast.success(`${inventory?.product?.name} Deleted Successfully.`);
                   setTimeout(() => {
                     window.location.reload();
                   }, 2000);
@@ -92,7 +92,7 @@ const Inventory = ({
                   });
                 } else {
                   res.json().then((json) => {
-                    toast.error("Failed to Delete the Product ");
+                    toast.error("Failed to Delete the Inventory.");
                   });
                 }
               })
@@ -466,7 +466,7 @@ const Inventory = ({
               Inventory Request
             </h2>
             <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
-              {requestedInventoryData
+              {requestedInventoryData?.filter((request) => !request?.is_approved)
                 ?.filter((data) => {
                   // If userProfile.has_access_only_to is "all", show all items
                   if (userProfile.has_access_only_to === "all") {
@@ -694,7 +694,7 @@ const Inventory = ({
                         <Button
                           variant="danger"
                           onClick={() => {
-                            deleteSubmit(data?.product);
+                            deleteSubmit(data);
                           }}
                           title="Delete Product"
                         >
