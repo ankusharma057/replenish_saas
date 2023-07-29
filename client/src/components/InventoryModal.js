@@ -182,7 +182,7 @@ const InventoryModal = ({
                           <Form.Control
                             type="number"
                             // step="0.01"
-                            defaultValue={data?.quantity}
+                            defaultValue={data?.quantity.toFixed(2)}
                             onChange={(e) => {
                               setUpdatedList({
                                 ...updatedList,
@@ -200,7 +200,7 @@ const InventoryModal = ({
                         </Form>
                       ) : (
                         <div className="flex flex-col justify-center gap-2">
-                          <span>{updateData.quantity || data?.quantity} </span>
+                          <span>{parseFloat(updateData.quantity || data?.quantity).toFixed(2)} </span>
                         </div>
                       )}
                     </td>
