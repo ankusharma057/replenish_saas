@@ -40,12 +40,11 @@ const Inventory = ({
       return;
     } else {
       if (userProfile?.is_inv_manager) {
-        if (userProfile.has_access_to?.length > 0) {
-          const filteredProducts = inventoryList.filter((item) =>
-            userProfile.has_access_to.includes(item?.product?.product_type)
+        if (!(userProfile.has_access_only_to === "all")) {
+          const filteredProducts = inventoryList?.filter((item) =>
+            userProfile.has_access_only_to.includes(item?.product?.product_type)
           );
           setFilterInventory(filteredProducts);
-          // console.log(filteredProducts);
         } else {
           setFilterInventory(inventoryList);
         }
@@ -54,7 +53,7 @@ const Inventory = ({
     return () => {};
   }, [
     inventoryList,
-    userProfile.has_access_to,
+    userProfile.has_access_only_to,
     userProfile?.is_admin,
     userProfile?.is_inv_manager,
   ]);
@@ -350,34 +349,40 @@ const Inventory = ({
     data?.forEach((employee) => {
       // Loop through each employee's inventories
       employee.employees_inventories.forEach((inventory) => {
-        // const { product } = inventory;
-        // const { name: inventory?.product?.name } = product;
+        // Check if the product type matches userProfile.has_access_only_to
+        const productTypeMatches =
+          userProfile?.has_access_only_to === "all" ||
+          inventory?.product?.product_type === userProfile.has_access_only_to;
 
-        // Check if the product is already in the result
-        if (!result[inventory?.product?.name]) {
-          result[inventory?.product?.name] = [];
-        }
+        // Continue processing only if the product type matches
+        if (productTypeMatches) {
+          // Check if the product is already in the result
+          if (!result[inventory?.product?.name]) {
+            result[inventory?.product?.name] = [];
+          }
 
-        // Check if the employee is already in the product's array
-        const existingEmployee = result[inventory?.product?.name].find(
-          (item) => item?.employee_name === employee?.name
-        );
+          // Check if the employee is already in the product's array
+          const existingEmployee = result[inventory?.product?.name].find(
+            (item) => item?.employee_name === employee?.name
+          );
 
-        // If the employee is not in the array, add them with quantity
-        if (!existingEmployee) {
-          result[inventory?.product?.name].push({
-            employee_name: employee?.name,
-            total_quantity: inventory?.quantity,
-          });
-        } else {
-          // If the employee is already in the array, update the quantity
-          existingEmployee.total_quantity += inventory?.quantity;
+          // If the employee is not in the array, add them with quantity
+          if (!existingEmployee) {
+            result[inventory?.product?.name].push({
+              employee_name: employee?.name,
+              total_quantity: inventory?.quantity,
+            });
+          } else {
+            // If the employee is already in the array, update the quantity
+            existingEmployee.total_quantity += inventory?.quantity;
+          }
         }
       });
     });
 
     return result;
   };
+
 
   return (
     <>
@@ -460,45 +465,54 @@ const Inventory = ({
             <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
               Inventory Request
             </h2>
-            <ul className=" container  mx-auto text-lg pl-0 px-4 mx-auto font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
-              {requestedInventoryData?.map((data) => {
-                const dateObj = new Date(data?.date_of_use);
-                const year = dateObj.getFullYear();
-                const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-                const day = String(dateObj.getDate()).padStart(2, "0");
-                const formattedDate = `${year}-${month}-${day}`;
-
-                return (
-                  <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
-                    <span className="text-red-500 text-xl ">*</span>
-                    <span className="text-blue-700 mx-2">
-                      {data?.requestor?.name}
-                    </span>
-                    has asked for
-                    <span className="text-blue-700 mx-2">
-                      {data?.quantity_asked} Quantity of{" "}
-                      {data?.inventory?.product?.name}.
-                    </span>
-                    Date Needed:
-                    <span className="text-blue-700 mx-2">{formattedDate}.</span>
-                    <Button
-                      onClick={() => acceptRequestInventorySubmit(data)}
-                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
-                      title="Click To Accept this Requested Inventory"
-                    >
-                      Fulfill
-                    </Button>
-                    <Button
-                      onClick={() => rejectRequestInventorySubmit(data)}
-                      className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
-                      title="Click To Reject this Requested Inventory"
-                      variant="danger"
-                    >
-                      Deny
-                    </Button>
-                  </li>
-                );
-              })}
+            <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
+              {requestedInventoryData
+                ?.filter((data) => {
+                  // If userProfile.has_access_only_to is "all", show all items
+                  if (userProfile.has_access_only_to === "all") {
+                    return true;
+                  }
+                  // If userProfile.has_access_only_to is not "all",
+                  // show items with matching product_type
+                  return (
+                    data?.inventory?.product?.product_type ===
+                    userProfile.has_access_only_to
+                  );
+                })
+                .map((data) => {
+                  return (
+                    <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
+                      <span className="text-red-500 text-xl ">*</span>
+                      <span className="text-blue-700 mx-2">
+                        {data?.requestor?.name}
+                      </span>
+                      has asked for
+                      <span className="text-blue-700 mx-2">
+                        {data?.quantity_asked} Quantity of{" "}
+                        {data?.inventory?.product?.name}.
+                      </span>
+                      Date Needed:
+                      <span className="text-blue-700 mx-2">
+                        {new Date(data?.date_of_use)?.toLocaleDateString()}.
+                      </span>
+                      <Button
+                        onClick={() => acceptRequestInventorySubmit(data)}
+                        className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                        title="Click To Accept this Requested Inventory"
+                      >
+                        Fulfill
+                      </Button>
+                      <Button
+                        onClick={() => rejectRequestInventorySubmit(data)}
+                        className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                        title="Click To Reject this Requested Inventory"
+                        variant="danger"
+                      >
+                        Deny
+                      </Button>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         )}

@@ -10,6 +10,7 @@ const InventoryModal = ({
   invList,
   productList,
   entireInventoryList,
+  userProfile,
 }) => {
   const dataList = inventoryList?.employees_inventories || invList;
   const initialNewProduct = {
@@ -28,6 +29,7 @@ const InventoryModal = ({
   const [showAddNew, setShowAddNew] = useState(false);
   const [newProduct, setNewProduct] = useState(initialNewProduct);
   const [newProductArr, setnewProductArr] = useState([]);
+  // const [filtereDataList, setfiltereDataList] = useState([]);
   const saveProduct = (e) => {
     e.preventDefault();
     setnewProductArr([
@@ -116,6 +118,25 @@ const InventoryModal = ({
     });
   };
 
+  const filteredInventoryList =
+    userProfile.has_access_only_to === "all"
+      ? entireInventoryList
+      : entireInventoryList?.filter((product) => {
+          return (
+            product?.product?.product_type === userProfile.has_access_only_to
+          );
+        });
+
+  const filtereDataList =
+    userProfile.has_access_only_to === "all"
+      ? dataList
+      : dataList?.filter((product) => {
+          // console.log(product.product);
+          return (
+            product.product?.product_type === userProfile.has_access_only_to
+          );
+        });
+
   return (
     <Modal
       show={showModal}
@@ -143,7 +164,7 @@ const InventoryModal = ({
             </thead>
 
             <tbody>
-              {dataList?.map((data) => {
+              {filtereDataList?.map((data) => {
                 return (
                   <tr key={data?.product?.id}>
                     <td className="align-middle">
@@ -183,7 +204,6 @@ const InventoryModal = ({
                         </div>
                       )}
                     </td>
-
                     <td className="align-middle">
                       {isUpdate ? (
                         <div
@@ -296,7 +316,7 @@ const InventoryModal = ({
                   required
                 >
                   <option value="">Select Product</option>
-                  {entireInventoryList
+                  {filteredInventoryList
                     ?.filter(
                       (item1) =>
                         !newProductArr.some(
