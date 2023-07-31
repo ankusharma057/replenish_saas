@@ -223,7 +223,7 @@ const InventoryModal = ({
                                 : setIsAlert({
                                     maxQuantityAlert: true,
                                     message: ` You can only select quantity upto ${
-                                      maxQuantity || data?.quantity
+                                      maxQuantity ?  maxQuantity : data?.quantity
                                     } for ${data.product.name}`,
                                   });
 
@@ -248,7 +248,7 @@ const InventoryModal = ({
                               //   },
                               // });
                             }}
-                            min={0.01}
+                            min={0}
                             required
                           />
                         </Form>
@@ -410,7 +410,7 @@ const InventoryModal = ({
                     });
                   }}
                   value={newProduct.quantity}
-                  min={0.01}
+                  min={0}
                   max={newProduct?.maxquantity}
                   required
                 />

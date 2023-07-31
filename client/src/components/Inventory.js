@@ -389,12 +389,10 @@ const Inventory = ({
 
   const filteredInventoryList =
     userProfile.has_access_only_to === "all"
-      ? inventoryList
-      : inventoryList &&
-        inventoryList?.filter((inventory) => {
-          return (
-            inventory?.product?.product_type === userProfile.has_access_only_to
-          );
+      ? productList
+      : productList &&
+        productList?.filter((product) => {
+          return product?.product_type === userProfile.has_access_only_to;
         });
 
   return (
@@ -569,10 +567,10 @@ const Inventory = ({
                   {filteredInventoryList?.map((data) => {
                     return (
                       <option
-                        key={data?.product?.name}
-                        value={data?.product?.name}
+                        key={data?.name}
+                        value={data?.name}
                       >
-                        {data?.product?.name}
+                        {data?.name}
                       </option>
                     );
                   })}
@@ -596,7 +594,7 @@ const Inventory = ({
                 }
                 // max={productInfoInput?.maxQty}
                 title={` You can select upto ${productInfoInput?.quantity} Quantity`}
-                min={1}
+                min={0}
                 required
               />
 
