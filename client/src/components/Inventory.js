@@ -277,7 +277,7 @@ const Inventory = ({
                   });
                 } else {
                   res.json().then((json) => {
-                    toast.error("Failed to Accept the Inventory ");
+                    toast.error("You do not have enough Available Inventory for this product ");
                   });
                 }
               })

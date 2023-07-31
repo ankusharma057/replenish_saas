@@ -13,4 +13,8 @@ class InventoryRequest < ApplicationRecord
 
     inventory.update!(quantity: (inventory.quantity.to_f - quantity_asked.to_f))
   end
+
+  def product
+    inventory.product
+  end
 end
