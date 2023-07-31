@@ -101,7 +101,7 @@ function App() {
   };
 
   const onDeleteProduct = (id) => {
-    const updatedProductsList = productList.filter(
+    const updatedProductsList = productList?.filter(
       (product) => product.id !== id
     );
     setProductList(updatedProductsList);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Header from "./Header";
 import { Button, Card, Modal, Form } from "react-bootstrap";
 import CustomModal from "./CustomModal.js";
@@ -22,6 +22,26 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
     quantity: 0,
   });
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
+
+  const [filteredInventoryList, setFilteredInventoryList] = useState([]);
+  useEffect(() => {
+    if (inventoryList?.length) {
+      const filterInventoryList =
+        userProfile.has_access_only_to === "all"
+          ? inventoryList
+          : inventoryList &&
+            inventoryList?.filter((inventory) => {
+              return (
+                inventory?.product?.product_type !==
+                userProfile?.has_access_only_to
+              );
+            });
+      setFilteredInventoryList(filterInventoryList);
+    }
+
+    return () => {};
+  }, [inventoryList]);
+
   const [requestInvetoryInput, setRequestInvetoryInput] = useState({
     quantity_asked: 0,
     product_name: "",
@@ -255,16 +275,6 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         setDisabled(false);
       });
   };
-
-  const filteredInventoryList =
-    userProfile.has_access_only_to === "all"
-      ? inventoryList
-      : inventoryList &&
-        inventoryList?.filter((inventory) => {
-          return (
-            inventory?.product?.product_type !== userProfile.has_access_only_to
-          );
-        });
 
   if (loading) return <Header></Header>;
   if (errors) return <h1>{errors}</h1>;

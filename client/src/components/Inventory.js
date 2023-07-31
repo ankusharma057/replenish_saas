@@ -34,6 +34,7 @@ const Inventory = ({
 
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
 
+  console.log({ inventoryList });
   useEffect(() => {
     if (userProfile?.is_admin) {
       setFilterInventory(inventoryList);
@@ -349,10 +350,11 @@ const Inventory = ({
   const convertData = (data) => {
     const result = {};
 
+    console.log({ employeeList });
     // Loop through the data
     data?.forEach((employee) => {
       // Loop through each employee's inventories
-      employee.employees_inventories.forEach((inventory) => {
+      employee.employees_inventories?.forEach((inventory) => {
         // Check if the product type matches userProfile.has_access_only_to
         const productTypeMatches =
           userProfile?.has_access_only_to === "all" ||
@@ -391,8 +393,8 @@ const Inventory = ({
     userProfile.has_access_only_to === "all"
       ? productList
       : productList &&
-        productList?.filter((product) => {
-          return product?.product_type === userProfile.has_access_only_to;
+        productList?.filter((inventory) => {
+          return inventory?.product_type === userProfile.has_access_only_to;
         });
 
   return (
@@ -561,16 +563,12 @@ const Inventory = ({
                       product_name: e.target.value,
                     })
                   }
-                  required
                 >
                   <option>Select Product</option>
-                  {filteredInventoryList?.map((data) => {
+                  {filteredInventoryList?.map((product) => {
                     return (
-                      <option
-                        key={data?.name}
-                        value={data?.name}
-                      >
-                        {data?.name}
+                      <option key={product?.id} value={product?.name}>
+                        {product?.name}
                       </option>
                     );
                   })}
