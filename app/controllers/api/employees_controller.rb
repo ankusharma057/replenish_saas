@@ -70,15 +70,17 @@ class Api::EmployeesController < ApplicationController
       else
         main_inventory.quantity -= (quantity_hash["quantity"].to_f - emp_inventory_previous_quantity.to_f)
       end
-      
+
       main_inventory.save
     end
 
     params["new_products"].each do |product|
-      company_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
-
       @employee.employees_inventories
         .create!(product: Product.where(name: product["product_name"]).first, quantity: product["quantity"])
+
+      main_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
+      main_inventory.quantity -= product["quantity"].to_f
+      main_inventory.save
     end
   end
 
