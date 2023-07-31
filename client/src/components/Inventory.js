@@ -42,7 +42,9 @@ const Inventory = ({
       if (userProfile?.is_inv_manager) {
         if (!(userProfile.has_access_only_to === "all")) {
           const filteredProducts = inventoryList?.filter((item) =>
-            userProfile?.has_access_only_to?.includes(item?.product?.product_type)
+            userProfile?.has_access_only_to?.includes(
+              item?.product?.product_type
+            )
           );
           setFilterInventory(filteredProducts);
         } else {
@@ -82,7 +84,9 @@ const Inventory = ({
             })
               .then((res) => {
                 if (res.ok) {
-                  toast.success(`${inventory?.product?.name} Deleted Successfully.`);
+                  toast.success(
+                    `${inventory?.product?.name} Deleted Successfully.`
+                  );
                   setTimeout(() => {
                     window.location.reload();
                   }, 2000);
@@ -115,7 +119,6 @@ const Inventory = ({
 
   const updateProductSubmit = (e) => {
     e.preventDefault();
-    console.log({ productInfoInput });
     setShowUpdateProductModal(false);
 
     confirmAlert({
@@ -165,7 +168,6 @@ const Inventory = ({
 
   const createProductSubmit = (e) => {
     e.preventDefault();
-    console.log({ productInfoInput });
     setShowUpdateProductModal(false);
 
     confirmAlert({
@@ -277,7 +279,9 @@ const Inventory = ({
                   });
                 } else {
                   res.json().then((json) => {
-                    toast.error("You do not have enough Available Inventory for this product ");
+                    toast.error(
+                      "You do not have enough Available Inventory for this product "
+                    );
                   });
                 }
               })
@@ -383,6 +387,15 @@ const Inventory = ({
     return result;
   };
 
+  const filteredInventoryList =
+    userProfile.has_access_only_to === "all"
+      ? inventoryList
+      : inventoryList &&
+        inventoryList?.filter((inventory) => {
+          return (
+            inventory?.product?.product_type === userProfile.has_access_only_to
+          );
+        });
 
   return (
     <>
@@ -466,7 +479,8 @@ const Inventory = ({
               Inventory Request
             </h2>
             <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
-              {requestedInventoryData?.filter((request) => !request?.is_approved)
+              {requestedInventoryData
+                ?.filter((request) => !request?.is_approved)
                 ?.filter((data) => {
                   // If userProfile.has_access_only_to is "all", show all items
                   if (userProfile.has_access_only_to === "all") {
@@ -525,7 +539,9 @@ const Inventory = ({
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            Product Id: {productInfoInput?.id}
+            {productInfoInput?.id
+              ? `Product Id: ${productInfoInput?.id}`
+              : "Add new product"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="flex justify-between flex-col items-center gap-2">
@@ -550,10 +566,13 @@ const Inventory = ({
                   required
                 >
                   <option>Select Product</option>
-                  {productList?.map((product) => {
+                  {filteredInventoryList?.map((data) => {
                     return (
-                      <option key={product?.name} value={product?.name}>
-                        {product?.name}
+                      <option
+                        key={data?.product?.name}
+                        value={data?.product?.name}
+                      >
+                        {data?.product?.name}
                       </option>
                     );
                   })}
@@ -674,8 +693,6 @@ const Inventory = ({
                         <Button
                           variant="info"
                           onClick={() => {
-                            console.log(data);
-
                             setproductInfoInput({
                               update: true,
                               quantity: data.quantity,

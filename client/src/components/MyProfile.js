@@ -259,10 +259,12 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   const filteredInventoryList =
     userProfile.has_access_only_to === "all"
       ? inventoryList
-      : inventoryList?.filter(
-          (inventory) =>
+      : inventoryList &&
+        inventoryList?.filter((inventory) => {
+          return (
             inventory?.product?.product_type !== userProfile.has_access_only_to
-        );
+          );
+        });
 
   if (loading) return <Header></Header>;
   if (errors) return <h1>{errors}</h1>;

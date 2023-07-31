@@ -218,7 +218,6 @@ const InventoryModal = ({
                                 Number(findInventory?.quantity) +
                                 Number(data?.quantity);
 
-                              console.log({ maxQuantity });
                               +e.target.value <= Number(maxQuantity)
                                 ? handleQuantityChange(e, data, findInventory)
                                 : setIsAlert({
