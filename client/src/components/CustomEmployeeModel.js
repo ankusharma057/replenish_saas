@@ -1,28 +1,27 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import CustomInvoiceModal from "./CustomInvoiceModal";
+import CustomModal from "./CustomModal";
 import { useState } from "react";
 
 function CustomEmployeeModal(props) {
   const { employeeInvoices } = props;
   const [modalShow, setModalShow] = useState(false);
   const [invoiceData, setinvoiceData] = useState(null);
-
-  function handleClick(invoice) {
-    // setinvoiceData();
+  function handleClick() {
     setModalShow(!modalShow);
   }
   return (
     <>
       {modalShow && (
-        <CustomInvoiceModal
+        <CustomModal
           show={modalShow}
-          onHide={handleClick}
+          onHide={() => setModalShow(false)}
           invoiceData={invoiceData}
         />
       )}
       <Modal
-        {...props}
+        show={props.show}
+        onHide={props.onHide}
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >

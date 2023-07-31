@@ -7,31 +7,34 @@ const InventoryModal = ({
   showModal,
   setshowModal,
   inventoryList,
-  updateQtySubmit,
-  updateQtyInput,
-  setUpdateQtyInput,
   invList,
-  userProfile,
-  employeeList,
   productList,
+  entireInventoryList,
+  userProfile,
 }) => {
   const dataList = inventoryList?.employees_inventories || invList;
   const initialNewProduct = {
     product_name: "",
-    quantity: 1,
+    quantity: 0,
     id: 0,
+    maxquantity: 0,
   };
-  const [updateModalShow, setUpdateModalShow] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [updateData, setUpdateData] = useState({
     quantity: 0,
     product: "",
     id: "",
+    maxQuantity: 0,
   });
   const [updatedList, setUpdatedList] = useState([]);
   const [showAddNew, setShowAddNew] = useState(false);
   const [newProduct, setNewProduct] = useState(initialNewProduct);
   const [newProductArr, setnewProductArr] = useState([]);
+  const [isAlert, setIsAlert] = useState({
+    maxQuantityAlert: false,
+    message: "",
+  });
+  // const [filtereDataList, setfiltereDataList] = useState([]);
   const saveProduct = (e) => {
     e.preventDefault();
     setnewProductArr([
@@ -46,7 +49,6 @@ const InventoryModal = ({
   };
 
   const updateNewProduct = (data) => {
-    console.log({ data, newProductArr });
     setNewProduct(data);
     setIsUpdate(true);
     setShowAddNew(true);
@@ -58,6 +60,9 @@ const InventoryModal = ({
 
   const updateSubmit = () => {
     setshowModal(false);
+
+    console.log("dondnsf");
+
     // Create a copy of the original object
     const modifiedObject = { ...updatedList };
 
@@ -96,11 +101,11 @@ const InventoryModal = ({
                   toast.success(" Updated successfully.");
                   window.location.reload();
                 } else if (res.status === 404) {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Please provide a client.");
                   });
                 } else {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Failed to Update ");
                   });
                 }
@@ -118,6 +123,36 @@ const InventoryModal = ({
           },
         },
       ],
+    });
+  };
+
+  const filteredInventoryList =
+    userProfile.has_access_only_to === "all"
+      ? entireInventoryList
+      : entireInventoryList?.filter((product) => {
+          return (
+            product?.product?.product_type === userProfile.has_access_only_to
+          );
+        });
+
+  const filtereDataList =
+    userProfile.has_access_only_to === "all"
+      ? dataList
+      : dataList?.filter((product) => {
+          // console.log(product.product);
+          return (
+            product.product?.product_type === userProfile.has_access_only_to
+          );
+        });
+
+  const handleQuantityChange = (e, invData, findInventory) => {
+    console.log("calllss");
+    setUpdatedList({
+      ...updatedList,
+      employee_id: invData?.employee?.id,
+      [invData?.product?.id]: {
+        quantity: e.target.value,
+      },
     });
   };
 
@@ -146,9 +181,8 @@ const InventoryModal = ({
                 <th>Update</th>
               </tr>
             </thead>
-
             <tbody>
-              {dataList?.map((data) => {
+              {filtereDataList?.map((data) => {
                 return (
                   <tr key={data?.product?.id}>
                     <td className="align-middle">
@@ -165,67 +199,96 @@ const InventoryModal = ({
                         <Form className="flex flex-col gap-4">
                           <Form.Control
                             type="number"
-                            // step="0.01"
-                            defaultValue={data?.quantity}
+                            step=".01"
+                            defaultValue={data?.quantity.toFixed(2)}
+                            value={
+                              updatedList[data?.product?.id]?.quantity ||
+                              data?.quantity ||
+                              undefined
+                            }
                             onChange={(e) => {
-                              console.log("THIS IS THE WANTED ID:", data);
-                              setUpdatedList({
-                                ...updatedList,
-                                employee_id: data?.employee?.id,
-                                [data?.product?.id]: {
-                                  quantity: Number(
-                                    e.target.value || 0
-                                  )?.toFixed(2),
-                                },
-                              });
+                              const findInventory = entireInventoryList.find(
+                                (envData) => {
+                                  return (
+                                    data?.product?.id === envData?.product?.id
+                                  );
+                                }
+                              );
+                              const maxQuantity =
+                                Number(findInventory?.quantity) +
+                                Number(data?.quantity);
+
+                              +e.target.value <= Number(maxQuantity)
+                                ? handleQuantityChange(e, data, findInventory)
+                                : setIsAlert({
+                                    maxQuantityAlert: true,
+                                    message: ` You can only select quantity upto ${
+                                      maxQuantity || data?.quantity
+                                    } for ${data.product.name}`,
+                                  });
+
+                              // setUpdatedList({
+                              //   ...updatedList,
+                              //   employee_id: data?.employee?.id,
+                              //   [data?.product?.id]: {
+                              //     quantity:
+                              //       e.target.value >
+                              //       Number(findInventory?.quantity) +
+                              //         Number(data?.quantity)
+                              //         ? setIsAlert({
+                              //             ...isAlert,
+                              //             message: `You ca select upto ${
+                              //               Number(findInventory?.quantity) +
+                              //               Number(data?.quantity)
+                              //             }`,
+                              //           })
+                              //         : Number(e.target.value || 0)?.toFixed(
+                              //             2
+                              //           ),
+                              //   },
+                              // });
                             }}
-                            min={1}
+                            min={0.01}
                             required
                           />
                         </Form>
                       ) : (
                         <div className="flex flex-col justify-center gap-2">
-                          <span>{updateData.quantity || data?.quantity} </span>
+                          <span>{parseFloat(data?.quantity).toFixed(2)} </span>
                         </div>
                       )}
                     </td>
-
                     <td className="align-middle">
-                      {isUpdate ? (
-                        <div
-                          onClick={() => {
-                            setIsUpdate(true);
-                            setUpdateData({
-                              product: data?.product?.name,
-                              quantity: data?.quantity - 1,
-                            });
-                          }}
-                          className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
-                        >
-                          -
-                        </div>
-                      ) : (
-                        <div className="flex gap-4 justify-center">
-                          <div
-                            onClick={() => {
-                              setIsUpdate(true);
-                              setUpdateData({
-                                product: data?.product?.name,
-                                quantity: data?.quantity - 1,
-                              });
-                            }}
-                            className="px-3 text-2xl text-white cursor-pointer  font-bold rounded-md  bg-blue-400"
-                          >
-                            -
-                          </div>
-                        </div>
-                      )}
+                      <div
+                        onClick={() => {
+                          setIsUpdate(true);
+                          // const findInventory = entireInventoryList.find(
+                          //   (envData) => {
+                          //     return data?.product?.id === envData?.product?.id;
+                          //   }
+                          // );
+                          // setUpdateData({
+                          //   product: data?.product?.name,
+                          //   quantity: data?.quantity,
+                          //   maxQuantity: +(
+                          //     Number(data?.quantity) +
+                          //     Number(findInventory?.quantity)
+                          //   ).toFixed(2),
+                          // });
+                        }}
+                        className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                      >
+                        -
+                      </div>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </Table>
+          {isAlert.maxQuantityAlert && (
+            <span className="text-sm block -mt-2 mb-2">{isAlert?.message}</span>
+          )}
           {newProductArr?.length > 0 && (
             <Table bordered hover responsive className="w-full text-center">
               <thead>
@@ -285,36 +348,46 @@ const InventoryModal = ({
               className="w-full flex flex-col md:flex-row  gap-2 text-center mb-2"
               onSubmit={saveProduct}
             >
-              <div className="  md:w-2/4">
+              <div className=" md:w-2/4">
                 <Form.Select
                   aria-label="Default select example"
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const selectedMaxQuantity =
+                      e.target.selectedOptions[0].getAttribute("maxquantity");
+
                     setNewProduct({
                       ...newProduct,
                       product_name: e.target.value,
-                    })
-                  }
+                      maxquantity: Number(selectedMaxQuantity),
+                    });
+                  }}
                   value={newProduct?.product_name}
                   required
                 >
                   <option value="">Select Product</option>
-                  {productList
+                  {filteredInventoryList
                     ?.filter(
                       (item1) =>
                         !newProductArr.some(
-                          (item2) => item2?.product_name === item1?.name
+                          (item2) =>
+                            item2?.product_name === item1?.product?.name
                         )
                     )
                     ?.filter(
                       (item1) =>
                         !dataList.some(
-                          (item2) => item2.product?.name === item1?.name
+                          (item2) =>
+                            item2?.product?.name === item1?.product?.name
                         )
                     )
                     ?.map((product) => {
                       return (
-                        <option key={product?.id} value={product?.name}>
-                          {product?.name}
+                        <option
+                          key={product?.id}
+                          value={product?.product?.name}
+                          maxquantity={product?.quantity}
+                        >
+                          {product?.product?.name}
                         </option>
                       );
                     })}
@@ -323,9 +396,13 @@ const InventoryModal = ({
               <div className="md:w-2/4 flex justify-between gap-2">
                 <Form.Control
                   type="number"
-                  // step="0.01"
+                  step="0.01"
                   className="w-[80%]"
-                  placeholder="Add Quantity"
+                  placeholder={` ${
+                    newProduct?.maxquantity
+                      ? `Quantity. max ${newProduct?.maxquantity || 0}`
+                      : `Select the product first`
+                  } `}
                   onChange={(e) => {
                     setNewProduct({
                       ...newProduct,
@@ -333,7 +410,8 @@ const InventoryModal = ({
                     });
                   }}
                   value={newProduct.quantity}
-                  min={1}
+                  min={0.01}
+                  max={newProduct?.maxquantity}
                   required
                 />
                 <div className="w-[20%] text-right ">
@@ -358,7 +436,6 @@ const InventoryModal = ({
       </Modal.Body>
       <Modal.Footer>
         {isUpdate && <Button onClick={updateSubmit}>Update</Button>}
-
         <Button onClick={() => setshowModal(false)}>Close</Button>
       </Modal.Footer>
     </Modal>

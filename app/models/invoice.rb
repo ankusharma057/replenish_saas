@@ -80,6 +80,7 @@ class Invoice < ApplicationRecord
   end
 
   private
+
   def revise_charge
     if (charge && charge_changed?) ||
       (overhead_fee_type && overhead_fee_type_changed?) ||
@@ -97,8 +98,8 @@ class Invoice < ApplicationRecord
   def return_inventory
     if products_hash && products_hash.any?
       products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
-        emp_product_quantity = employee.employees_inventories.find_or_create_by(product: Product.find_by(name: product_quantity.keys.first))
-        emp_product_quantity.update!(quantity: (emp_product_quantity.quantity.to_f + product_quantity.values.first.to_f))
+        emp_inventory = employee.employees_inventories.find_or_create_by(product: Product.find_by(name: product_quantity.keys.first))
+        emp_inventory.update!(quantity: (emp_inventory.quantity.to_f + product_quantity.values.first.to_f))
       end
     end
   end

@@ -59,11 +59,24 @@ class Api::EmployeesController < ApplicationController
 
   def update_inventories
     params[:updated_products].each do |product_id, quantity_hash|
-      @employee.employees_inventories.where(product_id: product_id)
-        .update!(quantity: quantity_hash["quantity"])
+      emp_inventory = @employee.employees_inventories.where(product_id: product_id).first
+      emp_inventory_previous_quantity = emp_inventory.quantity.to_f
+      emp_inventory.update(quantity: quantity_hash["quantity"].to_f)
+
+      main_inventory = Inventory.find_or_create_by(product: Product.find_by(id: product_id))
+
+      if emp_inventory_previous_quantity > quantity_hash["quantity"].to_f
+        main_inventory.quantity += (emp_inventory_previous_quantity.to_f - quantity_hash["quantity"].to_f)
+      else
+        main_inventory.quantity -= (quantity_hash["quantity"].to_f - emp_inventory_previous_quantity.to_f)
+      end
+      
+      main_inventory.save
     end
 
     params["new_products"].each do |product|
+      company_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
+
       @employee.employees_inventories
         .create!(product: Product.where(name: product["product_name"]).first, quantity: product["quantity"])
     end

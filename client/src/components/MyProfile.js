@@ -35,7 +35,6 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   function handleClick(invoice) {
     setModalShow(!modalShow);
   }
-
   const params = useParams();
   const { id } = params;
 
@@ -219,7 +218,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
 
   const requestInvetorySubmit = (e) => {
     e.preventDefault();
-
+    setDisabled(true);
     fetch(`/api/inventory_requests`, {
       method: "POST",
       headers: {
@@ -236,22 +235,36 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           toast.success("You have requested inventory successfully");
           setTimeout(() => {
             window.location.reload();
+            setDisabled(false);
           }, 1000);
         } else if (res.status === 404) {
           res.json().then((json) => {
             toast.error("Please provide a client.");
           });
+          setDisabled(false);
         } else {
           res.json().then((json) => {
             toast.error("Failed to request this inventory.");
+            setDisabled(false);
           });
         }
       })
       .catch((error) => {
         console.error("Error:", error);
         toast.error("An error occured.");
+        setDisabled(false);
       });
   };
+
+  const filteredInventoryList =
+    userProfile.has_access_only_to === "all"
+      ? inventoryList
+      : inventoryList &&
+        inventoryList?.filter((inventory) => {
+          return (
+            inventory?.product?.product_type !== userProfile.has_access_only_to
+          );
+        });
 
   if (loading) return <Header></Header>;
   if (errors) return <h1>{errors}</h1>;
@@ -306,8 +319,8 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                 required
               >
                 <option value="">Select The Product</option>
-                {inventoryList?.length > 0 &&
-                  inventoryList?.map((inventory) => {
+                {filteredInventoryList?.length > 0 &&
+                  filteredInventoryList?.map((inventory) => {
                     return (
                       <option key={inventory?.id} value={inventory?.id}>
                         {inventory?.product?.name}
@@ -351,7 +364,9 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                 }
                 required
               />
-              <Button type="submit">Submit</Button>
+              <Button key={disabled} disabled={disabled} type="submit">
+                Submit
+              </Button>
             </Form>
           </div>
         </Modal.Body>
@@ -375,14 +390,24 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         </h1>
       </div>
       <div className="flex justify-end mr-8">
-        {!userProfile?.is_inv_manager && !userProfile?.is_admin && (
+        {!(userProfile.has_access_only_to === "all") &&
+        userProfile?.is_inv_manager ? (
+          // Show the button if user is userProfile.has_access_only_to array and is_inv_manager is true
           <Button
             onClick={() => setshowRequestInvetory(true)}
             className="text-4xl font-bold text-center text-blue-600"
           >
             Request Inventory
           </Button>
-        )}
+        ) : !userProfile?.is_inv_manager && !userProfile?.is_admin ? (
+          // Show the button if user is not is_inv_manager and not is_admin
+          <Button
+            onClick={() => setshowRequestInvetory(true)}
+            className="text-4xl font-bold text-center text-blue-600"
+          >
+            Request Inventory
+          </Button>
+        ) : null}
       </div>
       {userProfile?.inventory_prompts?.filter(
         (prompt) => !prompt.is_accepted === true
