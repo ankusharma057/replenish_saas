@@ -30,6 +30,10 @@ const InventoryModal = ({
   const [showAddNew, setShowAddNew] = useState(false);
   const [newProduct, setNewProduct] = useState(initialNewProduct);
   const [newProductArr, setnewProductArr] = useState([]);
+  const [isAlert, setIsAlert] = useState({
+    maxQuantityAlert: false,
+    message: "",
+  });
   // const [filtereDataList, setfiltereDataList] = useState([]);
   const saveProduct = (e) => {
     e.preventDefault();
@@ -56,6 +60,9 @@ const InventoryModal = ({
 
   const updateSubmit = () => {
     setshowModal(false);
+
+    console.log("dondnsf");
+
     // Create a copy of the original object
     const modifiedObject = { ...updatedList };
 
@@ -138,6 +145,17 @@ const InventoryModal = ({
           );
         });
 
+  const handleQuantityChange = (e, invData, findInventory) => {
+    console.log("calllss");
+    setUpdatedList({
+      ...updatedList,
+      employee_id: invData?.employee?.id,
+      [invData?.product?.id]: {
+        quantity: e.target.value,
+      },
+    });
+  };
+
   return (
     <Modal
       show={showModal}
@@ -163,7 +181,6 @@ const InventoryModal = ({
                 <th>Update</th>
               </tr>
             </thead>
-
             <tbody>
               {filtereDataList?.map((data) => {
                 return (
@@ -182,78 +199,97 @@ const InventoryModal = ({
                         <Form className="flex flex-col gap-4">
                           <Form.Control
                             type="number"
-                            // step="0.01"
-                            placeholder={`max: ${updateData?.maxQuantity || 0}`}
+                            step=".01"
                             defaultValue={data?.quantity.toFixed(2)}
+                            value={
+                              updatedList[data?.product?.id]?.quantity ||
+                              data?.quantity ||
+                              undefined
+                            }
                             onChange={(e) => {
-                              setUpdatedList({
-                                ...updatedList,
-                                employee_id: data?.employee?.id,
-                                [data?.product?.id]: {
-                                  quantity: Number(
-                                    e.target.value || 0
-                                  )?.toFixed(2),
-                                },
-                              });
+                              const findInventory = entireInventoryList.find(
+                                (envData) => {
+                                  return (
+                                    data?.product?.id === envData?.product?.id
+                                  );
+                                }
+                              );
+                              const maxQuantity =
+                                Number(findInventory?.quantity) +
+                                Number(data?.quantity);
+
+                              console.log({ maxQuantity });
+                              +e.target.value <= Number(maxQuantity)
+                                ? handleQuantityChange(e, data, findInventory)
+                                : setIsAlert({
+                                    maxQuantityAlert: true,
+                                    message: ` You can only select quantity upto ${
+                                      maxQuantity || data?.quantity
+                                    } for ${data.product.name}`,
+                                  });
+
+                              // setUpdatedList({
+                              //   ...updatedList,
+                              //   employee_id: data?.employee?.id,
+                              //   [data?.product?.id]: {
+                              //     quantity:
+                              //       e.target.value >
+                              //       Number(findInventory?.quantity) +
+                              //         Number(data?.quantity)
+                              //         ? setIsAlert({
+                              //             ...isAlert,
+                              //             message: `You ca select upto ${
+                              //               Number(findInventory?.quantity) +
+                              //               Number(data?.quantity)
+                              //             }`,
+                              //           })
+                              //         : Number(e.target.value || 0)?.toFixed(
+                              //             2
+                              //           ),
+                              //   },
+                              // });
                             }}
-                            max={updateData?.maxQuantity}
-                            min={1}
+                            min={0.01}
                             required
                           />
                         </Form>
                       ) : (
                         <div className="flex flex-col justify-center gap-2">
-                          <span>{parseFloat(updateData.quantity || data?.quantity).toFixed(2)} </span>
+                          <span>{parseFloat(data?.quantity).toFixed(2)} </span>
                         </div>
                       )}
                     </td>
                     <td className="align-middle">
-                      {isUpdate ? (
-                        <div
-                          onClick={() => {
-                            setIsUpdate(true);
-
-                            const findInventory = entireInventoryList.find((envData) => {
-                              return data?.product?.id === envData?.product?.id
-                            })
-
-                            setUpdateData({
-                              product: data?.product?.name,
-                              quantity: data?.quantity,
-                              maxQuantity: +(Number(data?.quantity) + Number(findInventory?.quantity)).toFixed(2)
-                            });
-                          }}
-                          className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
-                        >
-                          -
-                        </div>
-                      ) : (
-                        <div className="flex gap-4 justify-center">
-                          <div
-                            onClick={() => {
-                              const findInventory = entireInventoryList.find((envData) => {
-                                return data?.product?.id === envData?.product?.id
-                              })
-
-                              setIsUpdate(true);
-                              setUpdateData({
-                                product: data?.product?.name,
-                                quantity: data?.quantity,
-                                maxQuantity: +(Number(data?.quantity) + Number(findInventory?.quantity)).toFixed(2)
-                              });
-                            }}
-                            className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
-                          >
-                            -
-                          </div>
-                        </div>
-                      )}
+                      <div
+                        onClick={() => {
+                          setIsUpdate(true);
+                          // const findInventory = entireInventoryList.find(
+                          //   (envData) => {
+                          //     return data?.product?.id === envData?.product?.id;
+                          //   }
+                          // );
+                          // setUpdateData({
+                          //   product: data?.product?.name,
+                          //   quantity: data?.quantity,
+                          //   maxQuantity: +(
+                          //     Number(data?.quantity) +
+                          //     Number(findInventory?.quantity)
+                          //   ).toFixed(2),
+                          // });
+                        }}
+                        className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
+                      >
+                        -
+                      </div>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </Table>
+          {isAlert.maxQuantityAlert && (
+            <span className="text-sm block -mt-2 mb-2">{isAlert?.message}</span>
+          )}
           {newProductArr?.length > 0 && (
             <Table bordered hover responsive className="w-full text-center">
               <thead>
@@ -401,7 +437,6 @@ const InventoryModal = ({
       </Modal.Body>
       <Modal.Footer>
         {isUpdate && <Button onClick={updateSubmit}>Update</Button>}
-
         <Button onClick={() => setshowModal(false)}>Close</Button>
       </Modal.Footer>
     </Modal>
