@@ -24,6 +24,7 @@ const InventoryModal = ({
     quantity: 0,
     product: "",
     id: "",
+    maxQuantity: 0,
   });
   const [updatedList, setUpdatedList] = useState([]);
   const [showAddNew, setShowAddNew] = useState(false);
@@ -182,6 +183,7 @@ const InventoryModal = ({
                           <Form.Control
                             type="number"
                             // step="0.01"
+                            placeholder={`max: ${updateData?.maxQuantity || 0}`}
                             defaultValue={data?.quantity.toFixed(2)}
                             onChange={(e) => {
                               setUpdatedList({
@@ -194,6 +196,7 @@ const InventoryModal = ({
                                 },
                               });
                             }}
+                            max={updateData?.maxQuantity}
                             min={1}
                             required
                           />
@@ -209,9 +212,15 @@ const InventoryModal = ({
                         <div
                           onClick={() => {
                             setIsUpdate(true);
+
+                            const findInventory = entireInventoryList.find((envData) => {
+                              return data?.product?.id === envData?.product?.id
+                            })
+
                             setUpdateData({
                               product: data?.product?.name,
-                              quantity: data?.quantity - 1,
+                              quantity: data?.quantity,
+                              maxQuantity: +(Number(data?.quantity) + Number(findInventory?.quantity)).toFixed(2)
                             });
                           }}
                           className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
@@ -222,13 +231,18 @@ const InventoryModal = ({
                         <div className="flex gap-4 justify-center">
                           <div
                             onClick={() => {
+                              const findInventory = entireInventoryList.find((envData) => {
+                                return data?.product?.id === envData?.product?.id
+                              })
+
                               setIsUpdate(true);
                               setUpdateData({
                                 product: data?.product?.name,
-                                quantity: data?.quantity - 1,
+                                quantity: data?.quantity,
+                                maxQuantity: +(Number(data?.quantity) + Number(findInventory?.quantity)).toFixed(2)
                               });
                             }}
-                            className="px-3 text-2xl text-white cursor-pointer  font-bold rounded-md  bg-blue-400"
+                            className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
                           >
                             -
                           </div>
@@ -299,7 +313,7 @@ const InventoryModal = ({
               className="w-full flex flex-col md:flex-row  gap-2 text-center mb-2"
               onSubmit={saveProduct}
             >
-              <div className="  md:w-2/4">
+              <div className=" md:w-2/4">
                 <Form.Select
                   aria-label="Default select example"
                   onChange={(e) => {

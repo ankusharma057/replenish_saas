@@ -4,7 +4,7 @@ class Inventory < ApplicationRecord
   belongs_to :product
   has_many :inventory_requests, dependent: :destroy
 
-  include Storage
+  # include Storage
 
   def prompt_to_employee(employee, quantity)
     update!(quantity: self.quantity.to_f - quantity.to_f)
