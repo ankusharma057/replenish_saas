@@ -65,10 +65,10 @@ class Api::EmployeesController < ApplicationController
 
       main_inventory = Inventory.find_or_create_by(product: Product.find_by(id: product_id))
 
-      if emp_inventory_previous_quantity > quantity_hash["quantity"].to_f
-        main_inventory.quantity += (emp_inventory_previous_quantity.to_f - quantity_hash["quantity"].to_f)
+      main_inventory.quantity = if emp_inventory_previous_quantity > quantity_hash["quantity"].to_f
+        main_inventory.quantity.to_f + (emp_inventory_previous_quantity.to_f - quantity_hash["quantity"].to_f)
       else
-        main_inventory.quantity -= (quantity_hash["quantity"].to_f - emp_inventory_previous_quantity.to_f)
+        main_inventory.quantity.to_f - (quantity_hash["quantity"].to_f - emp_inventory_previous_quantity.to_f)
       end
 
       main_inventory.save
