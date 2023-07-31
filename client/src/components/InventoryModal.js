@@ -57,18 +57,42 @@ const InventoryModal = ({
   const deleteAddProduct = (id) => {
     setnewProductArr(newProductArr.filter((data) => data.id !== id));
   };
+  const checkQuantityErrors = (updated_products) => {
+    const a = Object.keys(updated_products).find(
+      (key) =>
+        updated_products[key]?.maxQuantity <
+          Number(updated_products[key]?.quantity) ||
+        Number(updated_products[key]?.quantity) === 0
+    );
+
+    return a;
+  };
 
   const updateSubmit = () => {
-    setshowModal(false);
-
-    console.log("dondnsf");
-
     // Create a copy of the original object
     const modifiedObject = { ...updatedList };
+    const getIsMaxError = checkQuantityErrors(modifiedObject);
+    if (getIsMaxError) {
+      const product_name = modifiedObject[getIsMaxError]?.product_name;
+      const productMaxQuantity = modifiedObject[getIsMaxError]?.maxQuantity;
+      const productQuantity = modifiedObject[getIsMaxError]?.quantity;
 
+      setIsAlert({
+        maxQuantityAlert: true,
+        message: ` ${
+          Number(productQuantity) === 0
+            ? `Quantity should not be ${productQuantity}  for product ${product_name}  `
+            : `You can select upto  ${productMaxQuantity} for product ${product_name}  `
+        }`,
+
+        productId: getIsMaxError,
+      });
+
+      return;
+    }
     // Remove the "employee_id" field from the copied object
+    setshowModal(false);
     delete modifiedObject?.employee_id;
-
     let updatedProductData = {
       updated_products: modifiedObject,
       new_products: newProductArr,
@@ -125,7 +149,6 @@ const InventoryModal = ({
       ],
     });
   };
-
   const filteredInventoryList =
     userProfile.has_access_only_to === "all"
       ? entireInventoryList
@@ -139,19 +162,22 @@ const InventoryModal = ({
     userProfile.has_access_only_to === "all"
       ? dataList
       : dataList?.filter((product) => {
-          // console.log(product.product);
           return (
             product.product?.product_type === userProfile.has_access_only_to
           );
         });
 
-  const handleQuantityChange = (e, invData, findInventory) => {
-    console.log("calllss");
+  const handleQuantityChange = (e, invData, maxQuantity) => {
+    setIsAlert({
+      maxQuantityAlert: false,
+    });
     setUpdatedList({
       ...updatedList,
       employee_id: invData?.employee?.id,
       [invData?.product?.id]: {
         quantity: e.target.value,
+        maxQuantity,
+        product_name: invData?.product?.name,
       },
     });
   };
@@ -192,6 +218,14 @@ const InventoryModal = ({
                             <span>{data?.product?.name} </span>
                           </span>
                         </div>
+
+                        {isAlert.maxQuantityAlert &&
+                          String(isAlert?.productId) ===
+                            String(data?.product?.id) && (
+                            <span className="text-sm block text-red-400 -mt-2 mb-2">
+                              {isAlert?.message}
+                            </span>
+                          )}
                       </div>
                     </td>
                     <td className="align-middle">
@@ -201,11 +235,6 @@ const InventoryModal = ({
                             type="number"
                             step=".01"
                             defaultValue={data?.quantity.toFixed(2)}
-                            value={
-                              updatedList[data?.product?.id]?.quantity ||
-                              data?.quantity ||
-                              undefined
-                            }
                             onChange={(e) => {
                               const findInventory = entireInventoryList.find(
                                 (envData) => {
@@ -217,36 +246,7 @@ const InventoryModal = ({
                               const maxQuantity =
                                 Number(findInventory?.quantity) +
                                 Number(data?.quantity);
-
-                              +e.target.value <= Number(maxQuantity)
-                                ? handleQuantityChange(e, data, findInventory)
-                                : setIsAlert({
-                                    maxQuantityAlert: true,
-                                    message: ` You can only select quantity upto ${
-                                      maxQuantity ?  maxQuantity : data?.quantity
-                                    } for ${data.product.name}`,
-                                  });
-
-                              // setUpdatedList({
-                              //   ...updatedList,
-                              //   employee_id: data?.employee?.id,
-                              //   [data?.product?.id]: {
-                              //     quantity:
-                              //       e.target.value >
-                              //       Number(findInventory?.quantity) +
-                              //         Number(data?.quantity)
-                              //         ? setIsAlert({
-                              //             ...isAlert,
-                              //             message: `You ca select upto ${
-                              //               Number(findInventory?.quantity) +
-                              //               Number(data?.quantity)
-                              //             }`,
-                              //           })
-                              //         : Number(e.target.value || 0)?.toFixed(
-                              //             2
-                              //           ),
-                              //   },
-                              // });
+                              handleQuantityChange(e, data, maxQuantity);
                             }}
                             min={0}
                             required
@@ -262,19 +262,6 @@ const InventoryModal = ({
                       <div
                         onClick={() => {
                           setIsUpdate(true);
-                          // const findInventory = entireInventoryList.find(
-                          //   (envData) => {
-                          //     return data?.product?.id === envData?.product?.id;
-                          //   }
-                          // );
-                          // setUpdateData({
-                          //   product: data?.product?.name,
-                          //   quantity: data?.quantity,
-                          //   maxQuantity: +(
-                          //     Number(data?.quantity) +
-                          //     Number(findInventory?.quantity)
-                          //   ).toFixed(2),
-                          // });
                         }}
                         className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
                       >
@@ -286,9 +273,7 @@ const InventoryModal = ({
               })}
             </tbody>
           </Table>
-          {isAlert.maxQuantityAlert && (
-            <span className="text-sm block -mt-2 mb-2">{isAlert?.message}</span>
-          )}
+
           {newProductArr?.length > 0 && (
             <Table bordered hover responsive className="w-full text-center">
               <thead>
