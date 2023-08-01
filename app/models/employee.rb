@@ -5,9 +5,11 @@ class Employee < ApplicationRecord
   has_many :invoices
   has_many :products
   has_many :clients
-  has_many :inventory_prompts, class_name: 'InventoryPrompt'
-  has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id
-  has_many :employees_inventories, class_name: 'EmployeeInventory'
+  has_many :inventory_prompts, class_name: 'InventoryPrompt', dependent: :destroy
+  has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id, dependent: :destroy
+  has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
+
+  before_destroy :return_inventory
 
   has_secure_password
 
@@ -29,5 +31,14 @@ class Employee < ApplicationRecord
     current_inventory = self.employees_inventories.where(product: product).first
     current_inventory.quantity -= quantity.to_f
     current_inventory.save!
+  end
+
+  def return_inventory
+    employees_inventories.each do |emp_inventory|
+      inventory = Inventory.find_or_create_by(product: emp_inventory.product)
+      inventory.quantity += emp_inventory.quantity.to_f
+
+      inventory.save!
+    end
   end
 end
