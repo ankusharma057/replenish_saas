@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Modal, Table, Form } from "react-bootstrap";
+import { Button, Card, Modal, Table, Form, InputGroup } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import AssignModal from "./AssignModal";
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 
 const Inventory = ({
   userProfile,
@@ -28,13 +30,14 @@ const Inventory = ({
   const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
     useState("");
 
+  const [radioValue, setRadioValue] = useState('1');
+
   const [filterInventory, setFilterInventory] = useState([]);
 
-  const [searchInput, setSearchInput] = useState("");
+  const [comInvSearchInput, setComInvSearchInput] = useState("");
 
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
 
-  console.log({ inventoryList });
   useEffect(() => {
     if (userProfile?.is_admin) {
       setFilterInventory(inventoryList);
@@ -53,7 +56,7 @@ const Inventory = ({
         }
       }
     }
-    return () => {};
+    return () => { };
   }, [
     inventoryList,
     userProfile.has_access_only_to,
@@ -68,6 +71,17 @@ const Inventory = ({
         setRequestedInventoryData(data);
       });
   }, []);
+
+
+  useEffect(() => {
+    if (employeeList?.length) {
+      settotalEmpInventory(convertData(employeeList))
+    }
+    return () => null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeeList])
+
+
 
   const deleteSubmit = (inventory) => {
     confirmAlert({
@@ -393,10 +407,17 @@ const Inventory = ({
     userProfile.has_access_only_to === "all"
       ? productList
       : productList &&
-        productList?.filter((inventory) => {
-          return inventory?.product_type === userProfile.has_access_only_to;
-        });
+      productList?.filter((inventory) => {
+        return inventory?.product_type === userProfile.has_access_only_to;
+      });
 
+
+  const radios = [
+    { name: 'Company Inventory', value: '1' },
+    { name: 'Emp Inventories', value: '2' },
+  ];
+
+ 
   return (
     <>
       <Header userProfile={userProfile} />
@@ -471,6 +492,9 @@ const Inventory = ({
           <Button onClick={() => setShowTotalEmpInventory(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
+
+
+
       {requestedInventoryData?.filter((request) => !request?.is_approved)
         ?.length > 0 &&
         (userProfile?.is_inv_manager || userProfile?.is_admin) && (
@@ -607,27 +631,51 @@ const Inventory = ({
         </Modal.Footer>
       </Modal>
       <div className=" container  mx-auto">
-        <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
-          Company Inventory
-        </h2>
-        <div className="flex justify-center">
-          <input
-            type="text"
-            className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Search Product Name here"
-            onChange={(event) => setSearchInput(event.target.value)}
-          />
-          <Button
-            onClick={() => {
-              settotalEmpInventory(convertData(employeeList));
-              setShowTotalEmpInventory(true);
-            }}
-            className="self-end inline"
-          >
-            Emp Inventories
-          </Button>
+        <div className="text-4xl mt-8 font-bold text-center text-blue-400">
+          <ButtonGroup className="mb-2  border w-full md:w-auto border-gray-200 p-3 ">
+            {radios.map((radio, idx) => (
+              <ToggleButton
+                key={idx}
+                id={`radio-${idx}`}
+                type="radio"
+                className={`${radioValue === radio.value ? 'btn-white' : 'btn-blue'} toggle-button `}
+                name="radio"
+                style={{
+                  borderTopLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
+                  borderBottomLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
+                  borderTopRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
+                  borderBottomRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
+                }}
+                value={radio.value}
+                checked={radioValue === radio.value}
+                onChange={(e) => {
+                  setComInvSearchInput("");
+                  settotalEmpInventorySearchInput("")
+                  setRadioValue(e.currentTarget.value)
+                }}
+              >
+                {radio.name}
+              </ToggleButton>
+            ))}
+          </ButtonGroup>
         </div>
-        <Table bordered hover responsive className="w-full mt-4 text-center">
+
+        <div className="flex justify-center">
+
+          <InputGroup className="mb-3">
+            <Form.Control
+              placeholder="Search Product Name here"
+              aria-label="Search Product Name here"
+              aria-describedby="basic-addon2"
+              value={radioValue === "1" ? comInvSearchInput : totalEmpInventorySearchInput}
+              onChange={(event) => radioValue === "1" ? setComInvSearchInput(event.target.value) : settotalEmpInventorySearchInput(event.target.value)}
+            />
+            <InputGroup.Text id="basic-addon2">&#x1F50D;</InputGroup.Text>
+          </InputGroup>
+        </div>
+
+
+        {radioValue === "1" ? <Table bordered hover responsive className="w-full mt-4 text-center">
           <thead>
             <tr>
               <th>Product </th>
@@ -644,7 +692,7 @@ const Inventory = ({
                 ?.filter((data) => {
                   return data?.product?.name
                     ?.toLowerCase()
-                    .includes(searchInput?.toLocaleLowerCase());
+                    .includes(comInvSearchInput?.toLocaleLowerCase());
                 })
                 ?.map((data) => {
                   return (
@@ -718,9 +766,45 @@ const Inventory = ({
                   );
                 })}
           </tbody>
-        </Table>
-
-        <div
+        </Table> :
+          <div className="w-full max-h-[30rem]">
+            {Object.keys(totalEmpInventory)
+              ?.filter((data) => {
+                return data
+                  ?.toLowerCase()
+                  .includes(totalEmpInventorySearchInput?.toLocaleLowerCase());
+              })
+              .map((productName) => (
+                <div key={productName}>
+                  <h1 className="text-xl ml-2 mb-0">
+                    {productName || " Not Given"}
+                  </h1>
+                  <Table
+                    bordered
+                    hover
+                    responsive
+                    className="w-full text-center"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Employee Name</th>
+                        <th>Total Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {totalEmpInventory[productName]?.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.employee_name || "Not Given"}</td>
+                          <td>{item.total_quantity.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              ))}
+          </div>
+        }
+        {radioValue === "1" && <div
           className="my-10 container cursor-pointer mx-auto"
           onClick={() => {
             setShowUpdateProductModal(true);
@@ -738,7 +822,8 @@ const Inventory = ({
               +
             </p>
           </div>
-        </div>
+        </div>}
+
       </div>
     </>
   );
