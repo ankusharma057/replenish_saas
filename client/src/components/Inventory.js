@@ -638,7 +638,7 @@ const Inventory = ({
                 key={idx}
                 id={`radio-${idx}`}
                 type="radio"
-                className={`${radioValue === radio.value ? 'btn-white' : 'btn-blue'} toggle-button `}
+                className={`${radioValue === radio.value ? 'btn-blue' : 'btn-white'} toggle-button `}
                 name="radio"
                 style={{
                   borderTopLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
