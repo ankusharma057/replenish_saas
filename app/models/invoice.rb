@@ -72,7 +72,7 @@ class Invoice < ApplicationRecord
   end
 
   def fellow_invoices_finalized?
-    !fellow_invoices.map(&:is_finalized).include?(false)
+    fellow_invoices.map(&:is_finalized).include?(true)
   end
 
   def send_group_pdf_mail

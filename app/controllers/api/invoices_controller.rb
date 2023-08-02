@@ -58,8 +58,11 @@ class Api::InvoicesController < ApplicationController
   end
 
   def send_reject_mail
-    @invoice.send_group_pdf_mail if @invoice.fellow_invoices_finalized?
+    fellow_invoices = @invoice.fellow_invoices
+    fellow_invoices_finalized = @invoice.fellow_invoices_finalized?
     @invoice.reject_and_send_mail(params[:feedback])
+
+    fellow_invoices.first.send_group_pdf_mail if fellow_invoices && fellow_invoices_finalized
   end
 
   def download_attachment
