@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Invoice from "./Invoice";
-import { Form } from "react-bootstrap";
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 
 export default function InvoiceList({ userProfile }) {
-  const [finalizedInvoiceList, setFinalizedInvoiceList] = useState([]);
-  const [nonFinalizedInvoiceList, setNonFinalizedInvoiceList] = useState([]);
+
   const [invoiceList, setInvoiceList] = useState({
     finalizedInvoiceList: [],
     nonFinalizedInvoiceList: [],
   });
+  const [radioValue, setRadioValue] = useState('1');
+
   const [setselectList, setSetselectList] = useState("nonFinalizedInvoiceList");
   useEffect(() => {
     const fiInvoiceList = [];
@@ -38,23 +40,46 @@ export default function InvoiceList({ userProfile }) {
       });
   }, []); // Empty dependency array to run the effect only once
 
+
+
+  const radios = [
+    { name: 'Non Finalized Invoices', value: '1' },
+    { name: 'Finalized Invoices', value: '2' },
+  ];
+
   return (
     <div>
       <Header userProfile={userProfile} />
       <br />
       <div className="flex justify-content-center">
-        <div className="w-full sm:w-1/2 md:w-1/4">
-          <Form.Select
-            defaultValue={setselectList}
-            size="md"
-            aria-label="Default select example"
-            onChange={(e) => setSetselectList(e.target.value)}
-          >
-            <option value={"finalizedInvoiceList"}>Finalized Invoices</option>
-            <option value="nonFinalizedInvoiceList">
-              Non Finalized Invoices
-            </option>
-          </Form.Select>
+        <div className="w-full flex justify-center">
+
+          <ButtonGroup className="mb-2  border w-full md:w-auto border-gray-200 p-3 ">
+            {radios.map((radio, idx) => (
+              <ToggleButton
+                key={idx}
+                id={`radio-${idx}`}
+                type="radio"
+                className={`${radioValue === radio.value ? 'btn-white' : 'btn-blue'} toggle-button `}
+                name="radio"
+                style={{
+                  borderTopLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
+                  borderBottomLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
+                  borderTopRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
+                  borderBottomRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
+                }}
+                value={radio.value}
+                checked={radioValue === radio.value}
+                onChange={(e) => {
+                  setSetselectList(String(e.currentTarget.value) === "1" ? "nonFinalizedInvoiceList" : "finalizedInvoiceList")
+                  setRadioValue(e.currentTarget.value)
+                }}
+              >
+                {radio.name}
+              </ToggleButton>
+            ))}
+          </ButtonGroup>
+
         </div>
       </div>
       <div>
@@ -67,6 +92,6 @@ export default function InvoiceList({ userProfile }) {
         </div>
       </div>
       <br />
-    </div>
+    </div >
   );
 }
