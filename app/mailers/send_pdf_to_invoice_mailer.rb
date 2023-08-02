@@ -8,7 +8,7 @@ class SendPdfToInvoiceMailer < ApplicationMailer
 
     emails = Employee.admins.map(&:email)
     emails << @invoice_group.invoices.first.employee.email
-    # emails << "replenishmd_527@invoicesmelio.com"
+    emails << "replenishmd_527@invoicesmelio.com"
 
     mail(
       from: 'patrick@test.com',

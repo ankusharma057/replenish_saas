@@ -58,12 +58,14 @@ class Api::InvoicesController < ApplicationController
   end
 
   def send_reject_mail
-    invoice_group = @invoice.invoice_group
+    fellow_invoices = @invoice.fellow_invoices
+    fellow_invoices_finalized = @invoice.fellow_invoices_finalized?
     @invoice.reject_and_send_mail(params[:feedback])
-
-    invoice_group.send_finalized_mail if @invoice.fellow_invoices && @invoice.fellow_invoices_finalized
-  end
-
+    unless fellow_invoices.blank?
+      fellow_invoices.first.send_group_pdf_mail if fellow_invoices && fellow_invoices_finalized
+    end
+    end
+    
   def download_attachment
     if @invoice.document.attached?
       path = ActiveStorage::Blob.service.path_for(@invoice.document.key)
