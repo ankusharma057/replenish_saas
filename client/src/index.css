@@ -89,3 +89,11 @@ code {
     font-size: 1rem !important;
   }
 }
+
+@media screen and (max-width: 560px) {
+  .custom-toggle-btn {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    padding: 0.5rem !important;
+  }
+}

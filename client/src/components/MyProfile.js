@@ -48,9 +48,9 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
     date_of_use: "",
   });
 
-  const otherEmployeesList = employeeList?.filter(
-    (employee) => employee?.id !== userProfile?.id
-  );
+  const otherEmployeesList =
+    employeeList &&
+    employeeList?.filter((employee) => employee?.id !== userProfile?.id);
 
   function handleClick(invoice) {
     setModalShow(!modalShow);
@@ -340,9 +340,9 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
               </Form.Select>
               <Form.Control
                 type="number"
-                placeholder={` ${
+                placeholder={`${
                   requestInvetoryInput?.inventory_object?.quantity
-                    ? ` Type Quantity: max Quantity: ${requestInvetoryInput?.inventory_object?.quantity} `
+                    ? ` Type Quantity`
                     : "Select Product First"
                 }`}
                 onChange={(e) =>
@@ -351,7 +351,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                     quantity_asked: e.target.value,
                   })
                 }
-                max={+requestInvetoryInput?.inventory_object?.quantity || 0}
+                // max={+requestInvetoryInput?.inventory_object?.quantity || 0}
                 // min={1}
                 disabled={
                   requestInvetoryInput?.inventory_object?.quantity
