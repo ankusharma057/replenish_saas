@@ -34,8 +34,9 @@ module PdfDownloadable
         <body>
           <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>
           <div class="container" style="color: blue;">
-            <h2 style="text-align: left;">  Vendor: '"#{employee.name}"'  </h2> 
+            <h2 style="text-align: left;">  Vendor: '"#{employee.vedor_name}"'  </div> 
             <br>
+            <div style="text-align: right;">  Name: '"#{employee.name}"'  </div> 
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
 
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
@@ -124,8 +125,10 @@ module PdfDownloadable
         <body>
           <h1 style="text-align: center; color: blue;"> Replenish Aesthetics and Wellness</h1>
           <div class="container" style="color: blue;">
-            <h2 style="text-align: left;">  Vendor: '"#{employee.name}"'  </h2> 
+            <h2 style="text-align: left;">  Vendor: '"#{employee.vedor_name}"'  </div> 
             <br>
+            <div style="text-align: right;">  Name: '"#{employee.name}"'  </div>
+
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
 
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
