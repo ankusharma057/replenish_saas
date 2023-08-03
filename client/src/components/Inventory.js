@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Button, Card, Modal, Table, Form, InputGroup } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import AssignModal from "./AssignModal";
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import ToggleButton from 'react-bootstrap/ToggleButton';
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import ToggleButton from "react-bootstrap/ToggleButton";
 
 const Inventory = ({
   userProfile,
@@ -30,7 +30,7 @@ const Inventory = ({
   const [totalEmpInventorySearchInput, settotalEmpInventorySearchInput] =
     useState("");
 
-  const [radioValue, setRadioValue] = useState('1');
+  const [radioValue, setRadioValue] = useState("1");
 
   const [filterInventory, setFilterInventory] = useState([]);
 
@@ -56,7 +56,7 @@ const Inventory = ({
         }
       }
     }
-    return () => { };
+    return () => {};
   }, [
     inventoryList,
     userProfile.has_access_only_to,
@@ -72,16 +72,13 @@ const Inventory = ({
       });
   }, []);
 
-
   useEffect(() => {
     if (employeeList?.length) {
-      settotalEmpInventory(convertData(employeeList))
+      settotalEmpInventory(convertData(employeeList));
     }
-    return () => null
+    return () => null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [employeeList])
-
-
+  }, [employeeList]);
 
   const deleteSubmit = (inventory) => {
     confirmAlert({
@@ -407,17 +404,16 @@ const Inventory = ({
     userProfile.has_access_only_to === "all"
       ? productList
       : productList &&
-      productList?.filter((inventory) => {
-        return inventory?.product_type === userProfile.has_access_only_to;
-      });
-
+        productList?.filter((inventory) => {
+          return inventory?.product_type === userProfile.has_access_only_to;
+        });
 
   const radios = [
-    { name: 'Company Inventory', value: '1' },
-    { name: 'Emp Inventories', value: '2' },
+    { name: "Company Inventory", value: "1" },
+    { name: "Emp Inventories", value: "2" },
+    { name: "Company Request ", value: "3" },
   ];
 
- 
   return (
     <>
       <Header userProfile={userProfile} />
@@ -492,68 +488,6 @@ const Inventory = ({
           <Button onClick={() => setShowTotalEmpInventory(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
-
-
-
-      {requestedInventoryData?.filter((request) => !request?.is_approved)
-        ?.length > 0 &&
-        (userProfile?.is_inv_manager || userProfile?.is_admin) && (
-          <div className="px-4">
-            <h2 className="text-4xl mt-8 font-bold text-center text-blue-400">
-              Inventory Request
-            </h2>
-            <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
-              {requestedInventoryData
-                ?.filter((request) => !request?.is_approved)
-                ?.filter((data) => {
-                  // If userProfile.has_access_only_to is "all", show all items
-                  if (userProfile.has_access_only_to === "all") {
-                    return true;
-                  }
-                  // If userProfile.has_access_only_to is not "all",
-                  // show items with matching product_type
-                  return (
-                    data?.inventory?.product?.product_type ===
-                    userProfile.has_access_only_to
-                  );
-                })
-                .map((data) => {
-                  return (
-                    <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
-                      <span className="text-red-500 text-xl ">*</span>
-                      <span className="text-blue-700 mx-2">
-                        {data?.requestor?.name}
-                      </span>
-                      has asked for
-                      <span className="text-blue-700 mx-2">
-                        {data?.quantity_asked} Quantity of{" "}
-                        {data?.inventory?.product?.name}.
-                      </span>
-                      Date Needed:
-                      <span className="text-blue-700 mx-2">
-                        {new Date(data?.date_of_use)?.toLocaleDateString()}.
-                      </span>
-                      <Button
-                        onClick={() => acceptRequestInventorySubmit(data)}
-                        className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
-                        title="Click To Accept this Requested Inventory"
-                      >
-                        Fulfill
-                      </Button>
-                      <Button
-                        onClick={() => rejectRequestInventorySubmit(data)}
-                        className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
-                        title="Click To Reject this Requested Inventory"
-                        variant="danger"
-                      >
-                        Deny
-                      </Button>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-        )}
 
       <Modal
         show={showUpdateProductModal}
@@ -632,26 +566,36 @@ const Inventory = ({
       </Modal>
       <div className=" container  mx-auto">
         <div className="text-4xl mt-8 font-bold text-center text-blue-400">
-          <ButtonGroup className="mb-2  border w-full md:w-auto border-gray-200 p-3 ">
+          <ButtonGroup className="mb-2 gap-3 border w-full md:w-auto border-gray-200 p-3 ">
             {radios.map((radio, idx) => (
               <ToggleButton
                 key={idx}
                 id={`radio-${idx}`}
                 type="radio"
-                className={`${radioValue === radio.value ? 'btn-blue' : 'btn-white'} toggle-button `}
+                className={` custom-toggle-btn ${
+                  radioValue === radio.value ? "btn-blue" : "btn-white"
+                } toggle-button `}
                 name="radio"
-                style={{
-                  borderTopLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
-                  borderBottomLeftRadius: idx === 0 && radioValue === radio.value ? '0' : '1rem',
-                  borderTopRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
-                  borderBottomRightRadius: idx === radios.length - 1 && radioValue === radio.value ? '0' : '1rem',
-                }}
+                // style={{
+                //   borderTopLeftRadius:
+                //     idx === 0 && radioValue === radio.value ? "0" : "1rem",
+                //   borderBottomLeftRadius:
+                //     idx === 0 && radioValue === radio.value ? "0" : "1rem",
+                //   borderTopRightRadius:
+                //     idx === radios.length - 1 && radioValue === radio.value
+                //       ? "0"
+                //       : "1rem",
+                //   borderBottomRightRadius:
+                //     idx === radios.length - 1 && radioValue === radio.value
+                //       ? "0"
+                //       : "1rem",
+                // }}
                 value={radio.value}
                 checked={radioValue === radio.value}
                 onChange={(e) => {
                   setComInvSearchInput("");
-                  settotalEmpInventorySearchInput("")
-                  setRadioValue(e.currentTarget.value)
+                  settotalEmpInventorySearchInput("");
+                  setRadioValue(e.currentTarget.value);
                 }}
               >
                 {radio.name}
@@ -659,114 +603,145 @@ const Inventory = ({
             ))}
           </ButtonGroup>
         </div>
-
-        <div className="flex justify-center">
-
-          <InputGroup className="mb-3">
-            <Form.Control
-              placeholder="Search Product Name here"
-              aria-label="Search Product Name here"
-              aria-describedby="basic-addon2"
-              value={radioValue === "1" ? comInvSearchInput : totalEmpInventorySearchInput}
-              onChange={(event) => radioValue === "1" ? setComInvSearchInput(event.target.value) : settotalEmpInventorySearchInput(event.target.value)}
-            />
-            <InputGroup.Text id="basic-addon2">&#x1F50D;</InputGroup.Text>
-          </InputGroup>
+        <div className="flex mt-2 justify-center">
+          <div className="w-[52.5rem]">
+            <InputGroup className="mb-3 ">
+              <Form.Control
+                placeholder="Search Product Name here"
+                aria-label="Search Product Name here"
+                aria-describedby="basic-addon2"
+                value={
+                  radioValue === "1"
+                    ? comInvSearchInput
+                    : totalEmpInventorySearchInput
+                }
+                onChange={(event) =>
+                  radioValue === "1"
+                    ? setComInvSearchInput(event.target.value)
+                    : settotalEmpInventorySearchInput(event.target.value)
+                }
+              />
+              <InputGroup.Text id="basic-addon2">&#x1F50D;</InputGroup.Text>
+            </InputGroup>
+          </div>
         </div>
+        {radioValue === "1" && (
+          <Table bordered hover responsive className="w-full mt-4 text-center">
+            <thead>
+              <tr>
+                <th>Product </th>
+                <th>Product Type </th>
+                <th>Available Inv.</th>
+                <th>Replenish Inv.</th>
+                <th>Assign</th>
+                <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filterInventory &&
+                filterInventory
+                  ?.filter((data) => {
+                    return data?.product?.name
+                      ?.toLowerCase()
+                      .includes(comInvSearchInput?.toLocaleLowerCase());
+                  })
+                  ?.map((data) => {
+                    return (
+                      <tr key={data?.product?.id}>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.product?.name} </span>
+                            {/* <span>Product Name: Product </span> */}
+                          </div>
+                        </td>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.product?.product_type} </span>
+                          </div>
+                        </td>
 
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.quantity}</span>
+                          </div>
+                        </td>
 
-        {radioValue === "1" ? <Table bordered hover responsive className="w-full mt-4 text-center">
-          <thead>
-            <tr>
-              <th>Product </th>
-              <th>Product Type </th>
-              <th>Available Inv.</th>
-              <th>Replenish Inv.</th>
-              <th>Assign</th>
-              <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filterInventory &&
-              filterInventory
-                ?.filter((data) => {
-                  return data?.product?.name
-                    ?.toLowerCase()
-                    .includes(comInvSearchInput?.toLocaleLowerCase());
-                })
-                ?.map((data) => {
-                  return (
-                    <tr key={data?.product?.id}>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.product?.name} </span>
-                          {/* <span>Product Name: Product </span> */}
-                        </div>
-                      </td>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.product?.product_type} </span>
-                        </div>
-                      </td>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.replenish_total_inventory} </span>
+                          </div>
+                        </td>
 
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity}</span>
-                        </div>
-                      </td>
+                        <td className="align-middle">
+                          <Button
+                            variant="info"
+                            onClick={() => {
+                              setAssignProductData(data);
+                              setShowAssignMadal(true);
+                            }}
+                          >
+                            Assign
+                          </Button>
+                        </td>
 
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.replenish_total_inventory} </span>
-                        </div>
-                      </td>
+                        <td className="align-middle flex  justify-around items-center">
+                          <Button
+                            variant="info"
+                            onClick={() => {
+                              setproductInfoInput({
+                                update: true,
+                                quantity: data.quantity,
+                                product_type: data?.product?.product_type,
+                                product_name: data?.product?.name,
+                                id: data?.product?.id,
+                                maxQty: data?.quantity,
+                              });
+                              setShowUpdateProductModal(true);
+                            }}
+                            title="Edit Product"
+                          >
+                            Update
+                          </Button>
 
-                      <td className="align-middle">
-                        <Button
-                          variant="info"
-                          onClick={() => {
-                            setAssignProductData(data);
-                            setShowAssignMadal(true);
-                          }}
-                        >
-                          Assign
-                        </Button>
-                      </td>
+                          <Button
+                            variant="danger"
+                            onClick={() => {
+                              deleteSubmit(data);
+                            }}
+                            title="Delete Product"
+                          >
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+            </tbody>
+          </Table>
+        )}
 
-                      <td className="align-middle flex  justify-around items-center">
-                        <Button
-                          variant="info"
-                          onClick={() => {
-                            setproductInfoInput({
-                              update: true,
-                              quantity: data.quantity,
-                              product_type: data?.product?.product_type,
-                              product_name: data?.product?.name,
-                              id: data?.product?.id,
-                              maxQty: data?.quantity,
-                            });
-                            setShowUpdateProductModal(true);
-                          }}
-                          title="Edit Product"
-                        >
-                          Update
-                        </Button>
-
-                        <Button
-                          variant="danger"
-                          onClick={() => {
-                            deleteSubmit(data);
-                          }}
-                          title="Delete Product"
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-          </tbody>
-        </Table> :
+        {radioValue === "1" && (
+          <div
+            className="my-10 container cursor-pointer mx-auto"
+            onClick={() => {
+              setShowUpdateProductModal(true);
+              setproductInfoInput({
+                ...productInfoInput,
+                update: false,
+              });
+            }}
+          >
+            <div className="flex rounded-full items-center justify-start ">
+              <p
+                title="Add Product"
+                className="text-2xl w-10 h-10 p-4  hover:bg-blue-500  bg-blue-400 flex rounded-full items-center justify-center  "
+              >
+                +
+              </p>
+            </div>
+          </div>
+        )}
+        {radioValue === "2" && (
           <div className="w-full max-h-[30rem]">
             {Object.keys(totalEmpInventory)
               ?.filter((data) => {
@@ -803,27 +778,67 @@ const Inventory = ({
                 </div>
               ))}
           </div>
-        }
-        {radioValue === "1" && <div
-          className="my-10 container cursor-pointer mx-auto"
-          onClick={() => {
-            setShowUpdateProductModal(true);
-            setproductInfoInput({
-              ...productInfoInput,
-              update: false,
-            });
-          }}
-        >
-          <div className="flex rounded-full items-center justify-start ">
-            <p
-              title="Add Product"
-              className="text-2xl w-10 h-10 p-4  hover:bg-blue-500  bg-blue-400 flex rounded-full items-center justify-center  "
-            >
-              +
-            </p>
-          </div>
-        </div>}
+        )}
 
+        {radioValue === "3" &&
+          requestedInventoryData?.filter((request) => !request?.is_approved)
+            ?.length > 0 &&
+          (userProfile?.is_inv_manager || userProfile?.is_admin) && (
+            <div className="px-4">
+              <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
+                {requestedInventoryData
+                  ?.filter((request) => !request?.is_approved)
+                  ?.filter((data) => {
+                    // If userProfile.has_access_only_to is "all", show all items
+                    if (userProfile.has_access_only_to === "all") {
+                      return true;
+                    }
+                    // If userProfile.has_access_only_to is not "all",
+                    // show items with matching product_type
+                    return (
+                      data?.inventory?.product?.product_type ===
+                      userProfile.has_access_only_to
+                    );
+                  })
+                  .map((data, i) => {
+                    return (
+                      <li className="w-full px-4 py-2 border-gray-200 rounded-t-lg dark:border-gray-600">
+                        <span className="text-red-500/75 mr-2 text-xl ">
+                          {i + 1}.
+                        </span>
+                        <span className="text-blue-700 mx-2">
+                          {data?.requestor?.name}
+                        </span>
+                        has asked for
+                        <span className="text-blue-700 mx-2">
+                          {data?.quantity_asked} Quantity of{" "}
+                          {data?.inventory?.product?.name}.
+                        </span>
+                        Date Needed:
+                        <span className="text-blue-700 mx-2">
+                          {new Date(data?.date_of_use)?.toLocaleDateString()}.
+                        </span>
+                        <Button
+                          onClick={() => acceptRequestInventorySubmit(data)}
+                          className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                          title="Click To Accept this Requested Inventory"
+                        >
+                          Fulfill
+                        </Button>
+                        <Button
+                          onClick={() => rejectRequestInventorySubmit(data)}
+                          className="text-blue-700 mx-2 cursor-pointer hover:text-blue-900"
+                          title="Click To Reject this Requested Inventory"
+                          variant="danger"
+                        >
+                          Deny
+                        </Button>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </div>
+          )}
       </div>
     </>
   );
