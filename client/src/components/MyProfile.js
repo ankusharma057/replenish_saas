@@ -493,48 +493,53 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
         ) : null}
       </div>
 
-      {userProfile?.inventory_requests?.length > 0 && (
-        <Table bordered hover responsive className="w-full mt-4 text-center">
-          <thead>
-            <tr>
-              <th>Product </th>
-              <th>Quantity</th>
-              <th>Date of use</th>
-              <th className="w-[12rem]"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {userProfile?.inventory_requests?.map((data) => {
-              return (
-                <>
-                  <tr key={data?.id}>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.inventory?.product?.name} </span>
-                        {/* <span>Product Name: Product </span> */}
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.quantity_asked} </span>
-                      </div>
-                    </td>
+      {userProfile?.inventory_requests?.filter((request) => !request.is_approved )?.length > 0 && (
+        <>
+          <h2 className="text-4xl font-bold text-center text-blue-400">
+            Pending Requests
+          </h2>
+          <Table bordered hover responsive className="w-full mt-4 text-center">
+            <thead>
+              <tr>
+                <th>Product </th>
+                <th>Quantity</th>
+                <th>Date of use</th>
+                <th className="w-[12rem]"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {userProfile?.inventory_requests?.map((data) => {
+                return (
+                  <>
+                    <tr key={data?.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.inventory?.product?.name} </span>
+                          {/* <span>Product Name: Product </span> */}
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.quantity_asked} </span>
+                        </div>
+                      </td>
 
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>
-                          {new Date(data?.date_of_use).toLocaleDateString() ||
-                            "Not Given"}
-                        </span>
-                      </div>
-                    </td>
-                   
-                  </tr>
-                </>
-              );
-            })}
-          </tbody>
-        </Table>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>
+                            {new Date(data?.date_of_use).toLocaleDateString() ||
+                              "Not Given"}
+                          </span>
+                        </div>
+                      </td>
+                     
+                    </tr>
+                  </>
+                );
+              })}
+            </tbody>
+          </Table>
+        </>
       )}
       {userProfile?.inventory_prompts?.filter(
         (prompt) => !prompt.is_accepted === true

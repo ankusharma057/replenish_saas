@@ -423,7 +423,7 @@ const Inventory = ({
   const radios = [
     { name: "Company Inventory", value: "1" },
     { name: "Emp Inventories", value: "2" },
-    { name: "Company Request ", value: "3" },
+    { name: "Inventory Request ", value: "3" },
   ];
 
   return (

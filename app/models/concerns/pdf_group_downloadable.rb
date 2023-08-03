@@ -39,7 +39,7 @@ module PdfGroupDownloadable
       invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                  <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.vedor_name}"'  </div> 
+                  <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
                   <br>
                   <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
 
@@ -137,7 +137,7 @@ module PdfGroupDownloadable
       invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                <h2 style="text-align: left;">  Vendor: '"#{invoice.employee.vedor_name}"'  </div> 
+                <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
                 <br>
                 <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
 
