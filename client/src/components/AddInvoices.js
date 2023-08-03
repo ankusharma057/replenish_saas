@@ -178,10 +178,14 @@ export default function AddInvoices({ userProfile }) {
     };
     if (formData?.gfe) {
       afterTax.gfeFee = 30;
+      if(userProfile.email === "houstonbeautifulaesthetics@gmail.com") afterTax.gfeFee = afterTax.gfeFee + 10;
     }
+
+    console.log(userProfile.email)
     if (formData?.semaglitudeConsultation) {
       afterTax.semagConsultFee = 75;
     }
+    console.log(userProfile.email)
     if (formData?.conciergeFeePaid) {
       afterTax.conciergeFee = 50;
     }
@@ -207,8 +211,10 @@ export default function AddInvoices({ userProfile }) {
         100 +
       afterTax.conciergeFee;
 
-    if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0)
+    if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0){
       total = 30;
+      if(userProfile.email === "houstonbeautifulaesthetics@gmail.com") total = total + 10;
+    }
     if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT === 0)
       total = 75;
     if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() === 75)

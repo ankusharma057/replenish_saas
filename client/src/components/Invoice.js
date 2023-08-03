@@ -16,7 +16,7 @@ export default function Invoice({ invoice, fiInvoiceList, userProfile }) {
     confirmAlert({
       title: "Confirm to finalize",
       message:
-        "Are you sure you want to finalize, this will send this invoice as a mail to the client",
+        "Are you sure you want to finalize, this will send this invoice as a mail to the provider",
       buttons: [
         {
           label: "Yes",
