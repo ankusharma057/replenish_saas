@@ -16,18 +16,16 @@ export default function Employee({
 }) {
   const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const [modalShow, setModalShow] = useState(false);
-  const [showInventories, setShowInventories] = useState(false);
-  const [gfe, setGfe] = useState(employee?.gfe || false);
   const [showModal, setShowModal] = useState(false);
-  const [servicePercentage, setServicePercentage] = useState(
-    employee?.service_percentage,
-    0
-  );
-  const [retailPercentage, setRetailPercentage] = useState(
-    employee?.retail_percentage,
-    0
-  );
-  const [employeeName, setEmployeeName] = useState(employee?.name, "");
+
+  const [updateIvoiceInput, setUpdateIvoiceInput] = useState({
+    name: employee?.name || "",
+    vendor_name: employee?.vendor_name || "",
+    email: employee?.email,
+    gfe: employee?.gfe || false,
+    service_percentage: employee?.service_percentage || 0,
+    retail_percentage: employee?.retail_percentage || 0,
+  });
 
   useEffect(() => {
     const filteredInvoices = invoiceList.filter(
@@ -38,6 +36,15 @@ export default function Employee({
   function handleClick() {
     setModalShow(!modalShow);
   }
+
+  const handleUpdateChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const inputValue = type === "checkbox" ? checked : value;
+    setUpdateIvoiceInput((pre) => ({
+      ...pre,
+      [name]: inputValue,
+    }));
+  };
 
   function sendResetPasswordLink() {
     confirmAlert({
@@ -60,29 +67,26 @@ export default function Employee({
     });
   }
 
-  function updateGfePercent() {
+  // console.log(updateIvoiceInput);
+  function updateGfePercent(e) {
+    e.preventDefault();
     fetch(`/api/employees/${employee?.id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        gfe,
-        service_percentage: servicePercentage,
-        retail_percentage: retailPercentage,
-        name: employeeName,
-      }),
+      body: JSON.stringify(updateIvoiceInput),
     })
       .then((res) => {
         if (res.ok) {
           toast.success("Employee has been updated successfully.");
           window.location.reload();
         } else if (res.status === 404) {
-          res.json().then((json) => {
+          res.json().then(() => {
             toast.error("Please provide a client.");
           });
         } else {
-          res.json().then((json) => {
+          res.json().then(() => {
             toast.error("Failed to update Employee");
           });
         }
@@ -110,13 +114,13 @@ export default function Employee({
               .then((res) => {
                 if (res.ok) {
                   toast.success("Employee has been deleted successfully.");
-                  window.location.reload();
+                  // window.location.reload();
                 } else if (res.status === 404) {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Please provide a client.");
                   });
                 } else {
-                  res.json().then((json) => {
+                  res.json().then(() => {
                     toast.error("Failed to delete the Employee");
                   });
                 }
@@ -135,46 +139,61 @@ export default function Employee({
     });
   }
 
-
   const updatePopover = (
     <Popover id="popover-basic">
       <Popover.Header as="h3">Update Employee</Popover.Header>
       <Popover.Body>
-        <Form.Group className="mb-3">
+        <Form onSubmit={updateGfePercent} className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control
             type="text"
+            name="name"
             defaultValue={employee?.name}
-            onChange={(e) => setEmployeeName(e.target.value)}
+            onChange={handleUpdateChange}
           />
+          {userProfile?.is_admin === true && (
+            <>
+              <Form.Label className="mt-2">Vendor Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Vendor Name"
+                name="vendor_name"
+                defaultValue={employee?.vendor_name}
+                onChange={handleUpdateChange}
+              />
+            </>
+          )}
           <Form.Label className="mt-2">Email</Form.Label>
           <Form.Control type="text" readOnly disabled value={employee?.email} />
           <Form.Check
-            className="mb-1"
+            className="my-2"
+            name="gfe"
             type={"checkbox"}
             id={`default-checkbox`}
             label={`GFE`}
-            checked={gfe}
-            onChange={(e) => setGfe(e.target.checked)}
+            checked={updateIvoiceInput.gfe}
+            onChange={handleUpdateChange}
           />
           <Form.Label className="mt-2">Service Percentage</Form.Label>
           <Form.Control
             type="number"
+            name="service_percentage"
             defaultValue={employee?.service_percentage}
-            onChange={(e) => setServicePercentage(parseFloat(e.target.value))}
+            onChange={handleUpdateChange}
           />
           <br />
           <Form.Label className="mt-2">Retail Percentage</Form.Label>
           <Form.Control
             type="number"
+            name="retail_percentage"
             defaultValue={employee?.retail_percentage}
-            onChange={(e) => setRetailPercentage(parseFloat(e.target.value))}
+            onChange={handleUpdateChange}
           />
           <br />
-          <Button variant="primary" type="submit" onClick={updateGfePercent}>
+          <Button variant="primary" type="submit">
             Submit
           </Button>
-        </Form.Group>
+        </Form>
       </Popover.Body>
     </Popover>
   );
@@ -227,12 +246,7 @@ export default function Employee({
                     placement="bottom"
                     overlay={updatePopover}
                   >
-                    <Button
-                      // onClick={updateGfePercent}
-                      variant="info"
-                    >
-                      Update
-                    </Button>
+                    <Button variant="info">Update</Button>
                   </OverlayTrigger>
                   <Button
                     variant="danger"

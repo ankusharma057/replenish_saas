@@ -20,7 +20,7 @@ class EmployeeSerializer < ActiveModel::Serializer
     end
   end
 
-  def pending_requests
-    inventory_requests.where.not(is_approved: true)
+  def pending_requests 
+    object.inventory_requests.where.not(is_approved: true) 
   end
 end
