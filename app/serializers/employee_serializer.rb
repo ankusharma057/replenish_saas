@@ -1,5 +1,7 @@
 class EmployeeSerializer < ActiveModel::Serializer
-  attributes :id, :name, :email, :password, :is_admin, :is_inv_manager, :gfe, :service_percentage, :retail_percentage, :inventory_prompts, :employees_inventories, :has_access_only_to
+  attributes :id, :name, :vendor_name, :email, :password, :is_admin, :is_inv_manager, :gfe,
+              :service_percentage, :retail_percentage, :inventory_prompts,
+              :employees_inventories, :has_access_only_to, :pending_requests
 
   has_many :invoices
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
@@ -16,5 +18,9 @@ class EmployeeSerializer < ActiveModel::Serializer
     object.inventory_prompts&.map do |inventory_prompt|
       InventoryPromptSerializer.new(inventory_prompt).attributes
     end
+  end
+
+  def pending_requests 
+    object.inventory_requests.where.not(is_approved: true) 
   end
 end

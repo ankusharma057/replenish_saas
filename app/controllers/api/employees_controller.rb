@@ -87,7 +87,7 @@ class Api::EmployeesController < ApplicationController
   private
 
   def employee_params
-    params.permit(:name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager)
+    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager)
   end
 
   def find_employee

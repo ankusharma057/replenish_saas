@@ -7,6 +7,7 @@ import Table from "react-bootstrap/Table";
 import AssignModal from "./AssignModal";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert"; // Import
+import ModalWraper from "./Modals/ModalWraper";
 
 function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   const [employee, setEmployee] = useState();
@@ -16,11 +17,14 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
   const [invoiceData, setinvoiceData] = useState(null);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assigninventory_object, setAssigninventory_object] = useState({});
-  const [requestInveytoryList, setRequestInveytoryList] = useState([]);
+  const [vendorUpdataModalShow, setVendorUpdataModalShow] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
+  const [updateVendorInput, setupdateVendorInput] = useState(
+    userProfile?.vendor_name
+  );
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
 
   const [filteredInventoryList, setFilteredInventoryList] = useState([]);
@@ -72,19 +76,22 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    fetch(`/api/inventory_requests`).then((res) => {
-      if (res.ok) {
-        res.json().then((inventory) => {
-          setRequestInveytoryList(inventory);
-        });
-      } else {
-        res.json().then((data) => setErrors(data.error));
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   fetch(`/api/inventory_requests`).then((res) => {
+  //     if (res.ok) {
+  //       res.json().then((inventory) => {
+  //         setRequestInveytoryList(inventory);
+  //       });
+  //     } else {
+  //       res.json().then((data) => setErrors(data.error));
+  //     }
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
+  const hideUpdateVendorModal = () => {
+    setVendorUpdataModalShow(!vendorUpdataModalShow);
+  };
   const assignSubmit = (e, data) => {
     e.preventDefault();
     const inventory_object = {
@@ -276,6 +283,44 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
       });
   };
 
+  const updateVendoreSubmit = (e) => {
+    e.preventDefault();
+    setDisabled(true);
+    fetch(`/api/employees/${userProfile?.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        vendor_name: updateVendorInput,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          toast.success("Vendor Name Updated successfully");
+          setTimeout(() => {
+            window.location.reload();
+            setDisabled(false);
+          }, 1000);
+        } else if (res.status === 404) {
+          res.json().then((json) => {
+            toast.error("Please provide a client.");
+          });
+          setDisabled(false);
+        } else {
+          res.json().then((json) => {
+            toast.error("Failed To Update Vendor Name.");
+            setDisabled(false);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        toast.error("An error occured.");
+        setDisabled(false);
+      });
+  };
+
   if (loading) return <Header></Header>;
   if (errors) return <h1>{errors}</h1>;
 
@@ -393,11 +438,39 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           invoiceData={invoiceData}
         />
       )}
+      <ModalWraper
+        show={vendorUpdataModalShow}
+        onHide={hideUpdateVendorModal}
+        title="Update Vendor Name"
+      >
+        <Form className="flex flex-col gap-4" onSubmit={updateVendoreSubmit}>
+          <Form.Control
+            type="text"
+            placeholder="Enter vendor name"
+            value={updateVendorInput}
+            onChange={(e) => setupdateVendorInput(e.target.value)}
+            required
+          />
+          <Button key={disabled} disabled={disabled} type="submit">
+            Submit
+          </Button>
+        </Form>
+      </ModalWraper>
       <br />
       <div className="flex justify-center">
         <h1 className="text-4xl font-bold text-center text-blue-600">
           {employee?.name}
         </h1>
+      </div>
+      <div className="flex gap-3 justify-center  items-center">
+        <h4 className="text-1xl font-bold text-center text-blue-600">
+          <span className="text-gray-800">Vendor Name:</span>{" "}
+          {employee?.vendor_name}
+        </h4>
+
+        <Button variant="primary" onClick={hideUpdateVendorModal}>
+          Update
+        </Button>
       </div>
       <div className="flex justify-end mr-8">
         {!(userProfile.has_access_only_to === "all") &&
@@ -419,6 +492,55 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           </Button>
         ) : null}
       </div>
+
+      {userProfile?.inventory_requests?.filter((request) => !request.is_approved )?.length > 0 && (
+        <>
+          <h2 className="text-4xl font-bold text-center text-blue-400">
+            Pending Requests
+          </h2>
+          <Table bordered hover responsive className="w-full mt-4 text-center">
+            <thead>
+              <tr>
+                <th>Product </th>
+                <th>Quantity</th>
+                <th>Date of use</th>
+                <th className="w-[12rem]"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {userProfile?.inventory_requests?.map((data) => {
+                return (
+                  <>
+                    <tr key={data?.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.inventory?.product?.name} </span>
+                          {/* <span>Product Name: Product </span> */}
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.quantity_asked} </span>
+                        </div>
+                      </td>
+
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>
+                            {new Date(data?.date_of_use).toLocaleDateString() ||
+                              "Not Given"}
+                          </span>
+                        </div>
+                      </td>
+                     
+                    </tr>
+                  </>
+                );
+              })}
+            </tbody>
+          </Table>
+        </>
+      )}
       {userProfile?.inventory_prompts?.filter(
         (prompt) => !prompt.is_accepted === true
       )?.length > 0 && (

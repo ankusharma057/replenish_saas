@@ -268,50 +268,62 @@ const Inventory = ({
   };
 
   const acceptRequestInventorySubmit = (data) => {
-    confirmAlert({
-      title: "Confirm to submit",
-      message: `Are you sure to Accept Invetory `,
-      buttons: [
+    console.log(data);
+    if (Number(data?.quantity_asked) > Number(data.inventory.quantity)) {
+      return toast.error(
+        "You do not have enough inventories to fulfill this, please update first",
         {
-          label: "Yes",
-          onClick: () => {
-            fetch(`/api/inventory_requests/${data?.id}/accept`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-              .then((res) => {
-                if (res.ok) {
-                  toast.success("You have accept this inventory Successfully.");
-                  window.location.reload();
-                } else if (res.status === 404) {
-                  res.json().then((json) => {
-                    toast.error("Please provide a client.");
-                  });
-                } else {
-                  res.json().then((json) => {
-                    toast.error(
-                      "You do not have enough Available Inventory for this product "
-                    );
-                  });
-                }
+          autoClose: false,
+        }
+      );
+    } else {
+      confirmAlert({
+        title: "Confirm to submit",
+        message: `Are you sure to Accept Invetory `,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              fetch(`/api/inventory_requests/${data?.id}/accept`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
               })
-              .catch((error) => {
-                console.error("Error:", error);
-                toast.error("An error occured.");
-              });
+                .then((res) => {
+                  if (res.ok) {
+                    toast.success(
+                      "You have accept this inventory Successfully."
+                    );
+                    window.location.reload();
+                  } else if (res.status === 404) {
+                    res.json().then((json) => {
+                      toast.error("Please provide a client.");
+                    });
+                  } else {
+                    res.json().then((json) => {
+                      toast.error(
+                        "You do not have enough Available Inventory for this product "
+                      );
+                    });
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  toast.error("An error occured.");
+                });
+            },
           },
-        },
-        {
-          label: "No",
-          onClick: () => {
-            //  setShowUpdateProductModal(true);
-            console.log("Click No");
+          {
+            label: "No",
+            onClick: () => {
+              //  setShowUpdateProductModal(true);
+              console.log("Click No");
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
+    }
   };
 
   const rejectRequestInventorySubmit = (data) => {
@@ -411,7 +423,7 @@ const Inventory = ({
   const radios = [
     { name: "Company Inventory", value: "1" },
     { name: "Emp Inventories", value: "2" },
-    { name: "Company Request ", value: "3" },
+    { name: "Inventory Request ", value: "3" },
   ];
 
   return (
