@@ -398,11 +398,11 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
                 }
                 // max={+requestInvetoryInput?.inventory_object?.quantity || 0}
                 // min={1}
-                disabled={
-                  requestInvetoryInput?.inventory_object?.quantity
-                    ? false
-                    : true
-                }
+                // disabled={
+                //   requestInvetoryInput?.inventory_object?.quantity
+                //     ? false
+                //     : true
+                // }
                 required
               />
               <span>
@@ -462,15 +462,17 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           {employee?.name}
         </h1>
       </div>
+
       <div className="flex gap-3 justify-center  items-center">
         <h4 className="text-1xl font-bold text-center text-blue-600">
-          <span className="text-gray-800">Vendor Name:</span>{" "}
-          {employee?.vendor_name}
+          <span className="text-gray-800">
+            Vendor Name:{" "} {employee?.vendor_name} {"  "}
+            <Button variant="primary" onClick={hideUpdateVendorModal}>
+              Update
+            </Button>
+          </span>
         </h4>
 
-        <Button variant="primary" onClick={hideUpdateVendorModal}>
-          Update
-        </Button>
       </div>
       <div className="flex justify-end mr-8">
         {!(userProfile.has_access_only_to === "all") &&
@@ -483,7 +485,7 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
             Request Inventory
           </Button>
         ) : !userProfile?.is_inv_manager && !userProfile?.is_admin ? (
-          // Show the button if user is not is_inv_manager and not is_admin
+          // Show the button if user is neither an inv manager nor an admin
           <Button
             onClick={() => setshowRequestInvetory(true)}
             className="text-4xl font-bold text-center text-blue-600"
@@ -498,47 +500,47 @@ function UserPage({ userProfile, employeeList, productList, inventoryList }) {
           <h2 className="text-4xl font-bold text-center text-blue-400">
             Pending Requests
           </h2>
-          <Table bordered hover responsive className="w-full mt-4 text-center">
-            <thead>
-              <tr>
-                <th>Product </th>
-                <th>Quantity</th>
-                <th>Date of use</th>
-                <th className="w-[12rem]"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {userProfile?.inventory_requests?.map((data) => {
-                return (
-                  <>
-                    <tr key={data?.id}>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.inventory?.product?.name} </span>
-                          {/* <span>Product Name: Product </span> */}
-                        </div>
-                      </td>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity_asked} </span>
-                        </div>
-                      </td>
+          <div className=" container mx-auto my-3">
+            <Table bordered hover responsive className="w-full mt-4 text-center">
+              <thead>
+                <tr>
+                  <th>Product </th>
+                  <th>Quantity</th>
+                  <th>Date of use</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userProfile?.inventory_requests?.map((data) => {
+                  return (
+                    <>
+                      <tr key={data?.id}>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.inventory?.product?.name} </span>
+                            {/* <span>Product Name: Product </span> */}
+                          </div>
+                        </td>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>{data?.quantity_asked} </span>
+                          </div>
+                        </td>
 
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>
-                            {new Date(data?.date_of_use).toLocaleDateString() ||
-                              "Not Given"}
-                          </span>
-                        </div>
-                      </td>
-                     
-                    </tr>
-                  </>
-                );
-              })}
-            </tbody>
-          </Table>
+                        <td className="align-middle">
+                          <div className="flex flex-col  gap-2">
+                            <span>
+                              {new Date(data?.date_of_use).toLocaleDateString() ||
+                                "Not Given"}
+                            </span>
+                          </div>
+                        </td>                     
+                      </tr>
+                    </>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
         </>
       )}
       {userProfile?.inventory_prompts?.filter(
