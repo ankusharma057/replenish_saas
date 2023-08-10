@@ -345,7 +345,7 @@ function CustomModal(props) {
               {invoiceData?.products_hash?.retail_products?.length > 0 && (
                 <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
                   <p>
-                    <b>Retali Products</b>
+                    <b>Retail Products</b>
                   </p>
 
                   <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
@@ -359,7 +359,7 @@ function CustomModal(props) {
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
-                        {invoiceData?.products_hash?.products.map(
+                        {invoiceData?.products_hash?.retail_products.map(
                           (product, i) => (
                             <tr key={i}>
                               <td>{product[0]}</td>
