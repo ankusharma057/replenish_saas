@@ -16,11 +16,11 @@ class Api::EmployeesController < ApplicationController
 
   def create
     @employee = Employee.new(employee_params)
-    if @employee.save!
+    if @employee.save
       @employee.send_reset_password_mail
       render json: @employee, status: :created
     else
-      render json: { 'error': 'Employee could not be created.' }, status: :bad_request
+      render json: { 'error': @employee.errors }, status: :bad_request
     end
   end
 
