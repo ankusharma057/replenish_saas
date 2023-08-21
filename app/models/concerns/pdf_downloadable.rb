@@ -81,7 +81,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
                 </tr>'
           end
 
@@ -175,7 +175,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
                 </tr>'
           end
 
