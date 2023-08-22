@@ -4,6 +4,8 @@ class InvoiceGroup < ApplicationRecord
 
   include PdfGroupDownloadable
 
+  after_create :send_message_of_invoice_group_creation
+
   def save_pdfs_and_send_mail
     pdf_string = get_html_for_group
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
@@ -32,5 +34,12 @@ class InvoiceGroup < ApplicationRecord
 
     update!(finalized_totally: true)
     SendPdfToInvoiceMailer.with(group: self).send_mail.deliver
+  end
+
+  private
+
+  def send_message_of_invoice_group_creation
+    text = "Hi, an invoice group with invoice-ids: #{self.invoices.ids} has been recently created by #{self.employee&.name.capitalize}"
+    send_message text
   end
 end

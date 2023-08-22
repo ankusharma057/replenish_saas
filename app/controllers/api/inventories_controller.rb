@@ -58,7 +58,7 @@ class Api::InventoriesController < ApplicationController
       if @product.create_or_update_inventory(quantity: params[:quantity])
         render json: @inventory, status: :ok
       else
-        render json: { 'error' => "Could not Create Inventory" }, status: :bad_request
+        render json: { 'error' => 'Could not Create Inventory' }, status: :bad_request
       end
     else
       render json: { 'error' => 'Could not find the Product' }, status: :not_found
