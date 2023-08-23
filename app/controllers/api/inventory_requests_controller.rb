@@ -10,7 +10,7 @@ class Api::InventoryRequestsController < ApplicationController
   def create
     if @inventory
       @inventory.request_for_inventory_and_send_mail(current_employee, params[:quantity_asked], params[:date_of_use])
-      text = "#{current_employee.name.capitalize} has requested for #{params[:quantity_asked]} of #{@inventory.product.name.capitalize} to be used on #{params[:date_of_use]}."
+      text = "#{current_employee.name.capitalize} has requested for #{params[:quantity_asked]} of #{@inventory.product.name.capitalize}. Date Needed: #{params[:date_of_use]}."
       send_message text
       render json: @inventory, status: :ok
     else
@@ -20,7 +20,7 @@ class Api::InventoryRequestsController < ApplicationController
 
   def accept
     if @inventory_request.accept!
-      text = "#{current_employee.name.capitalize} has accepted Inventory Request of #{@inventory_request.requestor.name.capitalize} for #{@inventory_request.quantity_asked} of #{@inventory_request.inventory&.product.name.capitalize}."
+      text = "#{current_employee.name.capitalize} has approved Inventory Request of #{@inventory_request.requestor.name.capitalize} for #{@inventory_request.quantity_asked} of #{@inventory_request.inventory&.product.name.capitalize}."
       send_message text
       render json: @inventory, status: :ok
     else
