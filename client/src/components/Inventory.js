@@ -510,7 +510,7 @@ const Inventory = ({
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
             {productInfoInput?.id
-              ? `Product Id: ${productInfoInput?.id}`
+              ? `${productInfoInput?.product_name}`
               : "Add new product"}
           </Modal.Title>
         </Modal.Header>
