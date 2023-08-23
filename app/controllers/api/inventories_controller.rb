@@ -59,7 +59,7 @@ class Api::InventoriesController < ApplicationController
         @inventory.prompt_to_employee(@receiver_employee, params[:inventory][:quantity])
       end
         
-      text = "#{@employee.name.capitalize} assigned #{params[:inventory][:quantity]} of #{@inventory.product.name} to #{@receiver_employee.name.capitalize}"
+      text = "#{@employee.name.capitalize} assigned #{params[:inventory][:quantity]} of #{@inventory.product.name} to #{@receiver_employee.name.capitalize}."
       send_message text
 
       render json: @inventory, status: :ok

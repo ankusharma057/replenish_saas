@@ -4,9 +4,6 @@ class InventoryPrompt < ApplicationRecord
   belongs_to :employee
   belongs_to :product
 
-  before_save :notify_on_create_and_update
-  before_destroy :notify_on_create_and_update
-
   def accept!
     update!(is_accepted: true)
 
@@ -29,13 +26,13 @@ class InventoryPrompt < ApplicationRecord
 
   private
 
-  def notify_on_create_and_update
-    text = if new_record?
-        "A prompt for the inventory assignment for #{product.name} has been sent to #{employee&.name.capitalize}" 
-      else
-        "The Inventory for #{product.name} has been #{is_accepted_changed? ? 'accepted' : 'denied'} by #{employee&.name.capitalize}"
-      end
+  # def notify_on_create_and_update
+  #   text = if new_record?
+  #       "A prompt for the inventory assignment for #{product.name} has been sent to #{employee&.name.capitalize}" 
+  #     else
+  #       "The Inventory for #{product.name} has been #{is_accepted_changed? ? 'accepted' : 'denied'} by #{employee&.name.capitalize}"
+  #     end
 
-    send_message text
-  end
+  #   send_message text
+  # end
 end
