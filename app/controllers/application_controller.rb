@@ -12,4 +12,8 @@ class ApplicationController < ActionController::API
   def authorized_employee
     render json: { errors: "Not Authorized" }, status: :unauthorized unless current_employee
   end
+
+  def send_message(text)
+    MessagingService::Client.new.send_message(text)
+  end
 end

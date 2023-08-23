@@ -3,9 +3,7 @@ class Inventory < ApplicationRecord
 
   belongs_to :product
   has_many :inventory_requests, dependent: :destroy
-  before_save :notify_when_inventory_is_create_updated_or_deleted
-  before_destroy :notify_when_inventory_is_create_updated_or_deleted
-
+  
   def prompt_to_employee(employee, quantity)
     update!(quantity: self.quantity.to_f - quantity.to_f)
     employee.inventory_prompts.create!(
@@ -24,18 +22,18 @@ class Inventory < ApplicationRecord
     SendInventoryRequestNotificationMailer.with(inventory_request: inventory_request).send_notification.deliver_now
   end
 
-  private
+  # private
 
-  def notify_when_inventory_is_create_updated_or_deleted
-    text = "The Inventory for #{product.name} has been"
-    action_prompt = if new_record?
-        "created."
-      elsif quantity_changed?
-        "updated to quantity: #{quantity}."
-      else
-        "deleted."
-      end
+  # def notify_when_inventory_is_create_updated_or_deleted
+  #   text = "The Inventory for #{product.name} has been"
+  #   action_prompt = if new_record?
+  #       "created."
+  #     elsif quantity_changed?
+  #       "updated to quantity: #{quantity}."
+  #     else
+  #       "deleted."
+  #     end
 
-    send_message (text + action_prompt)
-  end
+  #   send_message (text + action_prompt)
+  # end
 end

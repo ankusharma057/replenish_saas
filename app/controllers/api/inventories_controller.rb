@@ -11,12 +11,24 @@ class Api::InventoriesController < ApplicationController
   end
 
   def create
-    create_or_update_inventory
+    if @product
+      if @product.create_or_update_inventory(quantity: params[:quantity])
+        text = "Inventory for #{@product.name.capitalize} has been created."
+        send_message text
+        render json: @inventory, status: :ok
+      else
+        render json: { 'error' => 'Could not Create Inventory' }, status: :bad_request
+      end
+    else
+      render json: { 'error' => 'Could not find the Product' }, status: :not_found
+    end
   end
 
   def update
     if @product
       if @product.inventory.update(inventory_params)
+        text = "Quantity for the Inventory of #{@product.name.capitalize} has been updated to #{inventory_params[:quantity]}"
+        send_message text
         render json: @inventory, status: :ok
       else
         render json: { 'error' => "Could not Update the Inventory" }, status: :bad_request
@@ -28,7 +40,9 @@ class Api::InventoriesController < ApplicationController
 
   def destroy
     if @inventory
+      text = "Inventory for #{@inventory.product.name.capitalize} has been deleted"
       @inventory.destroy!
+      send_message text
       render json: @inventory, status: :ok
     else
       render json: { 'error' => 'Could not find Inventory' }, status: :bad_request
@@ -44,6 +58,9 @@ class Api::InventoriesController < ApplicationController
       else
         @inventory.prompt_to_employee(@receiver_employee, params[:inventory][:quantity])
       end
+        
+      text = "#{@employee.name.capitalize} assigned #{params[:inventory][:quantity]} of #{@inventory.product.name} to #{@receiver_employee.name.capitalize}"
+      send_message text
 
       render json: @inventory, status: :ok
     else
@@ -52,18 +69,6 @@ class Api::InventoriesController < ApplicationController
   end
 
   private
-
-  def create_or_update_inventory
-    if @product
-      if @product.create_or_update_inventory(quantity: params[:quantity])
-        render json: @inventory, status: :ok
-      else
-        render json: { 'error' => 'Could not Create Inventory' }, status: :bad_request
-      end
-    else
-      render json: { 'error' => 'Could not find the Product' }, status: :not_found
-    end
-  end
 
   def inventory_params
     params.require(:inventory).permit(:quantity)
