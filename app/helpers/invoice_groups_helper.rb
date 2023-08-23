@@ -1,0 +1,2 @@
+module InvoiceGroupsHelper
+end

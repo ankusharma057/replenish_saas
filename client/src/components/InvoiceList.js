@@ -54,7 +54,7 @@ export default function InvoiceList({ userProfile }) {
       <div className="flex justify-content-center">
         <div className="w-full flex justify-center">
 
-          <ButtonGroup className="mb-2  border w-full md:w-auto border-gray-200 p-3 ">
+          <ButtonGroup className="mb-2 gap-2 border w-full md:w-auto border-gray-200 p-3 ">
             {radios.map((radio, idx) => (
               <ToggleButton
                 key={idx}

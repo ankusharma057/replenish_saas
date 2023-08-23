@@ -54,7 +54,9 @@ end
 # gem "prawn-rails"
 # gem "prawn-html"
 
-gem "active_model_serializers", "~> 0.10.13"
-gem "wicked_pdf"
-gem "wkhtmltopdf-binary"
-gem "faker"
+gem 'active_model_serializers', '~> 0.10.13'
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
+gem 'faker'
+# To use the messaging services:
+gem 'twilio-ruby'
