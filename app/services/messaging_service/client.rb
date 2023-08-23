@@ -4,8 +4,8 @@ require 'twilio-ruby'
 
 module MessagingService
   class Client
-    RECEIVER_NUMBER = +18325236736
-    INV_MANAGER_NUMBERS = [+18325231397]
+    RECEIVER_NUMBER = '+18325236736'
+    INV_MANAGER_NUMBERS = ['+18325231397']
 
     def initialize
       @client = Twilio::REST::Client.new account_sid, auth_token
@@ -17,7 +17,6 @@ module MessagingService
         to: RECEIVER_NUMBER,
         body: text
       )
-      
       if send_to_inv_manager
         INV_MANAGER_NUMBERS.each do |manager_number|
           @client.messages.create(
