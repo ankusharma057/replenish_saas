@@ -33,6 +33,6 @@ class InventoryPrompt < ApplicationRecord
   #       "The Inventory for #{product.name} has been #{is_accepted_changed? ? 'accepted' : 'denied'} by #{employee&.name.capitalize}"
   #     end
 
-  #   send_message text
+  #   send_message(text: text)
   # end
 end

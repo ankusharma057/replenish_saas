@@ -14,7 +14,7 @@ class Api::InventoriesController < ApplicationController
     if @product
       if @product.create_or_update_inventory(quantity: params[:quantity])
         text = "Inventory for #{@product.name.capitalize} has been created."
-        send_message text
+        send_message(text: text)
         render json: @inventory, status: :ok
       else
         render json: { 'error' => 'Could not Create Inventory' }, status: :bad_request
@@ -29,7 +29,7 @@ class Api::InventoriesController < ApplicationController
       previous_quantity = @product.inventory&.quantity.to_f
       if @product.inventory.update(inventory_params)
         text = "Quantity for the Inventory of #{@product.name.capitalize} has been updated from #{previous_quantity} to #{inventory_params[:quantity]}"
-        send_message text
+        send_message(text: text)
         render json: @inventory, status: :ok
       else
         render json: { 'error' => "Could not Update the Inventory" }, status: :bad_request
@@ -43,7 +43,7 @@ class Api::InventoriesController < ApplicationController
     if @inventory
       text = "Inventory for #{@inventory.product.name.capitalize} has been deleted"
       @inventory.destroy!
-      send_message text
+      send_message(text: text)
       render json: @inventory, status: :ok
     else
       render json: { 'error' => 'Could not find Inventory' }, status: :bad_request
@@ -61,7 +61,7 @@ class Api::InventoriesController < ApplicationController
       end
         
       text = "#{@employee.name.capitalize} assigned #{params[:inventory][:quantity]} of #{@inventory.product.name} to #{@receiver_employee.name.capitalize}."
-      send_message text
+      send_message(text: text)
 
       render json: @inventory, status: :ok
     else

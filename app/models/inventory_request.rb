@@ -25,6 +25,6 @@ class InventoryRequest < ApplicationRecord
   #       "The Inventory Request for #{product.name} has been #{is_approved_changed? ? 'accepted' : 'denied'}."
   #     end
 
-  #   send_message text
+  #   send_message(text: text)
   # end
 end
