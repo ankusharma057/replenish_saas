@@ -28,7 +28,7 @@ class Api::InventoriesController < ApplicationController
     if @product
       previous_quantity = @product.inventory&.quantity.to_f
       if @product.inventory.update(inventory_params)
-        text = "Quantity for the Inventory of #{@product.name.capitalize} has been updated from #{previous_quantity} to #{inventory_params[:quantity]}"
+        text = "Quantity for the Inventory of #{@product.name.capitalize} has been updated from #{previous_quantity} to #{inventory_params[:quantity]} by #{current_employee&.name.capitalize}"
         send_message(text: text)
         render json: @inventory, status: :ok
       else
