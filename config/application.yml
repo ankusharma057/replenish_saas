@@ -12,3 +12,6 @@
 
 gmail_username: info@replenishmd.com
 gmail_password: qsmlmxdiewwidgpf
+twillio_account_sid: AC34f653b329a03e27979dd8685408aa6a
+twillio_auth_token: 8f05bc29270d971bd10dfac0e59d062f
+twillio_phone_number: +18446024147
