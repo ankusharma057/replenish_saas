@@ -2,7 +2,8 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update update_inventories destroy send_reset_password_link reset_password)
+  before_action :find_employee, only: %i(update destroy send_reset_password_link reset_password)
+  before_action :find_employee_to_be_updated, only: :update_inventories
 
   def index
     employees = Employee.all 
@@ -59,11 +60,12 @@ class Api::EmployeesController < ApplicationController
 
   def update_inventories
     params[:updated_products].each do |product_id, quantity_hash|
+      product = Product.find_by(id: product_id)
       emp_inventory = @employee.employees_inventories.where(product_id: product_id).first
       emp_inventory_previous_quantity = emp_inventory.quantity.to_f
       emp_inventory.update(quantity: quantity_hash["quantity"].to_f)
 
-      main_inventory = Inventory.find_or_create_by(product: Product.find_by(id: product_id))
+      main_inventory = Inventory.find_or_create_by(product: product)
 
       main_inventory.quantity = if emp_inventory_previous_quantity > quantity_hash["quantity"].to_f
         main_inventory.quantity.to_f + (emp_inventory_previous_quantity.to_f - quantity_hash["quantity"].to_f)
@@ -72,15 +74,21 @@ class Api::EmployeesController < ApplicationController
       end
 
       main_inventory.save
+      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} from #{quantity_hash["quantity"]} for #{@employee.name.capitalize}."
+      send_message(text: text)
     end
 
     params["new_products"].each do |product|
+      record = Product.where(name: product["product_name"]).first
       @employee.employees_inventories
-        .create!(product: Product.where(name: product["product_name"]).first, quantity: product["quantity"])
+        .create!(product: record, quantity: product["quantity"])
 
       main_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
       main_inventory.quantity -= product["quantity"].to_f
       main_inventory.save
+
+      text = "#{current_employee.name.capitalize} added #{product["quantity"]} of #{record.name} for #{@employee.name.capitalize}."
+      send_message(text: text)
     end
   end
 
@@ -92,6 +100,10 @@ class Api::EmployeesController < ApplicationController
 
   def find_employee
     @employee = Employee.find_by(id: params[:id] || session[:employee_id])    
+  end
+
+  def find_employee_to_be_updated
+    @employee = Employee.find_by(id: params[:id])    
   end
 
   def compare_passwords
