@@ -30,10 +30,35 @@ const InventoryModal = ({
   const [showAddNew, setShowAddNew] = useState(false);
   const [newProduct, setNewProduct] = useState(initialNewProduct);
   const [newProductArr, setnewProductArr] = useState([]);
+  const [filtereDataList, setFiltereDataList] = useState(dataList);
+
   const [isAlert, setIsAlert] = useState({
     maxQuantityAlert: false,
     message: "",
   });
+
+  const filterData = (deleteProduct) => {
+    let removedProduct = filtereDataList;
+    if (deleteProduct) {
+      removedProduct = filtereDataList?.filter((product) => {
+        return product.product?.id !== deleteProduct;
+      });
+    }
+    const d =
+      userProfile.has_access_only_to === "all"
+        ? removedProduct
+        : removedProduct?.filter((product) => {
+            return (
+              product.product?.product_type === userProfile.has_access_only_to
+            );
+          });
+    setFiltereDataList(d);
+  };
+  useEffect(() => {
+    filterData();
+    return () => {};
+  }, [dataList]);
+
   // const [filtereDataList, setfiltereDataList] = useState([]);
   const saveProduct = (e) => {
     e.preventDefault();
@@ -61,8 +86,7 @@ const InventoryModal = ({
     const a = Object.keys(updated_products).find(
       (key) =>
         updated_products[key]?.maxQuantity <
-          Number(updated_products[key]?.quantity) ||
-        Number(updated_products[key]?.quantity) === 0
+        Number(updated_products[key]?.quantity)
     );
 
     return a;
@@ -75,16 +99,9 @@ const InventoryModal = ({
     if (getIsMaxError) {
       const product_name = modifiedObject[getIsMaxError]?.product_name;
       const productMaxQuantity = modifiedObject[getIsMaxError]?.maxQuantity;
-      const productQuantity = modifiedObject[getIsMaxError]?.quantity;
-
       setIsAlert({
         maxQuantityAlert: true,
-        message: ` ${
-          Number(productQuantity) === 0
-            ? `Quantity should not be ${productQuantity}  for product ${product_name}  `
-            : `You can select upto  ${productMaxQuantity} for product ${product_name}  `
-        }`,
-
+        message: `You can select upto  ${productMaxQuantity} for product ${product_name}  `,
         productId: getIsMaxError,
       });
 
@@ -98,11 +115,20 @@ const InventoryModal = ({
       new_products: newProductArr,
       employee_id: inventoryList?.id,
     };
+    let totalZeroProduct = 0;
+
+    for (const key in updatedProductData?.updated_products) {
+
+      if (updatedProductData?.updated_products[key]?.quantity <= 0) {
+        totalZeroProduct = totalZeroProduct + 1;
+      }
+    }
 
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure, you want to update ${
-        Object.keys(updatedProductData.updated_products)?.length
+      message: `Are you sure, you want to delete ${String(totalZeroProduct)}, update ${
+        Object.keys(updatedProductData.updated_products)?.length -
+        totalZeroProduct
       } product(s), and add ${
         updatedProductData.new_products?.length
       } product(s). `,
@@ -158,15 +184,6 @@ const InventoryModal = ({
           );
         });
 
-  const filtereDataList =
-    userProfile.has_access_only_to === "all"
-      ? dataList
-      : dataList?.filter((product) => {
-          return (
-            product.product?.product_type === userProfile.has_access_only_to
-          );
-        });
-
   const handleQuantityChange = (e, invData, maxQuantity) => {
     setIsAlert({
       maxQuantityAlert: false,
@@ -179,6 +196,40 @@ const InventoryModal = ({
         maxQuantity,
         product_name: invData?.product?.name,
       },
+    });
+  };
+
+  const deleteOldProduct = (data) => {
+    setshowModal(false);
+    confirmAlert({
+      title: "Confirm to submit",
+      message: `Are you sure you want to delete the product ${data.product?.name} `,
+      buttons: [
+        {
+          label: "Yes",
+
+          onClick: () => {
+            filterData(data.product.id);
+            setUpdatedList({
+              ...updatedList,
+              employee_id: data?.employee?.id,
+              [data?.product?.id]: {
+                quantity: 0,
+                maxQuantity: 0,
+                product_name: data?.product?.name,
+              },
+            });
+            setIsUpdate(true);
+            setshowModal(true);
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+            setshowModal(true);
+          },
+        },
+      ],
     });
   };
 
@@ -258,7 +309,7 @@ const InventoryModal = ({
                         </div>
                       )}
                     </td>
-                    <td className="align-middle">
+                    <td className="align-middle flex gap-2">
                       <div
                         onClick={() => {
                           setIsUpdate(true);
@@ -266,6 +317,14 @@ const InventoryModal = ({
                         className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-blue-400"
                       >
                         -
+                      </div>
+                      <div
+                        onClick={() => {
+                          deleteOldProduct(data);
+                        }}
+                        className="px-3 text-2xl text-white cursor-pointer font-bold rounded-md bg-red-400"
+                      >
+                        X
                       </div>
                     </td>
                   </tr>
@@ -395,7 +454,7 @@ const InventoryModal = ({
                     });
                   }}
                   value={newProduct.quantity}
-                  min={0}
+                  min={0.1}
                   max={newProduct?.maxquantity}
                   required
                 />
