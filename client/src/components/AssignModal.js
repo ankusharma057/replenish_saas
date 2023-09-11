@@ -14,7 +14,15 @@ const AssignModal = ({
   assigninventory_object,
   disabled,
 }) => {
-  // console.log(employeeList);
+  const fillterEmployeeList = (employeeData) => {
+    if (employee?.is_admin) {
+      return employeeData;
+    } else {
+      return employeeData?.filter((i) => {
+        return !i?.name?.toLowerCase()?.replace(/\s+/g, ' ').trim()?.includes("replenish testing");
+      });
+    }
+  };
   const assigninventoryData = assigninventory_object || assignProductData;
   return (
     <Modal
@@ -55,7 +63,7 @@ const AssignModal = ({
               required
             >
               <option>Select The Employee</option>
-              {employeeList?.map((employee) => {
+              {fillterEmployeeList(employeeList)?.map((employee) => {
                 return (
                   <option key={employee?.id} value={employee?.name}>
                     {employee?.name}
