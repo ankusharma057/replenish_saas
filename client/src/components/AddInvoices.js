@@ -96,10 +96,23 @@ export default function AddInvoices({ userProfile }) {
     return +product.cost_price * +product.quantity;
   };
 
+  const getTotalRetailPrice = (product) => {
+    return +product.retail_price * +product.quantity;
+    
+  };
+
   const getConsumableCostPrice = () => {
     let sum = 0;
     formData.products.forEach((product) => {
       sum += getTotalCostPrice(product);
+    });
+    return sum;
+  };
+
+  const getConsumableRetailPrice = () => {
+    let sum = 0;
+    formData.products.forEach((product) => {
+      sum += getTotalRetailPrice(product);
     });
     return sum;
   };
@@ -112,19 +125,6 @@ export default function AddInvoices({ userProfile }) {
     return sum;
   };
 
-  const getTotalRetailPrice = (product) => {
-    return +product.retail_price * +product.quantity;
-    
-  };
-
-  const getConsumableRetailPrice = () => {
-    let sum = 0;
-    formData.products.forEach((product) => {
-      sum += getTotalRetailPrice(product);
-    });
-    return sum;
-  };
-
   const getRetailRetailPrice = () => {
     let sum = 0;
     formData.retailProducts.forEach((product) => {
@@ -132,6 +132,8 @@ export default function AddInvoices({ userProfile }) {
     });
     return sum;
   };
+
+
 
   const calculateTax = (amountPaid) => {
     let afterTaxprice = amountPaid - amountPaid * 0.031;
@@ -171,7 +173,7 @@ export default function AddInvoices({ userProfile }) {
       cashRemaining: formData.paidByClientCash,
       tip: formData.tip,
       discount: formData.personalDiscount,
-      retailTotal: getRetailCostPrice(),
+      retailTotal: getRetailRetailPrice(),
       conciergeFee: 0,
       gfeFee: 0,
       semagConsultFee: 0
@@ -207,10 +209,10 @@ export default function AddInvoices({ userProfile }) {
     total =
       total -
       afterTax.discount + afterTax.tip +
-      (afterTax.retailTotal * (parseInt(userProfile?.retail_percentage) || 0)) /
+      ((afterTax.retailTotal - getRetailCostPrice()) * (parseInt(userProfile?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
-
+    
     if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0){
       total = 30;
       if(userProfile.email === "houstonbeautifulaesthetics@gmail.com") total = total + 10;
