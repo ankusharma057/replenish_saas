@@ -19,7 +19,7 @@ const AssignModal = ({
       return employeeData;
     } else {
       return employeeData?.filter((i) => {
-        return !i?.name?.toLowerCase()?.replace(/\s+/g, ' ').trim()?.includes("replenish testing");
+        return !i?.name?.toLowerCase()?.replace(/\s+/g, ' ').trim()?.includes("replenish training");
       });
     }
   };
