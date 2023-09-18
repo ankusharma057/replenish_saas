@@ -1,20 +1,23 @@
-import { Button, Modal, Form, ListGroup } from "react-bootstrap";
-import React, { memo, useState } from "react";
+import { Button, Modal, Form } from "react-bootstrap";
+import React, { memo } from "react";
+import Loadingbutton from "../Buttons/Loadingbutton";
 
 const AssignModal = ({
   showAssignMadal,
   setShowAssignMadal,
   assignProductData,
-  setAssignProductData,
   assignSubmit,
   assignInput,
   setAssignInput,
   employeeList,
   employee,
   assigninventory_object,
-  disabled,
+  loading,
+  loadingText,
+  setLoading,
 }) => {
-  const fillterEmployeeList = (employeeData) => {
+
+  const filterEmployeeList = (employeeData) => {
     if (employee?.is_admin) {
       return employeeData;
     } else {
@@ -27,7 +30,10 @@ const AssignModal = ({
   return (
     <Modal
       show={showAssignMadal}
-      onHide={() => setShowAssignMadal(false)}
+      onHide={() => {
+        setShowAssignMadal(false);
+        setLoading(false);
+      }}
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
@@ -63,7 +69,9 @@ const AssignModal = ({
               required
             >
               <option>Select The Employee</option>
-              {fillterEmployeeList(employeeList)?.map((employee) => {
+              {filterEmployeeList(
+                employeeList?.filter((i) => i?.id !== employee.id)
+              )?.map((employee) => {
                 return (
                   <option key={employee?.id} value={employee?.name}>
                     {employee?.name}
@@ -71,14 +79,27 @@ const AssignModal = ({
                 );
               })}
             </Form.Select>
-            <Button disabled={disabled} type="submit">
+            <Loadingbutton
+              isLoading={loading}
+              title="Submit"
+              loadingText={loadingText || "Submitting..."}
+              type="submit"
+            />
+            {/* <Button disabled={disabled} type="submit">
               Submit
-            </Button>
+            </Button> */}
           </Form>
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={() => setShowAssignMadal(false)}>Close</Button>
+        <Button
+          onClick={() => {
+            setShowAssignMadal(false);
+            setLoading(false);
+          }}
+        >
+          Close
+        </Button>
       </Modal.Footer>
     </Modal>
   );

@@ -97,3 +97,22 @@ code {
     padding: 0.5rem !important;
   }
 }
+
+@media (min-width: 768px) {
+  .submit-hidden {
+    display: none !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .sm-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .sm-hidden {
+    display: block !important;
+  }
+}
