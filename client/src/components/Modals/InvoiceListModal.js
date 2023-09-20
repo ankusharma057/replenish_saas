@@ -26,9 +26,9 @@ function InvoiceListModal(props) {
         onHide={props.onHide}
         aria-labelledby="contained-modal-title-vcenter"
         centered
-        title={`EmployeeId: ${props.EmployeeId}`}
+        title={`${props.EmployeeName}`}
       >
-        <div className="text-center">
+        <div className="text-center flex flex-col gap-3 items-center">
           {employeeInvoices.map((data) => {
             return (
               <div key={data.id}>

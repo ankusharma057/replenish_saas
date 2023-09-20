@@ -92,6 +92,9 @@ export const createGroupInvoices = async (data) =>
 export const invoiceFinalize = async (id, data) =>
   api.post(`/api/invoices/${id}/finalize`, data);
 
+export const multipleInvoiceFinalize = async (data) =>
+  api.post(`/api/invoices/finalize_multiple`, data);
+
 export const acceptInventory = async (id, data) =>
   api.post(`/api/inventory_prompts/${id}/accept`, data);
 
@@ -138,6 +141,7 @@ export const updateProduct = async (id, data) =>
   api.patch(`/api/products/${id}`, data);
 
 export const logoutUser = async (data) => api.delete("/api/logout", data);
+
 export const deleteInvProduct = async (id) =>
   api.delete(`/api/inventories/${id}`, {
     cache: {

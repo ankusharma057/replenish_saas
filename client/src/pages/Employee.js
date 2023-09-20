@@ -248,6 +248,7 @@ const Employee = () => {
       ],
     });
   };
+
   return (
     <>
       {/* <Header /> */}
@@ -257,7 +258,8 @@ const Employee = () => {
         onHide={() => setInvoiceModalShow(false)}
         setModalShow={invoiceModalShow}
         employeeInvoices={employeeInvoices.invoices}
-        EmployeeId={employeeInvoices.employee.id}
+        EmployeeName={employeeInvoices.employee.name}
+
       />
       {invModalSHow && (
         <InventoryModal

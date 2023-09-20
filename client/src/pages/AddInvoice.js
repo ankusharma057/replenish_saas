@@ -6,7 +6,7 @@ import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { useAuthContext } from "../context/AuthUserContext";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { createGroupInvoices, getUpdatedUserProfile } from "../Server";
+import { createGroupInvoices, getInventoryList, getInvoiceList, getUpdatedUserProfile } from "../Server";
 
 const initialFormState = {
   clientName: "",
@@ -608,7 +608,7 @@ export default function AddInvoices() {
               setLoading(true);
               await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
-              // await getInventory(true);
+              await getInvoiceList(true);
               toast.success("Product Updated Successfully.");
               await getUpdatedUserProfile(true);
             } catch (error) {
