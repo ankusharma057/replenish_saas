@@ -1,9 +1,12 @@
+/* eslint-disable eqeqeq */
 import React, { useRef, useState } from "react";
-import Header from "./Header";
 import { toast } from "react-toastify";
 import { Alert, Button } from "react-bootstrap";
-import AddInvoiceTemplate from "./AddInvoiceTemplate";
+import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import { confirmAlert } from "react-confirm-alert"; // Import
+import { useAuthContext } from "../context/AuthUserContext";
+import Loadingbutton from "../components/Buttons/Loadingbutton";
+import { createGroupInvoices, getUpdatedUserProfile } from "../Server";
 
 const initialFormState = {
   clientName: "",
@@ -20,24 +23,25 @@ const initialFormState = {
   retailProducts: [],
 };
 
-export default function AddInvoices({ userProfile }) {
+export default function AddInvoices() {
+  const { authUserState } = useAuthContext();
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
-    price: null,
+    price: 0,
     quantity: 1,
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [matchingProducts, setMatchingProducts] = useState([]);
   const [currentRetailProduct, setCurrentRetailProduct] = useState({
     name: "",
-    price: null,
+    price: 0,
     quantity: 1,
   });
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
   const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
-  const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     ...initialFormState,
@@ -98,7 +102,6 @@ export default function AddInvoices({ userProfile }) {
 
   const getTotalRetailPrice = (product) => {
     return +product.retail_price * +product.quantity;
-    
   };
 
   const getConsumableCostPrice = () => {
@@ -133,8 +136,6 @@ export default function AddInvoices({ userProfile }) {
     return sum;
   };
 
-
-
   const calculateTax = (amountPaid) => {
     let afterTaxprice = amountPaid - amountPaid * 0.031;
     return afterTaxprice;
@@ -160,6 +161,7 @@ export default function AddInvoices({ userProfile }) {
     return;
   };
 
+  // eslint-disable-next-line no-unused-vars
   const getOverheadFeeAmount = (total) => {
     if (formData.overheadFeeType === "percentage") {
       return total * (formData.overheadFeeValue / 100);
@@ -176,18 +178,18 @@ export default function AddInvoices({ userProfile }) {
       retailTotal: getRetailRetailPrice(),
       conciergeFee: 0,
       gfeFee: 0,
-      semagConsultFee: 0
+      semagConsultFee: 0,
     };
     if (formData?.gfe) {
       afterTax.gfeFee = 30;
-      if(userProfile.email === "houstonbeautifulaesthetics@gmail.com") afterTax.gfeFee = afterTax.gfeFee + 10;
+      if (authUserState.user?.email === "houstonbeautifulaesthetics@gmail.com")
+        afterTax.gfeFee = afterTax.gfeFee + 10;
     }
 
-    console.log(userProfile.email)
     if (formData?.semaglitudeConsultation) {
       afterTax.semagConsultFee = 75;
     }
-    console.log(userProfile.email)
+
     if (formData?.conciergeFeePaid) {
       afterTax.conciergeFee = 50;
     }
@@ -204,27 +206,42 @@ export default function AddInvoices({ userProfile }) {
         afterTax.semagConsultFee -
         afterTax.tip -
         afterTax.retailTotal) *
-      (userProfile?.service_percentage / 100); //(replace with injector percentage)
-    if (userProfile?.gfe) total += afterTax.gfeFee + afterTax.semagConsultFee;
+      (authUserState.user?.service_percentage / 100); //(replace with injector percentage)
+    if (authUserState.user?.gfe)
+      total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =
       total -
-      afterTax.discount + afterTax.tip +
-      ((afterTax.retailTotal - getRetailCostPrice()) * (parseInt(userProfile?.retail_percentage) || 0)) /
+      afterTax.discount +
+      afterTax.tip +
+      ((afterTax.retailTotal - getRetailCostPrice()) *
+        (parseInt(authUserState.user?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
-    
-    if (userProfile?.gfe && formData?.gfe && totalPaidByClientAT === 0){
+    if (authUserState.user?.gfe && formData?.gfe && totalPaidByClientAT === 0) {
       total = 30;
-      if(userProfile.email === "houstonbeautifulaesthetics@gmail.com") total = total + 10;
+      if (authUserState.user.email === "houstonbeautifulaesthetics@gmail.com")
+        total = total + 10;
     }
-    if (userProfile?.gfe && formData?.semaglitudeConsultation && totalPaidByClientAT === 0)
+    if (
+      authUserState.user?.gfe &&
+      formData?.semaglitudeConsultation &&
+      totalPaidByClientAT === 0
+    )
       total = 75;
-    if (!userProfile?.gfe && formData?.semaglitudeConsultation && getTotalPaidByClient() === 75)
+    if (
+      !authUserState.user?.gfe &&
+      formData?.semaglitudeConsultation &&
+      getTotalPaidByClient() === 75
+    )
       total = 0;
-    if (!userProfile?.gfe && formData?.gfe && getTotalPaidByClient() === 30) {
+    if (
+      !authUserState.user?.gfe &&
+      formData?.gfe &&
+      getTotalPaidByClient() === 30
+    ) {
       total = 0;
     }
-    
+
     // totalRef.current.charge =
     return total.toFixed(2);
   };
@@ -236,17 +253,15 @@ export default function AddInvoices({ userProfile }) {
     if ((formData.paidByClientCash = 0))
       expectedIncome = expectedIncome - expectedIncome * 0.031;
     expectedIncome =
-      expectedIncome * ((100 - userProfile?.service_percentage) / 100);
-    console.log(expectedIncome);
+      expectedIncome * ((100 - authUserState.user?.service_percentage) / 100);
     return expectedIncome;
   };
 
   const getActualReplenishIncome = () => {
     let injectorPay = getTotal();
     let actualIncome =
-      (injectorPay / (userProfile?.service_percentage / 100)) *
-      ((100 - userProfile?.service_percentage) / 100);
-    console.log(actualIncome);
+      (injectorPay / (authUserState.user?.service_percentage / 100)) *
+      ((100 - authUserState.user?.service_percentage) / 100);
     return actualIncome;
   };
 
@@ -260,14 +275,13 @@ export default function AddInvoices({ userProfile }) {
     const productList = [];
     // change to only user
 
-    userProfile?.employees_inventories.forEach((inventory) => {
+    authUserState.user?.employees_inventories.forEach((inventory) => {
       if (
         inventory?.product !== undefined &&
         inventory?.product !== null &&
         inventory?.product !== "" &&
         inventory?.product?.product_type !== undefined
       ) {
-        // console.log(product.product_type);
         if (!inventory?.product.product_type.includes("Retail")) {
           productList.push(inventory?.product);
         }
@@ -283,16 +297,13 @@ export default function AddInvoices({ userProfile }) {
         : productList?.filter((product) =>
             product?.name.toLowerCase().includes(input.toLowerCase())
           );
-
-    // console.log({ matchedProducts });
     setMatchingProducts(matchedProducts);
   };
   const handleProductSelection = (selectedProductName) => {
     // change to only user
-    const selectedProduct = userProfile?.employees_inventories?.find(
+    const selectedProduct = authUserState.user?.employees_inventories?.find(
       (product) => product?.product?.name === selectedProductName
     );
-    // console.log({ selectedProduct });
     if (selectedProduct.product) {
       setCurrentProduct({
         name: selectedProduct?.product.name,
@@ -348,11 +359,10 @@ export default function AddInvoices({ userProfile }) {
         ...selectedProduct,
         quantity: currentProduct.quantity,
       };
-      // console.log("productToBeAdded", productToBeAdded);
       setSelectedProduct(null);
       setFormData((prevFormData) => ({
         ...prevFormData,
-        ["products"]: [...formData.products, productToBeAdded],
+        products: [...formData.products, productToBeAdded],
       }));
     }
   };
@@ -362,14 +372,13 @@ export default function AddInvoices({ userProfile }) {
     const retailProductList = [];
     // change to only user
 
-    userProfile?.employees_inventories.forEach((inventory) => {
+    authUserState.user?.employees_inventories.forEach((inventory) => {
       if (
         inventory?.product !== undefined &&
         inventory?.product !== null &&
         inventory?.product !== "" &&
         inventory?.product?.product_type !== undefined
       ) {
-        // console.log(product.product_type);
         if (inventory?.product.product_type.includes("Retail")) {
           retailProductList.push(inventory?.product);
         }
@@ -386,14 +395,14 @@ export default function AddInvoices({ userProfile }) {
             product?.name.toLowerCase().includes(input.toLowerCase())
           );
 
-    // console.log({ matchedProducts });
     setMatchingRetailProducts(matchedProducts);
   };
   const handleRetailProductSelection = (selectedRetailProductName) => {
-    const selectedProduct = userProfile?.employees_inventories?.find(
+    const selectedProduct = authUserState.user?.employees_inventories?.find(
       (product) => product?.product?.name === selectedRetailProductName
     );
-    if (selectedProduct) {
+
+    if (selectedProduct.product) {
       setCurrentRetailProduct({
         name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
@@ -402,7 +411,7 @@ export default function AddInvoices({ userProfile }) {
           selectedProduct.quantity -
           Number(
             (allInvoiceProductsList &&
-              allInvoiceProductsList?.productQuantities[
+              allInvoiceProductsList?.retailProductQuantities[
                 selectedProduct?.product?.id
               ]?.sumofQuantity) ||
               0
@@ -432,6 +441,7 @@ export default function AddInvoices({ userProfile }) {
       if (Number(currentRetailProduct?.quantity) <= 0.009) {
         setIsAlert({
           retailShow: true,
+          productUsedShow: false,
           message: `Minimum quantity is 0.01`,
         });
         return;
@@ -443,6 +453,12 @@ export default function AddInvoices({ userProfile }) {
         });
         return;
       }
+
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
       setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
       let retailProductToBeAdded = {
         ...selectedRetailProduct,
@@ -514,8 +530,8 @@ export default function AddInvoices({ userProfile }) {
       return;
     }
     let invoice = {
-      employee_id: userProfile.id,
-      user_name: userProfile?.name,
+      employee_id: authUserState.user.id,
+      user_name: authUserState.user?.name,
       clientname: clientName,
 
       date_of_service: formData?.dateOfService,
@@ -578,50 +594,33 @@ export default function AddInvoices({ userProfile }) {
     }
   };
 
-  // console.log((currentProduct.quantity * currentProduct.price).toFixed(2));
-
   const handleSubmit = (event) => {
-    setSubmitButtonDisabled(true);
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-
     confirmAlert({
       title: "Confirm to submit",
       message: `Are you sure add ${invoiceData?.length} Invoices `,
       buttons: [
         {
           label: "Yes",
-          onClick: () => {
-            fetch("/api/invoice_groups/", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              // for single invoice
-              // body: JSON.stringify(invoice),
-              // for multiple invoice
-              body: JSON.stringify(invoiceData),
-            })
-              .then((res) => {
-                if (res.ok) {
-                  toast.success("Invoice created successfully.");
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 2000);
-                } else if (res.status === 404) {
-                  res.json().then((json) => {
-                    toast.error("Please provide a client.");
-                  });
-                } else {
-                  res.json().then((json) => {
-                    toast.error("Failed to create Invoice");
-                  });
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                toast.error("An error occured.");
-              });
+          onClick: async () => {
+            try {
+              setLoading(true);
+              await createGroupInvoices(invoiceData);
+              toast.success("Invoice created successfully.");
+              // await getInventory(true);
+              toast.success("Product Updated Successfully.");
+              await getUpdatedUserProfile(true);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                  error.response.statusText ||
+                  error.message ||
+                  "Failed to create Invoice"
+              );
+            } finally {
+              setLoading(false);
+            }
 
             setFormData(initialFormState);
             setCurrentProduct({ name: "", price: 0, quantity: 1 });
@@ -635,12 +634,11 @@ export default function AddInvoices({ userProfile }) {
         },
       ],
     });
-    setSubmitButtonDisabled(true);
   };
 
   return (
     <>
-      <Header userProfile={userProfile} />
+      {/* <Header /> */}
 
       <div className="bg-blue-200 p-1 sm:p-4 ">
         <div className="bg-blue-200 min-h-screen pb-8 flex items-center justify-center flex-col md:p-4">
@@ -664,7 +662,7 @@ export default function AddInvoices({ userProfile }) {
             <div className="border rounded-sm p-2 mb-4 flex flex-wrap justify-start md:justify-around">
               <div className="text-center">
                 <h4>Provider:</h4>
-                <div>{userProfile?.name}</div>
+                <div>{authUserState.user?.name}</div>
               </div>
               <div className="flex gap-4 mt-2 md:mt-0">
                 <label className=" mb-3 block relative">
@@ -803,13 +801,21 @@ export default function AddInvoices({ userProfile }) {
                     <span ref={totalRef}>{Number(getTotal()).toFixed(2)}</span>
                   </label>
                 </div>
-                <button
+
+                <Loadingbutton
+                  isLoading={loading}
+                  className="w-full  submit-hidden bg-blue-500 text-white px-4 py-2 rounded-md"
+                  title="Submit"
+                  loadingText={"Adding Invoices..."}
+                  type="submit"
+                />
+                {/* <button
                   type="submit"
                   disabled={submitButtonDisabled}
                   className="w-full md:hidden bg-blue-500 text-white px-4 py-2 rounded-md"
                 >
                   Submit
-                </button>
+                </button> */}
               </div>
               <div className="px-2">
                 <div className="border overflow-x-auto rounded-sm p-2 mb-4 products-used">
@@ -1021,8 +1027,9 @@ export default function AddInvoices({ userProfile }) {
                               currentRetailProduct?.maxQtantity
                                 ? handleRetailQuantityChange(e)
                                 : setIsAlert({
+                                    productUsedShow: false,
                                     retailShow: true,
-                                    message: ` Your can select upto ${currentRetailProduct?.maxQtantity} quantity`,
+                                    message: ` You can only select quantity upto ${currentRetailProduct?.maxQtantity} for ${currentRetailProduct?.name}`,
                                   });
                             }}
                             min="0"
@@ -1102,12 +1109,20 @@ export default function AddInvoices({ userProfile }) {
                     {Number(getConsumableCostPrice() || 0)?.toFixed(2)}
                   </label>
                 </div>
-                <button
+
+                <Loadingbutton
+                  isLoading={loading}
+                  className="w-full sm-hidden md:block bg-blue-500 text-white px-4 py-2"
+                  title="Submit"
+                  loadingText={"Adding Invoices..."}
+                  type="submit"
+                />
+                {/* <button
                   type="submit"
                   className="w-full hidden md:block bg-blue-500 text-white px-4 py-2 rounded-md"
                 >
                   Submit
-                </button>
+                </button> */}
               </div>
             </div>
           </form>
@@ -1116,7 +1131,6 @@ export default function AddInvoices({ userProfile }) {
         <div className="flex flex-col gap-4">
           {invoiceArray?.length > 0 &&
             invoiceArray?.map((invoice) => {
-              // console.log({ invoice });
               return (
                 <AddInvoiceTemplate
                   key={invoice.id}

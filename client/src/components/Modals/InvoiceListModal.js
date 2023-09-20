@@ -1,15 +1,16 @@
 import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
 import CustomModal from "./CustomModal";
 import { useState } from "react";
+import ModalWraper from "./ModalWraper";
 
-function CustomEmployeeModal(props) {
+function InvoiceListModal(props) {
   const { employeeInvoices } = props;
   const [modalShow, setModalShow] = useState(false);
   const [invoiceData, setinvoiceData] = useState(null);
   function handleClick() {
     setModalShow(!modalShow);
   }
+
   return (
     <>
       {modalShow && (
@@ -19,18 +20,15 @@ function CustomEmployeeModal(props) {
           invoiceData={invoiceData}
         />
       )}
-      <Modal
+
+      <ModalWraper
         show={props.show}
         onHide={props.onHide}
         aria-labelledby="contained-modal-title-vcenter"
         centered
+        title={`EmployeeId: ${props.EmployeeId}`}
       >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            EmployeeId: {props.EmployeeId}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-center flex  flex-col gap-4">
+        <div className="text-center">
           {employeeInvoices.map((data) => {
             return (
               <div key={data.id}>
@@ -46,12 +44,9 @@ function CustomEmployeeModal(props) {
               </div>
             );
           })}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={props.onHide}>Close</Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
+      </ModalWraper>
     </>
   );
 }
-export default CustomEmployeeModal;
+export default InvoiceListModal;
