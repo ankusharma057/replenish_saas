@@ -9,6 +9,10 @@ Rails.application.routes.draw do
     end
 
     resources :invoices, except: :create do
+      collection do
+        post :finalize_multiple
+      end
+
       member do
         post :finalize
         post :send_reject_mail
