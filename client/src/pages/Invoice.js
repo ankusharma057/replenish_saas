@@ -108,7 +108,7 @@ const Invoice = () => {
 
   const finalizeMultipeInvoiceSubmit = () => {
     setShowMultipleFinaliseModal(false);
-    setLoading(false);
+    setLoading(true);
     confirmAlert({
       title: "Confirm to finalize",
       message: `  Are you sure you want to finalize ${
@@ -120,10 +120,25 @@ const Invoice = () => {
           onClick: async () => {
             setShowMultipleFinaliseModal(true);
             try {
-              await multipleInvoiceFinalize(Object.values(multipleInvoiceData));
-              toast.success(
-                "Invoices finalized successfully and the mail has been sent on the email id"
+              const { data } = await multipleInvoiceFinalize(
+                Object.values(multipleInvoiceData)
               );
+              if (data) {
+                toast.success(
+                  <ul>
+                    {data.message?.map((item, index) => (
+                      <li className="list-disc" key={index}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              } else {
+                toast.success(
+                  "Invoices finalized successfully and the mail has been sent on the email id"
+                );
+              }
+
               await getInvoices(true);
               setMultipleInvoiceData({});
             } catch (error) {
@@ -230,7 +245,6 @@ const Invoice = () => {
       >
         <div className="justify-center flex flex-wrap gap-3 max-h-[35rem] overflow-y-auto">
           {invoiceList[setselectList]?.map((invoice) => {
-            console.log(invoice);
             return (
               <FinalizeInvoicesCard
                 key={invoice.id}

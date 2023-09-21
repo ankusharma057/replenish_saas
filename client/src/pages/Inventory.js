@@ -254,6 +254,7 @@ const Inventory = () => {
           : "Prompted Employee for the inventory."
       );
       await getEmployees(true, true);
+      await getInventory(true);
     } catch (error) {
       console.log(error);
       toast.error(
