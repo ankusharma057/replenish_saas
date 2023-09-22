@@ -609,7 +609,6 @@ export default function AddInvoices() {
               await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
-              toast.success("Product Updated Successfully.");
               await getUpdatedUserProfile(true);
             } catch (error) {
               toast.error(
