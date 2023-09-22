@@ -11,7 +11,7 @@ const FinalizeInvoicesCard = ({
 }) => {
   return (
     <Card
-      className={`text-center w-72 cursor-pointer max-w-[10rem]`}
+      className={`text-center w-60 cursor-pointer`}
       style={{
         background: multipleInvoiceData[invoiceId] ? "#529aff" : "white",
       }}

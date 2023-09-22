@@ -39,7 +39,7 @@ class Api::InvoiceGroupsController < ApplicationController
       text = "An invoice group with Invoice IDs: #{@invoice_group.invoices.ids} has been recently created by #{@invoice_group.invoices.first.employee&.name.capitalize}"
       send_message(text: text)
 
-      render json: @invoice_group, status: :ok
+      render json: @invoice_group, status: :created
     else
       render json: { 'error' => 'Something Went Wrong' }, status: :unprocessable_entity
     end
