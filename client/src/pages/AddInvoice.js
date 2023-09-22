@@ -6,7 +6,12 @@ import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { useAuthContext } from "../context/AuthUserContext";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { createGroupInvoices, getInventoryList, getInvoiceList, getUpdatedUserProfile } from "../Server";
+import {
+  createGroupInvoices,
+  getInventoryList,
+  getInvoiceList,
+  getUpdatedUserProfile,
+} from "../Server";
 
 const initialFormState = {
   clientName: "",
@@ -606,10 +611,16 @@ export default function AddInvoices() {
           onClick: async () => {
             try {
               setLoading(true);
-              await createGroupInvoices(invoiceData);
+              const data = await createGroupInvoices(invoiceData);
+              console.log(data);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
               await getUpdatedUserProfile(true);
+              setClientName("");
+              setFormData(initialFormState);
+              setCurrentProduct({ name: "", price: 0, quantity: 1 });
+              setSelectedProduct(null);
+              setMatchingProducts([]);
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
@@ -620,11 +631,6 @@ export default function AddInvoices() {
             } finally {
               setLoading(false);
             }
-
-            setFormData(initialFormState);
-            setCurrentProduct({ name: "", price: 0, quantity: 1 });
-            setSelectedProduct(null);
-            setMatchingProducts([]);
           },
         },
         {

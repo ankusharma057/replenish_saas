@@ -1,14 +1,14 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const ModalWraper = ({ show, onHide, children, title, footer }) => {
+const ModalWraper = ({ show, onHide, children, title, footer, size }) => {
   return (
     <Modal
       show={show}
       onHide={onHide}
       aria-labelledby="contained-modal-title-vcenter"
       centered
-      size="lg"
+      size={size || "md"}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">{title}</Modal.Title>

@@ -241,9 +241,10 @@ const Invoice = () => {
             )}
           </>
         }
+        size="lg"
       >
         <div className="justify-center flex flex-wrap gap-3 min-h-[5rem] max-h-[35rem] overflow-y-auto">
-          {invoiceList[setselectList]?.map((invoice) => {
+          {invoiceList["non-finalized"]?.map((invoice) => {
             return (
               <FinalizeInvoicesCard
                 key={invoice.id}
