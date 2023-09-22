@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "react-bootstrap";
 
 const FinalizeInvoicesCard = ({
+  employeeName,
   clientName,
   invoiceId,
   invoice,
@@ -10,7 +11,7 @@ const FinalizeInvoicesCard = ({
 }) => {
   return (
     <Card
-      className={`text-center w-72 cursor-pointer `}
+      className={`text-center w-72 cursor-pointer max-w-[10rem]`}
       style={{
         background: multipleInvoiceData[invoiceId] ? "#529aff" : "white",
       }}
@@ -28,7 +29,7 @@ const FinalizeInvoicesCard = ({
           color: multipleInvoiceData[invoiceId] ? "white" : "black",
         }}
       >
-        Client: {clientName}
+        {employeeName}
       </Card.Header>
       <Card.Body
         className={` ${
@@ -36,8 +37,9 @@ const FinalizeInvoicesCard = ({
         }  mb-3`}
       >
         <Card.Title className={` mb-3`}>Invoice Id: {invoiceId}</Card.Title>
+        <Card.Title className={` mb-3`}>Client: {clientName}</Card.Title>
         <Card.Title className="mb-3 ">
-          <span className="block text-sm ">Date of Service</span>
+          <span className="block text-sm ">Date of Service:</span>
           <span className="text-sm">
             {invoice.date_of_service || "Not Given"}
           </span>

@@ -79,16 +79,17 @@ const InventoryModal = ({
     setShowAddNew(true);
     deleteAddProduct(data.id);
   };
+
   const deleteAddProduct = (id) => {
     setnewProductArr(newProductArr.filter((data) => data.id !== id));
   };
+
   const checkQuantityErrors = (updated_products) => {
     const a = Object.keys(updated_products).find(
       (key) =>
         updated_products[key]?.maxQuantity <
         Number(updated_products[key]?.quantity)
     );
-
     return a;
   };
 
@@ -248,7 +249,7 @@ const InventoryModal = ({
           {inventoryList?.name}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="text-center flex  flex-col gap-4">
+      <Modal.Body className="text-center flex flex-col gap-4">
         <div>
           <Table bordered hover responsive className="w-full text-center">
             <thead>

@@ -142,7 +142,6 @@ const Invoice = () => {
               await getInvoices(true);
               setMultipleInvoiceData({});
             } catch (error) {
-              console.log(error);
               toast.error(
                 error?.response?.data?.exception ||
                   error.response.statusText ||
@@ -243,11 +242,12 @@ const Invoice = () => {
           </>
         }
       >
-        <div className="justify-center flex flex-wrap gap-3 max-h-[35rem] overflow-y-auto">
+        <div className="justify-center flex flex-wrap gap-3 min-h-[5rem] max-h-[35rem] overflow-y-auto">
           {invoiceList[setselectList]?.map((invoice) => {
             return (
               <FinalizeInvoicesCard
                 key={invoice.id}
+                employeeName={invoice.employee_name}
                 clientName={invoice.client?.name}
                 invoiceId={invoice.id}
                 invoice={invoice}

@@ -28,7 +28,7 @@ function InvoiceListModal(props) {
         centered
         title={`${props.EmployeeName}`}
       >
-        <div className="text-center flex flex-col gap-3 items-center">
+        <div className="text-center flex flex-wrap gap-3 items-center justify-center">
           {employeeInvoices.map((data) => {
             return (
               <div key={data.id}>

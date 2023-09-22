@@ -8,6 +8,7 @@ const ModalWraper = ({ show, onHide, children, title, footer }) => {
       onHide={onHide}
       aria-labelledby="contained-modal-title-vcenter"
       centered
+      size="lg"
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">{title}</Modal.Title>

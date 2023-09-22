@@ -19,7 +19,6 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 const Employee = () => {
   const { authUserState } = useAuthContext();
   const [invoiceList, setInvoiceList] = useState([]);
-  // const [modalShow, setModalShow] = useState(false);
   const [invModalSHow, setInvModalSHow] = useState(false);
   const [employeeList, setEmployeeList] = useState([]);
   const [employeeInvoices, setEmployeeInvoices] = useState({
