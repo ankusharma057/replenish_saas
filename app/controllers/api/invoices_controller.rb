@@ -57,6 +57,25 @@ class Api::InvoicesController < ApplicationController
     end
   end
 
+  def finalize_multiple
+    invoices = Invoice.where(id: params["_json"].pluck(:id))
+    message_hash = { success: [] }
+    invoices.each do |invoice|
+      if invoice.finalize_and_attach_pdf
+        if invoice.fellow_invoices_finalized?
+          invoice.send_group_pdf_mail
+          message_hash[:success] << "Invoice #{invoice.id} Finalized" 
+        else
+          message_hash[:success] << "Finalize Invoices: #{invoice.fellow_invoices.where(is_finalized: false).ids} to receive the mail"
+        end
+      else
+        return render json: {'error' => 'Invoice not found'}, status: :not_found
+      end
+    end
+
+    return render json: { 'message' => message_hash[:success] }, status: :ok
+  end
+
   def send_reject_mail
     fellow_invoices = @invoice.fellow_invoices
     fellow_invoices_finalized = @invoice.fellow_invoices_finalized?

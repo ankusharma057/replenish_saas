@@ -3,7 +3,7 @@ import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
-import { createEmployee } from "../../Server";
+import { createEmployee, getEmployeesList } from "../../Server";
 
 const formInitialState = {
   name: "",
@@ -29,6 +29,7 @@ export default function SignUp() {
       await createEmployee(formData);
       toast.success("User created successfully");
       //   setFormData(formInitialState);
+      getEmployeesList(true);
     } catch (error) {
       let errorString = "";
       Object.keys(error.response.data.error || {})?.forEach((key) => {
