@@ -617,6 +617,7 @@ export default function AddInvoices() {
               await getInvoiceList(true);
               await getUpdatedUserProfile(true);
               setClientName("");
+              setInvoiceArray([]);
               setFormData(initialFormState);
               setCurrentProduct({ name: "", price: 0, quantity: 1 });
               setSelectedProduct(null);
