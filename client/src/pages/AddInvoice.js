@@ -218,7 +218,7 @@ export default function AddInvoices() {
       total -
       afterTax.discount +
       afterTax.tip +
-      ((afterTax.retailTotal - getRetailCostPrice()) *
+      ((afterTax.retailTotal) *
         (parseInt(authUserState.user?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
