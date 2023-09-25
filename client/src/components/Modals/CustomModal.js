@@ -67,6 +67,7 @@ function CustomModal({
       toast.success("Invoice Updated successfully.");
       const { data: useData } = await getUpdatedUserProfile(true);
       authUserDispatch({ type: LOGIN, payload: useData });
+      window.location.reload();
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -113,6 +114,7 @@ function CustomModal({
       toast.success("Invoice Rejected successfully.");
       const { data: useData } = await getUpdatedUserProfile(true);
       authUserDispatch({ type: LOGIN, payload: useData });
+      window.location.reload();
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -174,6 +176,7 @@ function CustomModal({
                   showUpdateModal={showUpdateModal}
                   handleNestedClick={handleNestedClick}
                   invoiceID={invoiceID}
+                  charge={invoiceData?.charge}
                   nestedInputModal={nestedInputModal}
                   updateSubmit={updateSubmit}
                   setNestedInputModal={setNestedInputModal}

@@ -8,6 +8,7 @@ const UpdateInvoiceModal = ({
   showUpdateModal,
   handleNestedClick,
   invoiceID,
+  charge,
   nestedInputModal,
   updateSubmit,
   setNestedInputModal,
@@ -77,7 +78,7 @@ const UpdateInvoiceModal = ({
             <LabelInput
               label="Total"
               type="number"
-              placeholder={"Total"}
+              placeholder={charge}
               controlId="total"
               name="total"
               onChange={(event) =>
