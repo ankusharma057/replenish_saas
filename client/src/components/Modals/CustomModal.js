@@ -20,6 +20,7 @@ function CustomModal({
   onHide,
   fiInvoiceList,
   userProfile,
+  getInvoices,
 }) {
   const invoiceID = invoiceData.id;
   const employeeName = invoiceData.employee_name;
@@ -35,12 +36,13 @@ function CustomModal({
   const comments = invoiceData.comments;
   const overheadFeeType = invoiceData.overhead_fee_type;
   const overheadFeeValue = invoiceData.overhead_fee_value;
+
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [nestedInputModal, setNestedInputModal] = useState({
-    overheadFeeType,
-    overheadFeeValue,
-    charge,
+    overhead_fee_type: "",
+    overhead_fee_value: "",
+    charge: 0,
   });
 
   const { authUserDispatch } = useAuthContext();
@@ -48,7 +50,7 @@ function CustomModal({
   const [loading, setLoading] = useState(false);
   const [textAreaInput, settextAreaInput] = useState("");
 
-
+  // this will close or open the nested updated modal
   function handleNestedClick() {
     setShowUpdateModal(!showUpdateModal);
   }
@@ -57,16 +59,28 @@ function CustomModal({
   const updateSubmit = async (e) => {
     e.preventDefault();
     try {
+      const updateData = {
+        overhead_fee_type:
+          // if nestedInputModal.overhead_fee_type is not empty then use it else use previously
+          nestedInputModal.overhead_fee_type || invoiceData.overhead_fee_type,
+        overhead_fee_value:
+          nestedInputModal.overhead_fee_value || invoiceData.overhead_fee_value,
+        charge: nestedInputModal.charge || invoiceData.charge,
+      };
       setLoading(true);
-      await updateInvoice(invoiceID, {
-        overhead_fee_type: nestedInputModal.overheadFeeType,
-        overhead_fee_value: nestedInputModal.overheadFeeValue,
-        charge: nestedInputModal.charge,
-      });
-
+      await updateInvoice(invoiceID, updateData);
       toast.success("Invoice Updated successfully.");
       const { data: useData } = await getUpdatedUserProfile(true);
       authUserDispatch({ type: LOGIN, payload: useData });
+      if (getInvoices) {
+        await getInvoices();
+      }
+
+      if (getInvoices !== null && getInvoices !== undefined) {
+        await getInvoices(true);
+      }
+      handleNestedClick();
+      onHide();
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -76,7 +90,6 @@ function CustomModal({
     } finally {
       setLoading(false);
     }
-   
   };
 
   const downloadInvoicePdf = async (e) => {
@@ -100,7 +113,6 @@ function CustomModal({
     } finally {
       setLoading(false);
     }
-    
   };
 
   const rejectSubmit = async (e) => {
@@ -113,6 +125,11 @@ function CustomModal({
       toast.success("Invoice Rejected successfully.");
       const { data: useData } = await getUpdatedUserProfile(true);
       authUserDispatch({ type: LOGIN, payload: useData });
+      if (getInvoices !== null && getInvoices !== undefined) {
+        await getInvoices(true);
+      }
+      setShowRejectModal(false);
+      onHide();
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -178,6 +195,7 @@ function CustomModal({
                   updateSubmit={updateSubmit}
                   setNestedInputModal={setNestedInputModal}
                   loading={loading}
+                  invoiceData={invoiceData}
                 />
               </>
             )}

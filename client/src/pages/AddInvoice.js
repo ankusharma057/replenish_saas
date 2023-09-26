@@ -611,8 +611,7 @@ export default function AddInvoices() {
           onClick: async () => {
             try {
               setLoading(true);
-              const data = await createGroupInvoices(invoiceData);
-              console.log(data);
+              await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
               await getUpdatedUserProfile(true);
