@@ -8,6 +8,7 @@ const UpdateInvoiceModal = ({
   showUpdateModal,
   handleNestedClick,
   invoiceID,
+  charge,
   nestedInputModal,
   updateSubmit,
   setNestedInputModal,

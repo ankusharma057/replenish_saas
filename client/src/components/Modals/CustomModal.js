@@ -191,6 +191,7 @@ function CustomModal({
                   showUpdateModal={showUpdateModal}
                   handleNestedClick={handleNestedClick}
                   invoiceID={invoiceID}
+                  charge={invoiceData?.charge}
                   nestedInputModal={nestedInputModal}
                   updateSubmit={updateSubmit}
                   setNestedInputModal={setNestedInputModal}
