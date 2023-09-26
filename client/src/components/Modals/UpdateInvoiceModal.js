@@ -13,6 +13,7 @@ const UpdateInvoiceModal = ({
   updateSubmit,
   setNestedInputModal,
   loading,
+  invoiceData,
 }) => {
   return (
     <>
@@ -45,11 +46,11 @@ const UpdateInvoiceModal = ({
               Overhead Fee Type:
               <Form.Select
                 name="overheadFeeType"
-                value={nestedInputModal.overheadFeeType}
+                defaultValue={invoiceData?.overhead_fee_type}
                 onChange={(event) =>
                   setNestedInputModal({
                     ...nestedInputModal,
-                    overheadFeeType: event.target.value,
+                    overhead_fee_type: event.target.value,
                   })
                 }
                 className="w-full mt-1 p-1 border-gray-300 border rounded-md"
@@ -64,12 +65,13 @@ const UpdateInvoiceModal = ({
               label="Overhead Fee Value:"
               type="number"
               placeholder={"Overhead Fee"}
-              controlId="overheadFeeValue"
-              name="overheadFeeValue"
+              controlId="overhead_fee_value"
+              name="overhead_fee_value"
+              defaultValue={invoiceData?.overhead_fee_value}
               onChange={(event) =>
                 setNestedInputModal({
                   ...nestedInputModal,
-                  overheadFeeValue: event.target.value,
+                  overhead_fee_value: event.target.value,
                 })
               }
               className="w-full mt-1 p-1 border-gray-300 border rounded-md"
@@ -78,21 +80,25 @@ const UpdateInvoiceModal = ({
             <LabelInput
               label="Total"
               type="number"
-              placeholder={charge}
-              controlId="total"
-              name="total"
+              placeholder={"Total"}
+              controlId="charge"
+              defaultValue={invoiceData?.charge}
+              name="charge"
+              onBlur={(e) => e.target.blur()}
               onChange={(event) =>
                 setNestedInputModal({
                   ...nestedInputModal,
                   charge: event.target.value,
                 })
               }
+              required={false}
+              step="0.01"
+              // min="0.01"
               className="w-full mt-1 p-1 border-gray-300 border rounded-md"
             />
           </div>
         </Form>
       </ModalWraper>
-    
     </>
   );
 };

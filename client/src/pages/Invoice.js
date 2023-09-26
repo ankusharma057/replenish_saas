@@ -267,6 +267,7 @@ const Invoice = () => {
           userProfile={authUserState.user}
           invoiceData={singleInvoice}
           fiInvoiceList={singleInvoice.is_finalized}
+          getInvoices={getInvoices}
         />
         <div className="justify-center flex flex-wrap gap-3">
           {invoiceList[setselectList]?.map((invoice) => {

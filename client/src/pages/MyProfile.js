@@ -99,7 +99,7 @@ const MyProfile = () => {
     setLoading(true);
     confirmAlert({
       title: "Confirm to submit",
-      message: `Are you sure to accept this inventory`,
+      message: `Are you sure to assign this inventory`,
       buttons: [
         {
           label: "Yes",
@@ -109,8 +109,11 @@ const MyProfile = () => {
               toast.success(
                 "Sent a prompt for the employee to be accepted or rejected."
               );
+
               const { data: useData } = await getUpdatedUserProfile(true);
               authUserDispatch({ type: LOGIN, payload: useData });
+              await getInventory(true);
+              await getEmployeesList(true);
             } catch (error) {
               console.log(error);
               toast.error(
