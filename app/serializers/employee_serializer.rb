@@ -8,17 +8,17 @@ class EmployeeSerializer < ActiveModel::Serializer
   has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id
   has_many :employees_inventories, class_name: 'EmployeeInventory'
 
-  def employees_inventories
-    object.employees_inventories&.map do |employee_inventory|
-      EmployeeInventorySerializer.new(employee_inventory).attributes
-    end
-  end
+  # def employees_inventories
+  #   object.employees_inventories&.map do |employee_inventory|
+  #     EmployeeInventorySerializer.new(employee_inventory).attributes
+  #   end
+  # end
 
-  def inventory_prompts
-    object.inventory_prompts&.map do |inventory_prompt|
-      InventoryPromptSerializer.new(inventory_prompt).attributes
-    end
-  end
+  # def inventory_prompts
+  #   object.inventory_prompts&.map do |inventory_prompt|
+  #     InventoryPromptSerializer.new(inventory_prompt).attributes
+  #   end
+  # end
 
   def pending_requests
     object.inventory_requests.where.not(is_approved: true) 

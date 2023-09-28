@@ -10,7 +10,7 @@ class Api::SessionsController < ApplicationController
       render json: @employee, status: :ok
     elsif trying_with_temp_password?
       session[:employee_id] = @employee.id
-      render json: @employee, status: 302
+      render json: @employee, status: :ok
     else
       render json: { error: "Invalid email or password" }, status: 401
     end
