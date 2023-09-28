@@ -2,8 +2,8 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy send_reset_password_link reset_password)
-  before_action :find_employee_to_be_updated, only: :update_inventories
+  before_action :find_employee, only: %i(update destroy reset_password)
+  before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
     employees = Employee.all 
@@ -99,7 +99,6 @@ class Api::EmployeesController < ApplicationController
   end
 
   def find_employee
-    params[:id] = nil if params[:id] == "undefined" 
     @employee = Employee.find_by(id: params[:id] || session[:employee_id]) 
   end
 

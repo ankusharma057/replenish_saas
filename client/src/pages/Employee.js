@@ -81,7 +81,7 @@ const Employee = () => {
           label: "Yes",
           onClick: async () => {
             try {
-              await sendResetPasswordLinkRoute();
+              await sendResetPasswordLinkRoute(employee);
               toast.success("Send reset password main successfully delivered");
             } catch (error) {
               toast.error(
