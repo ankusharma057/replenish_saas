@@ -99,7 +99,8 @@ class Api::EmployeesController < ApplicationController
   end
 
   def find_employee
-    @employee = Employee.find_by(id: params[:id] || session[:employee_id])    
+    params[:id] = nil if params[:id] == "undefined" 
+    @employee = Employee.find_by(id: params[:id] || session[:employee_id]) 
   end
 
   def find_employee_to_be_updated
