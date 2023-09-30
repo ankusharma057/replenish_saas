@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
@@ -37,6 +34,7 @@ function Login() {
     try {
       setLoading(true);
       const { data } = await loginUser(formData);
+
       if (data) {
         authUserDispatch({ type: LOGIN, payload: data });
         toast.success("Successfully Logged In");
@@ -45,16 +43,21 @@ function Login() {
         });
       }
     } catch (error) {
-      toast.error(
-        error?.response?.data?.exception ||
-          error.response.statusText ||
-          error.message
-      );
+      if (error.response.status === 302) {
+        navigate(`/resetPassword?email=${formData.email}`, {
+          replace: true,
+        });
+        toast.success("Please reset your password.");
+      } else {
+        toast.error(
+          error?.response?.data?.error ||
+            error.response.statusText ||
+            error.message
+        );
+      }
     } finally {
       setLoading(false);
     }
-
-    
   };
   const handleChange = (e) => {
     const { name, value } = e.target;
