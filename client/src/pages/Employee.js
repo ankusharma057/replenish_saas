@@ -225,7 +225,7 @@ const Employee = () => {
           onClick: async () => {
             try {
               setLoading(true);
-                await deleteEmployeeRoute(employee.id);
+              await deleteEmployeeRoute(employee.id);
               toast.success("Employee has been deleted successfully.");
               await getEmployees(true);
             } catch (error) {
@@ -258,7 +258,6 @@ const Employee = () => {
         setModalShow={invoiceModalShow}
         employeeInvoices={employeeInvoices.invoices}
         EmployeeName={employeeInvoices.employee.name}
-
       />
       {invModalSHow && (
         <InventoryModal

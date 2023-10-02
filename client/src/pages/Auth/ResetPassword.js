@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
@@ -14,30 +14,34 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(resetPasswordState);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const email = searchParams.get("email");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password === formData.confirmPassword) {
-      try {
-        setLoading(true);
-        await resetPassword(formData);
-        toast.success("Successfully Logged In with new password.");
-        await getUpdatedUserProfile(true);
-        setFormData(resetPasswordState);
-        navigate("/myprofile");
-      } catch (error) {
-        toast.error(
-          error.response?.data?.exception ||
-            error.response.statusText ||
-            error.message ||
-            "Failed to create user"
-        );
-      } finally {
-        setLoading(false);
+    if (email)
+      if (formData.password === formData.confirmPassword) {
+        try {
+          setLoading(true);
+          await resetPassword({ ...formData, email: email });
+          toast.success("Successfully Logged In with new password.");
+          await getUpdatedUserProfile(true);
+          setFormData(resetPasswordState);
+          navigate("/myprofile");
+        } catch (error) {
+          toast.error(
+            error.response?.data?.exception ||
+              error.response.statusText ||
+              error.message ||
+              "Failed to create user"
+          );
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        toast.error("Passwords do not match, please try again.");
       }
-    } else {
-      toast.error("Passwords do not match, please try again.");
-    }
   };
 
   const handleChange = (e) => {

@@ -25,7 +25,7 @@ class Employee < ApplicationRecord
   end
 
   def transfer_to_colleague(product, receiver_employee, quantity)
-    receiver_prompt = receiver_employee.inventory_prompts.find_or_create_by(product: product)
+    receiver_prompt = receiver_employee.inventory_prompts.create(product: product)
     receiver_prompt.update(assigned_by: self.name, quantity: (receiver_prompt.quantity.to_f + quantity.to_f))
 
     current_inventory = self.employees_inventories.where(product: product).first

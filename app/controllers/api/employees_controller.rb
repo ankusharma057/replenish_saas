@@ -2,7 +2,7 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy reset_password)
+  before_action :find_employee, only: %i(update destroy )
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
@@ -42,6 +42,7 @@ class Api::EmployeesController < ApplicationController
   end
 
   def reset_password
+    @employee = Employee.find_by(email: params[:email])
     if compare_passwords
       @employee.update!(password: params[:password])
       render json: @employee, status: :ok

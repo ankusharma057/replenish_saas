@@ -42,8 +42,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!authUserState.user) {
-      navigate("/");
+    if (location.pathname !== "/resetPassword") {
+      if (!authUserState.user) {
+        navigate("/");
+      }
     }
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,6 +58,8 @@ function App() {
         {authUserState.user && <Header />}
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/resetPassword" element={<ResetPassword />} />
+
           {authUserState.user && (
             <>
               {authUserState.user &&
@@ -66,8 +70,6 @@ function App() {
                     <Route path="/employees" element={<Employee />} />
                   </>
                 )}
-
-              <Route path="/resetPassword" element={<ResetPassword />} />
 
               {authUserState.user && authUserState.user?.is_admin ? (
                 <>
