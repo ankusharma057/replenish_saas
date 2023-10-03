@@ -13,7 +13,7 @@ class Invoice < ApplicationRecord
 
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 
-  before_update :revise_charge
+  # before_update :revise_charge
   before_destroy :return_inventory
   before_destroy :verify_fellow_invoices
 
@@ -81,19 +81,19 @@ class Invoice < ApplicationRecord
 
   private
 
-  def revise_charge
-    if (charge && charge_changed?) ||
-      (overhead_fee_type && overhead_fee_type_changed?) ||
-      (overhead_fee_value && overhead_fee_value_changed?)
+  # def revise_charge
+  #   if (charge && charge_changed?) ||
+  #     (overhead_fee_type && overhead_fee_type_changed?) ||
+  #     (overhead_fee_value && overhead_fee_value_changed?)
 
-      self.charge -=  case overhead_fee_type
-                      when "percentage"
-                        (charge*overhead_fee_value/100)
-                      when "fixed"
-                        overhead_fee_value
-                      end.round(2)
-    end
-  end
+  #     self.charge -=  case overhead_fee_type
+  #                     when "percentage"
+  #                       (charge*overhead_fee_value/100)
+  #                     when "fixed"
+  #                       overhead_fee_value
+  #                     end.round(2)
+  #   end
+  # end
 
   def return_inventory
     if products_hash && products_hash.any?
