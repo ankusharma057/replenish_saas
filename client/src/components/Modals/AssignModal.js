@@ -1,6 +1,7 @@
 import { Button, Modal, Form } from "react-bootstrap";
 import React, { memo } from "react";
 import Loadingbutton from "../Buttons/Loadingbutton";
+import LabelInput from "../Input/LabelInput";
 
 const AssignModal = ({
   showAssignMadal,
@@ -16,13 +17,16 @@ const AssignModal = ({
   loadingText,
   setLoading,
 }) => {
-
   const filterEmployeeList = (employeeData) => {
     if (employee?.is_admin) {
       return employeeData;
     } else {
       return employeeData?.filter((i) => {
-        return !i?.name?.toLowerCase()?.replace(/\s+/g, ' ').trim()?.includes("replenish training");
+        return !i?.name
+          ?.toLowerCase()
+          ?.replace(/\s+/g, " ")
+          .trim()
+          ?.includes("replenish training");
       });
     }
   };
@@ -45,17 +49,23 @@ const AssignModal = ({
       <Modal.Body className="flex justify-between flex-col items-center gap-2">
         <div className="w-full">
           <Form className="flex flex-col gap-4" onSubmit={assignSubmit}>
-            <Form.Control
-              type="number"
-              step="0.01"
-              min="0"
+        
+
+            <LabelInput
+              label="Quantity"
+              controlId="Quantity"
               placeholder={` Type Quantity. maximum: ${assigninventoryData?.quantity}`}
+              required={true}
               onChange={(e) =>
                 setAssignInput({ ...assignInput, quantity: e.target.value })
               }
+              className="-mb-3"
               max={assigninventoryData?.quantity}
+              type="number"
               title={` You can select upto ${assigninventoryData?.quantity} Quantity`}
-              required
+              step="0.01"
+              min="0"
+              name="password"
             />
 
             <Form.Select

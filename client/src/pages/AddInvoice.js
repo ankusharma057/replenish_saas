@@ -218,7 +218,7 @@ export default function AddInvoices() {
       total -
       afterTax.discount +
       afterTax.tip +
-      ((afterTax.retailTotal) *
+      (afterTax.retailTotal *
         (parseInt(authUserState.user?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
@@ -742,6 +742,7 @@ export default function AddInvoices() {
                     Paid by Client Cash:
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="paidByClientCash"
                       value={Number(formData.paidByClientCash).toString()}
                       min="0"
@@ -753,6 +754,7 @@ export default function AddInvoices() {
                     Paid by Client Credit:
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="paidByClientCredit"
                       value={Number(formData.paidByClientCredit).toString()}
                       min="0"
@@ -769,6 +771,7 @@ export default function AddInvoices() {
                     Personal Discount:
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="personalDiscount"
                       value={Number(formData.personalDiscount).toString()}
                       min="0"
@@ -780,6 +783,7 @@ export default function AddInvoices() {
                     Tip:
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="tip"
                       // value={Number(formData.tip).toString()}
                       min="0"
@@ -874,6 +878,7 @@ export default function AddInvoices() {
                         <td>
                           <input
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             step="0.01"
                             name="productQuantity"
                             placeholder={`max:${currentProduct?.maxQtantity}`}
@@ -888,7 +893,9 @@ export default function AddInvoices() {
                                 ? handleQuantityChange(e)
                                 : setIsAlert({
                                     productUsedShow: true,
-                                    message: ` You can only select quantity upto ${currentProduct?.maxQtantity} for ${currentProduct?.name}`,
+                                    message: ` You can only select quantity upto ${
+                                      currentProduct?.maxQtantity || ""
+                                    } for ${currentProduct?.name}`,
                                   });
                             }}
                             min={0.01}
@@ -1018,6 +1025,7 @@ export default function AddInvoices() {
                         <td className="">
                           <input
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             name="productQuantity"
                             step="0.01"
                             placeholder={`max:${currentRetailProduct?.maxQtantity}`}
@@ -1034,7 +1042,9 @@ export default function AddInvoices() {
                                 : setIsAlert({
                                     productUsedShow: false,
                                     retailShow: true,
-                                    message: ` You can only select quantity upto ${currentRetailProduct?.maxQtantity} for ${currentRetailProduct?.name}`,
+                                    message: ` You can only select quantity upto ${
+                                      currentRetailProduct?.maxQtantity || ""
+                                    } for ${currentRetailProduct?.name}`,
                                   });
                             }}
                             min="0"
