@@ -42,7 +42,6 @@ const InventoryModal = ({
   const filterData = (deleteProduct) => {
     setFiltereDataList((pre) => {
       let removedProduct = pre?.length ? pre : dataList;
-      console.log(removedProduct);
       if (deleteProduct) {
         removedProduct = removedProduct?.filter((product) => {
           return product.product?.id !== deleteProduct;

@@ -62,7 +62,7 @@ class Api::EmployeesController < ApplicationController
   def update_inventories
     params[:updated_products].each do |product_id, quantity_hash|
       product = Product.find_by(id: product_id)
-      emp_inventory = @employee.employees_inventories.where(product_id: product_id).first
+      emp_inventory = @selected_employee.employees_inventories.where(product_id: product_id).first
       emp_inventory_previous_quantity = emp_inventory.quantity.to_f
       emp_inventory.update(quantity: quantity_hash["quantity"].to_f)
 
@@ -75,20 +75,20 @@ class Api::EmployeesController < ApplicationController
       end
 
       main_inventory.save
-      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} from #{quantity_hash["quantity"]} for #{@employee.name.capitalize}."
+      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} from #{quantity_hash["quantity"]} for #{@selected_employee.name.capitalize}."
       send_message(text: text)
     end
 
     params["new_products"].each do |product|
       record = Product.where(name: product["product_name"]).first
-      @employee.employees_inventories
+      @selected_employee.employees_inventories
         .create!(product: record, quantity: product["quantity"])
 
       main_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
       main_inventory.quantity -= product["quantity"].to_f
       main_inventory.save
 
-      text = "#{current_employee.name.capitalize} added #{product["quantity"]} of #{record.name} for #{@employee.name.capitalize}."
+      text = "#{current_employee.name.capitalize} added #{product["quantity"]} of #{record.name} for #{@selected_employee.name.capitalize}."
       send_message(text: text)
     end
   end
@@ -104,7 +104,7 @@ class Api::EmployeesController < ApplicationController
   end
 
   def find_employee_to_be_updated
-    @employee = Employee.find_by(id: params[:id])    
+    @selected_employee = Employee.find_by(id: params[:id])
   end
 
   def compare_passwords
