@@ -21,6 +21,7 @@ const LabelInput = ({
         placeholder={placeholder}
         required={required}
         onChange={onChange}
+        onWheel={(e) => (type = "number" && e.target.blur())}
         {...rest}
       />
     </Form.Group>

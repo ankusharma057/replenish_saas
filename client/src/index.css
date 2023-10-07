@@ -126,3 +126,7 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield !important;
 }
+
+.react-confirm-alert-overlay {
+  z-index: 20000 !important;
+}
