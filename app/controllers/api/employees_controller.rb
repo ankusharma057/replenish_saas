@@ -34,8 +34,8 @@ class Api::EmployeesController < ApplicationController
   end
 
   def send_reset_password_link
-    if @employee
-      @employee.send_reset_password_mail
+    if @selected_employee
+      @selected_employee.send_reset_password_mail
     else
       render json: { 'error': 'Record Not found' }, status: :bad_request
     end
