@@ -17,19 +17,39 @@ const AssignModal = ({
   loadingText,
   setLoading,
 }) => {
+  // const filterEmployeeList = (employeeData) => {
+  //   if (employee?.is_admin) {
+  //     return employeeData;
+  //   } else {
+  //     return employeeData?.filter((i) => {
+  //       return !i?.name
+  //         ?.toLowerCase()
+  //         ?.replace(/\s+/g, " ")
+  //         .trim()
+  //         ?.includes("replenish training");
+  //     });
+  //   }
+  // };
+
   const filterEmployeeList = (employeeData) => {
     if (employee?.is_admin) {
       return employeeData;
     } else {
       return employeeData?.filter((i) => {
-        return !i?.name
+        const lowerCaseName = i?.name
           ?.toLowerCase()
           ?.replace(/\s+/g, " ")
-          .trim()
-          ?.includes("replenish training");
+          .trim();
+        return !(
+          lowerCaseName.includes("replenish training") ||
+          lowerCaseName.includes("kelechi azuogu")
+        );
       });
     }
   };
+
+  // console.log(hello)
+  
   const assigninventoryData = assigninventory_object || assignProductData;
   return (
     <Modal
