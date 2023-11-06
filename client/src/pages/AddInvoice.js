@@ -851,6 +851,10 @@ export default function AddInvoices() {
                             onClick={handleProductNameChange}
                             onChange={handleProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
+                            onBlur={(e) => {
+                              e.stopPropagation();
+                              setMatchingProducts([])
+                            }}
                           />
                           {matchingProducts?.length >= 0 && (
                             <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
@@ -996,6 +1000,10 @@ export default function AddInvoices() {
                             onChange={handleRetailProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
                             // required
+                            onBlur={(e) => {
+                              e.stopPropagation();
+                              setMatchingRetailProducts([])
+                            }}
                           />
                           {matchingRetailProducts?.length > 0 && (
                             <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
