@@ -40,7 +40,7 @@ module PdfDownloadable
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
 
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
-            <div style="text-align: left;"> Charge: '"#{charge.round(2)}"' </div>
+            <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
 
             <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
@@ -49,10 +49,10 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
             <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash}"'</div>  
+            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>  
 
-            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
-            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)).round(2)}"'</div>  
+            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
+            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
 
             <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>
             <div style="text-align: left;">  Tip: '"#{tip}"'</div>
@@ -81,7 +81,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
                 </tr>'
           end
 
@@ -132,7 +132,7 @@ module PdfDownloadable
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
 
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
-            <div style="text-align: left;"> Charge: '"#{charge.round(2)}"' </div>
+            <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
 
             <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
@@ -141,10 +141,10 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
 
             <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash}"'</div>
+            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
 
-            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit}"'</div>  
-            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit)).round(2)}"'</div>  
+            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
+            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
 
             <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>
             <div style="text-align: left;">  Tip: '"#{tip}"'</div>
@@ -175,7 +175,7 @@ module PdfDownloadable
                   <td width="40%">'"#{data.first}"'</td>
                   <td width="20%">'"#{data.second}"'</td>
                   <td width="20%">'"#{data.last}"'</td>
-                  <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
+                  <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
                 </tr>'
           end
 
