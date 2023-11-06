@@ -29,16 +29,19 @@ const MyProfile = () => {
   const [invoiceData, setinvoiceData] = useState(null);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assigninventory_object, setAssigninventory_object] = useState({});
-  const [vendorUpdataModalShow, setVendorUpdataModalShow] = useState(false);
+  const [vendorUpdateModalShow, setVendorUpdateModalShow] = useState(false);
   const [employeeList, setEmployeeList] = useState([]);
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
 
+  // console.log(authUserState.user);
+
   const [inventoryList, setInventoryList] = useState([]);
   const [updateVendorInput, setupdateVendorInput] = useState(
     authUserState.user?.vendor_name
   );
+
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
   const [filteredInventoryList, setFilteredInventoryList] = useState([]);
   // added
@@ -84,7 +87,7 @@ const MyProfile = () => {
   }
 
   const hideUpdateVendorModal = () => {
-    setVendorUpdataModalShow(!vendorUpdataModalShow);
+    setVendorUpdateModalShow(!vendorUpdateModalShow);
   };
 
   // refectored
@@ -384,7 +387,7 @@ const MyProfile = () => {
       {/* Refectored */}
       {/* change Vendor name Modal */}
       <ModalWraper
-        show={vendorUpdataModalShow}
+        show={vendorUpdateModalShow}
         onHide={hideUpdateVendorModal}
         title="Update Vendor Name"
       >

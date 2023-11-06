@@ -61,7 +61,10 @@ const EmployeeInvoiceCard = ({
                 isEmployeeAdmin ? "justify-between" : "justify-center"
               } px-2 my-3 gap-2`}
             >
-              <Button onClick={() => sendResetPasswordLink(employee)} variant="info">
+              <Button
+                onClick={() => sendResetPasswordLink(employee)}
+                variant="info"
+              >
                 Send Password Reset Link
               </Button>
 
@@ -94,7 +97,10 @@ const EmployeeInvoiceCard = ({
         ) : (
           userProfile?.is_inv_manager === true &&
           userProfile?.is_admin === false && (
-            <Button onClick={() => setShowModal(true)} variant="info">
+            <Button
+              onClick={() => openShowInventory(employeeInvoices, employee)}
+              variant="info"
+            >
               Show Inventories
             </Button>
           )

@@ -161,7 +161,7 @@ const InventoryModal = ({
             try {
               await updateEmployeeInv(updatedProductData);
               toast.success(" Updated successfully.");
-              // await getInventory(true);
+              await getInventory(true);
               await getEmployees(true);
             } catch (error) {
               toast.error(

@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Alert, Button } from "react-bootstrap";
 import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
@@ -12,6 +12,7 @@ import {
   getInvoiceList,
   getUpdatedUserProfile,
 } from "../Server";
+import { LOGIN } from "../Constants/AuthConstants";
 
 const initialFormState = {
   clientName: "",
@@ -29,7 +30,7 @@ const initialFormState = {
 };
 
 export default function AddInvoices() {
-  const { authUserState } = useAuthContext();
+  const { authUserState, authUserDispatch } = useAuthContext();
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     price: 0,
@@ -42,6 +43,8 @@ export default function AddInvoices() {
     price: 0,
     quantity: 1,
   });
+  const suggestProductListRef = useRef(null);
+  const suggestRetailProductListRef = useRef(null);
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
@@ -61,6 +64,30 @@ export default function AddInvoices() {
     maxInvoice: false,
   });
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        suggestProductListRef.current &&
+        !suggestProductListRef.current.contains(event.target)
+      ) {
+        setMatchingProducts([]);
+      }
+
+      if (
+        suggestRetailProductListRef.current &&
+        !suggestRetailProductListRef.current.contains(event.target)
+      ) {
+        setMatchingRetailProducts([]);
+      }
+    };
+    // Add the event listener when the component mounts.
+    document.addEventListener("click", handleClickOutside);
+
+    // Remove the event listener when the component unmounts.
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     const inputValue =
@@ -614,7 +641,9 @@ export default function AddInvoices() {
               await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
-              await getUpdatedUserProfile(true);
+              const { data: useData } = await getUpdatedUserProfile(true);
+              authUserDispatch({ type: LOGIN, payload: useData });
+
               setClientName("");
               setInvoiceArray([]);
               setFormData(initialFormState);
@@ -840,7 +869,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody className="whitespace-normal">
                       <tr key={1}>
-                        <td>
+                        <td ref={suggestProductListRef}>
                           <input
                             type="text"
                             name="productName"
@@ -851,10 +880,6 @@ export default function AddInvoices() {
                             onClick={handleProductNameChange}
                             onChange={handleProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
-                            onBlur={(e) => {
-                              e.stopPropagation();
-                              setMatchingProducts([])
-                            }}
                           />
                           {matchingProducts?.length >= 0 && (
                             <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
@@ -989,7 +1014,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>
+                        <td ref={suggestRetailProductListRef}>
                           <input
                             type="text"
                             name="productName"
@@ -1000,10 +1025,6 @@ export default function AddInvoices() {
                             onChange={handleRetailProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
                             // required
-                            onBlur={(e) => {
-                              e.stopPropagation();
-                              setMatchingRetailProducts([])
-                            }}
                           />
                           {matchingRetailProducts?.length > 0 && (
                             <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
