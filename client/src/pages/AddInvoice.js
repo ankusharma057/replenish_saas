@@ -229,6 +229,16 @@ export default function AddInvoices() {
     const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
+
+    const selected_product_types = formData.products.map((product) => {
+                              return product?.product_type
+                            });
+
+    const semaglitude_percentage =
+      (selectedProduct?.product_type === 'Semaglitude'
+        || selected_product_types.includes('Semaglitude')) ?
+        20 : authUserState.user?.service_percentage
+
     let total =
       (totalPaidByClientAT +
         afterTax.discount -
@@ -238,7 +248,8 @@ export default function AddInvoices() {
         afterTax.semagConsultFee -
         afterTax.tip -
         afterTax.retailTotal) *
-      (authUserState.user?.service_percentage / 100); //(replace with injector percentage)
+      (semaglitude_percentage / 100); //(replace with injector percentage)
+
     if (authUserState.user?.gfe)
       total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =
