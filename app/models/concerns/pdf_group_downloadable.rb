@@ -46,7 +46,7 @@ module PdfGroupDownloadable
                   <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
                   <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
-                  <div style="text-align: left;"> Charge: '"#{invoice.charge.round(2)}"' </div>
+                  <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
 
                   <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
                   <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
@@ -55,10 +55,10 @@ module PdfGroupDownloadable
                   <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
 
                   <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                  <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
+                  <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
 
-                  <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
-                  <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)).round(2)}"'</div>  
+                  <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
+                  <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
 
                   <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
                   <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
@@ -86,7 +86,7 @@ module PdfGroupDownloadable
                           <td width="40%">'"#{data.first}"'</td>
                           <td width="20%">'"#{data.second}"'</td>
                           <td width="20%">'"#{data.last}"'</td>
-                          <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
+                          <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
                         </tr>'
                   end
 
@@ -144,7 +144,7 @@ module PdfGroupDownloadable
                 <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
                 <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
-                <div style="text-align: left;"> Charge: '"#{invoice.charge.round(2)}"' </div>
+                <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
 
                 <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
                 <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
@@ -153,10 +153,10 @@ module PdfGroupDownloadable
                 <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
 
                 <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash}"'</div>  
+                <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
 
-                <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit}"'</div>  
-                <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit)).round(2)}"'</div>  
+                <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
+                <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
 
                 <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
                 <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
@@ -187,7 +187,7 @@ module PdfGroupDownloadable
                         <td width="40%">'"#{data.first}"'</td>
                         <td width="20%">'"#{data.second}"'</td>
                         <td width="20%">'"#{data.last}"'</td>
-                        <td width="20%">'"#{(data.second.to_f * data.last.to_f).round(2)}"'</td>
+                        <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
                       </tr>'
                 end
 

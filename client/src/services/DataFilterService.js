@@ -9,7 +9,7 @@ class DataFilterService {
         });
       } else {
         return invList?.filter((inventory) => {
-          return inventory?.product?.product_type !== accessFiled;
+          return inventory?.product?.product_type === accessFiled;
         });
       }
     }

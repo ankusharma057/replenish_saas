@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Alert, Button } from "react-bootstrap";
 import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
@@ -12,6 +12,7 @@ import {
   getInvoiceList,
   getUpdatedUserProfile,
 } from "../Server";
+import { LOGIN } from "../Constants/AuthConstants";
 
 const initialFormState = {
   clientName: "",
@@ -29,7 +30,7 @@ const initialFormState = {
 };
 
 export default function AddInvoices() {
-  const { authUserState } = useAuthContext();
+  const { authUserState, authUserDispatch } = useAuthContext();
   const [currentProduct, setCurrentProduct] = useState({
     name: "",
     price: 0,
@@ -42,6 +43,8 @@ export default function AddInvoices() {
     price: 0,
     quantity: 1,
   });
+  const suggestProductListRef = useRef(null);
+  const suggestRetailProductListRef = useRef(null);
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
@@ -61,6 +64,30 @@ export default function AddInvoices() {
     maxInvoice: false,
   });
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        suggestProductListRef.current &&
+        !suggestProductListRef.current.contains(event.target)
+      ) {
+        setMatchingProducts([]);
+      }
+
+      if (
+        suggestRetailProductListRef.current &&
+        !suggestRetailProductListRef.current.contains(event.target)
+      ) {
+        setMatchingRetailProducts([]);
+      }
+    };
+    // Add the event listener when the component mounts.
+    document.addEventListener("click", handleClickOutside);
+
+    // Remove the event listener when the component unmounts.
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     const inputValue =
@@ -202,6 +229,16 @@ export default function AddInvoices() {
     const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
+
+    const selected_product_types = formData.products.map((product) => {
+                              return product?.product_type
+                            });
+
+    const semaglitude_percentage =
+      (selectedProduct?.product_type === 'Semaglitude'
+        || selected_product_types.includes('Semaglitude')) ?
+        20 : authUserState.user?.service_percentage
+
     let total =
       (totalPaidByClientAT +
         afterTax.discount -
@@ -211,7 +248,8 @@ export default function AddInvoices() {
         afterTax.semagConsultFee -
         afterTax.tip -
         afterTax.retailTotal) *
-      (authUserState.user?.service_percentage / 100); //(replace with injector percentage)
+      (semaglitude_percentage / 100); //(replace with injector percentage)
+
     if (authUserState.user?.gfe)
       total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =
@@ -614,7 +652,9 @@ export default function AddInvoices() {
               await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
-              await getUpdatedUserProfile(true);
+              const { data: useData } = await getUpdatedUserProfile(true);
+              authUserDispatch({ type: LOGIN, payload: useData });
+
               setClientName("");
               setInvoiceArray([]);
               setFormData(initialFormState);
@@ -840,7 +880,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody className="whitespace-normal">
                       <tr key={1}>
-                        <td>
+                        <td ref={suggestProductListRef}>
                           <input
                             type="text"
                             name="productName"
@@ -985,7 +1025,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>
+                        <td ref={suggestRetailProductListRef}>
                           <input
                             type="text"
                             name="productName"
