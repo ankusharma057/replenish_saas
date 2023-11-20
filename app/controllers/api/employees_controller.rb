@@ -42,12 +42,16 @@ class Api::EmployeesController < ApplicationController
   end
 
   def reset_password
-    @employee = Employee.find_by(email: params[:email])
-    if compare_passwords
-      @employee.update!(password: params[:password])
-      render json: @employee, status: :ok
-    else 
-      render json: {'error' => 'Passwords do not match, please try again.'}, status: 302
+    @employee = Employee.where('lower(email) = ?', params[:email].downcase)
+    if @employee
+      if compare_passwords
+        @employee.update!(password: params[:password])
+        render json: @employee, status: :ok
+      else 
+        render json: {'error' => 'Passwords do not match, please try again.'}, status: 302
+      end
+    else
+      render json: {'error' => 'Email is not found in our database, please try again.'}, status: :ok
     end
   end
 
