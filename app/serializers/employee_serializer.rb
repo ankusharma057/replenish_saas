@@ -1,7 +1,7 @@
 class EmployeeSerializer < ActiveModel::Serializer
   attributes :id, :name, :vendor_name, :email, :password, :is_admin, :is_inv_manager, :gfe,
               :service_percentage, :retail_percentage, :inventory_prompts,
-              :employees_inventories, :has_access_only_to, :pending_requests
+              :employees_inventories, :has_access_only_to
 
   has_many :invoices
   has_many :inventory_prompts, class_name: 'InventoryPrompt'

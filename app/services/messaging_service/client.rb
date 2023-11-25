@@ -26,6 +26,8 @@ module MessagingService
           )
         end
       end
+    rescue Exception => e
+      puts e
     end
 
     private

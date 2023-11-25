@@ -4,6 +4,8 @@ class InventoryRequest < ApplicationRecord
   belongs_to :requestor, foreign_key: :requestor_id, class_name: "Employee"
   belongs_to :inventory
 
+  scope :un_approved, -> { where(is_approved: false) }
+
   def accept!
     return false if inventory.quantity.to_f < quantity_asked.to_f
 

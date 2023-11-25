@@ -6,6 +6,7 @@ import { getInventoryList, updateEmployeeInv } from "../../Server";
 import DataFilterService from "../../services/DataFilterService";
 import ModalWraper from "./ModalWraper";
 import Loadingbutton from "../Buttons/Loadingbutton";
+import Select from "react-select";
 
 const InventoryModal = ({
   showModal,
@@ -228,6 +229,25 @@ const InventoryModal = ({
     });
   };
 
+  const options = entireInventoryList
+    ?.filter(
+      (item1) =>
+        !newProductArr.some(
+          (item2) => item2?.product_name === item1?.product?.name
+        )
+    )
+    ?.filter(
+      (item1) =>
+        !dataList.some((item2) => item2?.product?.name === item1?.product?.name)
+    )
+    ?.map((product) => {
+      return {
+        maxquantity: product?.quantity,
+        label: product?.product?.name,
+        value: product?.product?.name,
+      };
+    });
+
   return (
     <>
       <ModalWraper
@@ -395,7 +415,19 @@ const InventoryModal = ({
               onSubmit={saveProduct}
             >
               <div className=" md:w-2/4">
-                <Form.Select
+                <Select
+                  onChange={(e) => {
+                    setNewProduct({
+                      ...newProduct,
+                      product_name: e.value,
+                      maxquantity: Number(e.maxquantity),
+                    });
+                  }}
+                  options={options}
+                  required
+                />
+
+                {/* <Form.Select
                   aria-label="Default select example"
                   onChange={(e) => {
                     const selectedMaxQuantity =
@@ -437,7 +469,7 @@ const InventoryModal = ({
                         </option>
                       );
                     })}
-                </Form.Select>
+                </Form.Select> */}
               </div>
               <div className="md:w-2/4 flex justify-between gap-2">
                 <Form.Control

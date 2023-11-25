@@ -6,7 +6,7 @@ class Api::EmployeesController < ApplicationController
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
-    employees = Employee.all 
+    employees = Employee.all
     render json: employees, status: :ok
   end
 
