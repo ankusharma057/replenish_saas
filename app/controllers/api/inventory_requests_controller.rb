@@ -3,7 +3,7 @@ class Api::InventoryRequestsController < ApplicationController
   before_action :find_inventory_request, except: :create
 
   def index
-    @inventory_request = InventoryRequest.unapproved
+    @inventory_request = InventoryRequest.all
     render json: @inventory_request, status: :ok
   end
 
