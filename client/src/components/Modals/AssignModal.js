@@ -42,8 +42,8 @@ const AssignModal = ({
           ?.replace(/\s+/g, " ")
           .trim();
         return !(
-          lowerCaseName.includes("replenish training") ||
-          lowerCaseName.includes("kelechi azuogu")
+          lowerCaseName?.includes("replenish training") ||
+          lowerCaseName?.includes("kelechi azuogu")
         );
       });
     }
