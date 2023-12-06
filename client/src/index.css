@@ -130,3 +130,14 @@ input[type="number"] {
 .react-confirm-alert-overlay {
   z-index: 20000 !important;
 }
+
+.css-t3ipsp-control:hover {
+  border-color: #c2dbfe !important;
+  border-width: 2px !important;
+}
+
+.css-t3ipsp-control {
+  box-shadow: 0 0 0 1px #c2dbfe !important ;
+  border-color: #c2dbfe !important;
+  border-width: 2px !important;
+}

@@ -22,16 +22,19 @@ import DataFilterService from "../services/DataFilterService";
 import ModalWraper from "../components/Modals/ModalWraper";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import LabelInput from "../components/Input/LabelInput";
-
+import Select from "react-select";
 const Inventory = () => {
   const { authUserState } = useAuthContext();
   const [loading, setLoading] = useState(false);
-  const [productInfoInput, setproductInfoInput] = useState({});
+  const [productInfoInput, setProductInfoInput] = useState({
+    quantity: 0,
+  });
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assignProductData, setAssignProductData] = useState({});
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
+    employee_name: "",
   });
 
   const [productList, setProductList] = useState([]);
@@ -357,6 +360,13 @@ const Inventory = () => {
     },
   ];
 
+  const options = productList?.map((product) => {
+    return {
+      value: product?.name,
+      label: product?.name,
+    };
+  });
+
   return (
     <>
       {/* <Header userProfile={authUserState.user} /> */}
@@ -395,10 +405,22 @@ const Inventory = () => {
             }
           >
             {!productInfoInput?.update && (
+              <Select
+                onChange={(e) => {
+                  setProductInfoInput({
+                    ...productInfoInput,
+                    product_name: e.value,
+                  });
+                }}
+                options={options}
+                required
+              />
+            )}
+            {/* {!productInfoInput?.update && (
               <Form.Select
                 aria-label="Default select example"
                 onChange={(e) =>
-                  setproductInfoInput({
+                  setProductInfoInput({
                     ...productInfoInput,
                     product_name: e.target.value,
                   })
@@ -414,7 +436,7 @@ const Inventory = () => {
                   );
                 })}
               </Form.Select>
-            )}
+            )} */}
 
             <LabelInput
               label="Product Quantity"
@@ -424,9 +446,10 @@ const Inventory = () => {
               controlId="quantity"
               title={` You can select upto ${productInfoInput?.quantity} Quantity`}
               name="quantity"
+              min="0.1"
               placeholder={` Type Quantity `}
               onChange={(e) =>
-                setproductInfoInput({
+                setProductInfoInput({
                   ...productInfoInput,
                   quantity: e.target.value,
                 })
@@ -475,12 +498,12 @@ const Inventory = () => {
           </ButtonGroup>
         </div>
         <div className="flex mt-2 justify-center">
-          <div className="w-[52.5rem]">
-            <InputGroup className="mb-3 ">
+          <div className="w-[52.5rem] flex gap-x-2 ">
+            <div className="mb-3 flex  items-center gap-x-2 flex-1 relative">
               <Form.Control
                 placeholder="Search Product Name here"
                 aria-label="Search Product Name here"
-                aria-describedby="basic-addon2"
+                className="pr-4!"
                 value={productSearchInput[radioValue]}
                 onChange={(event) => {
                   setProductSearchInput((pre) => ({
@@ -489,8 +512,25 @@ const Inventory = () => {
                   }));
                 }}
               />
-              <InputGroup.Text id="basic-addon2">&#x1F50D;</InputGroup.Text>
-            </InputGroup>
+              <span className="absolute right-4 pointer-events-none ">
+                &#x1F50D;
+              </span>
+            </div>
+            <div>
+              <Button
+                onClick={() => {
+                  getProducts();
+                  setShowUpdateProductModal(true);
+                  setProductInfoInput({
+                    ...productInfoInput,
+                    update: false,
+                  });
+                }}
+                className="truncate rounded-full roundedpill "
+              >
+                Add Product
+              </Button>
+            </div>
           </div>
         </div>
         {radioValue === "1" && (
@@ -559,7 +599,7 @@ const Inventory = () => {
                           <Button
                             variant="info"
                             onClick={() => {
-                              setproductInfoInput({
+                              setProductInfoInput({
                                 update: true,
                                 quantity: data.quantity,
                                 product_type: data?.product?.product_type,
@@ -591,13 +631,13 @@ const Inventory = () => {
           </Table>
         )}
 
-        {radioValue === "1" && (
+        {/* {radioValue === "1" && (
           <div
             className="my-10 container cursor-pointer mx-auto"
             onClick={() => {
               getProducts();
               setShowUpdateProductModal(true);
-              setproductInfoInput({
+              setProductInfoInput({
                 ...productInfoInput,
                 update: false,
               });
@@ -612,7 +652,7 @@ const Inventory = () => {
               </p>
             </div>
           </div>
-        )}
+        )} */}
         {radioValue === "2" && (
           <div className="w-full">
             {Object.keys(totalEmpInventory)

@@ -21,7 +21,7 @@ import {
 import { LOGIN } from "../Constants/AuthConstants";
 import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-
+import Select from "react-select";
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -35,25 +35,34 @@ const MyProfile = () => {
     quantity: 0,
   });
 
-  // console.log(authUserState.user);
-
   const [inventoryList, setInventoryList] = useState([]);
   const [updateVendorInput, setupdateVendorInput] = useState(
     authUserState.user?.vendor_name
   );
-
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
   const [filteredInventoryList, setFilteredInventoryList] = useState([]);
   // added
-  const getInventory = async () => {
+  const getInventory = async (refetch = false) => {
     try {
-      const { data } = await getInventoryList(false);
+      const { data } = await getInventoryList(refetch);
       const filterInventoryList = DataFilterService.specialInvManeger(
         data,
         authUserState.user?.has_access_only_to,
         authUserState.user?.is_admin
       );
-      setFilteredInventoryList(filterInventoryList);
+      // setFilteredInventoryList(filterInventoryList);
+      setFilteredInventoryList(() => {
+        return (
+          filterInventoryList?.length > 0 &&
+          filterInventoryList?.map((inventory) => {
+            return {
+              value: inventory?.id,
+              label: inventory?.product?.name,
+            };
+          })
+        );
+      });
+
       setInventoryList(data);
     } catch (error) {
       console.log(error);
@@ -90,7 +99,6 @@ const MyProfile = () => {
     setVendorUpdateModalShow(!vendorUpdateModalShow);
   };
 
-  // refectored
   const assignSubmit = (e) => {
     e.preventDefault();
     const inventory_object = {
@@ -141,7 +149,6 @@ const MyProfile = () => {
     });
   };
 
-  // refectored
   const acceptSubmit = async (data) => {
     const inventory_object = {
       id: data?.id,
@@ -185,7 +192,6 @@ const MyProfile = () => {
     }
   };
 
-  // refectored
   const denySubmit = (data) => {
     const inventory_object = {
       id: data?.id,
@@ -229,17 +235,18 @@ const MyProfile = () => {
     }
   };
 
-  // refectored
   const requestInvetorySubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data } = await requestInventory({
+      await requestInventory({
         inventory: requestInvetoryInput?.inventory_object,
         quantity_asked: requestInvetoryInput.quantity_asked,
         date_of_use: requestInvetoryInput.date_of_use,
       });
-      authUserDispatch({ type: LOGIN, payload: data });
+      getInventory(true);
+      const { data: useData } = await getUpdatedUserProfile(true);
+      authUserDispatch({ type: LOGIN, payload: useData });
       toast.success("You have requested inventory successfully");
     } catch (error) {
       toast.error(
@@ -252,7 +259,6 @@ const MyProfile = () => {
     }
   };
 
-  // refectored
   const updateVendoreSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -296,7 +302,7 @@ const MyProfile = () => {
         setLoading={setLoading}
         loading={loading}
       />
-      {/* refectored */}
+
       {/* Request Inventory Modal */}
       <ModalWraper
         show={showRequestInvetory}
@@ -308,7 +314,21 @@ const MyProfile = () => {
         title="Request Inventory"
       >
         <Form className="flex flex-col gap-4" onSubmit={requestInvetorySubmit}>
-          <Form.Select
+          <Select
+            onChange={(e) => {
+              const selectedInventory = inventoryList.find(
+                (inventory) => String(inventory.id) === String(e.value)
+              );
+              setRequestInvetoryInput({
+                ...requestInvetoryInput,
+                product_name: e.value,
+                inventory_object: selectedInventory,
+              });
+            }}
+            options={filteredInventoryList}
+            required
+          />
+          {/* <Form.Select
             onChange={(e) => {
               const selectedInventory = inventoryList.find(
                 (inventory) => String(inventory.id) === String(e.target.value)
@@ -330,7 +350,7 @@ const MyProfile = () => {
                   </option>
                 );
               })}
-          </Form.Select>
+          </Form.Select> */}
 
           <LabelInput
             label="Quantity"
@@ -384,7 +404,6 @@ const MyProfile = () => {
         />
       )}
 
-      {/* Refectored */}
       {/* change Vendor name Modal */}
       <ModalWraper
         show={vendorUpdateModalShow}
@@ -434,7 +453,9 @@ const MyProfile = () => {
           <Button
             onClick={() => {
               getInventory();
-              setshowRequestInvetory(true);
+              setTimeout(() => {
+                setshowRequestInvetory(true);
+              }, 0);
             }}
             className="text-4xl font-bold text-center text-blue-600"
           >
@@ -446,7 +467,9 @@ const MyProfile = () => {
           <Button
             onClick={() => {
               getInventory();
-              setshowRequestInvetory(true);
+              setTimeout(() => {
+                setshowRequestInvetory(true);
+              }, 0);
             }}
             className="text-4xl font-bold text-center text-blue-600"
           >
@@ -601,7 +624,6 @@ const MyProfile = () => {
             </thead>
             <tbody>
               {authUserState.user?.employees_inventories?.map((data) => {
-                // console.log(data);
                 return (
                   <tr key={data?.product?.id}>
                     <td className="align-middle">

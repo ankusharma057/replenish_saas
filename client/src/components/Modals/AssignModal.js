@@ -2,6 +2,7 @@ import { Button, Modal, Form } from "react-bootstrap";
 import React, { memo } from "react";
 import Loadingbutton from "../Buttons/Loadingbutton";
 import LabelInput from "../Input/LabelInput";
+import Select from "react-select";
 
 const AssignModal = ({
   showAssignMadal,
@@ -48,8 +49,12 @@ const AssignModal = ({
     }
   };
 
-  // console.log(hello)
-  
+  const options = filterEmployeeList(
+    employeeList?.filter((i) => i?.id !== employee.id)
+  )?.map((employee) => {
+    return { value: employee?.name, label: employee?.name };
+  });
+
   const assigninventoryData = assigninventory_object || assignProductData;
   return (
     <Modal
@@ -69,8 +74,6 @@ const AssignModal = ({
       <Modal.Body className="flex justify-between flex-col items-center gap-2">
         <div className="w-full">
           <Form className="flex flex-col gap-4" onSubmit={assignSubmit}>
-        
-
             <LabelInput
               label="Quantity"
               controlId="Quantity"
@@ -85,10 +88,21 @@ const AssignModal = ({
               title={` You can select upto ${assigninventoryData?.quantity} Quantity`}
               step="0.01"
               min="0"
-              name="password"
+              name="qty"
             />
 
-            <Form.Select
+            <Select
+              onChange={(e) =>
+                setAssignInput({
+                  ...assignInput,
+                  employee_name: e.value,
+                })
+              }
+              options={options}
+              required
+            />
+
+            {/* <Form.Select
               aria-label="Default select example"
               onChange={(e) =>
                 setAssignInput({
@@ -98,7 +112,6 @@ const AssignModal = ({
               }
               required
             >
-              <option>Select The Employee</option>
               {filterEmployeeList(
                 employeeList?.filter((i) => i?.id !== employee.id)
               )?.map((employee) => {
@@ -108,7 +121,7 @@ const AssignModal = ({
                   </option>
                 );
               })}
-            </Form.Select>
+            </Form.Select> */}
             <Loadingbutton
               isLoading={loading}
               title="Submit"
