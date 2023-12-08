@@ -711,8 +711,7 @@ const Inventory = () => {
                     // If authUserState.user.has_access_only_to is not "all",
                     // show items with matching product_type
                     return (
-                      data?.inventory?.product?.product_type ===
-                      authUserState.user?.has_access_only_to
+                      authUserState.user?.has_access_only_to?.includes(data?.inventory?.product?.product_type)
                     );
                   })
                   ?.filter((data) => {

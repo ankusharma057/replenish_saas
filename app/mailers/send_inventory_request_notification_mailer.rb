@@ -20,7 +20,7 @@ class SendInventoryRequestNotificationMailer < ApplicationMailer
 
   def inventory_manager_emails
     Employee.inv_managers.select do |employee|
-      employee.has_access_only_to == ("all" || @inventory_request.product.product_type)
+      (employee.has_access_only_to == "all") || (employee.has_access_only_to.include?(@inventory_request.product.product_type))
     end.map(&:email)
   end
 end
