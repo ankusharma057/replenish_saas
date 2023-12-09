@@ -700,7 +700,7 @@ const Inventory = () => {
           (authUserState.user?.is_inv_manager ||
             authUserState.user?.is_admin) && (
             <div className="px-4">
-              <ul className=" container  mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
+              <ul className=" container mx-auto text-lg pl-0 px-4   font-medium text-gray-900 bg-white border border-gray-200 rounded-lg ">
                 {requestedInventoryData
                   ?.filter((request) => !request?.is_approved)
                   ?.filter((data) => {

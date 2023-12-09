@@ -302,7 +302,6 @@ const MyProfile = () => {
         setLoading={setLoading}
         loading={loading}
       />
-
       {/* Request Inventory Modal */}
       <ModalWraper
         show={showRequestInvetory}
@@ -393,7 +392,6 @@ const MyProfile = () => {
           />
         </Form>
       </ModalWraper>
-
       {/* showing the modal once */}
       {modalShow && (
         <CustomModal
@@ -403,7 +401,6 @@ const MyProfile = () => {
           invoiceData={invoiceData}
         />
       )}
-
       {/* change Vendor name Modal */}
       <ModalWraper
         show={vendorUpdateModalShow}
@@ -435,7 +432,6 @@ const MyProfile = () => {
           {authUserState.user?.name}
         </h1>
       </div>
-
       <div className="flex gap-3 justify-center  items-center">
         <h4 className="text-1xl font-bold text-center text-blue-600">
           <span className="text-gray-800">
@@ -477,7 +473,6 @@ const MyProfile = () => {
           </Button>
         ) : null}
       </div>
-
       {authUserState.user?.inventory_requests?.filter(
         (request) => !request.is_approved
       )?.length > 0 && (
@@ -500,33 +495,30 @@ const MyProfile = () => {
                 </tr>
               </thead>
               <tbody>
-                {authUserState.user?.inventory_requests?.map((data) => {
+                {authUserState.user?.inventory_requests?.map((data, i) => {
                   return (
-                    <>
-                      <tr key={data?.id}>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.inventory?.product?.name} </span>
-                            {/* <span>Product Name: Product </span> */}
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.quantity_asked} </span>
-                          </div>
-                        </td>
+                    <tr key={data?.id}>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.inventory?.product?.name} </span>
+                          {/* <span>Product Name: Product </span> */}
+                        </div>
+                      </td>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>{data?.quantity_asked} </span>
+                        </div>
+                      </td>
 
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>
-                              {new Date(
-                                data?.date_of_use
-                              ).toLocaleDateString() || "Not Given"}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    </>
+                      <td className="align-middle">
+                        <div className="flex flex-col  gap-2">
+                          <span>
+                            {new Date(data?.date_of_use).toLocaleDateString() ||
+                              "Not Given"}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -662,9 +654,11 @@ const MyProfile = () => {
         </div>
       )}
       <br />
-      <h2 className="text-4xl font-bold text-center text-blue-400">
-        My invoices
-      </h2>
+      {authUserState.user?.invoices?.length > 0 && (
+        <h2 className="text-4xl font-bold text-center text-blue-400">
+          My invoices
+        </h2>
+      )}
       <br />
       <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
         {authUserState.user?.invoices?.map((invoice) => {
