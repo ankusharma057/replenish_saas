@@ -32,15 +32,15 @@ export default memo(function Header() {
   };
 
   const adminHeader = (
-    <nav className="bg-blue-400">
-      <div className="max-w-7xl mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
-        <div className="flex items-center justify-between h-26">
+    <nav className="bg-blue-400 relative z-20">
+      <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
+        <div className="flex items-center justify-start h-26">
           <div className="flex-shrink-0  p-2">
             <Link to="/addInvoice">
               <Image
                 src="/replenish-logo.png"
                 className="relative z-30"
-                width="80px"
+                width="60px"
                 roundedCircle
               />
             </Link>
@@ -89,7 +89,7 @@ export default memo(function Header() {
                   Invoice List
                 </Link>
               </button>
-              <button
+              {/* <button
                 onClick={handleMenuSHow}
                 className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
               >
@@ -103,7 +103,7 @@ export default memo(function Header() {
                 >
                   Create a new user
                 </Link>
-              </button>
+              </button> */}
 
               <button
                 onClick={handleMenuSHow}
@@ -132,7 +132,7 @@ export default memo(function Header() {
                   } no-underline text-gray-700 py-3 inline-block hover:text-white `}
                   to="/employees"
                 >
-                  All Employees
+                  Staff
                 </Link>
               </button>
 
@@ -194,9 +194,9 @@ export default memo(function Header() {
   );
 
   const employeeHeader = (
-    <nav className="bg-blue-400">
-      <div className="max-w-7xl mx-auto md:px-4 sm:pl-6 sm:pr-0 lg:px-8">
-        <div className="flex items-center justify-between h-26">
+    <nav className="bg-blue-400 relative z-20">
+      <div className=" mx-auto md:px-4 sm:pl-6 sm:pr-0 lg:px-8">
+        <div className="flex items-center justify-start h-26">
           <div className="flex-shrink-0 relative z-30">
             <Link to="/addInvoice">
               <Image src="/replenish-logo.png" width="80px" roundedCircle />

@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Form, InputGroup, Popover } from "react-bootstrap";
-import { useAuthContext } from "../context/AuthUserContext";
-import ProductCard from "../components/Cards/ProductCard";
-import { deleteProduct, getProductsList, updateProduct } from "../Server";
+import ProductTable from "../Tables/ProductTable";
+import { useAuthContext } from "../../context/AuthUserContext";
+import { deleteProduct, getProductsList, updateProduct } from "../../Server";
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
-import LabelInput from "../components/Input/LabelInput";
-import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { Link } from "react-router-dom";
+import ModalWraper from "../Modals/ModalWraper";
+import LabelInput from "../Input/LabelInput";
+import Loadingbutton from "../Buttons/Loadingbutton";
+import { Form } from "react-bootstrap";
 
-const Products = () => {
+const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
-  const [searchInput, setSearchInput] = useState("");
-  const [updateProductInput, setupdateProductInput] = useState({
+  const [updateProductInput, setUpdateProductInput] = useState({
     name: "",
     product_type: "",
     cost_price: "",
     retail_price: "",
   });
+  const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // added
@@ -36,13 +36,14 @@ const Products = () => {
   }, []);
 
   const handleProductChange = (e) => {
-    setupdateProductInput((pre) => ({
+    setUpdateProductInput((pre) => ({
       ...pre,
       [e.target.name]: e.target.value,
     }));
   };
 
   const handleDelete = (product) => {
+    console.log(product);
     confirmAlert({
       title: "Confirm to delete",
       message: "Are you sure you want to delete this product",
@@ -97,12 +98,24 @@ const Products = () => {
     }
   };
 
-  console.log(productList);
+  return (
+    <div className="h-full w-full">
+      <ProductTable
+        productSearchInput={productSearchInput}
+        setProductSearchInput={setProductSearchInput}
+        userProfile={authUserState}
+        handleDelete={handleDelete}
+        productList={productList}
+        setUpdateProductInput={setUpdateProductInput}
+        setShowUpdateProductModal={setShowUpdateProductModal}
+      />
 
-  const updatePopover = (
-    <Popover id="popover-basic">
-      <Popover.Header as="h3">Edit Product</Popover.Header>
-      <Popover.Body>
+      {/* Modal */}
+      <ModalWraper
+        show={showUpdateProductModal}
+        onHide={() => setShowUpdateProductModal(false)}
+        title="Update Product"
+      >
         <Form onSubmit={handleSave} className="mb-3">
           <LabelInput
             label="Name"
@@ -155,54 +168,9 @@ const Products = () => {
             type="submit"
           />
         </Form>
-      </Popover.Body>
-    </Popover>
-  );
-
-  return (
-    <>
-      {/* <Header /> */}
-      <br />
-      <div className="flex mt-2 gap-2 justify-center">
-        <div className="w-[52.5rem] max-w-[80%]">
-          <InputGroup className="mb-3 ">
-            <Form.Control
-              placeholder="Search Product Name here"
-              aria-label="Search Product Name here"
-              aria-describedby="basic-addon2"
-              onChange={(event) => setSearchInput(event.target.value)}
-            />
-            <InputGroup.Text id="basic-addon2">&#x1F50D;</InputGroup.Text>
-          </InputGroup>
-        </div>
-        <div>
-          {authUserState.user?.is_admin && (
-            <Link to="/addproduct" type="button" className="btn btn-primary">
-              Add product
-            </Link>
-          )}
-        </div>
-      </div>
-      <div className="justify-center flex flex-wrap gap-3">
-        {productList
-          ?.filter((product) => {
-            return product.name
-              ?.toLowerCase()
-              .includes(searchInput?.toLocaleLowerCase());
-          })
-          .map((product) => (
-            <ProductCard
-              product={product}
-              key={product.id}
-              isAdmin={authUserState.user.is_admin}
-              handleDelete={handleDelete}
-              updatePopover={updatePopover}
-              setupdateProductInput={setupdateProductInput}
-            />
-          ))}
-      </div>
-    </>
+      </ModalWraper>
+    </div>
   );
 };
 
-export default Products;
+export default ProductsTab;
