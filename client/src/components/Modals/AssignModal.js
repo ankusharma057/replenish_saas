@@ -49,9 +49,7 @@ const AssignModal = ({
     }
   };
 
-  const options = filterEmployeeList(
-    employeeList?.filter((i) => i?.id !== employee.id)
-  )?.map((employee) => {
+  const options = filterEmployeeList(employeeList)?.map((employee) => {
     return { value: employee?.name, label: employee?.name };
   });
 

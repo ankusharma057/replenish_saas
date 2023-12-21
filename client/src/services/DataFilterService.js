@@ -9,7 +9,7 @@ class DataFilterService {
         });
       } else {
         return invList?.filter((inventory) => {
-          return inventory?.product?.product_type === accessFiled;
+          return accessFiled?.includes(inventory?.product?.product_type);
         });
       }
     }
@@ -24,8 +24,9 @@ class DataFilterService {
         // Check if the product type matches authUserState.user.has_access_only_to
         const productTypeMatches =
           authUserState.user?.has_access_only_to === "all" ||
-          inventory?.product?.product_type ===
-            authUserState.user?.has_access_only_to;
+          authUserState.user?.has_access_only_to?.includes(
+            inventory?.product?.product_type
+          );
 
         // Continue processing only if the product type matches
         if (productTypeMatches) {
