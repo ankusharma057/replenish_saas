@@ -1,17 +1,15 @@
 {
-  
-    "name": "heroku-deploy",
-    "description": "Build scripts for Heroku",
-    "engines": {
-      "node": "16.17.1"
-    },
-    "scripts": {
-      "clean": "rm -rf public",
-      "build": "npm install --prefix client && npm run build --prefix client",
-      "deploy": "cp -a client/build/. public/",
-      "heroku-postbuild": "npm run clean && npm run build && npm run deploy"
-    },
-  
+  "name": "heroku-deploy",
+  "description": "Build scripts for Heroku",
+  "engines": {
+    "node": "16.17.1"
+  },
+  "scripts": {
+    "clean": "rm -rf public",
+    "build": "npm install --prefix client && npm run build --prefix client",
+    "deploy": "cp -a client/build/. public/",
+    "heroku-postbuild": "npm run clean && npm run build && npm run deploy"
+  },
   "dependencies": {
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -19,6 +17,3 @@
     "react-navigation-stack": "^2.10.4"
   }
 }
-
-
-

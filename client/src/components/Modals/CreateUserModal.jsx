@@ -18,13 +18,11 @@ const formInitialState = {
   is_admin: false,
 };
 
-export default function SignUp() {
+export default function CreateUserModal({ show, onHide }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(formInitialState);
-
   const onSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
       await createEmployee(formData);
@@ -66,10 +64,10 @@ export default function SignUp() {
 
   return (
     <>
-      <ModalWraper>
-        <h3 className="text-center text-3xl font-semibold my-3">
+      <ModalWraper title="Create An Account" show={show} onHide={onHide}>
+        {/* <h3 className="text-center text-3xl font-semibold my-3">
           Create an account
-        </h3>
+        </h3> */}
         <Form
           onSubmit={onSubmit}
           className="max-w-md mx-auto p-4 bg-blue-100 rounded-lg shadow-md flex flex-col gap-1"

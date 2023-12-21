@@ -13,7 +13,7 @@ const MyProfile = lazy(() => import("./pages/MyProfile"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AddInvoices = lazy(() => import("./pages/AddInvoice"));
 const Invoice = lazy(() => import("./pages/Invoice"));
-const Signup = lazy(() => import("./pages/Auth/SignUp"));
+// const Signup = lazy(() => import("./pages/Auth/SignUp"));
 const AddProduct = lazy(() => import("./pages/AddProduct"));
 const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const Employee = lazy(() => import("./pages/Employee"));
@@ -78,7 +78,7 @@ function App() {
                   <Route path="/invoicelist" element={<Invoice />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
-                  <Route path="/signup" element={<Signup />} />
+                  {/* <Route path="/signup" element={<Signup />} /> */}
                   <Route path="/myprofile" element={<MyProfile />} />
                   <Route path="*" element={<MyProfile />} />
                 </>
