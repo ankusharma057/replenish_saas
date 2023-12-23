@@ -25,6 +25,13 @@ export const getUpdatedUserProfile = async (refetch) =>
     },
   });
 
+export const getClients = async (refetch) =>
+  api.get("/api/clients", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getInventoryList = async (refetch) =>
   api.get("/api/inventories", {
     cache: {
@@ -127,6 +134,8 @@ export const createProduct = async (data) =>
 
 export const createEmployee = async (data) =>
   api.post(`/api/employees/new`, data);
+
+export const createSchedule = async (data) => api.post(`/api/schedules`, data);
 
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);
