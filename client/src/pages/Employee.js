@@ -1,8 +1,8 @@
-import React, { useEffect,  useState } from "react";
+import React, { useEffect, useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
-  getEmployeesList,
+   getEmployeesList,
   getInvoiceList,
   sendResetPasswordLinkRoute,
   updateVendore,
@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 // import { Form, Popover } from "react-bootstrap";
 // import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { ChevronDown, } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import { ButtonGroup, ToggleButton, Button } from "react-bootstrap";
@@ -34,7 +34,7 @@ const Employee = () => {
   //   invoices: [],
   //   employee: {},
   // });
-  const { isCollapsed, collapse } = useAsideLayoutContext();
+  const {  collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentTab, setCurrentTab] = useState("inventory");
   const [loading, setLoading] = useState(false);
@@ -73,6 +73,7 @@ const Employee = () => {
     getInvoices();
     return () => {};
   }, []);
+
 
   // const openShowInventory = (invoice, employee) => {
   //   setEmployeeInvoices({
@@ -335,7 +336,7 @@ const Employee = () => {
       <AsideLayout
         asideContent={
           <>
-            <div >
+            <div>
               <SearchInput
                 placeholder="Search"
                 value={searchQuery}
