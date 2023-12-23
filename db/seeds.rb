@@ -24,6 +24,19 @@ Employee.create(
     is_inv_manager: true
 )
 
+5.times do |i|
+  emp = Employee.create(
+    name: "Employee #{i}",
+    email: "patricklcarrera#{i}@gmail.com",
+    gfe: true,
+    service_percentage: 60,
+    password: "test123",
+    is_inv_manager: true
+  )
+
+  5.times{|c| emp.clients.create(name: "EMP-#{emp.id} Client #{c}")}
+end
+
 Product.create(
     name: "Botox",
     product_type: "Neurotoxins",
