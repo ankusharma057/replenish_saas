@@ -1,7 +1,9 @@
 class Api::SchedulesController < ApplicationController
   def index
     schedules = Schedule.all
-    
+    schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
+    schedules = schedules.where(date: params[:date]) if params[:date].present?
+
     render json: schedules, status: :ok
   end
 
