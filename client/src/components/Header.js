@@ -111,13 +111,13 @@ export default memo(function Header() {
               >
                 <Link
                   className={` ${
-                    location.pathname === "/products"
+                    location.pathname === "/schedule"
                       ? "text-white"
                       : "text-gray-700"
                   } no-underline text-gray-700 py-3 inline-block hover:text-white `}
-                  to="/products"
+                  to="/schedule"
                 >
-                  Product List
+                  Schedule
                 </Link>
               </button>
               <button
@@ -188,7 +188,7 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-4/6 z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
+        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );
@@ -315,7 +315,7 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-4/6 z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
+        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
       ></div>
     </nav>
   );

@@ -98,7 +98,7 @@ const ProductTable = ({
   });
 
   return (
-    <div className="overscroll-y-auto my-8">
+    <div className="overscroll-y-auto mb-8">
       <div className="flex gap-x-4 justify-end ">
         {/* <Button onClick={() => table.setPageIndex(0)}>First page</Button> */}
         <Button

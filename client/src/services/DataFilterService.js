@@ -70,7 +70,7 @@ class DataFilterService {
     // Sort the invoices within each group by the 'id' field
     for (const key in groupedInvoices) {
       if (groupedInvoices.hasOwnProperty(key)) {
-        groupedInvoices[key].sort((a, b) => a.id - b.id);
+        groupedInvoices[key].sort((a, b) => b.id - a.id);
       }
     }
 

@@ -64,7 +64,7 @@ export default function CreateUserModal({ show, onHide }) {
 
   return (
     <>
-      <ModalWraper title="Create An Account" show={show} onHide={onHide}>
+      <ModalWraper title="Create An Staff" show={show} onHide={onHide}>
         {/* <h3 className="text-center text-3xl font-semibold my-3">
           Create an account
         </h3> */}
