@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect,  useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 // import { Form, Popover } from "react-bootstrap";
 // import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import { ButtonGroup, ToggleButton, Button } from "react-bootstrap";
@@ -23,6 +23,8 @@ import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
 import CreateUserModal from "../components/Modals/CreateUserModal";
+import AsideLayout from "../components/Layouts/AsideLayout";
+import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 const Employee = () => {
   const { authUserState } = useAuthContext();
   // const [invoiceList, setInvoiceList] = useState([]);
@@ -32,7 +34,7 @@ const Employee = () => {
   //   invoices: [],
   //   employee: {},
   // });
-  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
+  const { isCollapsed, collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentTab, setCurrentTab] = useState("inventory");
   const [loading, setLoading] = useState(false);
@@ -199,11 +201,12 @@ const Employee = () => {
     });
   };
 
-  const sortedEmployeeList = employeeList?.sort((a, b) =>
-    a?.name?.localeCompare(b?.name)
-  );
-  const filteredEmployeeList = sortedEmployeeList.filter((employee) =>
-    employee.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // const sortedEmployeeList = employeeList?.sort((a, b) =>
+  //   a?.name?.localeCompare(b?.name)
+  // );
+
+  const filteredEmployeeList = employeeList?.filter((employee) =>
+    employee?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
   );
 
   const handleSelect = (emp) => {
@@ -235,19 +238,24 @@ const Employee = () => {
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
     return (
-      <div
-        style={style}
-        onClick={() =>
-          selectedEmployeeData?.id !== employee.id && handleSelect(employee)
-        }
-        className={`p-2 border-b transition-all duration-700 ${
-          selectedEmployeeData?.id === employee.id
-            ? "pointer-events-none"
-            : "cursor-pointer "
-        } `}
-      >
-        {employee.name || ""}
-      </div>
+      employee && (
+        <div
+          style={style}
+          onClick={() => {
+            selectedEmployeeData?.id !== employee.id && handleSelect(employee);
+            if (window.innerWidth < 1024) {
+              collapse();
+            }
+          }}
+          className={`p-2 border-b transition-all duration-700 ${
+            selectedEmployeeData?.id === employee.id
+              ? "pointer-events-none"
+              : "cursor-pointer "
+          } `}
+        >
+          {employee.name || ""}
+        </div>
+      )
     );
   };
 
@@ -321,50 +329,45 @@ const Employee = () => {
       [name]: inputValue,
     }));
   };
-  const collapse = () => {
-    setIsCollapsed((pre) => !pre);
-  };
 
   return (
     <>
-      <div className="flex relative h-screen bg-gray-100">
-        {isCollapsed && (
-          <Button onClick={collapse} size="sm" variant="icon">
-            <ChevronRight />
-          </Button>
-        )}
-        <aside
-          className={`group/sidebar transition-all ease-in-out duration-300 h-full p-2 border-r-2  overflow-y-auto relative flex flex-col gap-y-4`}
-        >
-          <div className="">
-            <SearchInput
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="border-t-2  py-2 bg-white">
-            <h1 className="text-xl flex gap-x-2 items-center justify-center">
-              All Staff <ChevronDown />
-            </h1>
-            <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
-              <List
-                height={window.innerHeight - 350}
-                itemCount={filteredEmployeeList.length}
-                itemSize={45}
-                width={"100%"}
-              >
-                {EmployeeItem}
-              </List>
+      <AsideLayout
+        asideContent={
+          <>
+            <div >
+              <SearchInput
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </div>
-          <Button
-            onClick={() => setShowCreateUserModal(true)}
-            className="w-full"
-          >
-            + Add Employee
-          </Button>
-        </aside>
+            <div className="border-t-2  py-2 bg-white">
+              <h1 className="text-xl flex gap-x-2 items-center justify-center">
+                All Staff <ChevronDown />
+              </h1>
+              <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
+                {(employeeList || []).length > 0 && (
+                  <List
+                    height={window.innerHeight - 350}
+                    itemCount={employeeList.length}
+                    itemSize={45}
+                    width={"100%"}
+                  >
+                    {EmployeeItem}
+                  </List>
+                )}
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowCreateUserModal(true)}
+              className="w-full"
+            >
+              + Add Employee
+            </Button>
+          </>
+        }
+      >
         <div className="flex-1" key={selectedEmployeeData?.name}>
           {selectedEmployeeData && (
             <div className="p-10">
@@ -571,10 +574,6 @@ const Employee = () => {
                 invoiceData={selectedInvoiceData}
               />
 
-              <CreateUserModal
-                show={showCreateUserModal}
-                onHide={() => setShowCreateUserModal(false)}
-              />
               {/* <InvoiceListModal
                 show={invoiceModalShow}
                 onHide={() => setInvoiceModalShow(false)}
@@ -619,8 +618,13 @@ const Employee = () => {
               </div> */}
             </div>
           )}
+
+          <CreateUserModal
+            show={showCreateUserModal}
+            onHide={() => setShowCreateUserModal(false)}
+          />
         </div>
-      </div>
+      </AsideLayout>
     </>
   );
 };

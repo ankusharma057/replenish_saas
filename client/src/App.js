@@ -8,6 +8,7 @@ import { LOGIN } from "./Constants/AuthConstants";
 import { getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
+import Schedule from "./pages/Schedule";
 const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
 const Inventory = lazy(() => import("./pages/Inventory"));
@@ -52,7 +53,7 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden h-screen">
       {/* <SuspenseLoading /> */}
       <Suspense fallback={<SuspenseLoading />}>
         {authUserState.user && <Header />}
@@ -68,6 +69,7 @@ function App() {
                   <>
                     <Route path="/inventories" element={<Inventory />} />
                     <Route path="/employees" element={<Employee />} />
+                    <Route path="/schedule" element={<Schedule />} />
                   </>
                 )}
 

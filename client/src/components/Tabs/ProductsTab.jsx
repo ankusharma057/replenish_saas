@@ -43,7 +43,7 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
   };
 
   const handleDelete = (product) => {
-    console.log(product);
+    // console.log(product);
     confirmAlert({
       title: "Confirm to delete",
       message: "Are you sure you want to delete this product",
@@ -100,15 +100,17 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
 
   return (
     <div className="h-full w-full">
-      <ProductTable
-        productSearchInput={productSearchInput}
-        setProductSearchInput={setProductSearchInput}
-        userProfile={authUserState}
-        handleDelete={handleDelete}
-        productList={productList}
-        setUpdateProductInput={setUpdateProductInput}
-        setShowUpdateProductModal={setShowUpdateProductModal}
-      />
+      {(productList || []).length > 0 && (
+        <ProductTable
+          productSearchInput={productSearchInput}
+          setProductSearchInput={setProductSearchInput}
+          userProfile={authUserState}
+          handleDelete={handleDelete}
+          productList={productList}
+          setUpdateProductInput={setUpdateProductInput}
+          setShowUpdateProductModal={setShowUpdateProductModal}
+        />
+      )}
 
       {/* Modal */}
       <ModalWraper
