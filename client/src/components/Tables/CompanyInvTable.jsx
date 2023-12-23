@@ -84,7 +84,7 @@ const CompanyInvTable = ({
   });
 
   return (
-    <div className="overscroll-y-auto my-8 w-full">
+    <div className="overscroll-y-auto mb-8 w-full">
       <div className="flex gap-x-4 justify-end ">
         <Button
           disabled={!table.getCanPreviousPage()}

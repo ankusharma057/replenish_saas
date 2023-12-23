@@ -4,15 +4,18 @@ import "./index.css";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthUserContext";
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { AsideLayoutProvide } from "./context/AsideLayoutContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <AsideLayoutProvide>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </AsideLayoutProvide>
     </AuthProvider>
   </React.StrictMode>
 );
