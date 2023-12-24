@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
 
   namespace :api do
+    resources :locations, only: [ :index] do
+      get :employees, on: :member
+    end
     resources :schedules, only: [:index, :create]
     resources :clients
     resources :employees, only: %i(index show create destroy update) do
