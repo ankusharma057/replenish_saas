@@ -25,10 +25,13 @@ export const getUpdatedUserProfile = async (refetch) =>
     },
   });
 
-export const getClients = async (refetch) =>
+export const getClients = async (employee_id, refetch) =>
   api.get("/api/clients", {
     cache: {
       ignoreCache: refetch,
+    },
+    params: {
+      employee_id,
     },
   });
 
@@ -60,6 +63,20 @@ export const getEmployeesList = async (refetch = false) =>
     },
   });
 
+export const getLocations = async (refetch = false) =>
+  api.get("/api/locations", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocationEmployee = async (locationId, refetch = false) =>
+  api.get(`api/locations/${locationId}/employees`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const downloadInvoice = async (invoiceID) =>
   api.get(`/api/invoices/${invoiceID}/download_attachment`, {
     responseType: "blob",
@@ -77,6 +94,15 @@ export const sendResetPasswordLinkRoute = async (data) =>
     cache: {
       ignoreCache: true,
     },
+  });
+
+// {employee_id: 1,start_date: "18/10/2023",end_date: "19/12/2023"}
+export const getSchedule = async (params, refetch = false) =>
+  api.get(`/api/schedules`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: params,
   });
 
 export const loginUser = async (data) => api.post("/api/login", data);

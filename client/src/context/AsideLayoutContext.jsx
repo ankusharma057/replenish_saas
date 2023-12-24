@@ -8,9 +8,7 @@ const AsideLayoutContext = createContext();
 export const AsideLayoutProvide = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
   const collapse = () => {
-    if (window.innerWidth < 1024) {
-      setIsCollapsed((pre) => !pre);
-    }
+    setIsCollapsed((pre) => !pre);
   };
   return (
     <AsideLayoutContext.Provider
