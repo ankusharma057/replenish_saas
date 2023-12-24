@@ -1,41 +1,90 @@
-import React from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Select from "react-select";
+import { getLocationEmployee } from "../../Server";
 
 const ScheduleToolbar = (toolbar) => {
-  const options = [
-    {
-      value: "employee?.name",
-      label: "employee?.name",
-    },
-  ];
+  const calculateDateRange = (mDate, view, action) => {
+    let newDate;
+
+    switch (view) {
+      case "week":
+        newDate =
+          action === "prev"
+            ? new Date(
+                mDate.getFullYear(),
+                mDate.getMonth(),
+                mDate.getDate() - 7
+              )
+            : new Date(
+                mDate.getFullYear(),
+                mDate.getMonth(),
+                mDate.getDate() + 7
+              );
+        break;
+      case "month":
+        newDate =
+          action === "prev"
+            ? new Date(mDate.getFullYear(), mDate.getMonth() - 1, 1)
+            : new Date(mDate.getFullYear(), mDate.getMonth() + 1, 1);
+        break;
+      case "day":
+        newDate =
+          action === "prev"
+            ? new Date(
+                mDate.getFullYear(),
+                mDate.getMonth(),
+                mDate.getDate() - 1
+              )
+            : new Date(
+                mDate.getFullYear(),
+                mDate.getMonth(),
+                mDate.getDate() + 1
+              );
+        break;
+      default:
+        newDate = mDate;
+    }
+
+    return newDate;
+  };
+
 
   const goToBack = () => {
-    let mDate = toolbar.date;
-    let newDate = new Date(mDate.getFullYear(), mDate.getMonth() - 1, 1);
+    const newDate = calculateDateRange(toolbar.date, toolbar.view, "prev");
     toolbar.onNavigate("prev", newDate);
+    // const startDate = calculateDateRange(newDate, toolbar.view, "prev");
+    // fetchScheduleData(toolbar.view, startDate, newDate);
   };
+
   const goToNext = () => {
-    let mDate = toolbar.date;
-    let newDate = new Date(mDate.getFullYear(), mDate.getMonth() + 1, 1);
+    const newDate = calculateDateRange(toolbar.date, toolbar.view, "next");
     toolbar.onNavigate("next", newDate);
+    // const endDate = calculateDateRange(newDate, toolbar.view, "next");
+    // fetchScheduleData(toolbar.view, newDate, endDate);
   };
 
   const goToToday = () => {
     const today = new Date();
     toolbar.onNavigate("today", today);
+    // const startDate = today;
+    // const endDate = today;
+    // fetchScheduleData(toolbar.view, startDate, endDate);
   };
+
   return (
-    <div className="flex justify-around flex-wrap mt-8 items-center p-3 gap-4">
-      <h1 className="text-2xl  sm:text-3xl md:text-4xl">{toolbar.label}</h1>
-      <div>
-        <Select
-          className=" flex-1 w-80"
-          onChange={(e) => {}}
-          options={options}
-          placeholder="Search Places"
-        />
-      </div>
+    <div className="flex justify-around flex-wrap mt-4 items-center p-3 gap-4">
+      <h1 className="text-2xl  sm:text-3xl">{toolbar.label}</h1>
+      {/* {toolbar?.serviceLocation?.length > 0 && (
+        <div>
+          <Select
+            className=" flex-1 w-80"
+            options={toolbar?.serviceLocation}
+            placeholder="Search Places"
+            onChange={toolbar?.onLocationChange}
+          />
+        </div>
+      )} */}
       <div className="flex gap-x-4">
         {toolbar.views?.map((view) => (
           <Button
@@ -63,4 +112,4 @@ const ScheduleToolbar = (toolbar) => {
   );
 };
 
-export default ScheduleToolbar;
+export default memo(ScheduleToolbar);
