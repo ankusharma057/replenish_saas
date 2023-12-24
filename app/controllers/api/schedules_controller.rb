@@ -2,7 +2,7 @@ class Api::SchedulesController < ApplicationController
   def index
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
-    schedules = schedules.where("DATE(created_at) BETWEEN  ?  AND ?" , params[:start_date], (params[:end_time] || Date.today) if params[:start_date]
+    schedules = schedules.where("DATE(date) BETWEEN  ?  AND ?" , params[:start_date], (params[:end_date] || Date.today)) if params[:start_date]
 
     render json: schedules, status: :ok
   end
