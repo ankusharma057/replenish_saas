@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
-   getEmployeesList,
+  getEmployeesList,
   getInvoiceList,
   sendResetPasswordLinkRoute,
   updateVendore,
@@ -34,7 +34,7 @@ const Employee = () => {
   //   invoices: [],
   //   employee: {},
   // });
-  const {  collapse } = useAsideLayoutContext();
+  const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentTab, setCurrentTab] = useState("inventory");
   const [loading, setLoading] = useState(false);
@@ -57,23 +57,26 @@ const Employee = () => {
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getEmployeesList(refetch);
-      setEmployeeList(data);
+      if (data?.length > 0) {
+        setEmployeeList(data);
+        handleSelect(data[0]);
+      }
     } catch (error) {
       console.log(error);
     }
   };
-  const getInvoices = async () => {
-    // eslint-disable-next-line no-unused-vars
-    const { data } = await getInvoiceList();
-    // setInvoiceList(data);
-  };
+  // const getInvoices = async () => {
+  //   // eslint-disable-next-line no-unused-vars
+  //   const { data } = await getInvoiceList();
+  //   // setInvoiceList(data);
+  // };
 
   useEffect(() => {
     getEmployees();
-    getInvoices();
+    // getInvoices();
     return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   // const openShowInventory = (invoice, employee) => {
   //   setEmployeeInvoices({
@@ -250,7 +253,7 @@ const Employee = () => {
           }}
           className={`p-2 border-b transition-all duration-700 ${
             selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none"
+              ? "pointer-events-none bg-gray-200 rounded-md"
               : "cursor-pointer "
           } `}
         >

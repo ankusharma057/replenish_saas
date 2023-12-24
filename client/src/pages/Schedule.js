@@ -55,6 +55,7 @@ function Schedule() {
       const { data } = await getEmployeesList(refetch);
       if (data?.length > 0) {
         setEmployeeList(data);
+        handleSelectEmployee(data[0]);
       }
     } catch (error) {
       console.log(error);
