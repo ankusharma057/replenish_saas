@@ -6,6 +6,8 @@ class Employee < ApplicationRecord
   has_many :products
   has_many :clients
   has_many :schedules
+  has_many :employee_locations
+  has_many :locations, through: :employee_locations
   has_many :inventory_prompts, class_name: 'InventoryPrompt', dependent: :destroy
   has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id, dependent: :destroy
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
