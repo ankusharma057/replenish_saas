@@ -34,6 +34,9 @@ Employee.create(
     is_inv_manager: true
   )
 
+  location = Location.create(name: "Location #{i}")
+  location.employees <<  emp
+
   5.times{|c| emp.clients.create(name: "EMP-#{emp.id} Client #{c}")}
 end
 
