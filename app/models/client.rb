@@ -3,4 +3,5 @@ class Client < ApplicationRecord
     has_many :invoices
     has_many :schedules
     validates :name, presence: true
+    validates :email, uniqueness: true, allow_blank: true
 end
