@@ -9,6 +9,7 @@ import { getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import Schedule from "./pages/Schedule";
+import ClientSignup from "./pages/Clients/ClientSignup";
 const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
 const Inventory = lazy(() => import("./pages/Inventory"));
@@ -31,11 +32,10 @@ function App() {
       if (data) {
         authUserDispatch({ type: LOGIN, payload: data });
       } else {
-        navigate("/");
+        if (!location.pathname.includes("clients")) navigate("/");
       }
     };
     !isCancelled && getMyProfile();
-
     return () => {
       isCancelled = true;
     };
@@ -43,10 +43,20 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (location.pathname !== "/resetPassword") {
-      if (!authUserState.user) {
-        navigate("/");
-      }
+    if (
+      location.pathname === "/resetPassword" ||
+      location.pathname.includes("clients")
+    ) {
+      return;
+    }
+
+    if (
+      !authUserState.user?.is_admin &&
+      !authUserState.user?.is_inv_manager &&
+      ["/invoicelist", "/schedule", "/employees"].includes(location.pathname) &&
+      authUserState.user?.id
+    ) {
+      navigate("/myprofile");
     }
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,12 +64,12 @@ function App() {
 
   return (
     <div className="overflow-x-hidden h-screen">
-      {/* <SuspenseLoading /> */}
       <Suspense fallback={<SuspenseLoading />}>
         {authUserState.user && <Header />}
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
+          <Route path="/clients/signup" element={<ClientSignup />} />
 
           {authUserState.user && (
             <>

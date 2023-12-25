@@ -347,7 +347,6 @@ const Inventory = () => {
   };
 
   const onAssign = (data) => {
-    console.log(data);
     getEmployees(true);
     setAssignProductData(data);
     setShowAssignMadal(true);

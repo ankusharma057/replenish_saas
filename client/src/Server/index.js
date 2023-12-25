@@ -161,6 +161,12 @@ export const createProduct = async (data) =>
 export const createEmployee = async (data) =>
   api.post(`/api/employees/new`, data);
 
+// {email: "client@xyz.com",name: "Test Client", employee_id: 1,}
+export const inviteClient = async (data) =>
+  api.post(`/api/clients`, {
+    client: data,
+  });
+
 export const createSchedule = async (data) => api.post(`/api/schedules`, data);
 
 export const updateInvoice = async (invoiceID, data) =>

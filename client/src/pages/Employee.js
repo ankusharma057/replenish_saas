@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   deleteEmployeeRoute,
   getEmployeesList,
-  getInvoiceList,
+  // getInvoiceList,
   sendResetPasswordLinkRoute,
   updateVendore,
 } from "../Server";
@@ -22,9 +22,10 @@ import { ButtonGroup, ToggleButton, Button } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
-import CreateUserModal from "../components/Modals/CreateUserModal";
 import AsideLayout from "../components/Layouts/AsideLayout";
 import { useAsideLayoutContext } from "../context/AsideLayoutContext";
+import CreateStaffCard from "../components/Cards/CreateStaffCard";
+import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 const Employee = () => {
   const { authUserState } = useAuthContext();
   // const [invoiceList, setInvoiceList] = useState([]);
@@ -251,9 +252,9 @@ const Employee = () => {
               collapse();
             }
           }}
-          className={`p-2 border-b transition-all duration-700 ${
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${
             selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none bg-gray-200 rounded-md"
+              ? "pointer-events-none bg-gray-200 "
               : "cursor-pointer "
           } `}
         >
@@ -364,7 +365,10 @@ const Employee = () => {
               </div>
             </div>
             <Button
-              onClick={() => setShowCreateUserModal(true)}
+              onClick={() => {
+                setShowCreateUserModal(true);
+                setCurrentTab("staff");
+              }}
               className="w-full"
             >
               + Add Employee
@@ -386,10 +390,8 @@ const Employee = () => {
                       key={tab.value}
                       id={tab.value}
                       type="radio"
-                      className={` !border-none !rounded-t-lg ${
-                        currentTab === tab.value
-                          ? "!bg-white pb-2 !no-underline"
-                          : "btn-link"
+                      className={` !border-none !no-underline !rounded-t-lg ${
+                        currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
                       }  `}
                       name="radio"
                       value={tab.value}
@@ -404,7 +406,11 @@ const Employee = () => {
                 })}
               </ButtonGroup>
 
-              <div className="bg-white p-4 rounded-b-lg">
+              <div
+                className={`p-4 rounded-b-lg ${
+                  currentTab === "staff" ? "" : "bg-white"
+                } `}
+              >
                 {currentTab === "profile" && (
                   <form onSubmit={updateEmployee}>
                     <table>
@@ -471,6 +477,7 @@ const Employee = () => {
                         <tr>
                           <th className="px-4">Service Percentage:</th>
                           <td>
+                            CreateStaffCard{" "}
                             <div className="flex items-center">
                               <LineInput
                                 type="number"
@@ -568,7 +575,17 @@ const Employee = () => {
                         title={"Send"}
                       />
                     </div>
+
+                    <InviteClientsTab
+                      employeeId={selectedEmployeeData?.id || ""}
+                    />
                   </div>
+                )}
+                {currentTab === "staff" && (
+                  <CreateStaffCard
+                    show={showCreateUserModal}
+                    onHide={() => setShowCreateUserModal(false)}
+                  />
                 )}
               </div>
 
@@ -622,11 +639,6 @@ const Employee = () => {
               </div> */}
             </div>
           )}
-
-          <CreateUserModal
-            show={showCreateUserModal}
-            onHide={() => setShowCreateUserModal(false)}
-          />
         </div>
       </AsideLayout>
     </>

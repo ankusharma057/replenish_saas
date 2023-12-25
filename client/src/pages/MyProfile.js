@@ -9,6 +9,15 @@ import ModalWraper from "../components/Modals/ModalWraper";
 import { useAuthContext } from "../context/AuthUserContext";
 import DataFilterService from "../services/DataFilterService";
 import {
+  Box,
+  RotateCw,
+  ArrowRightLeft,
+  FileText,
+  Settings,
+  Edit,
+  GitPullRequestArrow,
+} from "lucide-react";
+import {
   acceptInventory,
   assignInventory,
   getEmployeesList,
@@ -19,13 +28,18 @@ import {
   updateVendore,
 } from "../Server";
 import { LOGIN } from "../Constants/AuthConstants";
+import AsideLayout from "../components/Layouts/AsideLayout";
 import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import Select from "react-select";
+import { useAsideLayoutContext } from "../context/AsideLayoutContext";
+import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
   const [loading, setLoading] = useState(false);
+  const { collapse } = useAsideLayoutContext();
   const [modalShow, setModalShow] = useState(false);
+  const [currentTab, setCurrentTab] = useState("products");
   const [invoiceData, setinvoiceData] = useState(null);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assigninventory_object, setAssigninventory_object] = useState({});
@@ -287,47 +301,136 @@ const MyProfile = () => {
 
   return (
     <div>
-      {/* <Header userProfile={authUserState.user} /> */}
-      {/* showing the Assign Product modal once */}
-      <AssignModal
-        showAssignMadal={showAssignMadal}
-        setShowAssignMadal={setShowAssignMadal}
-        assignSubmit={assignSubmit}
-        assigninventory_object={assigninventory_object}
-        setAssigninventory_object={setAssigninventory_object}
-        employeeList={employeeList}
-        setAssignInput={setAssignInput}
-        assignInput={assignInput}
-        employee={authUserState.user}
-        setLoading={setLoading}
-        loading={loading}
-      />
-      {/* Request Inventory Modal */}
-      <ModalWraper
-        show={showRequestInvetory}
-        onHide={() => {
-          setShowAssignMadal(false);
-          setshowRequestInvetory(false);
-        }}
-        centered
-        title="Request Inventory"
+      <AsideLayout
+        asideContent={
+          <div className="bg-white p-2 min-h-[90%] flex flex-col gap-2">
+            <h1 className="text-2xl font-bold text-center text-blue-600">
+              {authUserState.user?.name}
+            </h1>
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "products" && setCurrentTab("products");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+                currentTab === "products" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <Box />
+              Products
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "assignedInventory" &&
+                  setCurrentTab("assignedInventory");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+                currentTab === "assignedInventory" &&
+                "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <ArrowRightLeft /> Assigned Inventory
+            </div>
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "pendingRequest" &&
+                  setCurrentTab("pendingRequest");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+                currentTab === "pendingRequest" &&
+                "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <RotateCw />
+              Pending Request
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "invoice" && setCurrentTab("invoice");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+                currentTab === "invoice" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <FileText /> Invoices
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "settings" && setCurrentTab("settings");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+                currentTab === "settings" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <Settings /> Settings
+            </div>
+          </div>
+        }
       >
-        <Form className="flex flex-col gap-4" onSubmit={requestInvetorySubmit}>
-          <Select
-            onChange={(e) => {
-              const selectedInventory = inventoryList.find(
-                (inventory) => String(inventory.id) === String(e.value)
-              );
-              setRequestInvetoryInput({
-                ...requestInvetoryInput,
-                product_name: e.value,
-                inventory_object: selectedInventory,
-              });
-            }}
-            options={filteredInventoryList}
-            required
-          />
-          {/* <Form.Select
+        <AssignModal
+          showAssignMadal={showAssignMadal}
+          setShowAssignMadal={setShowAssignMadal}
+          assignSubmit={assignSubmit}
+          assigninventory_object={assigninventory_object}
+          setAssigninventory_object={setAssigninventory_object}
+          employeeList={employeeList}
+          setAssignInput={setAssignInput}
+          assignInput={assignInput}
+          employee={authUserState.user}
+          setLoading={setLoading}
+          loading={loading}
+        />
+        {/* Request Inventory Modal */}
+        <ModalWraper
+          show={showRequestInvetory}
+          onHide={() => {
+            setShowAssignMadal(false);
+            setshowRequestInvetory(false);
+          }}
+          centered
+          title="Request Inventory"
+        >
+          <Form
+            className="flex flex-col gap-4"
+            onSubmit={requestInvetorySubmit}
+          >
+            <Select
+              onChange={(e) => {
+                const selectedInventory = inventoryList.find(
+                  (inventory) => String(inventory.id) === String(e.value)
+                );
+                setRequestInvetoryInput({
+                  ...requestInvetoryInput,
+                  product_name: e.value,
+                  inventory_object: selectedInventory,
+                });
+              }}
+              options={filteredInventoryList}
+              required
+            />
+            {/* <Form.Select
             onChange={(e) => {
               const selectedInventory = inventoryList.find(
                 (inventory) => String(inventory.id) === String(e.target.value)
@@ -351,341 +454,382 @@ const MyProfile = () => {
               })}
           </Form.Select> */}
 
-          <LabelInput
-            label="Quantity"
-            type="number"
-            controlId="quantity"
-            name="quantity"
-            placeholder={`${
-              requestInvetoryInput?.inventory_object?.quantity
-                ? ` Type Quantity`
-                : "Select Product First"
-            }`}
-            onChange={(e) =>
-              setRequestInvetoryInput({
-                ...requestInvetoryInput,
-                quantity_asked: e.target.value,
-              })
-            }
-            required={true}
-          />
+            <LabelInput
+              label="Quantity"
+              type="number"
+              controlId="quantity"
+              name="quantity"
+              placeholder={`${
+                requestInvetoryInput?.inventory_object?.quantity
+                  ? ` Type Quantity`
+                  : "Select Product First"
+              }`}
+              onChange={(e) =>
+                setRequestInvetoryInput({
+                  ...requestInvetoryInput,
+                  quantity_asked: e.target.value,
+                })
+              }
+              required={true}
+            />
 
-          <LabelInput
-            label="Date Needed"
-            type="date"
-            placeholder={"Date Needed"}
-            controlId="dateNeeded"
-            name="dateNeeded"
-            onChange={(e) =>
-              setRequestInvetoryInput({
-                ...requestInvetoryInput,
-                date_of_use: e.target.value,
-              })
-            }
-            required={true}
+            <LabelInput
+              label="Date Needed"
+              type="date"
+              placeholder={"Date Needed"}
+              controlId="dateNeeded"
+              name="dateNeeded"
+              onChange={(e) =>
+                setRequestInvetoryInput({
+                  ...requestInvetoryInput,
+                  date_of_use: e.target.value,
+                })
+              }
+              required={true}
+            />
+            <Loadingbutton
+              isLoading={loading}
+              title="Submit"
+              loadingText="Requesting inventory..."
+              type="submit"
+            />
+          </Form>
+        </ModalWraper>
+        {/* showing the modal once */}
+        {modalShow && (
+          <CustomModal
+            show={modalShow}
+            onHide={handleClick}
+            userProfile={authUserState.user}
+            invoiceData={invoiceData}
           />
-          <Loadingbutton
-            isLoading={loading}
-            title="Submit"
-            loadingText="Requesting inventory..."
-            type="submit"
-          />
-        </Form>
-      </ModalWraper>
-      {/* showing the modal once */}
-      {modalShow && (
-        <CustomModal
-          show={modalShow}
-          onHide={handleClick}
-          userProfile={authUserState.user}
-          invoiceData={invoiceData}
-        />
-      )}
-      {/* change Vendor name Modal */}
-      <ModalWraper
-        show={vendorUpdateModalShow}
-        onHide={hideUpdateVendorModal}
-        title="Update Vendor Name"
-      >
-        <Form className="flex flex-col gap-4" onSubmit={updateVendoreSubmit}>
-          <LabelInput
-            label="Enter New Vendor Name"
-            type="text"
-            placeholder="Enter vendor name"
-            controlId="vendoreName"
-            name="vendoreName"
-            value={updateVendorInput}
-            onChange={(e) => setupdateVendorInput(e.target.value)}
-            required={true}
-          />
-          <Loadingbutton
-            isLoading={loading}
-            title="Submit"
-            loadingText="Updating Vendor Name..."
-            type="submit"
-          />
-        </Form>
-      </ModalWraper>
-      <br />
-      <div className="flex justify-center">
-        <h1 className="text-4xl font-bold text-center text-blue-600">
-          {authUserState.user?.name}
-        </h1>
-      </div>
-      <div className="flex gap-3 justify-center  items-center">
-        <h4 className="text-1xl font-bold text-center text-blue-600">
-          <span className="text-gray-800">
-            Vendor Name: {authUserState.user?.vendor_name} {"  "}
-            <Button variant="primary" onClick={hideUpdateVendorModal}>
-              Update
-            </Button>
-          </span>
-        </h4>
-      </div>
-      <div className="flex justify-end mr-8">
-        {!(authUserState.user.has_access_only_to === "all") &&
-        authUserState.user?.is_inv_manager ? (
-          // Show the button if user is authUserState.user.has_access_only_to array and is_inv_manager is true
-          <Button
-            onClick={() => {
-              getInventory();
-              setTimeout(() => {
-                setshowRequestInvetory(true);
-              }, 0);
-            }}
-            className="text-4xl font-bold text-center text-blue-600"
-          >
-            Request Inventory
-          </Button>
-        ) : !authUserState.user?.is_inv_manager &&
-          !authUserState.user?.is_admin ? (
-          // Show the button if user is neither an inv manager nor an admin
-          <Button
-            onClick={() => {
-              getInventory();
-              setTimeout(() => {
-                setshowRequestInvetory(true);
-              }, 0);
-            }}
-            className="text-4xl font-bold text-center text-blue-600"
-          >
-            Request Inventory
-          </Button>
-        ) : null}
-      </div>
-      {authUserState.user?.inventory_requests?.filter(
-        (request) => !request.is_approved
-      )?.length > 0 && (
-        <>
-          <h2 className="text-4xl font-bold text-center text-blue-400">
-            Pending Requests
-          </h2>
-          <div className=" container mx-auto my-3">
-            <Table
-              bordered
-              hover
-              responsive
-              className="w-full mt-4 text-center"
-            >
-              <thead>
-                <tr>
-                  <th>Product </th>
-                  <th>Quantity</th>
-                  <th>Date of use</th>
-                </tr>
-              </thead>
-              <tbody>
-                {authUserState.user?.inventory_requests?.map((data, i) => {
-                  return (
-                    <tr key={data?.id}>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.inventory?.product?.name} </span>
-                          {/* <span>Product Name: Product </span> */}
-                        </div>
-                      </td>
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>{data?.quantity_asked} </span>
-                        </div>
-                      </td>
-
-                      <td className="align-middle">
-                        <div className="flex flex-col  gap-2">
-                          <span>
-                            {new Date(data?.date_of_use).toLocaleDateString() ||
-                              "Not Given"}
-                          </span>
-                        </div>
-                      </td>
+        )}
+        {/* change Vendor name Modal */}
+        <ModalWraper
+          show={vendorUpdateModalShow}
+          onHide={hideUpdateVendorModal}
+          title="Update Vendor Name"
+        >
+          <Form className="flex flex-col gap-4" onSubmit={updateVendoreSubmit}>
+            <LabelInput
+              label="Enter New Vendor Name"
+              type="text"
+              placeholder="Enter vendor name"
+              controlId="vendoreName"
+              name="vendoreName"
+              value={updateVendorInput}
+              onChange={(e) => setupdateVendorInput(e.target.value)}
+              required={true}
+            />
+            <Loadingbutton
+              isLoading={loading}
+              title="Submit"
+              loadingText="Updating Vendor Name..."
+              type="submit"
+            />
+          </Form>
+        </ModalWraper>
+        <div className="flex py-10 px-6 flex-1 items-center flex-col">
+          {currentTab === "products" &&
+            (authUserState.user?.employees_inventories?.length > 0 ? (
+              <div className=" sm:container mx-auto my-3">
+                <h2 className="text-4xl font-bold text-center text-blue-400">
+                  Products
+                </h2>
+                <Table
+                  bordered
+                  hover
+                  responsive
+                  className="w-full mt-4 text-center"
+                >
+                  <thead>
+                    <tr>
+                      <th>Product </th>
+                      <th>Product Type</th>
+                      <th>Quantity</th>
+                      <th>Assign</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </div>
-        </>
-      )}
-      {authUserState.user?.inventory_prompts?.filter(
-        (prompt) => !prompt.is_accepted === true
-      )?.length > 0 && (
-        <>
-          <h2 className="text-4xl font-bold text-center text-blue-400">
-            Inventory Assigned
-          </h2>
-          <Table bordered hover responsive className="w-full mt-4 text-center">
-            <thead>
-              <tr>
-                <th>Product </th>
-                <th>Product Type </th>
-                <th>Quantity</th>
-                <th>Assigned By</th>
-                <th className="w-[12rem]"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {authUserState.user?.inventory_prompts?.map((data) => {
-                return (
-                  <React.Fragment key={data.id}>
-                    {!data?.is_accepted && (
-                      <tr key={data?.id}>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.product?.name} </span>
-                            {/* <span>Product Name: Product </span> */}
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.product?.product_type} </span>
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.quantity} </span>
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.assigned_by} </span>
-                          </div>
-                        </td>
-
-                        <td className="align-middle">
-                          <div className=" flex justify-around gap-3">
+                  </thead>
+                  <tbody>
+                    {authUserState.user?.employees_inventories?.map((data) => {
+                      return (
+                        <tr key={data?.product?.id}>
+                          <td className="align-middle">
+                            <div className="flex flex-col  gap-2">
+                              <span>{data?.product?.name} </span>
+                              {/* <span>Product Name: Product </span> */}
+                            </div>
+                          </td>
+                          <td className="align-middle">
+                            <div className="flex flex-col  gap-2">
+                              <span>{data?.product?.product_type} </span>
+                            </div>
+                          </td>
+                          <td className="align-middle">
+                            <div className="flex flex-col  gap-2">
+                              <span>{data?.quantity.toFixed(2)} </span>
+                            </div>
+                          </td>
+                          <td className="align-middle">
                             <Button
-                              onClick={async () => {
-                                acceptSubmit({ ...data, isDelete: false });
-                              }}
                               variant="info"
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                denySubmit({ ...data, isDelete: true });
+                              onClick={() => {
+                                getEmployees();
+                                setAssigninventory_object(data);
+                                setShowAssignMadal(true);
                               }}
-                              variant="danger"
                             >
-                              Deny
+                              Assign
                             </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </Table>
-        </>
-      )}
-      {authUserState.user?.employees_inventories?.length > 0 && (
-        <div className=" container mx-auto my-3">
-          <h2 className="text-4xl font-bold text-center text-blue-400">
-            Products
-          </h2>
-          <Table bordered hover responsive className="w-full mt-4 text-center">
-            <thead>
-              <tr>
-                <th>Product </th>
-                <th>Product Type</th>
-                <th>Quantity</th>
-                <th>Assign</th>
-              </tr>
-            </thead>
-            <tbody>
-              {authUserState.user?.employees_inventories?.map((data) => {
-                return (
-                  <tr key={data?.product?.id}>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.product?.name} </span>
-                        {/* <span>Product Name: Product </span> */}
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.product?.product_type} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <div className="flex flex-col  gap-2">
-                        <span>{data?.quantity.toFixed(2)} </span>
-                      </div>
-                    </td>
-                    <td className="align-middle">
-                      <Button
-                        variant="info"
-                        onClick={() => {
-                          getEmployees();
-                          setAssigninventory_object(data);
-                          setShowAssignMadal(true);
-                        }}
-                      >
-                        Assign
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </div>
-      )}
-      <br />
-      {authUserState.user?.invoices?.length > 0 && (
-        <h2 className="text-4xl font-bold text-center text-blue-400">
-          My invoices
-        </h2>
-      )}
-      <br />
-      <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
-        {authUserState.user?.invoices?.map((invoice) => {
-          return (
-            <li key={invoice?.id}>
-              <Card
-                className="text-center"
-                border="info"
-                style={{ width: "18rem" }}
-              >
-                <Card.Header as="h5">Invoice ID {invoice.id}</Card.Header>
-                <Card.Body className="">
-                  <Button
-                    onClick={async () => {
-                      await setinvoiceData(invoice);
-                      handleClick();
-                    }}
-                    variant="info"
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            ) : (
+              <h2 className="text-4xl font-bold text-center text-blue-400">
+                No Product Found
+              </h2>
+            ))}
+          {currentTab === "assignedInventory" &&
+            (authUserState.user?.inventory_prompts?.filter(
+              (prompt) => !prompt.is_accepted === true
+            )?.length > 0 ? (
+              <div className="sm:container">
+                <h2 className="text-4xl font-bold text-center text-blue-400">
+                  Inventory Assigned
+                </h2>
+                <Table bordered hover responsive className="mt-4 text-center">
+                  <thead>
+                    <tr>
+                      <th>Product </th>
+                      <th>Product Type </th>
+                      <th>Quantity</th>
+                      <th>Assigned By</th>
+                      <th className="w-[12rem]"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {authUserState.user?.inventory_prompts?.map((data) => {
+                      return (
+                        <React.Fragment key={data.id}>
+                          {!data?.is_accepted && (
+                            <tr key={data?.id}>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.product?.name} </span>
+                                  {/* <span>Product Name: Product </span> */}
+                                </div>
+                              </td>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.product?.product_type} </span>
+                                </div>
+                              </td>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.quantity} </span>
+                                </div>
+                              </td>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.assigned_by} </span>
+                                </div>
+                              </td>
+
+                              <td className="align-middle">
+                                <div className=" flex justify-around gap-3">
+                                  <Button
+                                    onClick={async () => {
+                                      acceptSubmit({
+                                        ...data,
+                                        isDelete: false,
+                                      });
+                                    }}
+                                    variant="info"
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    onClick={async () => {
+                                      denySubmit({ ...data, isDelete: true });
+                                    }}
+                                    variant="danger"
+                                  >
+                                    Deny
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            ) : (
+              <h2 className="text-4xl font-bold text-center text-blue-400">
+                No Assigned Inventory Found
+              </h2>
+            ))}
+          {currentTab === "pendingRequest" &&
+            (authUserState.user?.inventory_requests?.filter(
+              (request) => !request.is_approved
+            )?.length > 0 ? (
+              <>
+                <h2 className="text-4xl font-bold text-center text-blue-400">
+                  Pending Requests
+                </h2>
+                <div className=" sm:container mx-auto my-3">
+                  <Table
+                    bordered
+                    hover
+                    responsive
+                    className="w-full mt-4 text-center"
                   >
-                    See More Details
+                    <thead>
+                      <tr>
+                        <th>Product </th>
+                        <th>Quantity</th>
+                        <th>Date of use</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {authUserState.user?.inventory_requests?.map(
+                        (data, i) => {
+                          return (
+                            <tr key={data?.id}>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.inventory?.product?.name} </span>
+                                  {/* <span>Product Name: Product </span> */}
+                                </div>
+                              </td>
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>{data?.quantity_asked} </span>
+                                </div>
+                              </td>
+
+                              <td className="align-middle">
+                                <div className="flex flex-col  gap-2">
+                                  <span>
+                                    {new Date(
+                                      data?.date_of_use
+                                    ).toLocaleDateString() || "Not Given"}
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
+              </>
+            ) : (
+              <h2 className="text-4xl font-bold text-center text-blue-400">
+                No Pending Requests Found
+              </h2>
+            ))}
+
+          {currentTab === "invoice" && (
+            <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
+              {authUserState.user?.invoices?.length > 0 ? (
+                authUserState.user?.invoices?.map((invoice) => {
+                  return (
+                    <li key={invoice?.id}>
+                      <Card
+                        className="text-center"
+                        border="info"
+                        style={{ width: "18rem" }}
+                      >
+                        <Card.Header as="h5">
+                          Invoice ID {invoice.id}
+                        </Card.Header>
+                        <Card.Body className="">
+                          <Button
+                            onClick={async () => {
+                              await setinvoiceData(invoice);
+                              handleClick();
+                            }}
+                            variant="info"
+                          >
+                            See More Details
+                          </Button>
+                        </Card.Body>
+                      </Card>
+                    </li>
+                  );
+                })
+              ) : (
+                <h2 className="text-4xl font-bold text-center text-blue-400">
+                  No Invoice Found
+                </h2>
+              )}
+            </ul>
+          )}
+          {currentTab === "settings" && (
+            <div className="sm:container p-4 bg-white border-2 rounded-lg">
+              <div className="flex gap-3  items-center">
+                <h4 className="text-1xl font-bold text-center">
+                  <span className="text-gray-800 flex gap-3 items-center">
+                    Vendor Name:
+                    <span className=" text-blue-600">
+                      {authUserState.user?.vendor_name}
+                    </span>
+                    <button
+                      className="p-2  hover:bg-gray-200 rounded-lg transition-all"
+                      onClick={hideUpdateVendorModal}
+                    >
+                      <Edit />
+                    </button>
+                  </span>
+                </h4>
+              </div>
+              <div className="flex mr-8">
+                {!(authUserState.user.has_access_only_to === "all") &&
+                authUserState.user?.is_inv_manager ? (
+                  // Show the button if user is authUserState.user.has_access_only_to array and is_inv_manager is true
+                  <Button
+                    onClick={() => {
+                      getInventory();
+                      setTimeout(() => {
+                        setshowRequestInvetory(true);
+                      }, 0);
+                    }}
+                    variant="outline-primary"
+                    className="text-4xl font-bold text-center text-blue-600 !flex gap-x-2"
+                  >
+                    <GitPullRequestArrow /> <span>Request Inventory</span>
                   </Button>
-                </Card.Body>
-              </Card>
-            </li>
-          );
-        })}
-      </ul>
+                ) : !authUserState.user?.is_inv_manager &&
+                  !authUserState.user?.is_admin ? (
+                  // Show the button if user is neither an inv manager nor an admin
+                  <Button
+                    onClick={() => {
+                      getInventory();
+                      setTimeout(() => {
+                        setshowRequestInvetory(true);
+                      }, 0);
+                    }}
+                    variant="outline-primary"
+                    className="text-4xl font-bold text-center text-blue-600 !flex gap-x-2"
+                  >
+                    <GitPullRequestArrow /> <span>Request Inventory</span>
+                  </Button>
+                ) : null}
+              </div>
+
+              <InviteClientsTab employeeId={authUserState.user?.id || ""} />
+            </div>
+          )}
+        </div>
+      </AsideLayout>
     </div>
   );
 };

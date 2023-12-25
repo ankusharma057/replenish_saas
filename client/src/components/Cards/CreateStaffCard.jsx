@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { createEmployee, getEmployeesList } from "../../Server";
-import ModalWraper from "../../components/Modals/ModalWraper";
 
 const formInitialState = {
   name: "",
@@ -18,7 +17,7 @@ const formInitialState = {
   is_admin: false,
 };
 
-export default function CreateUserModal({ show, onHide }) {
+export default function CreateStaffCard({ show, onHide }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(formInitialState);
   const onSubmit = async (e) => {
@@ -29,6 +28,7 @@ export default function CreateUserModal({ show, onHide }) {
       toast.success("User created successfully");
       //   setFormData(formInitialState);
       getEmployeesList(true);
+      e.target.reset();
     } catch (error) {
       let errorString = "";
       Object.keys(error.response.data.error || {})?.forEach((key) => {
@@ -63,15 +63,12 @@ export default function CreateUserModal({ show, onHide }) {
   };
 
   return (
-    <>
-      <ModalWraper title="Create An Staff" show={show} onHide={onHide}>
-        {/* <h3 className="text-center text-3xl font-semibold my-3">
-          Create an account
-        </h3> */}
-        <Form
-          onSubmit={onSubmit}
-          className="max-w-md mx-auto p-4 bg-blue-100 rounded-lg shadow-md flex flex-col gap-1"
-        >
+    show && (
+      <div className="hover:shadow-lg border-2 border-black/15 max-w-md m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
+        <Form onSubmit={onSubmit} className=" mx-auto p-4 flex flex-col gap-1">
+          <h3 className="text-center text-3xl font-semibold my-3">
+            Create An Staff
+          </h3>
           <LabelInput
             label="Name"
             controlId="name"
@@ -200,7 +197,7 @@ export default function CreateUserModal({ show, onHide }) {
             className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           />
         </Form>
-      </ModalWraper>
-    </>
+      </div>
+    )
   );
 }
