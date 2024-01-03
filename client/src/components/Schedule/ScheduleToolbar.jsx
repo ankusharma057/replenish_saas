@@ -1,7 +1,5 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo } from "react";
 import { Button } from "react-bootstrap";
-import Select from "react-select";
-import { getLocationEmployee } from "../../Server";
 
 const ScheduleToolbar = (toolbar) => {
   const calculateDateRange = (mDate, view, action) => {
@@ -49,7 +47,6 @@ const ScheduleToolbar = (toolbar) => {
     return newDate;
   };
 
-
   const goToBack = () => {
     const newDate = calculateDateRange(toolbar.date, toolbar.view, "prev");
     toolbar.onNavigate("prev", newDate);
@@ -75,16 +72,7 @@ const ScheduleToolbar = (toolbar) => {
   return (
     <div className="flex justify-around flex-wrap mt-4 items-center p-3 gap-4">
       <h1 className="text-2xl  sm:text-3xl">{toolbar.label}</h1>
-      {/* {toolbar?.serviceLocation?.length > 0 && (
-        <div>
-          <Select
-            className=" flex-1 w-80"
-            options={toolbar?.serviceLocation}
-            placeholder="Search Places"
-            onChange={toolbar?.onLocationChange}
-          />
-        </div>
-      )} */}
+
       <div className="flex gap-x-4">
         {toolbar.views?.map((view) => (
           <Button

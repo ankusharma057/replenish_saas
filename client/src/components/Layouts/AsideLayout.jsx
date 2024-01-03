@@ -18,15 +18,17 @@ const AsideLayout = ({ asideContent, children }) => {
           isCollapsed ? "w-0 p-0" : "w-64 pt-16 px-2 fixed"
         } `}
       >
-        <div
-          role="button"
-          onClick={collapse}
-          className={
-            "text-muted-foreground absolute transition-all duration-500 p-2 top-3 right-3 opacity-0 hover:bg-gray-200 rounded-lg group-hover/sidebar:!opacity-100"
-          }
-        >
-          <ChevronLeft className="h-6 w-6 " />
-        </div>
+        {!isCollapsed && (
+          <div
+            role="button"
+            onClick={collapse}
+            className={
+              "text-muted-foreground absolute transition-all duration-500 p-2 top-3 right-3 opacity-0 hover:bg-gray-200 rounded-lg group-hover/sidebar:!opacity-100"
+            }
+          >
+            <ChevronLeft className="h-6 w-6 " />
+          </div>
+        )}
         {!isCollapsed && asideContent}
       </aside>
       {children}

@@ -1,29 +1,22 @@
 import React, { useEffect, useState } from "react";
-import {
-  useNavigate,
-  useLocation,
-  useSearchParams,
-  Link,
-} from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
-import { signupClient } from "../../Server";
+import { signInClient, signupClient } from "../../Server";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { useAuthContext } from "../../context/AuthUserContext";
 import { CLIENT_LOGIN } from "../../Constants/AuthConstants";
 
-function ClientSignup() {
+function ClientSignIn() {
   const [isLoading, setLoading] = useState(false);
   const { authUserState, authUserDispatch } = useAuthContext();
   const loginState = {
     email: "",
     password: "",
   };
-
   const [formInput, setFormInput] = useState(loginState);
   const location = useLocation();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,10 +33,7 @@ function ClientSignup() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data } = await signupClient({
-        client: formInput,
-        ref: searchParams.get("ref"),
-      });
+      const { data } = await signInClient(formInput);
       if (data) {
         authUserDispatch({ type: CLIENT_LOGIN, payload: data });
         toast.success("Successfully Logged In");
@@ -78,20 +68,10 @@ function ClientSignup() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white shadow-lg rounded-lg">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Sign up to ReplenishMD
+            Sign in to ReplenishMD
           </h2>
 
           <Form onSubmit={handleSubmit}>
-            <LabelInput
-              label="Name"
-              type="text"
-              placeholder="Enter your name"
-              controlId="name"
-              name="name"
-              onChange={handleChange}
-              required
-            />
-
             <LabelInput
               label="Email"
               type="email"
@@ -110,13 +90,14 @@ function ClientSignup() {
               onChange={handleChange}
               required
             />
+
             <div className="flex items-center mb-4 justify-between">
               <div className="text-sm">
                 <Link
-                  to="/clients/signin"
+                  to="/clients/signup"
                   className="font-medium no-underline text-indigo-600 hover:text-indigo-500"
                 >
-                  Already have an account? Login
+                  Don't have an account? Signup
                 </Link>
               </div>
             </div>
@@ -134,4 +115,4 @@ function ClientSignup() {
   );
 }
 
-export default ClientSignup;
+export default ClientSignIn;

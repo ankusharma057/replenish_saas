@@ -64,11 +64,12 @@ export default function CreateStaffCard({ show, onHide }) {
 
   return (
     show && (
-      <div className="hover:shadow-lg border-2 border-black/15 max-w-md m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
-        <Form onSubmit={onSubmit} className=" mx-auto p-4 flex flex-col gap-1">
-          <h3 className="text-center text-3xl font-semibold my-3">
-            Create An Staff
-          </h3>
+      <div className="hover:shadow-lg border-2 px-2 sm:px-10 py-5 border-black/15 m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
+        <h3 className=" text-3xl font-semibold my-3">Create An Staff</h3>
+        <Form
+          onSubmit={onSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center justify-center w-full md:max-w -7xl gap-1"
+        >
           <LabelInput
             label="Name"
             controlId="name"
@@ -114,23 +115,6 @@ export default function CreateStaffCard({ show, onHide }) {
             name="password"
           />
 
-          <div className="mb-4">
-            <label
-              htmlFor="gfe"
-              className="text-base me-3 font-medium text-blue-800"
-            >
-              GFE
-            </label>
-            <input
-              id="gfe"
-              type="checkbox"
-              name="gfe"
-              value={formData.gfe}
-              onChange={handleChange}
-              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
           <LabelInput
             label="Service Percentage"
             controlId="service_percentage"
@@ -157,6 +141,23 @@ export default function CreateStaffCard({ show, onHide }) {
 
           <div className="mb-4">
             <label
+              htmlFor="gfe"
+              className="text-base me-3 font-medium text-blue-800"
+            >
+              GFE
+            </label>
+            <input
+              id="gfe"
+              type="checkbox"
+              name="gfe"
+              value={formData.gfe}
+              onChange={handleChange}
+              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
               htmlFor="is_admin"
               className="text-base me-3 font-medium text-blue-800"
             >
@@ -172,7 +173,7 @@ export default function CreateStaffCard({ show, onHide }) {
             />
           </div>
 
-          <div className="mb-4">
+          <div className=" ">
             <label
               htmlFor="is_inv_manager"
               className="text-base me-3 font-medium text-blue-800"
@@ -194,7 +195,7 @@ export default function CreateStaffCard({ show, onHide }) {
             title="Sign up"
             loadingText={"Creating User..."}
             type="submit"
-            className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-500 w-full  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           />
         </Form>
       </div>

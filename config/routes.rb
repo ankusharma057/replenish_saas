@@ -1,11 +1,36 @@
 Rails.application.routes.draw do
 
   namespace :api do
-    resources :locations, only: [ :index] do
+    namespace :client do
+      post '/sign_up', to: 'registrations#sign_up'
+      post '/log_in', to: 'sessions#create'
+      delete '/log_out', to: 'sessions#destroy'
+      post '/password_update', to: 'sessions#password_update'
+      get '/profile', to: 'clients#profile'
+
+      resources :locations, only: [ :index, :create] do
+        get :employees, on: :member
+      end
+
+      resources :employees, only: %i(index show)
+
+      resources :schedules, only: %i(index create show)
+    end
+
+    resources :locations, only: [ :index, :create] do
       get :employees, on: :member
     end
     resources :schedules, only: [:index, :create]
-    resources :clients
+
+    resources :clients do
+      collection do
+        post :sign_in
+        delete :sign_out
+        post :password_update
+        get :profile
+      end
+    end
+
     resources :employees, only: %i(index show create destroy update) do
       member do
         patch :update_inventories

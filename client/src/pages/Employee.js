@@ -37,12 +37,12 @@ const Employee = () => {
   // });
   const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
-  const [currentTab, setCurrentTab] = useState("inventory");
+  const [currentTab, setCurrentTab] = useState("invoice");
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [radioTabs, setRadioTabs] = useState([]);
   // const [invoiceModalShow, setInvoiceModalShow] = useState(false);
-  // const [updateIvoiceInput, setUpdateIvoiceInput] = useState({
+  // const [updateInvoiceInput, setUpdateInvoiceInput] = useState({
   //   name: employeeInvoices.employee?.name || "",
   //   vendor_name: employeeInvoices.employee?.vendor_name || "",
   //   email: employeeInvoices.employee?.email,
@@ -103,7 +103,7 @@ const Employee = () => {
   //         <LabelInput
   //           label="Name"
   //           type="text"
-  //           defaultValue={updateIvoiceInput.name}
+  //           defaultValue={updateInvoiceInput.name}
   //           controlId="name"
   //           name="name"
   //           placeholder="Enter Name"
@@ -115,7 +115,7 @@ const Employee = () => {
   //             <LabelInput
   //               label="Vendor Name"
   //               type="text"
-  //               defaultValue={updateIvoiceInput.vendor_name}
+  //               defaultValue={updateInvoiceInput.vendor_name}
   //               controlId="vendor_name"
   //               name="vendor_name"
   //               placeholder="Enter Vendor Name"
@@ -128,7 +128,7 @@ const Employee = () => {
   //         <LabelInput
   //           label="Email"
   //           type="text"
-  //           value={updateIvoiceInput.email}
+  //           value={updateInvoiceInput.email}
   //           controlId="email"
   //           name="email"
   //           disabled
@@ -140,14 +140,14 @@ const Employee = () => {
   //           type={"checkbox"}
   //           id={`default-checkbox`}
   //           label={`GFE`}
-  //           checked={updateIvoiceInput.gfe}
+  //           checked={updateInvoiceInput.gfe}
   //           onChange={handleUpdateChange}
   //         />
 
   //         <LabelInput
   //           label="Service Percentage"
   //           type="number"
-  //           defaultValue={updateIvoiceInput.service_percentage}
+  //           defaultValue={updateInvoiceInput.service_percentage}
   //           controlId="service_percentage"
   //           onChange={handleUpdateChange}
   //           name="service_percentage"
@@ -158,7 +158,7 @@ const Employee = () => {
   //           controlId="service_percentage"
   //           type="number"
   //           name="retail_percentage"
-  //           defaultValue={updateIvoiceInput.retail_percentage}
+  //           defaultValue={updateInvoiceInput.retail_percentage}
   //           onChange={handleUpdateChange}
   //         />
 
@@ -218,7 +218,7 @@ const Employee = () => {
     setSelectedEmployeeData(emp);
     setRadioTabs([]);
     setUpdateEmployeeInput({});
-    setCurrentTab("inventory");
+    setCurrentTab("invoice");
     let addTabs = [
       {
         name: "Invoices",
@@ -296,12 +296,12 @@ const Employee = () => {
   const updateEmployee = async (e) => {
     e.preventDefault();
     // const updatedData = {
-    //   email: updateIvoiceInput.email,
-    //   gfe: updateIvoiceInput.gfe,
-    //   name: updateIvoiceInput.name,
-    //   retail_percentage: updateIvoiceInput.retail_percentage,
-    //   service_percentage: updateIvoiceInput.service_percentage,
-    //   vendor_name: updateIvoiceInput.vendor_name,
+    //   email: updateInvoiceInput.email,
+    //   gfe: updateInvoiceInput.gfe,
+    //   name: updateInvoiceInput.name,
+    //   retail_percentage: updateInvoiceInput.retail_percentage,
+    //   service_percentage: updateInvoiceInput.service_percentage,
+    //   vendor_name: updateInvoiceInput.vendor_name,
     // };
     try {
       setLoading(true);
@@ -312,7 +312,7 @@ const Employee = () => {
 
       toast.success("Employee has been updated successfully.");
       await getEmployees(true);
-      // setUpdateIvoiceInput(data);
+      // setUpdateInvoiceInput(data);
       setSelectedEmployeeData(data);
     } catch (error) {
       toast.error(
@@ -354,7 +354,7 @@ const Employee = () => {
               <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
                 {(employeeList || []).length > 0 && (
                   <List
-                    height={window.innerHeight - 350}
+                    height={window.innerHeight - 450}
                     itemCount={employeeList.length}
                     itemSize={45}
                     width={"100%"}
@@ -378,8 +378,8 @@ const Employee = () => {
       >
         <div className="flex-1" key={selectedEmployeeData?.name}>
           {selectedEmployeeData && (
-            <div className="p-10">
-              <h1 className="text-3xl font-bold">
+            <div className=" p-2 sm:p-10">
+              <h1 className="text-3xl mt-10  font-bold">
                 {selectedEmployeeData?.name}
               </h1>
               <ButtonGroup className="w-full md:w-auto">
@@ -392,7 +392,7 @@ const Employee = () => {
                       type="radio"
                       className={` !border-none !no-underline !rounded-t-lg ${
                         currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
-                      }  `}
+                      }`}
                       name="radio"
                       value={tab.value}
                       checked={currentTab === tab.value}
@@ -407,7 +407,7 @@ const Employee = () => {
               </ButtonGroup>
 
               <div
-                className={`p-4 rounded-b-lg ${
+                className={`sm:p-6 rounded-b-lg ${
                   currentTab === "staff" ? "" : "bg-white"
                 } `}
               >
@@ -561,11 +561,11 @@ const Employee = () => {
                 {currentTab === "settings" && (
                   <div className="flex flex-col gap-y-4">
                     <div className="flex gap-4 items-center">
-                      <span>Delete this Employee:</span>
+                      <span>Remove this Employee:</span>
                       <Loadingbutton
                         onClick={deleteEmployee}
                         variant="danger"
-                        title={"Delete"}
+                        title={"Remove"}
                       />
                     </div>
                     <div className="flex gap-4 items-center">
@@ -577,7 +577,7 @@ const Employee = () => {
                     </div>
 
                     <InviteClientsTab
-                      employeeId={selectedEmployeeData?.id || ""}
+                      employee={selectedEmployeeData}
                     />
                   </div>
                 )}
@@ -631,7 +631,7 @@ const Employee = () => {
                         openShowInvoice={openShowInvoice}
                         sendResetPasswordLink={sendResetPasswordLink}
                         updatePopover={updatePopover}
-                        setUpdateIvoiceInput={setUpdateIvoiceInput}
+                        setUpdateInvoiceInput={setUpdateInvoiceInput}
                         deleteEmployee={deleteEmployee}
                       />
                     );

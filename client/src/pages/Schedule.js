@@ -6,6 +6,7 @@ import ScheduleToolbar from "../components/Schedule/ScheduleToolbar";
 import { FixedSizeList as List } from "react-window";
 import AsideLayout from "../components/Layouts/AsideLayout";
 import {
+  createLocation,
   createSchedule,
   getClients,
   getEmployeesList,
@@ -24,6 +25,9 @@ import ModalWraper from "../components/Modals/ModalWraper";
 import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../components/Input/LabelInput";
+import { useAuthContext } from "../context/AuthUserContext";
+import Loadingbutton from "../components/Buttons/Loadingbutton";
+import ScheduleCalender from "../components/Schedule/ScheduleCalender";
 
 const localizer = momentLocalizer(moment);
 
@@ -35,8 +39,15 @@ const initialAppointmentModal = {
   isEdit: false,
 };
 
+const initialAddLocationModal = {
+  show: false,
+  location: "",
+  employees: [],
+  isLoading: false,
+};
+
 function Schedule() {
-  const modalFormRef = useRef(null);
+  const { authUserState } = useAuthContext();
   const [employeeSearch, setEmployeeSearch] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
   const { collapse } = useAsideLayoutContext();
@@ -45,6 +56,10 @@ function Schedule() {
   const [appointmentModal, setAppointmentModal] = useState(
     initialAppointmentModal
   );
+  const [addLocationModal, setAddLocationModal] = useState(
+    initialAddLocationModal
+  );
+
   const [employeeScheduleEventsData, setEmployeeScheduleEventsData] = useState(
     {}
   );
@@ -54,7 +69,9 @@ function Schedule() {
     try {
       const { data } = await getEmployeesList(refetch);
       if (data?.length > 0) {
-        setEmployeeList(data);
+        setEmployeeList(
+          data?.map((emp) => ({ ...emp, label: emp?.name, value: emp?.id }))
+        );
         handleSelectEmployee(data[0]);
       }
     } catch (error) {
@@ -87,20 +104,22 @@ function Schedule() {
   };
 
   const getClientName = async (employee_id, refetch = false) => {
-    const { data } = await getClients(employee_id, refetch);
+    try {
+      const { data } = await getClients(employee_id, refetch);
 
-    if (data?.length > 0) {
-      setClientNameOptions(
-        data.map((client) => ({
-          label: client.name,
-          value: client.id,
-        }))
-      );
-    }
+      if (data?.length > 0) {
+        setClientNameOptions(
+          data.map((client) => ({
+            label: client.name,
+            value: client.id,
+          }))
+        );
+      }
+    } catch (error) {}
   };
 
-  const getAllLocation = async () => {
-    const { data } = await getLocations();
+  const getAllLocation = async (refetch = false) => {
+    const { data } = await getLocations(refetch);
 
     if (data?.length > 0) {
       setServiceLocation(
@@ -236,6 +255,23 @@ function Schedule() {
     }
   };
 
+  const addLocation = async (e) => {
+    try {
+      e.preventDefault();
+
+      const copyAddLocationModal = { ...addLocationModal };
+      delete copyAddLocationModal?.show;
+      delete copyAddLocationModal?.isLoading;
+      e.target?.reset();
+      const { data } = await createLocation(copyAddLocationModal);
+      if (data) {
+        setAddLocationModal(initialAddLocationModal);
+        // getEmployees();
+        getAllLocation(true);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
     if (selectedEmployeeData) {
       const firstVisibleDay = dates.firstVisibleDay(new Date(), localizer);
@@ -290,38 +326,28 @@ function Schedule() {
           <div className="flex items-center justify-between">
             <h1>{selectedEmployeeData?.name}</h1>
             {serviceLocation?.length > 0 && (
-              <div>
+              <div className="flex items-center gap-x-2">
                 <Select
                   className="w-80"
                   options={serviceLocation}
                   placeholder="Search Places"
                   onChange={onLocationChange}
                 />
+                {authUserState.user?.is_admin && (
+                  <Button
+                    onClick={() =>
+                      setAddLocationModal((pre) => ({ ...pre, show: true }))
+                    }
+                  >
+                    Add
+                  </Button>
+                )}
               </div>
             )}
           </div>
           {selectedEmployeeData && (
-            <Calendar
-              views={[Views.MONTH, Views.WEEK, Views.DAY]}
-              selectable
-              startAccessor="start_time"
-              endAccessor="end_time"
-              titleAccessor="treatment"
-              tooltipAccessor={"treatment"}
-              localizer={localizer}
-              defaultDate={new Date()}
-              defaultView="week"
+            <ScheduleCalender
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
-              components={{
-                toolbar: (e) => (
-                  <ScheduleToolbar
-                    {...e}
-                    serviceLocation={serviceLocation || []}
-                    onLocationChange={onLocationChange}
-                    setEmployeeList={setEmployeeList}
-                  />
-                ),
-              }}
               onSelectEvent={(event) => {
                 handleAddAppointmentSelect(event, true);
               }}
@@ -332,6 +358,7 @@ function Schedule() {
         </div>
       </AsideLayout>
 
+      {/* Add appointment modal */}
       <ModalWraper
         show={appointmentModal.show}
         onHide={() => setAppointmentModal(initialAppointmentModal)}
@@ -366,7 +393,6 @@ function Schedule() {
       >
         <form
           id="appointmentForm"
-          ref={modalFormRef}
           onSubmit={addAppointMentSubmit}
           className="text-lg flex flex-col gap-y-2"
         >
@@ -449,6 +475,58 @@ function Schedule() {
               </span>
             )}
           </div>
+        </form>
+      </ModalWraper>
+
+      {/* create location modal */}
+      <ModalWraper
+        show={addLocationModal.show}
+        onHide={() => setAddLocationModal(initialAddLocationModal)}
+        title={"Add New Location"}
+        footer={
+          <Loadingbutton
+            type="submit"
+            title="Add"
+            isLoading={addLocationModal.isLoading}
+            loadingText="Adding..."
+            form="addLocation"
+          />
+        }
+      >
+        <form
+          id="addLocation"
+          onSubmit={addLocation}
+          className="text-lg flex flex-col gap-y-2"
+        >
+          <LabelInput
+            controlId="locationName"
+            label="Location"
+            name="location"
+            onChange={(e) => {
+              setAddLocationModal((pre) => ({
+                ...pre,
+                location: e.target.value,
+              }));
+            }}
+            placeholder="Add new location"
+            required
+            type="text"
+          />
+
+          <Select
+            inputId="availableEmployee"
+            isClearable
+            isMulti
+            onChange={(emp) => {
+              setAddLocationModal((pre) => ({
+                ...pre,
+                employees: emp,
+              }));
+            }}
+            options={employeeList}
+            placeholder="Select Available Employees"
+            required
+          />
         </form>
       </ModalWraper>
     </>

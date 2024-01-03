@@ -97,7 +97,6 @@ const Products = () => {
     }
   };
 
-  console.log(productList);
 
   const updatePopover = (
     <Popover id="popover-basic">

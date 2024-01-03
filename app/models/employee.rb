@@ -11,7 +11,7 @@ class Employee < ApplicationRecord
   has_many :inventory_prompts, class_name: 'InventoryPrompt', dependent: :destroy
   has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id, dependent: :destroy
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
-
+  after_create :update_reference
   before_destroy :return_inventory
 
   has_secure_password
@@ -43,5 +43,10 @@ class Employee < ApplicationRecord
 
       inventory.save!
     end
+  end
+
+  def update_reference
+    str = 5.times.map { (4...8).map { ('a'..'z').to_a[rand(26)] }.join }.join("").gsub(/\s+/, "")
+    self.update(reference_number: str)
   end
 end

@@ -13,7 +13,7 @@ const EmployeeInvoiceCard = ({
   invoiceList,
   openShowInventory,
   openShowInvoice,
-  setUpdateIvoiceInput,
+  setUpdateInvoiceInput,
 }) => {
   const isEmployeeAdmin = employee?.is_admin === false;
   // const [employeeInvoices, setEmployeeInvoices] = useState([]);
@@ -77,7 +77,7 @@ const EmployeeInvoiceCard = ({
                     overlay={updatePopover}
                   >
                     <Button
-                      onClick={() => setUpdateIvoiceInput(employee)}
+                      onClick={() => setUpdateInvoiceInput(employee)}
                       variant="info"
                     >
                       Update

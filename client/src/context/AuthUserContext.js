@@ -6,6 +6,7 @@ import { authReducer } from "../store/reducers/authReducer";
 const initialState = {
   isAuthenticated: false,
   user: JSON.parse(sessionStorage.getItem("user")),
+  client: JSON.parse(sessionStorage.getItem("client")),
 };
 
 // Create an authentication context

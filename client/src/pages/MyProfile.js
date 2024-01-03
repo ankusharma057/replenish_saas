@@ -315,7 +315,7 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${
                 currentTab === "products" && "pointer-events-none bg-gray-200"
               } `}
             >
@@ -332,7 +332,7 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
                 currentTab === "assignedInventory" &&
                 "pointer-events-none bg-gray-200"
               } `}
@@ -348,7 +348,7 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
                 currentTab === "pendingRequest" &&
                 "pointer-events-none bg-gray-200"
               } `}
@@ -365,7 +365,7 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
                 currentTab === "invoice" && "pointer-events-none bg-gray-200"
               } `}
             >
@@ -380,7 +380,7 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer transition-all hover:bg-gray-200 rounded-md duration-700 ${
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
                 currentTab === "settings" && "pointer-events-none bg-gray-200"
               } `}
             >
@@ -775,7 +775,7 @@ const MyProfile = () => {
           )}
           {currentTab === "settings" && (
             <div className="sm:container p-4 bg-white border-2 rounded-lg">
-              <div className="flex gap-3  items-center">
+              <div className="flex gap-3 items-center">
                 <h4 className="text-1xl font-bold text-center">
                   <span className="text-gray-800 flex gap-3 items-center">
                     Vendor Name:
@@ -825,7 +825,7 @@ const MyProfile = () => {
                 ) : null}
               </div>
 
-              <InviteClientsTab employeeId={authUserState.user?.id || ""} />
+              <InviteClientsTab employee={authUserState.user} />
             </div>
           )}
         </div>

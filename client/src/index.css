@@ -157,3 +157,15 @@ input[type="number"] {
 .rbc-row-content {
   pointer-events: none;
 }
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #e5e0ff !important;
+}
+
+.rbc-timeslot-group {
+  min-height: 100px !important;
+}
+
+.rbc-time-view .rbc-allday-cell {
+  pointer-events: none;
+}
