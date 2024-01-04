@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resources :employees, only: %i(index show)
 
       resources :schedules, only: %i(index create show)
+      resources :products, only: %i(index)
     end
 
     resources :locations, only: [ :index, :create] do

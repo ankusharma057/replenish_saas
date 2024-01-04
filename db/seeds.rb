@@ -581,6 +581,8 @@ end
 
 Product.all.reload.each do |product|
     product.create_inventory!(quantity: 1)
+
+    2.times{ |i| product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30") }
 end
 
 15.times do
