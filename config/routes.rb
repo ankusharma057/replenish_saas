@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     resources :employees, only: %i(index show create destroy update) do
       member do
         patch :update_inventories
+        get :locations
       end
     end
 

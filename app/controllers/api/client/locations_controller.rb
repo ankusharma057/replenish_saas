@@ -1,8 +1,10 @@
 class Api::Client::LocationsController < ClientApplicationController
+  skip_before_action :authorized_client
+
   def index
     locations = Location.all
-    
-    render json: locations, status: :ok
+
+    render json: locations, employees: true
   end
 
   # def create
