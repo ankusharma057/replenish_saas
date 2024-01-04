@@ -47,7 +47,7 @@ function ClientSignup() {
       if (data) {
         authUserDispatch({ type: CLIENT_LOGIN, payload: data });
         toast.success("Successfully Logged In");
-        navigate("/clients", {
+        navigate(`/clients/location${window.location.search}|| ""}`, {
           replace: true,
         });
       }
@@ -113,7 +113,9 @@ function ClientSignup() {
             <div className="flex items-center mb-4 justify-between">
               <div className="text-sm">
                 <Link
-                  to="/clients/signin"
+                  to={`/clients/signin?redirect=${
+                    searchParams.get("redirect") || ""
+                  }`}
                   className="font-medium no-underline text-indigo-600 hover:text-indigo-500"
                 >
                   Already have an account? Login

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  Link,
+  useSearchParams,
+} from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
@@ -15,13 +20,15 @@ function ClientSignIn() {
     email: "",
     password: "",
   };
+  const [params] = useSearchParams();
+
   const [formInput, setFormInput] = useState(loginState);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (authUserState.client) {
-      return navigate("/clients", {
+      return navigate(`/clients/location${window.location.search}`, {
         replace: true,
       });
     }
@@ -37,7 +44,7 @@ function ClientSignIn() {
       if (data) {
         authUserDispatch({ type: CLIENT_LOGIN, payload: data });
         toast.success("Successfully Logged In");
-        navigate("/clients", {
+        navigate(`/clients/location${window.location.search}`, {
           replace: true,
         });
       }
@@ -94,7 +101,7 @@ function ClientSignIn() {
             <div className="flex items-center mb-4 justify-between">
               <div className="text-sm">
                 <Link
-                  to="/clients/signup"
+                  to={`/clients/signup${window.location.search}`}
                   className="font-medium no-underline text-indigo-600 hover:text-indigo-500"
                 >
                   Don't have an account? Signup

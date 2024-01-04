@@ -9,6 +9,7 @@ import { getClientProfile, getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
+import ClientLocation from "./pages/Clients/ClientLocation";
 
 const ClientSignup = lazy(() => import("./pages/Clients/ClientSignup"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -104,9 +105,10 @@ function App() {
       !["/signin", "/signup"].some((path) => location.pathname.includes(path));
     const isNotClient = !isClientRoute;
 
-    if (!authUserState.client && isClientSignInOrSignUp) {
-      navigate("/clients/signin");
-    } else if (authUserState.client && isNotClient) {
+    // if (!authUserState.client && isClientSignInOrSignUp) {
+    //   navigate("/clients/signin");
+    // } else
+    if (authUserState.client && isNotClient) {
       navigate("/clients");
     } else if (
       !authUserState.user?.is_admin &&
@@ -128,15 +130,15 @@ function App() {
   return (
     <div className="overflow-x-hidden h-screen">
       <Suspense fallback={<SuspenseLoading />}>
-        {authUserState.user && <Header />}
-        {authUserState.client && <ClientHeader />}
+        {authUserState.user ? <Header /> : <ClientHeader />}
+
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />
           <Route path="/clients/signin" element={<ClientSignIn />} />
           <Route path="/clients" element={<ClientRoot />} />
-          <Route path="/clients/staff" element={<ClientStaff />} />
+          <Route path="/clients/location" element={<ClientLocation />} />
           <Route
             path="/clients/resetPassword"
             element={<ClientResetPassword />}

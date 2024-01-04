@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthUserContext";
 import EmployeeProfileCard from "../../components/Cards/EmployeeProfileCard";
 import {
+  getAllLocationAndEmployee,
   getClientEmployeesList,
   getClientLocations,
   getLocationEmployee,
@@ -10,101 +11,108 @@ import {
 import { CircleUser } from "lucide-react";
 
 import SearchInput from "../../components/Input/SearchInput";
+import ClientLayout from "../../components/Layouts/ClientLayout";
+import LocationCard from "../../components/Cards/LocationCard";
+import Heading from "../../components/Headers/Heading";
+import LogoHeader from "../../components/Headers/LogoHeader";
 const ClientRoot = () => {
   const { authUserState } = useAuthContext();
-  const [loading, setLoading] = useState(false);
-  const [employeeList, setEmployeeList] = useState([]);
-  const [searchEmployee, setSearchEmployee] = useState("");
-  const [serviceLocation, setServiceLocation] = useState([]);
-  const [searchParams] = useSearchParams();
-  const locationId = searchParams.get("location");
+  const [locationAndEmployee, setLocationAndEmployee] = useState([]);
+  // const [loading, setLoading] = useState(false);
+  // const [employeeList, setEmployeeList] = useState([]);
+  // const [searchEmployee, setSearchEmployee] = useState("");
+  // const [serviceLocation, setServiceLocation] = useState([]);
+  // const [searchParams] = useSearchParams();
+  // const locationId = searchParams.get("location");
 
-  const getAllEmployees = async () => {
-    try {
-      setLoading(true);
+  // const getAllEmployees = async () => {
+  //   try {
+  //     setLoading(true);
 
-      let data;
-      if (locationId) {
-        data = await getLocationEmployee(locationId);
-      } else {
-        data = await getClientEmployeesList();
-      }
-      if (data.data?.length) {
-        setEmployeeList(data.data);
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
-  const getAllLocation = async (refetch = false) => {
-    try {
-      const { data } = await getClientLocations(refetch);
-      if (data?.length > 0) {
-        setServiceLocation(
-          data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
-        );
-      }
-    } catch (error) {}
-  };
+  //     let data;
+  //     if (locationId) {
+  //       data = await getLocationEmployee(locationId);
+  //     } else {
+  //       data = await getClientEmployeesList();
+  //     }
+  //     if (data.data?.length) {
+  //       setEmployeeList(data.data);
+  //     }
+  //   } catch (error) {
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // const getAllLocation = async (refetch = false) => {
+  //   try {
+  //     const { data } = await getClientLocations(refetch);
+  //     if (data?.length > 0) {
+  //       setServiceLocation(
+  //         data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
+  //       );
+  //     }
+  //   } catch (error) {}
+  // };
+
+  // useEffect(() => {
+  //   getAllLocation();
+  //   getAllEmployees();
+
+  //   getAllLocationAndEmployee()
+  //     .then((d) => console.log(JSON.stringify(d.data , null ,2)))
+  //     .catch((e) => console.log(e));
+
+  //   return () => {};
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [locationId]);
 
   useEffect(() => {
-    getAllLocation();
-    getAllEmployees();
+    getLocEmp();
     return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationId]);
+  }, []);
+
+  const getLocEmp = async () => {
+    try {
+      const { data } = await getAllLocationAndEmployee();
+      if (data?.length > 0) {
+        setLocationAndEmployee(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div className="px-[1.25rem] sm:p-14 md:p-16 lg:!p-24 flex-1 flex flex-col gap-4">
-      {/* <div className="w-full flex flex-col gap-y-8">
-        <h1>Welcome to our online booking site</h1>
-        <p className="text-lg">
-          Book appointment by our practitioner
-          {searchParams.get("location_name") &&
-            ` at ${searchParams.get("location_name")}`}
-        </p>
-        <SearchInput
-          onChange={(e) => setSearchEmployee(e.target.value)}
-          placeholder="Search the practitioner..."
-        />
-
-        <div className="flex w-full flex-wrap gap-2">
-          {(employeeList || [])
-            .filter((empSearch) => empSearch?.name?.includes(searchEmployee))
-            .map((emp) => (
-              <EmployeeProfileCard
-                key={emp?.id}
-                id={emp.id}
-                image={emp?.image}
-                name={emp.name}
-                email={emp.email}
+    <ClientLayout>
+      <div className="shadow-md bg-white  flex flex-col rounded-lg p-4">
+        <LogoHeader />
+        <Heading text="Welcome to our online booking site" />
+        <div className="flex flex-col gap-4">
+          {(locationAndEmployee || []).map((locEmp) => (
+            <div
+              key={locEmp?.id}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-4"
+            >
+              <LocationCard
+                id={locEmp?.id}
+                name={locEmp?.name}
+                path={`/clients/location?locations=${locEmp?.name}&locId=${locEmp?.id}`}
               />
-            ))}
-        </div>
-      </div> */}
-      {authUserState.client && (
-        <div className="flex ">
-          <div className="bg-white shadow-md flex flex-col items-center gap-4 p-8 border transition-all hover:!border-blue-500 rounded-lg no-underline">
-            <CircleUser className="w-24  col-span-1 h-24 text-black/50" />
-            <div>
-              <p className="break-words">
-                Name:
-                <span className="font-bold ml-2">
-                  {authUserState.client?.name}
-                </span>
-              </p>
-              <p className="text-sm break-words">
-                Email:
-                <span className="font-bold ml-2">
-                  {authUserState.client?.email}
-                </span>
-              </p>
+              <div className="flex gap-2 flex-wrap">
+                {locEmp?.employees?.map((emp) => (
+                  <EmployeeProfileCard
+                    key={emp?.id}
+                    path={`/clients/location?locations=${locEmp?.name}&locId=${locEmp?.id}&empId=${emp?.id}`}
+                    image={emp?.image}
+                    name={emp?.name}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      )}
-    </div>
+      </div>
+    </ClientLayout>
   );
 };
 

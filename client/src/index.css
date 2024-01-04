@@ -169,3 +169,8 @@ input[type="number"] {
 .rbc-time-view .rbc-allday-cell {
   pointer-events: none;
 }
+
+.client .rbc-event {
+  background-color: black;
+  color: white;
+}

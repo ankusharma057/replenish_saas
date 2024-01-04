@@ -112,6 +112,13 @@ export const getLocationEmployee = async (locationId, refetch = false) =>
     },
   });
 
+export const getAllLocationAndEmployee = async (locationId, refetch = false) =>
+  api.get(`api/client/locations`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const downloadInvoice = async (invoiceID) =>
   api.get(`/api/invoices/${invoiceID}/download_attachment`, {
     responseType: "blob",
@@ -142,6 +149,16 @@ export const getSchedule = async (params, refetch = false) =>
 
 export const getClientSchedule = async (refetch = false) =>
   api.get(`/api/client/schedules`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getEmployeeServiceLocation = async (
+  employee_id,
+  refetch = false
+) =>
+  api.get(`api/employees/${employee_id}/locations`, {
     cache: {
       ignoreCache: refetch,
     },

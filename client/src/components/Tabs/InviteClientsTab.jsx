@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Copy, CopyCheck } from "lucide-react";
-// import LabelInput from "../Input/LabelInput";
+import SearchInput from "../Input/SearchInput";
 import { toast } from "react-toastify";
-// import { inviteClient } from "../../Server";
-// import Loadingbutton from "../Buttons/Loadingbutton";
+import { getEmployeeServiceLocation } from "../../Server";
+import { useEffect } from "react";
+
 const InviteClientsTab = ({ employee }) => {
-  const [isCopy, setIsCopy] = useState(false);
+  const [searchLink, setSearchLink] = useState("");
+  const [copiedLink, setCopiedLink] = useState(null);
+
+  const [locations, setLocations] = useState([]);
   // const [clientInput, setClientInput] = useState({
   //   email: "",
   //   name: "",
@@ -53,14 +57,29 @@ const InviteClientsTab = ({ employee }) => {
   //   setClientInput({ ...clientInput, [e.target.name]: e.target.value });
   // };
 
-  const refLink = `${window.location.origin}/clients/signup?ref=${employee?.reference_number}`;
   const handleCopy = (link) => {
     navigator.clipboard.writeText(link);
-    setIsCopy(true);
-    setTimeout(() => {
-      setIsCopy(false);
-    }, 3000);
+    setCopiedLink(link);
+    toast("Copied to clipboard");
   };
+
+  const getLocation = async () => {
+    try {
+      const { data } = await getEmployeeServiceLocation(employee?.id);
+      if (data?.length) {
+        setLocations(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getLocation();
+
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="border p-2 rounded-lg flex flex-col">
@@ -106,18 +125,50 @@ const InviteClientsTab = ({ employee }) => {
           type="submit"
         />
       </form> */}
-      <p className="flex text-lg font-semibold justify-between">
+
+      <p className="flex flex-wrap gap-x-4 items-center text-lg font-semibold ">
         <span>Referral Link</span>
-        {isCopy ? (
+        <div className="">
+          <SearchInput
+            placeholder="Search Referral link"
+            onChange={(e) => setSearchLink(e.target.value)}
+          />
+        </div>
+        {/* {isCopy ? (
           <CopyCheck className="cursor-pointer text-blue-500" />
         ) : (
           <Copy
             className="cursor-pointer "
             onClick={() => handleCopy(refLink)}
           />
-        )}
+        )} */}
       </p>
-      {refLink}
+
+      {locations?.length > 0
+        ? locations
+            ?.filter((lo) => lo?.name?.includes(searchLink))
+            ?.map((loc) => {
+
+              const link = `${window.location.origin}/clients/signup?empId=${employee?.id}&&location=${loc?.name}`;
+              return (
+                <p
+                  className={`cursor-copy flex justify-between px-[1rem] md:px-20 lg-px-40 ${
+                    copiedLink === link ? "" : ""
+                  }`}
+                  onClick={() => handleCopy(link)}
+                >
+                  <span>{link}</span>
+                  <span>
+                    {copiedLink === link ? (
+                      <CopyCheck className="cursor-pointer text-blue-500" />
+                    ) : (
+                      <Copy className="cursor-pointer " />
+                    )}
+                  </span>
+                </p>
+              );
+            })
+        : "No Referral link found"}
     </div>
   );
 };
