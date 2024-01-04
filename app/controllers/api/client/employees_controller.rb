@@ -1,4 +1,6 @@
 class Api::Client::EmployeesController < ClientApplicationController
+  skip_before_action :authorized_client, only: [:show]
+  
   def index
     employees = Employee.all
     render json: employees, status: :ok
