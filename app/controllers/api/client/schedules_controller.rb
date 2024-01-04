@@ -1,4 +1,6 @@
 class Api::Client::SchedulesController < ClientApplicationController
+  skip_before_action :authorized_client, only: [:index]
+  
   def index
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
