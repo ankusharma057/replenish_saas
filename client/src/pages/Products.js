@@ -97,6 +97,7 @@ const Products = () => {
     }
   };
 
+
   const updatePopover = (
     <Popover id="popover-basic">
       <Popover.Header as="h3">Edit Product</Popover.Header>

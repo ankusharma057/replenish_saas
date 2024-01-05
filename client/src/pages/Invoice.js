@@ -14,6 +14,7 @@ import { useAuthContext } from "../context/AuthUserContext";
 import ModalWraper from "../components/Modals/ModalWraper";
 import FinalizeInvoicesCard from "../components/Cards/FinalizeInvoicesCard";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 const Invoice = () => {
   const [radioValue, setRadioValue] = useState("1");
@@ -23,10 +24,10 @@ const Invoice = () => {
   });
   const [loading, setLoading] = useState(false);
   const { authUserState } = useAuthContext();
-  const [setselectList, setSetselectList] = useState("non-finalized");
+  const [selectList, setSelectList] = useState("non-finalized");
   const [modalShow, setModalShow] = useState(false);
   const [singleInvoice, setSingleInvoice] = useState({});
-  const [showMultipleFinaliseModal, setShowMultipleFinaliseModal] =
+  const [showMultipleFinalizeModal, setShowMultipleFinalizeModal] =
     useState(false);
   const [multipleInvoiceData, setMultipleInvoiceData] = useState({});
 
@@ -106,8 +107,8 @@ const Invoice = () => {
     });
   };
 
-  const finalizeMultipeInvoiceSubmit = () => {
-    setShowMultipleFinaliseModal(false);
+  const finalizeMultipleInvoiceSubmit = () => {
+    setShowMultipleFinalizeModal(false);
     setLoading(true);
     confirmAlert({
       title: "Confirm to finalize",
@@ -118,7 +119,7 @@ const Invoice = () => {
         {
           label: "Yes",
           onClick: async () => {
-            setShowMultipleFinaliseModal(true);
+            setShowMultipleFinalizeModal(true);
             try {
               const { data } = await multipleInvoiceFinalize(
                 Object.values(multipleInvoiceData)
@@ -154,7 +155,7 @@ const Invoice = () => {
                 );
               }
             } finally {
-              setShowMultipleFinaliseModal(false);
+              setShowMultipleFinalizeModal(false);
               setLoading(false);
             }
           },
@@ -165,6 +166,19 @@ const Invoice = () => {
         },
       ],
     });
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemPerPage = 2; // Calculate the index range for the current page
+  const startIndex = (currentPage - 1) * itemPerPage;
+  const endIndex = startIndex + itemPerPage;
+
+  // Get the invoices for the current page
+  const currentInvoices =
+    invoiceList[selectList]?.slice(startIndex, endIndex) || [];
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   return (
@@ -199,7 +213,7 @@ const Invoice = () => {
                 value={radio.value}
                 checked={radioValue === radio.value}
                 onChange={(e) => {
-                  setSetselectList(
+                  setSelectList(
                     String(e.currentTarget.value) === "1"
                       ? "non-finalized"
                       : "finalized"
@@ -216,7 +230,7 @@ const Invoice = () => {
           <Button
             type="button"
             style={{ background: "#0A59CA" }}
-            onClick={() => setShowMultipleFinaliseModal(true)}
+            onClick={() => setShowMultipleFinalizeModal(true)}
             className=" whitespace-nowrap px-4"
           >
             Finalize Multiple
@@ -225,8 +239,8 @@ const Invoice = () => {
       </div>
       <hr />
       <ModalWraper
-        show={showMultipleFinaliseModal}
-        onHide={() => setShowMultipleFinaliseModal(false)}
+        show={showMultipleFinalizeModal}
+        onHide={() => setShowMultipleFinalizeModal(false)}
         footer={
           <>
             {Object.keys(multipleInvoiceData).length > 0 && (
@@ -236,7 +250,7 @@ const Invoice = () => {
                 loadingText={`Finalizing ${
                   Object.keys(multipleInvoiceData).length
                 } invoices...`}
-                onClick={finalizeMultipeInvoiceSubmit}
+                onClick={finalizeMultipleInvoiceSubmit}
               />
             )}
           </>
@@ -269,8 +283,41 @@ const Invoice = () => {
           fiInvoiceList={singleInvoice.is_finalized}
           getInvoices={getInvoices}
         />
+
+        <div className="flex gap-x-4  justify-end my-4">
+          {/* Pagination controls */}
+          <Button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft />
+          </Button>
+          {/* {Array.from(
+            {
+              length: Math.ceil((invoiceList[selectList] || []).length / 5),
+            },
+            (_, i) => (
+              <Button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                disabled={currentPage === i + 1}
+              >
+                {i + 1}
+              </Button>
+            )
+          )} */}
+          <Button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={
+              currentPage ===
+              Math.ceil((invoiceList[selectList] || []).length / itemPerPage)
+            }
+          >
+            <ChevronRight />
+          </Button>
+        </div>
         <div className="justify-center flex flex-wrap gap-3">
-          {invoiceList[setselectList]?.map((invoice) => {
+          {/* {invoiceList[selectList]?.map((invoice) => {
             return (
               <InvoiceCard
                 key={invoice.id}
@@ -279,7 +326,15 @@ const Invoice = () => {
                 seeMore={seeMore}
               />
             );
-          })}
+          })} */}
+          {currentInvoices.map((invoice) => (
+            <InvoiceCard
+              key={invoice.id}
+              invoice={invoice}
+              finalizeInvoiceSubmit={finalizeInvoiceSubmit}
+              seeMore={seeMore}
+            />
+          ))}
         </div>
       </div>
     </>

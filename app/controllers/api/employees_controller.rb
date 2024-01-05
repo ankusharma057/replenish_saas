@@ -2,7 +2,7 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy )
+  before_action :find_employee, only: %i(update destroy locations)
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
@@ -23,6 +23,12 @@ class Api::EmployeesController < ApplicationController
     else
       render json: { 'error': @employee.errors }, status: :bad_request
     end
+  end
+
+  def locations
+    locations = @employee.locations
+
+    render json: locations, status: :ok
   end
 
   def destroy

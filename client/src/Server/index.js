@@ -25,6 +25,23 @@ export const getUpdatedUserProfile = async (refetch) =>
     },
   });
 
+export const getClientProfile = async (refetch) =>
+  api.get("/api/client/profile", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getClients = async (employee_id, refetch) =>
+  api.get("/api/clients", {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: {
+      employee_id,
+    },
+  });
+
 export const getInventoryList = async (refetch) =>
   api.get("/api/inventories", {
     cache: {
@@ -53,6 +70,55 @@ export const getEmployeesList = async (refetch = false) =>
     },
   });
 
+export const getClientEmployeesList = async (refetch = false) =>
+  api.get("/api/client/employees", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getClientEmployee = async (employee_id, refetch = false) =>
+  api.get(`/api/client/employees/${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getClientEmployeeSchedule = async (employee_id, refetch = false) =>
+  api.get(`/api/client/schedules?employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocations = async (refetch = false) =>
+  api.get("/api/locations", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getClientLocations = async (refetch = false) =>
+  api.get("/api/client/locations", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocationEmployee = async (locationId, refetch = false) =>
+  api.get(`api/client/locations/${locationId}/employees`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getAllLocationAndEmployee = async (locationId, refetch = false) =>
+  api.get(`api/client/locations`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const downloadInvoice = async (invoiceID) =>
   api.get(`/api/invoices/${invoiceID}/download_attachment`, {
     responseType: "blob",
@@ -72,7 +138,38 @@ export const sendResetPasswordLinkRoute = async (data) =>
     },
   });
 
+// {employee_id: 1,start_date: "18/10/2023",end_date: "19/12/2023"}
+export const getSchedule = async (params, refetch = false) =>
+  api.get(`/api/schedules`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: params,
+  });
+
+export const getClientSchedule = async (refetch = false) =>
+  api.get(`/api/client/schedules`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getEmployeeServiceLocation = async (
+  employee_id,
+  refetch = false
+) =>
+  api.get(`api/employees/${employee_id}/locations`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const loginUser = async (data) => api.post("/api/login", data);
+export const signupClient = async (data) =>
+  api.post("/api/client/sign_up", data);
+
+export const signInClient = async (data) =>
+  api.post("/api/client/log_in", data);
 
 export const requestInventory = async (data) =>
   api.post(`/api/inventory_requests`, data);
@@ -80,11 +177,11 @@ export const requestInventory = async (data) =>
 export const resetPassword = async (data) =>
   api.post(`/api/employees/reset_password`, data);
 
-export const asignContributor = async (data) =>
-  api.post("/asignContributor", data);
+export const clientResetPassword = async (data) =>
+  api.post(`/api/clients/password_update`, data);
 
-export const changeContributor = async (data) =>
-  api.post("/changecontributor", data);
+export const createLocation = async (data) =>
+  api.post(`/api/add_location`, data);
 
 export const createGroupInvoices = async (data) =>
   api.post("/api/invoice_groups", data);
@@ -128,6 +225,16 @@ export const createProduct = async (data) =>
 export const createEmployee = async (data) =>
   api.post(`/api/employees/new`, data);
 
+// {email: "client@xyz.com",name: "Test Client", employee_id: 1,}
+export const inviteClient = async (data) =>
+  api.post(`/api/clients`, {
+    client: data,
+  });
+
+export const createSchedule = async (data) => api.post(`/api/schedules`, data);
+export const createClientSchedule = async (data) =>
+  api.post(`/api/client/schedules`, data);
+
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);
 
@@ -141,6 +248,8 @@ export const updateProduct = async (id, data) =>
   api.patch(`/api/products/${id}`, data);
 
 export const logoutUser = async (data) => api.delete("/api/logout", data);
+export const logoutClient = async (data) =>
+  api.delete("/api/client/log_out", data);
 
 export const deleteInvProduct = async (id) =>
   api.delete(`/api/inventories/${id}`, {

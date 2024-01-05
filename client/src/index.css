@@ -92,7 +92,7 @@ code {
 
 @media screen and (max-width: 560px) {
   .custom-toggle-btn {
-    font-size: 1rem !important;
+    font-size: 0.8rem !important;
     font-weight: 500 !important;
     padding: 0.5rem !important;
   }
@@ -140,4 +140,37 @@ input[type="number"] {
   box-shadow: 0 0 0 1px #c2dbfe !important ;
   border-color: #c2dbfe !important;
   border-width: 2px !important;
+}
+
+/* .rbc-timeslot-group:hover {
+  border: #0a59ca solid 2px !important;
+}
+
+.rbc-time-slot:hover {
+  border: #0a59ca solid 2px !important;
+} */
+
+.rbc-day-slot {
+  cursor: pointer;
+}
+
+.rbc-row-content {
+  pointer-events: none;
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #e5e0ff !important;
+}
+
+.rbc-timeslot-group {
+  min-height: 100px !important;
+}
+
+.rbc-time-view .rbc-allday-cell {
+  pointer-events: none;
+}
+
+.client .rbc-event {
+  background-color: black;
+  color: white;
 }

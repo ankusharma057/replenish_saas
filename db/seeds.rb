@@ -24,6 +24,22 @@ Employee.create(
     is_inv_manager: true
 )
 
+5.times do |i|
+  emp = Employee.create(
+    name: "Employee #{i}",
+    email: "patricklcarrera#{i}@gmail.com",
+    gfe: true,
+    service_percentage: 60,
+    password: "test123",
+    is_inv_manager: true
+  )
+
+  location = Location.create(name: "Location #{i}")
+  location.employees <<  emp
+
+  5.times{|c| emp.clients.create(name: "EMP-#{emp.id} Client #{c}")}
+end
+
 Product.create(
     name: "Botox",
     product_type: "Neurotoxins",
@@ -565,6 +581,8 @@ end
 
 Product.all.reload.each do |product|
     product.create_inventory!(quantity: 1)
+
+    2.times{ |i| product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30") }
 end
 
 15.times do

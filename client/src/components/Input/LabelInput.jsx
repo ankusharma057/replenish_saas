@@ -10,10 +10,11 @@ const LabelInput = ({
   onChange,
   required,
   labelClassName,
+  groupClassName,
   ...rest
 }) => {
   return (
-    <Form.Group className="mb-3" controlId={controlId}>
+    <Form.Group className={`mb-3 ${groupClassName}`} controlId={controlId}>
       <Form.Label className={labelClassName}>{label}</Form.Label>
       <Form.Control
         type={type}

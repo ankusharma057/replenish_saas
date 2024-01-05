@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Button, Table, Form, InputGroup } from "react-bootstrap";
+import { Button, Table, Form } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import AssignModal from "../components/Modals/AssignModal";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
@@ -23,6 +23,8 @@ import ModalWraper from "../components/Modals/ModalWraper";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import LabelInput from "../components/Input/LabelInput";
 import Select from "react-select";
+import ProductsTab from "../components/Tabs/ProductsTab";
+import CompanyInvTable from "../components/Tables/CompanyInvTable";
 const Inventory = () => {
   const { authUserState } = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -42,14 +44,13 @@ const Inventory = () => {
   const [employeeList, setEmployeeList] = useState([]);
   const [totalEmpInventory, settotalEmpInventory] = useState({});
 
-  const [radioValue, setRadioValue] = useState("1");
-
+  const [radioValue, setRadioValue] = useState("companyInventory");
   const [filterInventory, setFilterInventory] = useState([]);
-
   const [productSearchInput, setProductSearchInput] = useState({
-    1: "",
-    2: "",
-    3: "",
+    companyInventory: "",
+    empInventories: "",
+    inventoryRequest: "",
+    products: "",
   });
   const [requestedInventoryData, setRequestedInventoryData] = useState([]);
 
@@ -132,7 +133,6 @@ const Inventory = () => {
                 `${inventory?.product?.name} Deleted Successfully.`
               );
               await getInventory(true);
-              toast.success("Product Updated Successfully.");
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
@@ -346,17 +346,41 @@ const Inventory = () => {
     });
   };
 
+  const onAssign = (data) => {
+    getEmployees(true);
+    setAssignProductData(data);
+    setShowAssignMadal(true);
+  };
+
+  const onComInvUpdate = (data) => {
+    setProductInfoInput({
+      update: true,
+      quantity: data.quantity,
+      product_type: data?.product?.product_type,
+      product_name: data?.product?.name,
+      id: data?.product?.id,
+      maxQty: data?.quantity,
+    });
+    setShowUpdateProductModal(true);
+  };
+
   const radios = [
-    { name: "Company Inventory", value: "1" },
+    { name: "Company Inventory", value: "companyInventory" },
     {
       name: "Emp Inventories",
-      value: "2",
+      value: "empInventories",
       data: getEmployees,
     },
     {
       name: "Inventory Request ",
-      value: "3",
+      value: "inventoryRequest",
       data: getRequestInventoryData,
+    },
+
+    {
+      name: "Products",
+      value: "products",
+      // data: getRequestInventoryData,
     },
   ];
 
@@ -369,7 +393,6 @@ const Inventory = () => {
 
   return (
     <>
-      {/* <Header userProfile={authUserState.user} /> */}
       <AssignModal
         showAssignMadal={showAssignMadal}
         setShowAssignMadal={setShowAssignMadal}
@@ -473,15 +496,15 @@ const Inventory = () => {
         </div>
       </ModalWraper>
 
-      <div className=" container  mx-auto">
-        <div className="text-4xl mt-8 font-bold text-center text-blue-400">
+      <div className=" lg:container h-screen flex flex-col items-center max-w-full  mx-auto">
+        <div className="mt-8 font-bold mb-8 text-center text-blue-400">
           <ButtonGroup className="mb-2 gap-3 border w-full md:w-auto border-gray-200 p-3 ">
             {radios.map((radio, idx) => (
               <ToggleButton
                 key={idx}
                 id={`radio-${idx}`}
                 type="radio"
-                className={` custom-toggle-btn ${
+                className={`!flex !justify-center !items-center custom-toggle-btn !p-1 sm:!p-3 !text-sm ${
                   radioValue === radio.value ? "btn-blue" : "btn-white"
                 } toggle-button `}
                 name="radio"
@@ -496,10 +519,9 @@ const Inventory = () => {
               </ToggleButton>
             ))}
           </ButtonGroup>
-        </div>
-        <div className="flex mt-2 justify-center">
-          <div className="w-[52.5rem] flex gap-x-2 ">
-            <div className="mb-3 flex  items-center gap-x-2 flex-1 relative">
+
+          <div className="flex items-center gap-x-1 md:gap-x-2">
+            <div className="flex items-center gap-x-2 flex-1 relative">
               <Form.Control
                 placeholder="Search Product Name here"
                 aria-label="Search Product Name here"
@@ -516,6 +538,7 @@ const Inventory = () => {
                 &#x1F50D;
               </span>
             </div>
+
             <div>
               <Button
                 onClick={() => {
@@ -526,134 +549,122 @@ const Inventory = () => {
                     update: false,
                   });
                 }}
-                className="truncate rounded-full roundedpill "
+                className="truncate rounded-full !text-sm md:!text-base"
               >
                 Add Product
               </Button>
             </div>
           </div>
         </div>
-        {radioValue === "1" && (
-          <Table bordered hover responsive className="w-full mt-4 text-center">
-            <thead>
-              <tr>
-                <th>Product </th>
-                <th>Product Type </th>
-                <th>Available Inv.</th>
-                <th>Replenish Inv.</th>
-                <th>Assign</th>
-                <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filterInventory &&
-                filterInventory
-                  ?.filter((data) => {
-                    return data?.product?.name
-                      ?.toLowerCase()
-                      .includes(
-                        productSearchInput[radioValue]?.toLocaleLowerCase()
-                      );
-                  })
-                  ?.map((data) => {
-                    return (
-                      <tr key={data?.product?.id}>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.product?.name} </span>
-                            {/* <span>Product Name: Product </span> */}
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.product?.product_type} </span>
-                          </div>
-                        </td>
 
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.quantity}</span>
-                          </div>
-                        </td>
+        {radioValue === "companyInventory" &&
+          (filterInventory || []).length > 0 && (
+            <CompanyInvTable
+              inventoryList={filterInventory}
+              userProfile={authUserState}
+              onAssign={onAssign}
+              onComInvUpdate={onComInvUpdate}
+              onDelete={deleteSubmit}
+              productSearchInput={productSearchInput}
+            />
+            // <Table bordered hover responsive className="w-full mt-4 text-center">
+            //   <thead>
+            //     <tr>
+            //       <th>Product </th>
+            //       <th>Product Type </th>
+            //       <th>Available Inv.</th>
+            //       <th>Replenish Inv.</th>
+            //       <th>Assign</th>
+            //       <th className="flex justify-center items-center min-w-[11rem] md:w-auto"></th>
+            //     </tr>
+            //   </thead>
+            //   <tbody>
+            //     {filterInventory &&
+            //       filterInventory
+            //         ?.filter((data) => {
+            //           return data?.product?.name
+            //             ?.toLowerCase()
+            //             .includes(
+            //               productSearchInput[radioValue]?.toLocaleLowerCase()
+            //             );
+            //         })
+            //         ?.map((data) => {
+            //           return (
+            //             <tr key={data?.product?.id}>
+            //               <td className="align-middle">
+            //                 <div className="flex flex-col  gap-2">
+            //                   <span>{data?.product?.name} </span>
+            //                   {/* <span>Product Name: Product </span> */}
+            //                 </div>
+            //               </td>
+            //               <td className="align-middle">
+            //                 <div className="flex flex-col  gap-2">
+            //                   <span>{data?.product?.product_type} </span>
+            //                 </div>
+            //               </td>
 
-                        <td className="align-middle">
-                          <div className="flex flex-col  gap-2">
-                            <span>{data?.replenish_total_inventory} </span>
-                          </div>
-                        </td>
+            //               <td className="align-middle">
+            //                 <div className="flex flex-col  gap-2">
+            //                   <span>{data?.quantity}</span>
+            //                 </div>
+            //               </td>
 
-                        <td className="align-middle">
-                          <Button
-                            variant="info"
-                            onClick={() => {
-                              getEmployees(true);
-                              setAssignProductData(data);
-                              setShowAssignMadal(true);
-                            }}
-                          >
-                            Assign
-                          </Button>
-                        </td>
+            //               <td className="align-middle">
+            //                 <div className="flex flex-col  gap-2">
+            //                   <span>{data?.replenish_total_inventory} </span>
+            //                 </div>
+            //               </td>
 
-                        <td className="align-middle flex  justify-around items-center">
-                          <Button
-                            variant="info"
-                            onClick={() => {
-                              setProductInfoInput({
-                                update: true,
-                                quantity: data.quantity,
-                                product_type: data?.product?.product_type,
-                                product_name: data?.product?.name,
-                                id: data?.product?.id,
-                                maxQty: data?.quantity,
-                              });
-                              setShowUpdateProductModal(true);
-                            }}
-                            title="Edit Product"
-                          >
-                            Update
-                          </Button>
+            //               <td className="align-middle">
+            //                 <Button
+            //                   variant="info"
+            //                   onClick={() => {
+            //                     getEmployees(true);
+            //                     setAssignProductData(data);
+            //                     setShowAssignMadal(true);
+            //                   }}
+            //                 >
+            //                   Assign
+            //                 </Button>
+            //               </td>
 
-                          <Button
-                            variant="danger"
-                            onClick={() => {
-                              deleteSubmit(data);
-                            }}
-                            title="Delete Product"
-                          >
-                            Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-            </tbody>
-          </Table>
-        )}
+            //               <td className="align-middle flex  justify-around items-center">
+            //                 <Button
+            //                   variant="info"
+            //                   onClick={() => {
+            //                     setProductInfoInput({
+            //                       update: true,
+            //                       quantity: data.quantity,
+            //                       product_type: data?.product?.product_type,
+            //                       product_name: data?.product?.name,
+            //                       id: data?.product?.id,
+            //                       maxQty: data?.quantity,
+            //                     });
+            //                     setShowUpdateProductModal(true);
+            //                   }}
+            //                   title="Edit Product"
+            //                 >
+            //                   Update
+            //                 </Button>
 
-        {/* {radioValue === "1" && (
-          <div
-            className="my-10 container cursor-pointer mx-auto"
-            onClick={() => {
-              getProducts();
-              setShowUpdateProductModal(true);
-              setProductInfoInput({
-                ...productInfoInput,
-                update: false,
-              });
-            }}
-          >
-            <div className="flex rounded-full items-center justify-start ">
-              <p
-                title="Add Product"
-                className="text-2xl w-10 h-10 p-4  hover:bg-blue-500  bg-blue-400 flex rounded-full items-center justify-center  "
-              >
-                +
-              </p>
-            </div>
-          </div>
-        )} */}
-        {radioValue === "2" && (
+            //                 <Button
+            //                   variant="danger"
+            //                   onClick={() => {
+            //                     deleteSubmit(data);
+            //                   }}
+            //                   title="Delete Product"
+            //                 >
+            //                   Delete
+            //                 </Button>
+            //               </td>
+            //             </tr>
+            //           );
+            //         })}
+            //   </tbody>
+            // </Table>
+          )}
+
+        {radioValue === "empInventories" && (
           <div className="w-full">
             {Object.keys(totalEmpInventory)
               ?.filter((data) => {
@@ -694,7 +705,7 @@ const Inventory = () => {
           </div>
         )}
 
-        {radioValue === "3" &&
+        {radioValue === "inventoryRequest" &&
           requestedInventoryData?.filter((request) => !request?.is_approved)
             ?.length > 0 &&
           (authUserState.user?.is_inv_manager ||
@@ -710,8 +721,8 @@ const Inventory = () => {
                     }
                     // If authUserState.user.has_access_only_to is not "all",
                     // show items with matching product_type
-                    return (
-                      authUserState.user?.has_access_only_to?.includes(data?.inventory?.product?.product_type)
+                    return authUserState.user?.has_access_only_to?.includes(
+                      data?.inventory?.product?.product_type
                     );
                   })
                   ?.filter((data) => {
@@ -763,6 +774,13 @@ const Inventory = () => {
               </ul>
             </div>
           )}
+
+        {radioValue === "products" && (
+          <ProductsTab
+            productSearchInput={productSearchInput}
+            setProductSearchInput={setProductSearchInput}
+          />
+        )}
       </div>
     </>
   );

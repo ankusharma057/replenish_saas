@@ -32,24 +32,24 @@ export default memo(function Header() {
   };
 
   const adminHeader = (
-    <nav className="bg-blue-400">
-      <div className="max-w-7xl mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
-        <div className="flex items-center justify-between h-26">
+    <nav className="bg-blue-400 relative z-20">
+      <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
+        <div className="flex items-center justify-start h-26">
           <div className="flex-shrink-0  p-2">
             <Link to="/addInvoice">
               <Image
                 src="/replenish-logo.png"
                 className="relative z-30"
-                width="80px"
+                width="60px"
                 roundedCircle
               />
             </Link>
           </div>
-          <div className="z-10 w-full pr-6 flex justify-end xl:w-auto">
+          <div className=" w-full pr-6 flex justify-end xl:w-auto">
             <div className="xl:hidden">
               <button
                 onClick={handleMenuSHow}
-                className="border-none text-w-full py-3 5xl transition-all text-5xl text-white"
+                className="border-none relative z-30 text-w-full py-3 5xl transition-all text-5xl text-white"
               >
                 ≡
               </button>
@@ -57,7 +57,7 @@ export default memo(function Header() {
             <div
               className={` ${
                 isMenuShow ? "translate-x-full" : ""
-              } xl:block pt-10 xl:pt-0 z-20 fixed top-[4rem] h-screen bg-blue-400 right-0 w-3/4 md:w-1/3  gap-4 items-center xl:w-auto xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-baseline space-x-4 transition-all xl:translate-x-0  `}
+              } xl:block pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-3/4 md:w-1/3  gap-4 items-center xl:w-auto xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-baseline space-x-4 transition-all xl:translate-x-0  `}
             >
               <button
                 onClick={handleMenuSHow}
@@ -89,7 +89,7 @@ export default memo(function Header() {
                   Invoice List
                 </Link>
               </button>
-              <button
+              {/* <button
                 onClick={handleMenuSHow}
                 className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
               >
@@ -103,7 +103,7 @@ export default memo(function Header() {
                 >
                   Create a new user
                 </Link>
-              </button>
+              </button> */}
 
               <button
                 onClick={handleMenuSHow}
@@ -111,13 +111,13 @@ export default memo(function Header() {
               >
                 <Link
                   className={` ${
-                    location.pathname === "/products"
+                    location.pathname === "/schedule"
                       ? "text-white"
                       : "text-gray-700"
                   } no-underline text-gray-700 py-3 inline-block hover:text-white `}
-                  to="/products"
+                  to="/schedule"
                 >
-                  Product List
+                  Schedule
                 </Link>
               </button>
               <button
@@ -132,7 +132,7 @@ export default memo(function Header() {
                   } no-underline text-gray-700 py-3 inline-block hover:text-white `}
                   to="/employees"
                 >
-                  All Employees
+                  Staff
                 </Link>
               </button>
 
@@ -188,18 +188,18 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-4/6 z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
+        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );
 
   const employeeHeader = (
-    <nav className="bg-blue-400">
-      <div className="max-w-7xl mx-auto md:px-4 sm:pl-6 sm:pr-0 lg:px-8">
-        <div className="flex items-center justify-between h-26">
-          <div className="flex-shrink-0 relative z-30">
+    <nav className="bg-blue-400 relative z-20">
+      <div className=" mx-auto md:px-4 sm:pl-6 sm:pr-0 lg:px-8">
+        <div className="flex items-center justify-start h-26">
+          <div className="flex-shrink-0 p-2 relative z-30">
             <Link to="/addInvoice">
-              <Image src="/replenish-logo.png" width="80px" roundedCircle />
+              <Image src="/replenish-logo.png" width="60px" roundedCircle />
             </Link>
           </div>
 
@@ -207,7 +207,7 @@ export default memo(function Header() {
             <div className="lg:hidden">
               <button
                 onClick={handleMenuSHow}
-                className="border-none text-w-full py-3 5xl transition-all text-5xl text-white"
+                className="border-none relative z-30 text-w-full py-3 5xl transition-all text-5xl text-white"
               >
                 ≡
               </button>
@@ -215,7 +215,7 @@ export default memo(function Header() {
             <div
               className={` ${
                 isMenuShow ? "translate-x-full" : ""
-              } lg:block pt-10 lg:pt-0 z-20 fixed top-[4rem] h-screen bg-blue-400 right-0 w-3/4 md:w-1/3 gap-4 items-center lg:w-auto lg:static flex-col lg:flex-row lg:h-auto ml-10 flex lg:items-baseline space-x-4 transition-all lg:translate-x-0 `}
+              } lg:block pt-20 lg:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-3/4 md:w-1/3 gap-4 items-center lg:w-auto lg:static flex-col lg:flex-row lg:h-auto ml-10 flex lg:items-baseline space-x-4 transition-all lg:translate-x-0 `}
             >
               <button
                 onClick={handleMenuSHow}
@@ -315,7 +315,7 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-4/6 z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
+        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
       ></div>
     </nav>
   );
