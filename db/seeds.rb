@@ -39,7 +39,7 @@ location.employees <<  e
     is_inv_manager: true
   )
 
-  location = Location.create(name: "Location #{i}", email: Faker::Internet.unique.email)
+  location = Location.create(name: "Location #{i}")
   location.employees <<  emp
 
   5.times{|c| emp.clients.create(name: Faker::Name.name, email: Faker::Internet.unique.email)}
