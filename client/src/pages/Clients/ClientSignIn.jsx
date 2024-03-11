@@ -8,7 +8,7 @@ import {
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
-import { signInClient, signupClient } from "../../Server";
+import { createClientSchedule, signInClient, signupClient } from "../../Server";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { useAuthContext } from "../../context/AuthUserContext";
 import { CLIENT_LOGIN } from "../../Constants/AuthConstants";
@@ -40,13 +40,50 @@ function ClientSignIn() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data } = await signInClient(formInput);
-      if (data) {
-        authUserDispatch({ type: CLIENT_LOGIN, payload: data });
+      const res = await signInClient(formInput);
+      if (res.status === 200) {
+        authUserDispatch({ type: CLIENT_LOGIN, payload: res.data });
         toast.success("Successfully Logged In");
-        navigate(`/clients/location${window.location.search}`, {
-          replace: true,
-        });
+        if (
+          localStorage.getItem("treatment") &&
+          localStorage.getItem("formateData") &&
+          localStorage.getItem("appointmentData")
+        ) {
+          let selectedTreatMent = JSON.parse(localStorage.getItem("treatment"));
+          let appointment = JSON.parse(localStorage.getItem("appointmentData"));
+          const locId = params.get("locId");
+          const empId = params.get("empId");
+          const copyAppointMent = {
+            start_time: appointment?.selectedTimeSlot?.start,
+            date: appointment?.date,
+            end_time: appointment?.selectedTimeSlot?.end,
+            employee_id: empId,
+            treatment_id: selectedTreatMent?.treatment?.id,
+            product_id: selectedTreatMent?.product?.id,
+            location_id: locId,
+          };
+          const { data } = await createClientSchedule(copyAppointMent);
+          console.log(data, copyAppointMent)
+          if (data?.redirect_url) {
+            navigate(`/clients/payment/confirm_payment`, {
+              state: {
+                redirect_url: data?.redirect_url,
+                locId,
+                empId,
+                selectedTreatMent,
+                id: data?.schedule?.id,
+              },
+            });
+          } else {
+            navigate(`/clients/location${window.location.search}`, {
+              replace: true,
+            });
+          toast.error("Something went wrong. Please try again.")
+          }
+        }
+        // navigate(`/clients/location${window.location.search}`, {
+        //   replace: true,
+        // });
       }
     } catch (error) {
       if (error.response.status === 302) {
@@ -57,7 +94,7 @@ function ClientSignIn() {
       } else {
         toast.error(
           error?.response?.data?.error ||
-            error.response.statusText ||
+            error?.response?.statusText ||
             error.message
         );
       }

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Api::InvoicesController < ApplicationController
+  include Rails.application.routes.url_helpers
   skip_before_action :authorized_employee
   # before_action :find_employee, only: :create
-  before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment)
+  before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment update_images)
 
   def index
     invoices = Invoice.all
@@ -42,6 +43,31 @@ class Api::InvoicesController < ApplicationController
     else
       render json: { 'error' => 'Failed to Update Invoice' }, status: :bad_request
     end
+  end
+
+  def update_images
+    remove_images_from_blobs
+    decoded_before_images_data = params['blobsForBefore'].map { |data| Base64.decode64(data.sub("data:image/png;base64,", '')) }
+
+    decoded_before_images_data.each_with_index do |before_image, index|
+      filename = "#{@invoice.id}-before-image-#{rand(100)}.png"
+      file_path = File.join(Rails.root+'tmp', filename)
+      File.open(file_path, 'wb') { |file| file.write(before_image) }
+      @invoice.before_images.attach(io: File.open(file_path),filename: filename)
+      File.delete(file_path) if File.exist?(file_path)
+    end
+
+    decoded_after_images_data = params['blobsForAfter'].map { |data| Base64.decode64(data.sub("data:image/png;base64,", '')) }
+
+    decoded_after_images_data.each_with_index do |after_image, index|
+      filename = "#{@invoice.id}-after-image-#{rand(100)}.png"
+      file_path = File.join(Rails.root+'tmp', filename)
+      File.open(file_path, 'wb') { |file| file.write(after_image) }
+      @invoice.after_images.attach(io: File.open(file_path),filename: filename)
+      File.delete(file_path) if File.exist?(file_path)
+    end
+
+    render json: @invoice, status: :ok
   end
 
   def finalize
@@ -102,5 +128,13 @@ class Api::InvoicesController < ApplicationController
 
   def find_invoice
     @invoice = Invoice.find_by(id: params[:id])
+  end
+
+  def remove_images_from_blobs
+    filenames = (params[:deletedBeforeImages] + params[:deletedAfterImages]).map{|img| img.split('/').last}
+    attachments = ActiveStorage::Attachment.where(record_type: "Invoice", record_id: params[:id])
+    attachments.each do|attachment|
+      attachment.destroy if filenames.include?(attachment.blob.filename.to_s)
+    end
   end
 end

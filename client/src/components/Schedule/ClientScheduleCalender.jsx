@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
@@ -8,10 +8,19 @@ import ClientScheduleToolbar from "./ClientScheduleToolbar";
 const localizer = momentLocalizer(moment);
 
 const ClientScheduleCalender = ({ ...rest }) => {
+  const [timeSlots, setTimeSlots] = useState(1);
+  const today = new Date();
+  // useEffect(()=>{
+  //   console.log(rest);
+  // },[rest])
+  // useEffect(()=>{
+  //   let timeSlotsPerHour = 60 / rest.slotDuration;
+  //   setTimeSlots(timeSlotsPerHour)
+  // },[])
   return (
     <div className="client max-w-full overscroll-auto">
       <Calendar
-        views={[Views.MONTH, Views.WEEK, Views.DAY]}
+        views={[Views.WEEK, Views.DAY]}
         selectable
         startAccessor="start_time"
         endAccessor="end_time"
@@ -20,17 +29,28 @@ const ClientScheduleCalender = ({ ...rest }) => {
         localizer={localizer}
         defaultDate={new Date()}
         defaultView="week"
-        timeslots={6}
-        step={10} //Number of time slots per hour
+        timeslots={timeSlots}
+        step={60} //Number of time slots per hour
+        min={
+          new Date(
+            today.getFullYear(), 
+            today.getMonth(), 
+            today.getDate(), 
+            7
+          )
+        }
+        max={
+          new Date(
+            today.getFullYear(), 
+            today.getMonth(), 
+            today.getDate(), 
+            20
+          )
+        }
         components={{
           toolbar: (e) => <ClientScheduleToolbar {...e} />,
         }}
         {...rest}
-        //   onSelectEvent={(event) => {
-        //     handleAddAppointmentSelect(event, true);
-        //   }}
-        //   onSelectSlot={handleAddAppointmentSelect}
-        //   onRangeChange={onCalenderRangeChange}
       />
     </div>
   );

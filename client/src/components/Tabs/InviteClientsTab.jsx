@@ -10,6 +10,7 @@ const InviteClientsTab = ({ employee }) => {
   const [copiedLink, setCopiedLink] = useState(null);
 
   const [locations, setLocations] = useState([]);
+  console.log(employee, "employee")
   // const [clientInput, setClientInput] = useState({
   //   email: "",
   //   name: "",
@@ -44,7 +45,7 @@ const InviteClientsTab = ({ employee }) => {
   //   } catch (error) {
   //     toast.error(
   //       error?.response?.data?.exception ||
-  //         error.response.statusText ||
+  //         error?.response?.statusText ||
   //         error.message ||
   //         "Failed to update Employee"
   //     );
@@ -65,9 +66,11 @@ const InviteClientsTab = ({ employee }) => {
 
   const getLocation = async () => {
     try {
-      const { data } = await getEmployeeServiceLocation(employee?.id);
-      if (data?.length) {
-        setLocations(data);
+      console.log(employee, "employee")
+      const data  = await getEmployeeServiceLocation({employee_id: employee.id});
+      console.log(data);
+      if (data && data.data.length > 0) {
+        setLocations(data.data);
       }
     } catch (error) {
       console.log(error);
@@ -130,7 +133,7 @@ const InviteClientsTab = ({ employee }) => {
         <span>Referral Link</span>
         <div className="">
           <SearchInput
-            placeholder="Search Referral link"
+            placeholder="Search places.."
             onChange={(e) => setSearchLink(e.target.value)}
           />
         </div>
@@ -148,8 +151,10 @@ const InviteClientsTab = ({ employee }) => {
         ? locations
             ?.filter((lo) => lo?.name?.includes(searchLink))
             ?.map((loc) => {
+              console.log(loc?.name, "loc name", loc?.id, "loc id", employee?.id, "emp id")
+              // const link = `${window.location.origin}/clients/signup?empId=${employee?.id}&&location=${loc?.name}`;
+              const link = `${window.location.origin}/clients/location?locations=${loc?.name}&locId=${loc?.id}&empId=${employee?.id}&ref=${employee?.reference_number}`;
 
-              const link = `${window.location.origin}/clients/signup?empId=${employee?.id}&&location=${loc?.name}`;
               return (
                 <p
                   className={`cursor-copy flex justify-between px-[1rem] md:px-20 lg-px-40 ${

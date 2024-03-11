@@ -8,8 +8,15 @@ import ModalWraper from "../Modals/ModalWraper";
 import LabelInput from "../Input/LabelInput";
 import Loadingbutton from "../Buttons/Loadingbutton";
 import { Form } from "react-bootstrap";
+import CreateProductModal from "../Modals/CreateProductModal";
 
-const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
+const ProductsTab = ({
+  productSearchInput,
+  setProductSearchInput,
+  show,
+  onHide,
+  filteredInventory,
+}) => {
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
   const [updateProductInput, setUpdateProductInput] = useState({
@@ -22,18 +29,18 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
   const [loading, setLoading] = useState(false);
 
   // added
-  const getProducts = async (refetch = false) => {
-    try {
-      const { data } = await getProductsList(refetch);
-      setProductList(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+   const getProducts = async (refetch = false) => {
+     try {
+       const { data } = await getProductsList(refetch);
+       setProductList(data);
+     } catch (error) {
+       console.log(error);
+     }
+   };
   useEffect(() => {
-    getProducts();
+    setProductList(filteredInventory);
     return () => {};
-  }, []);
+  }, [filteredInventory]);
 
   const handleProductChange = (e) => {
     setUpdateProductInput((pre) => ({
@@ -58,7 +65,7 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to Delete the Product."
               );
@@ -89,7 +96,7 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to Delete the Product."
       ); // handle error
@@ -112,7 +119,7 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
         />
       )}
 
-      {/* Modal */}
+      {/*Update Modal */}
       <ModalWraper
         show={showUpdateProductModal}
         onHide={() => setShowUpdateProductModal(false)}
@@ -171,6 +178,12 @@ const ProductsTab = ({ productSearchInput, setProductSearchInput }) => {
           />
         </Form>
       </ModalWraper>
+
+      <CreateProductModal
+        show={show}
+        onHide={() => onHide(false)}
+        getProducts={getProducts}
+      />
     </div>
   );
 };

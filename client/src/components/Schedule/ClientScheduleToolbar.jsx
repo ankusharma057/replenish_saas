@@ -77,7 +77,7 @@ const ClientScheduleToolbar = (toolbar) => {
         {toolbar.views?.map((view) => (
           <Button
             key={view}
-            variant={toolbar.view === view ? "primary" : "outline-primary"}
+            variant={toolbar.view === view ? "dark" : "outline-dark"}
             onClick={() => toolbar.onView(view)}
             className=""
           >
@@ -86,13 +86,13 @@ const ClientScheduleToolbar = (toolbar) => {
         ))}
       </div>
       <div className="flex gap-x-4 items-center">
-        <Button size="sm" variant="outline-primary" onClick={goToBack}>
+        <Button size="sm" variant="outline-dark" onClick={goToBack}>
           Back
         </Button>
-        <Button size="sm" variant="outline-primary" onClick={goToToday}>
+        <Button size="sm" variant="outline-dark" onClick={goToToday}>
           Today
         </Button>
-        <Button size="sm" variant="outline-primary" onClick={goToNext}>
+        <Button size="sm" variant="outline-dark" onClick={goToNext}>
           Next
         </Button>
       </div>

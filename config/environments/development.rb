@@ -10,7 +10,6 @@ Rails.application.configure do
 
   # Do not eager load code on boot.
   config.eager_load = false
-
   # Show full error reports.
   config.consider_all_requests_local = true
 
@@ -37,10 +36,12 @@ Rails.application.configure do
 
   # This line was causing the EngineYard deploy to fail
   # config.action_mailer.default_charset = "utf-8"
+  config.active_job.queue_adapter     = :sidekiq
+  
   config.action_mailer.perform_deliveries = true
   config.action_mailer.perform_caching = false
   config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.delivery_method = :letter_opener
 
   config.action_mailer.smtp_settings = {  
     address: 'smtp.gmail.com',

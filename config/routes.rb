@@ -7,21 +7,31 @@ Rails.application.routes.draw do
       delete '/log_out', to: 'sessions#destroy'
       post '/password_update', to: 'sessions#password_update'
       get '/profile', to: 'clients#profile'
-
+      post '/stripe/success', to: 'stripe#success'
+      get '/stripe/success', to: 'stripe#success'
+      get '/employee_unavailability', to: 'schedules#employee_unavailability'
+      get '/appointments', to: 'schedules#appointments'
+      
       resources :locations, only: [ :index, :create] do
         get :employees, on: :member
       end
 
       resources :employees, only: %i(index show)
 
-      resources :schedules, only: %i(index create show)
+      resources :schedules, only: %i(index create show destroy) do
+        post :remaining_pay, on: :member
+        post :remainder, on: :member
+      end
+
       resources :products, only: %i(index)
     end
 
-    resources :locations, only: [ :index, :create] do
-      get :employees, on: :member
+    resources :treatments
+    resources :unavailabilities
+    resources :locations, only: [ :index, :create]
+    resources :schedules, only: [:index, :create, :destroy] do
+      post :remaining_paid, on: :member 
     end
-    resources :schedules, only: [:index, :create]
 
     resources :clients do
       collection do
@@ -48,6 +58,7 @@ Rails.application.routes.draw do
         post :finalize
         post :send_reject_mail
         get :download_attachment
+        put :update_images
       end
     end
 

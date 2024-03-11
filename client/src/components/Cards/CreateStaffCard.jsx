@@ -44,8 +44,8 @@ export default function CreateStaffCard({ show, onHide }) {
 
       toast.error(
         errorString ||
-          error.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.data?.exception ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to create user"
       );
@@ -65,7 +65,7 @@ export default function CreateStaffCard({ show, onHide }) {
   return (
     show && (
       <div className="hover:shadow-lg border-2 px-2 sm:px-10 py-5 border-black/15 m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
-        <h3 className=" text-3xl font-semibold my-3">Create An Staff</h3>
+        <h3 className=" text-3xl font-semibold my-3">Create an employee</h3>
         <Form
           onSubmit={onSubmit}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center justify-center w-full md:max-w -7xl gap-1"

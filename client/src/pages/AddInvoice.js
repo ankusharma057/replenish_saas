@@ -1,18 +1,18 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
 import { Alert, Button } from "react-bootstrap";
-import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import { confirmAlert } from "react-confirm-alert"; // Import
-import { useAuthContext } from "../context/AuthUserContext";
-import Loadingbutton from "../components/Buttons/Loadingbutton";
+import { toast } from "react-toastify";
+import { LOGIN } from "../Constants/AuthConstants";
 import {
   createGroupInvoices,
-  getInventoryList,
   getInvoiceList,
   getUpdatedUserProfile,
 } from "../Server";
-import { LOGIN } from "../Constants/AuthConstants";
+import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
+import Loadingbutton from "../components/Buttons/Loadingbutton";
+import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
+import { useAuthContext } from "../context/AuthUserContext";
 
 const initialFormState = {
   clientName: "",
@@ -63,6 +63,12 @@ export default function AddInvoices() {
     isClient: false,
     maxInvoice: false,
   });
+  const [showModal, setShowModal] = useState(false);
+  const [beforeImages, setBeforeImages] = useState([]);
+  const [afterImages, setAfterImages] = useState([]);
+
+  const [blobsForBefore, setBlobForBefore] = useState([]);
+  const [blobsForAfter, setBlobForAfter] = useState([]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -231,13 +237,14 @@ export default function AddInvoices() {
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
 
     const selected_product_types = formData.products.map((product) => {
-                              return product?.product_type
-                            });
+      return product?.product_type;
+    });
 
     const semaglitude_percentage =
-      (selectedProduct?.product_type === 'Semaglitude'
-        || selected_product_types.includes('Semaglitude')) ?
-        20 : authUserState.user?.service_percentage
+      selectedProduct?.product_type === "Semaglitude" ||
+      selected_product_types.includes("Semaglitude")
+        ? 20
+        : authUserState.user?.service_percentage;
 
     let total =
       (totalPaidByClientAT +
@@ -572,10 +579,12 @@ export default function AddInvoices() {
       });
       return;
     }
-    let invoice = {
+        let invoice = {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
       clientname: clientName,
+      beforeImages: blobsForBefore,
+      afterImages: blobsForAfter,
 
       date_of_service: formData?.dateOfService,
       concierge_fee_paid: formData?.conciergeFeePaid,
@@ -627,6 +636,10 @@ export default function AddInvoices() {
       setSelectedProduct(null);
       setMatchingProducts([]);
       setClientName("");
+      setAfterImages([]);
+      setBeforeImages([]);
+      setBlobForAfter([]);
+      setBlobForBefore([]);
 
       window.scrollTo({
         top: document.body.scrollHeight + 500,
@@ -661,10 +674,14 @@ export default function AddInvoices() {
               setCurrentProduct({ name: "", price: 0, quantity: 1 });
               setSelectedProduct(null);
               setMatchingProducts([]);
+              setAfterImages([]);
+              setBeforeImages([]);
+              setBlobForAfter([]);
+              setBlobForBefore([]);
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to create Invoice"
               );
@@ -690,10 +707,7 @@ export default function AddInvoices() {
           {isAlert.maxInvoice && (
             <Alert variant="warning">{isAlert.message}</Alert>
           )}
-          <form
-            className="max-w-full md:max-w-4xl mx-auto bg-white md:p-4 rounded-md"
-            onSubmit={handleSubmit}
-          >
+          <form className=" bg-white md:p-4 rounded-md" onSubmit={handleSubmit}>
             <div className="flex justify-end  mr-4 my-2 ">
               <Button
                 onClick={() => {
@@ -737,6 +751,18 @@ export default function AddInvoices() {
                     className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                   />
                 </label>
+                <div className="flex gap-4 mt-2 md:mt-0">
+                  <BeforeAfterMediaModal
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    beforeImages={beforeImages}
+                    setBeforeImages={setBeforeImages}
+                    afterImages={afterImages}
+                    setAfterImages={setAfterImages}
+                    setBlobForAfter={setBlobForAfter}
+                    setBlobForBefore={setBlobForBefore}
+                  />
+                </div>
               </div>
             </div>
             <div

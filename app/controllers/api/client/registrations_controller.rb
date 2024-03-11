@@ -3,8 +3,13 @@ class Api::Client::RegistrationsController < ClientApplicationController
 
   def sign_up
     employee = Employee.find_by(reference_number: params[:ref])
-    client = employee.clients.new(client_params)
-
+    
+    client = if employee.present?
+      employee.clients.new(client_params)
+    else
+      Client.new(client_params)
+    end
+    client.timezone = params[:timezone] if params[:timezone]
     if client.save!
       session[:client_id] = client.id
       render json: client, status: :ok
@@ -15,6 +20,6 @@ class Api::Client::RegistrationsController < ClientApplicationController
 
   private
   def client_params
-    params.require(:client).permit(:email, :name, :employee_id, :password)
+    params.require(:client).permit(:email, :name, :employee_id, :password, :timezone)
   end
 end

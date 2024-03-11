@@ -47,7 +47,7 @@ export default function SignUp() {
       toast.error(
         errorString ||
           error.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to create user"
       );

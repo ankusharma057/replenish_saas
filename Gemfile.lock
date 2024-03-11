@@ -80,6 +80,7 @@ GEM
     case_transform (0.2)
       activesupport
     concurrent-ruby (1.2.2)
+    connection_pool (2.4.1)
     crass (1.0.6)
     date (3.3.3)
     debug (1.8.0)
@@ -173,9 +174,15 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.0.6)
+    redis (4.8.1)
     reline (0.3.6)
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)
+    sidekiq (6.5.12)
+      connection_pool (>= 2.2.5, < 3)
+      rack (~> 2.0)
+      redis (>= 4.5.0, < 5)
+    stripe (10.5.0)
     thor (1.2.2)
     timeout (0.4.0)
     twilio-ruby (6.4.0)
@@ -207,6 +214,9 @@ DEPENDENCIES
   pg (~> 1.1)
   puma (~> 5.0)
   rails (~> 7.0.4, >= 7.0.4.2)
+  redis
+  sidekiq (~> 6.0)
+  stripe
   twilio-ruby
   tzinfo-data
   wicked_pdf

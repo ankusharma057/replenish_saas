@@ -16,7 +16,11 @@ import {
   Settings,
   Edit,
   GitPullRequestArrow,
+  ChevronRight,
+  ChevronLeft,
+  CalendarCheck,
 } from "lucide-react";
+
 import {
   acceptInventory,
   assignInventory,
@@ -34,6 +38,8 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import Select from "react-select";
 import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 import InviteClientsTab from "../components/Tabs/InviteClientsTab";
+import MySchedule from "./MySchedule";
+
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -48,6 +54,10 @@ const MyProfile = () => {
   const [assignInput, setAssignInput] = useState({
     quantity: 0,
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemPerPage = 30; // Calculate the index range for the current page
+  const startIndex = (currentPage - 1) * itemPerPage;
+  const endIndex = startIndex + itemPerPage;
 
   const [inventoryList, setInventoryList] = useState([]);
   const [updateVendorInput, setupdateVendorInput] = useState(
@@ -143,7 +153,7 @@ const MyProfile = () => {
               console.log(error);
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to Transfer the inventory"
               );
@@ -198,7 +208,7 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
@@ -241,7 +251,7 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
@@ -265,7 +275,7 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
@@ -288,7 +298,7 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
@@ -296,8 +306,12 @@ const MyProfile = () => {
     }
   };
 
-  // if (loading) return <Header></Header>;
-  // if (errors) return <h1>{errors}</h1>;
+  const currentInvoices =
+    (authUserState.user?.invoices || [])?.slice(startIndex, endIndex) || [];
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div>
@@ -370,6 +384,21 @@ const MyProfile = () => {
               } `}
             >
               <FileText /> Invoices
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "mySchedule" && setCurrentTab("mySchedule");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "mySchedule" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <CalendarCheck /> My Schedule
             </div>
 
             <div
@@ -738,40 +767,62 @@ const MyProfile = () => {
             ))}
 
           {currentTab === "invoice" && (
-            <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
-              {authUserState.user?.invoices?.length > 0 ? (
-                authUserState.user?.invoices?.map((invoice) => {
-                  return (
-                    <li key={invoice?.id}>
-                      <Card
-                        className="text-center"
-                        border="info"
-                        style={{ width: "18rem" }}
-                      >
-                        <Card.Header as="h5">
-                          Invoice ID {invoice.id}
-                        </Card.Header>
-                        <Card.Body className="">
-                          <Button
-                            onClick={async () => {
-                              await setinvoiceData(invoice);
-                              handleClick();
-                            }}
-                            variant="info"
-                          >
-                            See More Details
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </li>
-                  );
-                })
-              ) : (
-                <h2 className="text-4xl font-bold text-center text-blue-400">
-                  No Invoice Found
-                </h2>
-              )}
-            </ul>
+            <>
+              <div className="flex gap-x-4  w-full justify-end my-4">
+                {/* Pagination controls */}
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={
+                    currentPage ===
+                    Math.ceil(
+                      (authUserState.user?.invoices || []).length / itemPerPage
+                    )
+                  }
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+              <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
+                {authUserState.user?.invoices?.length > 0 ? (
+                  (currentInvoices || []).map((invoice) => {
+                    return (
+                      <li key={invoice?.id}>
+                        <Card
+                          className="text-center"
+                          border="info"
+                          style={{ width: "18rem" }}
+                        >
+                          <Card.Header as="h5">
+                            Invoice ID {invoice.id}
+                          </Card.Header>
+                          <Card.Body className="">
+                            <Button
+                              onClick={async () => {
+                                await setinvoiceData(invoice);
+                                handleClick();
+                              }}
+                              variant="info"
+                            >
+                              See More Details
+                            </Button>
+                          </Card.Body>
+                        </Card>
+                      </li>
+                    );
+                  })
+                ) : (
+                  <h2 className="text-4xl font-bold text-center text-blue-400">
+                    No Invoice Found
+                  </h2>
+                )}
+              </ul>
+            </>
           )}
           {currentTab === "settings" && (
             <div className="sm:container p-4 bg-white border-2 rounded-lg">
@@ -828,6 +879,7 @@ const MyProfile = () => {
               <InviteClientsTab employee={authUserState.user} />
             </div>
           )}
+          {currentTab === "mySchedule" && <MySchedule />}
         </div>
       </AsideLayout>
     </div>

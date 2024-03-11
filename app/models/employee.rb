@@ -11,6 +11,7 @@ class Employee < ApplicationRecord
   has_many :inventory_prompts, class_name: 'InventoryPrompt', dependent: :destroy
   has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id, dependent: :destroy
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
+  has_many :unavailabilities, dependent: :destroy
   after_create :update_reference
   before_destroy :return_inventory
 

@@ -32,6 +32,27 @@ class Api::InvoiceGroupsController < ApplicationController
         invoice.is_finalized = false
 
         invoice.save!
+
+        id = invoice.id
+        decoded_before_images_data = invoice_param['beforeImages'].map { |data| Base64.decode64(data.sub("data:image/png;base64,", '')) }
+
+        decoded_before_images_data.each_with_index do |before_image, index|
+          filename = "#{id}-before-image-#{index+1}.png"
+          file_path = File.join(Rails.root+'public', filename)
+          File.open(file_path, 'wb') { |file| file.write(before_image) }
+          invoice.before_images.attach(io: File.open(file_path),filename: filename)
+          File.delete(file_path) if File.exist?(file_path)
+        end
+
+        decoded_after_images_data = invoice_param['afterImages'].map { |data| Base64.decode64(data.sub("data:image/png;base64,", '')) }
+
+        decoded_after_images_data.each_with_index do |after_image, index|
+          filename = "#{id}-after-image-#{index+1}.png"
+          file_path = File.join(Rails.root+'public', filename)
+          File.open(file_path, 'wb') { |file| file.write(after_image) }
+          invoice.after_images.attach(io: File.open(file_path),filename: filename)
+          File.delete(file_path) if File.exist?(file_path)
+        end
       end
 
       @invoice_group.save_pdfs_and_send_mail

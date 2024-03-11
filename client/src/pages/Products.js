@@ -57,7 +57,7 @@ const Products = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to Delete the Product."
               );
@@ -88,7 +88,7 @@ const Products = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to Delete the Product."
       ); // handle error

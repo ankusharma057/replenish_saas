@@ -51,7 +51,7 @@ function Login() {
       } else {
         toast.error(
           error?.response?.data?.error ||
-            error.response.statusText ||
+            error?.response?.statusText ||
             error.message
         );
       }

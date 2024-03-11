@@ -60,7 +60,7 @@ const Invoice = () => {
               console.log(error);
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to Finalize Invoices."
               );
@@ -145,7 +145,7 @@ const Invoice = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to Finalize Invoices."
               );
@@ -169,7 +169,7 @@ const Invoice = () => {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemPerPage = 2; // Calculate the index range for the current page
+  const itemPerPage = 30; // Calculate the index range for the current page
   const startIndex = (currentPage - 1) * itemPerPage;
   const endIndex = startIndex + itemPerPage;
 
@@ -179,6 +179,11 @@ const Invoice = () => {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+  };
+
+  const onCustomModalHide = async () => {
+    setModalShow(false);
+    await getInvoices(true);
   };
 
   return (
@@ -275,14 +280,16 @@ const Invoice = () => {
         </div>
       </ModalWraper>
       <div className="p-4">
-        <CustomModal
-          show={modalShow}
-          onHide={() => setModalShow(false)}
-          userProfile={authUserState.user}
-          invoiceData={singleInvoice}
-          fiInvoiceList={singleInvoice.is_finalized}
-          getInvoices={getInvoices}
-        />
+        {modalShow && (
+          <CustomModal
+            show={modalShow}
+            onHide={onCustomModalHide}
+            userProfile={authUserState.user}
+            invoiceData={singleInvoice}
+            fiInvoiceList={singleInvoice.is_finalized}
+            getInvoices={getInvoices}
+          />
+        )}
 
         <div className="flex gap-x-4  justify-end my-4">
           {/* Pagination controls */}
@@ -292,20 +299,6 @@ const Invoice = () => {
           >
             <ChevronLeft />
           </Button>
-          {/* {Array.from(
-            {
-              length: Math.ceil((invoiceList[selectList] || []).length / 5),
-            },
-            (_, i) => (
-              <Button
-                key={i + 1}
-                onClick={() => handlePageChange(i + 1)}
-                disabled={currentPage === i + 1}
-              >
-                {i + 1}
-              </Button>
-            )
-          )} */}
           <Button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={
