@@ -21,7 +21,7 @@ export default memo(function Header() {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     }
@@ -35,7 +35,7 @@ export default memo(function Header() {
     <nav className="bg-blue-400 relative z-20">
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
         <div className="flex items-center justify-start h-26">
-          <div className="flex-shrink-0  p-2">
+          <div className="flex-shrink-0 p-2">
             <Link to="/addInvoice">
               <Image
                 src="/replenish-logo.png"
@@ -57,7 +57,7 @@ export default memo(function Header() {
             <div
               className={` ${
                 isMenuShow ? "translate-x-full" : ""
-              } xl:block pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-3/4 md:w-1/3  gap-4 items-center xl:w-auto xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-baseline space-x-4 transition-all xl:translate-x-0  `}
+              } xl:block pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-1/2 md:w-1/4 gap-y-2 items-center xl:w-auto xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-baseline space-x-4 transition-all xl:translate-x-0  `}
             >
               <button
                 onClick={handleMenuSHow}
@@ -68,7 +68,7 @@ export default memo(function Header() {
                     location.pathname === "/addinvoice"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/addinvoice"
                 >
                   Submit invoice
@@ -83,43 +83,30 @@ export default memo(function Header() {
                     location.pathname === "/invoicelist"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/invoicelist"
                 >
                   Invoice List
                 </Link>
               </button>
-              {/* <button
-                onClick={handleMenuSHow}
-                className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
-              >
-                <Link
-                  className={` ${
-                    location.pathname === "/signup"
-                      ? "text-white"
-                      : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
-                  to="/signup"
+              {(authUserState.user?.is_inv_manager === true ||
+                authUserState.user?.is_admin) === true && (
+                <button
+                  onClick={handleMenuSHow}
+                  className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
                 >
-                  Create a new user
-                </Link>
-              </button> */}
-
-              <button
-                onClick={handleMenuSHow}
-                className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
-              >
-                <Link
-                  className={` ${
-                    location.pathname === "/schedule"
-                      ? "text-white"
-                      : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
-                  to="/schedule"
-                >
-                  Schedule
-                </Link>
-              </button>
+                  <Link
+                    className={` ${
+                      location.pathname === "/schedule"
+                        ? "text-white"
+                        : "text-gray-700"
+                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
+                    to="/schedule"
+                  >
+                    Schedule
+                  </Link>
+                </button>
+              )}
               <button
                 onClick={handleMenuSHow}
                 className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
@@ -129,7 +116,7 @@ export default memo(function Header() {
                     location.pathname === "/employees"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/employees"
                 >
                   Staff
@@ -147,10 +134,28 @@ export default memo(function Header() {
                       location.pathname === "/inventories"
                         ? "text-white"
                         : "text-gray-700"
-                    } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                     to="/inventories"
                   >
                     Inventories
+                  </Link>
+                </button>
+              )}
+              {(authUserState.user?.is_inv_manager === true ||
+                authUserState.user?.is_admin) === true && (
+                <button
+                  onClick={handleMenuSHow}
+                  className={` :bg-blue-200 w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}
+                >
+                  <Link
+                    className={` ${
+                      location.pathname === "/treatment"
+                        ? "text-white"
+                        : "text-gray-700"
+                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
+                    to="/treatment"
+                  >
+                    Treatments
                   </Link>
                 </button>
               )}
@@ -164,7 +169,7 @@ export default memo(function Header() {
                     location.pathname === "/myprofile"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/myprofile"
                 >
                   My Profile
@@ -188,7 +193,7 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
+        } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );
@@ -215,7 +220,7 @@ export default memo(function Header() {
             <div
               className={` ${
                 isMenuShow ? "translate-x-full" : ""
-              } lg:block pt-20 lg:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-3/4 md:w-1/3 gap-4 items-center lg:w-auto lg:static flex-col lg:flex-row lg:h-auto ml-10 flex lg:items-baseline space-x-4 transition-all lg:translate-x-0 `}
+              } lg:block pt-20 lg:pt-0 z-20 fixed top-0  h-screen bg-blue-400 right-0 w-1/2 md:w-1/4  gap-y-2 items-center lg:w-auto lg:static flex-col lg:flex-row lg:h-auto ml-10 flex lg:items-baseline space-x-4 transition-all lg:translate-x-0 `}
             >
               <button
                 onClick={handleMenuSHow}
@@ -226,7 +231,7 @@ export default memo(function Header() {
                     location.pathname === "/addinvoice"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/addinvoice"
                 >
                   Submit invoice
@@ -241,7 +246,7 @@ export default memo(function Header() {
                     location.pathname === "/products"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/products"
                 >
                   Product List
@@ -259,7 +264,7 @@ export default memo(function Header() {
                         location.pathname === "/employees"
                           ? "text-white"
                           : "text-gray-700"
-                      } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                      } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                       to="/employees"
                     >
                       All Employees
@@ -275,7 +280,7 @@ export default memo(function Header() {
                         location.pathname === "/inventories"
                           ? "text-white"
                           : "text-gray-700"
-                      } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                      } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                       to="/inventories"
                     >
                       Inventories
@@ -293,7 +298,7 @@ export default memo(function Header() {
                     location.pathname === "/myprofile"
                       ? "text-white"
                       : "text-gray-700"
-                  } no-underline text-gray-700 py-3 inline-block hover:text-white `}
+                  } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
                   to="/myprofile"
                 >
                   My Profile
@@ -315,7 +320,7 @@ export default memo(function Header() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-1/4 md:w-[67%] z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
+        } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
       ></div>
     </nav>
   );

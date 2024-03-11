@@ -9,19 +9,27 @@ import { getClientProfile, getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
-import ClientLocation from "./pages/Clients/ClientLocation";
 
+const ConfirmPayment = lazy(() =>
+  import("./pages/Clients/payment/ConfirmPayment")
+);
+const ClientPaymentSuccess = lazy(() =>
+  import("./pages/Clients/payment/ClientPaymentSuccess")
+);
+const ClientsBookedAppointments = lazy(() =>
+  import("./pages/Clients/ClientsBookedAppointments")
+);
 const ClientSignup = lazy(() => import("./pages/Clients/ClientSignup"));
+const ClientLocation = lazy(() => import("./pages/Clients/ClientLocation"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ClientResetPassword = lazy(() =>
   import("./pages/Clients/ClientResetPassword")
 );
-const ClientSchedule = lazy(() => import("./pages/Clients/ClientSchedule"));
 const ClientRoot = lazy(() => import("./pages/Clients"));
 const ClientAppointment = lazy(() =>
-  import("./pages/Clients/Schedule/ClientAppointment")
+  import("./pages/Clients/ClientAppointments")
 );
-const ClientStaff = lazy(() => import("./pages/Clients/ClientStaff"));
+// const ClientStaff = lazy(() => import("./pages/Clients/ClientStaff"));
 const ClientSignIn = lazy(() => import("./pages/Clients/ClientSignIn"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Login = lazy(() => import("./pages/Auth/Login"));
@@ -34,6 +42,7 @@ const AddProduct = lazy(() => import("./pages/AddProduct"));
 const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const Employee = lazy(() => import("./pages/Employee"));
 const Products = lazy(() => import("./pages/Products"));
+const Treatment = lazy(() => import("./pages/Treatment"));
 
 function App() {
   const navigate = useNavigate();
@@ -130,7 +139,11 @@ function App() {
   return (
     <div className="overflow-x-hidden h-screen">
       <Suspense fallback={<SuspenseLoading />}>
-        {authUserState.user ? <Header /> : <ClientHeader />}
+        {authUserState.client ? (
+          <ClientHeader />
+        ) : authUserState.user ? (
+          <Header />
+        ) : null}
 
         <Routes>
           <Route path="/" element={<Login />} />
@@ -140,6 +153,31 @@ function App() {
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
           <Route
+            path="/clients/payment/success"
+            element={<ClientPaymentSuccess />}
+          />
+
+          {authUserState.client && (
+            <>
+              <Route
+                path="/clients/appointments"
+                element={<ClientAppointment />}
+              />
+              <Route
+                path="/clients/appointments"
+                element={<ClientsBookedAppointments />}
+              />
+              <Route
+                path="/clients/payment/success"
+                element={<ClientPaymentSuccess />}
+              />
+              <Route
+                path="/clients/payment/confirm_payment"
+                element={<ConfirmPayment />}
+              />
+            </>
+          )}
+          <Route
             path="/clients/resetPassword"
             element={<ClientResetPassword />}
           />
@@ -148,7 +186,7 @@ function App() {
             element={<ClientAppointment />}
           />
 
-          <Route path="/clients/schedule" element={<ClientSchedule />} />
+          {/* <Route path="/clients/schedule" element={<ClientSchedule />} /> */}
           {authUserState.user && (
             <>
               {authUserState.user &&
@@ -158,6 +196,7 @@ function App() {
                     <Route path="/inventories" element={<Inventory />} />
                     <Route path="/employees" element={<Employee />} />
                     <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/treatment" element={<Treatment />} />
                   </>
                 )}
 

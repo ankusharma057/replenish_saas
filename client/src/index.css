@@ -173,4 +173,26 @@ input[type="number"] {
 .client .rbc-event {
   background-color: black;
   color: white;
+  left: 0 !important;
+  width: 100% !important;
+}
+.client .rbc-current-time-indicator {
+  background-color: black;
+}
+
+.client .rbc-today {
+  background-color: #2e2e2e14;
+}
+
+.client .rbc-calendar {
+  min-height: 100vh;
+}
+
+.sch-calender .rbc-event {
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.rbc-events-container {
+  margin-right: 0 !important;
 }

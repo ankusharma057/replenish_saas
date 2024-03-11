@@ -37,19 +37,10 @@ const Employee = () => {
   // });
   const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
-  const [currentTab, setCurrentTab] = useState("invoice");
+  const [currentTab, setCurrentTab] = useState("profile");
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [radioTabs, setRadioTabs] = useState([]);
-  // const [invoiceModalShow, setInvoiceModalShow] = useState(false);
-  // const [updateInvoiceInput, setUpdateInvoiceInput] = useState({
-  //   name: employeeInvoices.employee?.name || "",
-  //   vendor_name: employeeInvoices.employee?.vendor_name || "",
-  //   email: employeeInvoices.employee?.email,
-  //   gfe: employeeInvoices.employee?.gfe || false,
-  //   service_percentage: employeeInvoices.employee?.service_percentage || 0,
-  //   retail_percentage: employeeInvoices.employee?.retail_percentage || 0,
-  // });
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
   const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
@@ -189,7 +180,7 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Failed to delete the Employee"
               );
@@ -218,7 +209,7 @@ const Employee = () => {
     setSelectedEmployeeData(emp);
     setRadioTabs([]);
     setUpdateEmployeeInput({});
-    setCurrentTab("invoice");
+    setCurrentTab(emp.is_admin ? "invoice" : "profile");
     let addTabs = [
       {
         name: "Invoices",
@@ -278,7 +269,7 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error.response.statusText ||
+                  error?.response?.statusText ||
                   error.message ||
                   "Some Error Occur"
               );
@@ -317,7 +308,7 @@ const Employee = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to update Employee"
       );
@@ -405,7 +396,6 @@ const Employee = () => {
                   );
                 })}
               </ButtonGroup>
-
               <div
                 className={`sm:p-6 rounded-b-lg ${
                   currentTab === "staff" ? "" : "bg-white"
@@ -576,9 +566,7 @@ const Employee = () => {
                       />
                     </div>
 
-                    <InviteClientsTab
-                      employee={selectedEmployeeData}
-                    />
+                    <InviteClientsTab employee={selectedEmployeeData} />
                   </div>
                 )}
                 {currentTab === "staff" && (
@@ -588,55 +576,11 @@ const Employee = () => {
                   />
                 )}
               </div>
-
               <CustomModal
                 show={showInvoiceModal}
                 onHide={() => setShowInvoiceModal(false)}
                 invoiceData={selectedInvoiceData}
               />
-
-              {/* <InvoiceListModal
-                show={invoiceModalShow}
-                onHide={() => setInvoiceModalShow(false)}
-                setShowInvoiceModal={invoiceModalShow}
-                employeeInvoices={employeeInvoices.invoices}
-                EmployeeName={employeeInvoices.employee.name}
-              /> */}
-              {/* {invModalSHow && (
-                <InventoryModal
-                  inventoryList={employeeInvoices.employee}
-                  showModal={invModalSHow}
-                  setshowModal={setInvModalSHow}
-                  isQtyUpdate={false}
-                  employeeList={employeeList}
-                  userProfile={authUserState.user}
-                  // productList={productList}
-                  // entireInventoryList={inventoryList}
-                  getEmployees={getEmployees}
-                />
-              )} */}
-              {/* <div className="mt-3 mb-3 mx-1 flex justify-center flex-wrap gap-3">
-                {employeeList
-                  ?.sort((a, b) => a?.name?.localeCompare(b?.name))
-                  ?.map((employee) => {
-                    return (
-                      <EmployeeInvoiceCard
-                        key={employee.id}
-                        employeeList={employeeList}
-                        employee={employee}
-                        title={employee.name}
-                        invoiceList={invoiceList}
-                        userProfile={authUserState.user}
-                        openShowInventory={openShowInventory}
-                        openShowInvoice={openShowInvoice}
-                        sendResetPasswordLink={sendResetPasswordLink}
-                        updatePopover={updatePopover}
-                        setUpdateInvoiceInput={setUpdateInvoiceInput}
-                        deleteEmployee={deleteEmployee}
-                      />
-                    );
-                  })}
-              </div> */}
             </div>
           )}
         </div>

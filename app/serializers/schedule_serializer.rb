@@ -1,3 +1,15 @@
 class ScheduleSerializer < ActiveModel::Serializer
-  attributes :id, :client_id, :product_id, :employee_id, :product_type, :treatment, :start_time, :end_time, :date
+  attributes :id, :client, :product, :employee, :product_type, :treatment, :start_time, :end_time, :date, :total_amount, :paid_amount, :remaining_amount, :remainder
+
+  def total_amount
+    object.amount
+  end
+
+  def remaining_amount
+    object.remaining_amt
+  end
+
+  def paid_amount
+    object.paid_amt
+  end
 end

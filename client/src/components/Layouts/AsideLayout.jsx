@@ -23,7 +23,7 @@ const AsideLayout = ({ asideContent, children }) => {
             role="button"
             onClick={collapse}
             className={
-              "text-muted-foreground absolute transition-all duration-500 p-2 top-3 right-3 opacity-0 hover:bg-gray-200 rounded-lg group-hover/sidebar:!opacity-100"
+              "text-muted-foreground absolute transition-all duration-500 p-2 top-3 right-3 hover:bg-gray-200 rounded-lg group-hover/sidebar:!opacity-100"
             }
           >
             <ChevronLeft className="h-6 w-6 " />

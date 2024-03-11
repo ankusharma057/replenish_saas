@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::ClientsController < ClientApplicationController
+class Api::ClientsController < ApplicationController
   before_action :find_client, only: [:sign_in, :password_update]
 
   def index

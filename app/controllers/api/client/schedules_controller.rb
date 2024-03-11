@@ -1,6 +1,6 @@
 class Api::Client::SchedulesController < ClientApplicationController
-  skip_before_action :authorized_client, only: [:index]
-  
+  skip_before_action :authorized_client, only: [:index, :employee_unavailability]
+
   def index
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
@@ -10,17 +10,76 @@ class Api::Client::SchedulesController < ClientApplicationController
     render json: schedules, status: :ok
   end
 
+  def appointments
+    schedules = current_client.schedules
+
+    render json: schedules, status: :ok
+  end
+
+  def employee_unavailability
+    employee  = Employee.find_by(id: params[:employee_id])
+    unavails = employee.unavailabilities
+    
+    render json: unavails
+  end
+
   def create
     schedule = current_client.schedules.new(schedule_param)
     if schedule.save
-      render json: schedule, status: :created
+      response_data = Stripe::Payment.create(schedule)
+      record_payment_from_session(response_data, schedule, 50)
+      puts response_data
+      render json: {schedule: schedule}.merge!({redirect_url: response_data['url']}), status: :created
     else
-      render json: {error: 'Something went wrong!'}, status: :unprocessable_entity
+      render json: {error: schedule.errors}, status: :unprocessable_entity
+    end
+  end
+
+  def remainder
+    @schedule = current_client.schedules.find_by(id: params[:id])
+    if @schedule
+      @schedule.update(remainder: params[:remainder])
+      @schedule.update_remainder
+      render json: {message: "Remainder Updated with #{@schedule.remainder}!!"}, status: :ok
+    else
+      render json: {error: "Schedule not found"}, status: :unprocessable_entity
+    end
+  end
+
+  def remaining_pay
+    schedule = Schedule.find_by(id: params[:id])
+    render json: {error: "No inventories"}, status: :unprocessable_entity and return unless schedule.check_for_inventory
+    if schedule.present?
+      amount = schedule.remaining_amt.to_i
+      response_data = Stripe::Payment.create(schedule, amount)
+      record_payment_from_session(response_data, schedule, amount)
+      puts response_data
+      render json: {schedule: schedule}.merge!({redirect_url: response_data['url']})
+    else
+      render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    schedule = Schedule.find_by(id: params[:id])
+    if schedule.destroy
+      render json: {message: "Schedule deleted."}, status: :ok
+    else
+      render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
     end
   end
 
   private
   def schedule_param
-    params.require(:schedule).permit(:product_type, :treatment, :start_time, :end_time, :date, :employee_id, :product_id, :treatment_id)
+    params.require(:schedule).permit(:product_type, :start_time, :end_time, :date, :employee_id, :product_id, :treatment_id, :location_id)
+  end
+
+  def record_payment_from_session(session, schedule, amount)
+    current_client.payments.create(
+      status: "Pending",
+      schedule_id: schedule.id,
+      amount: amount,
+      session_id: session.id
+    )
   end
 end

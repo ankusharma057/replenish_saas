@@ -4,6 +4,7 @@ import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { createProduct } from "../Server";
 import { toast } from "react-toastify";
+import ModalWraper from "../components/Modals/ModalWraper";
 
 const AddProduct = () => {
   const initialFormData = {
@@ -32,7 +33,7 @@ const AddProduct = () => {
     } catch (error) {
       toast.error(
         error.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message ||
           "Failed to Create Product."
       );
@@ -42,8 +43,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div>
-      {/* <Header /> */}
+    <ModalWraper>
       <Form
         className="max-w-md mx-auto mt-4 p-4 bg-blue-200 shadow-lg flex flex-col gap-2 rounded-lg"
         onSubmit={handleSubmit}
@@ -108,7 +108,7 @@ const AddProduct = () => {
           />
         </div>
       </Form>
-    </div>
+    </ModalWraper>
   );
 };
 

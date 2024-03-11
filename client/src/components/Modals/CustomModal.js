@@ -1,18 +1,21 @@
-import React, { useState } from "react";
-import { toast } from "react-toastify";
-import { Button } from "react-bootstrap";
 import { saveAs } from "file-saver";
-import ModalWraper from "./ModalWraper";
-import UpdateInvoiceModal from "./UpdateInvoiceModal";
-import RejectInvoiceModal from "./RejectInvoiceModal";
+import React, { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+import { toast } from "react-toastify";
+import { LOGIN } from "../../Constants/AuthConstants";
 import {
   downloadInvoice,
   getUpdatedUserProfile,
   rejectInvoice,
+  updateImages,
   updateInvoice,
 } from "../../Server";
 import { useAuthContext } from "../../context/AuthUserContext";
-import { LOGIN } from "../../Constants/AuthConstants";
+import BeforeAfterMediaModal from "./BeforeAfterMediaModal";
+import ModalWraper from "./ModalWraper";
+import RejectInvoiceModal from "./RejectInvoiceModal";
+import UpdateInvoiceModal from "./UpdateInvoiceModal";
+import { removeDuplicateElements } from "../../helper";
 
 function CustomModal({
   invoiceData,
@@ -49,6 +52,58 @@ function CustomModal({
 
   const [loading, setLoading] = useState(false);
   const [textAreaInput, settextAreaInput] = useState("");
+  const [editImages, setEditImages] = useState(true);
+  const [showImageEditModal, setShowImageEditModal] = useState(false);
+  const [beforeImages, setBeforeImages] = useState([]);
+  const [afterImages, setAfterImages] = useState([]);
+  const [blobsForBefore, setBlobForBefore] = useState([]);
+  const [blobsForAfter, setBlobForAfter] = useState([]);
+  const [deletedBeforeImages, setDeletedBeforeImages] = useState([]);
+  const [deletedAfterImages, setDeletedAfterImages] = useState([]);
+
+  // useEffect for initial assignment of before and after images
+
+  useEffect(() => {
+    if (invoiceData?.before_images) {
+      setBeforeImages([...invoiceData?.before_images]);
+    }
+    if (invoiceData?.after_images) {
+      setAfterImages([...invoiceData?.after_images]);
+    }
+  }, [invoiceData]);
+
+  const handleUpdateImage = async () => {
+    const {
+      updatedArray1: updatedDeletedBeforeImages,
+      updatedArray2: updatedBlobsForBefore,
+    } = removeDuplicateElements(deletedBeforeImages, blobsForBefore);
+    const {
+      updatedArray1: updatedDeletedAfterImages,
+      updatedArray2: updatedBlobsForAfter,
+    } = removeDuplicateElements(deletedAfterImages, blobsForAfter);
+    const updatedData = {
+      blobsForBefore: updatedBlobsForBefore,
+      blobsForAfter: updatedBlobsForAfter,
+      deletedBeforeImages: updatedDeletedBeforeImages,
+      deletedAfterImages: updatedDeletedAfterImages,
+    };
+    try {
+      await updateImages(invoiceID, updatedData);
+      toast.success("Images Updated successfully.");
+      setDeletedAfterImages([]);
+      setDeletedBeforeImages([]);
+      setBlobForAfter([]);
+      setBlobForBefore([]);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.exception ||
+          error?.response?.statusText ||
+          error.message
+      );
+    } finally {
+      setShowImageEditModal(false);
+    }
+  };
 
   // this will close or open the nested updated modal
   function handleNestedClick() {
@@ -84,7 +139,7 @@ function CustomModal({
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
@@ -133,12 +188,70 @@ function CustomModal({
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error.response.statusText ||
+          error?.response?.statusText ||
           error.message
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCollapse = () => {
+    const elements = document.querySelectorAll(`.image_collapse`);
+    elements.forEach((element) => {
+      element.classList.toggle("collapse");
+    });
+    // setEditImages(!editImages);
+  };
+
+  const handleEditImages = () => {
+    setShowImageEditModal(!showImageEditModal);
+  };
+
+  const renderImages = (type, imageArray) => {
+    const baseURL = window.location.origin;
+    return (
+      <div className="border rounded-sm p-2 mb-4 flex align-items-center flex-column w-100">
+        <div className="flex flex-row justify-content-between w-100">
+          <div>
+            <h3>{type}</h3>
+          </div>
+        </div>
+        <div
+          className="flex flex-row collapse multi-collapse image_collapse"
+          id={`image_collapse`}
+        >
+          {imageArray.map((image, index) => {
+            return (
+              <div
+                key={`${type}-${index}`}
+                className="m-2 flex flex-column align-items-center"
+              >
+                {image && typeof image === "object" ? (
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt={`Uploaded ${type} image ${index + 1}`}
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                    }}
+                  />
+                ) : (
+                  <img
+                    className="img-thumbnail"
+                    src={`${baseURL}${image}`}
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -153,6 +266,7 @@ function CustomModal({
             Total: {charge}
           </>
         }
+        size={"lg"}
         footer={
           <>
             {userProfile?.is_admin === true && fiInvoiceList === false && (
@@ -348,8 +462,53 @@ function CustomModal({
               <span>{overheadFeeValue}</span>
             </div>
           </div>
+          <div className="border rounded-sm p-2 mb-4 flex align-items-center flex-column">
+            <div className="flex flex-row justify-content-between w-100 m-2">
+              <div>
+                <h3>Attached Media</h3>
+              </div>
+              <div className="flex flex-row justify-content-between">
+                <Button
+                  className="mx-1"
+                  onClick={() => handleCollapse()}
+                  variant="primary"
+                >
+                  Show Media
+                </Button>
+                <Button
+                  disabled={!editImages}
+                  className="mx-1"
+                  onClick={() => handleEditImages()}
+                  variant="primary"
+                >
+                  Edit Media
+                </Button>
+              </div>
+            </div>
+            {beforeImages?.length > 0 &&
+              renderImages("Before Images", beforeImages)}
+            {afterImages?.length > 0 &&
+              renderImages("After Images", afterImages)}
+          </div>
         </div>
       </ModalWraper>
+      <div className="flex gap-4 mt-2 md:mt-0">
+        <BeforeAfterMediaModal
+          isEditModal={true}
+          showModal={showImageEditModal}
+          setShowModal={setShowImageEditModal}
+          beforeImages={beforeImages}
+          setBeforeImages={setBeforeImages}
+          afterImages={afterImages}
+          setAfterImages={setAfterImages}
+          setBlobForAfter={setBlobForAfter}
+          setBlobForBefore={setBlobForBefore}
+          setDeletedBeforeImages={setDeletedBeforeImages}
+          setDeletedAfterImages={setDeletedAfterImages}
+          handleSave={handleUpdateImage}
+          showButton={false}
+        />
+      </div>
     </>
   );
 }

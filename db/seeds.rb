@@ -14,7 +14,7 @@ puts "Seeding data"
 # Employee.destroy_all
 # Product.destroy_all
 
-Employee.create(
+Employee.create_or_find_by(
     name: "Replenish Test Admin",
     email: "patricklcarrera@gmail.com",
     gfe: true,
@@ -24,20 +24,25 @@ Employee.create(
     is_inv_manager: true
 )
 
+e = Employee.find_by(email: "patricklcarrera@gmail.com")
+
+location = Location.create(name: "admin_location")
+location.employees <<  e
+
 5.times do |i|
   emp = Employee.create(
-    name: "Employee #{i}",
-    email: "patricklcarrera#{i}@gmail.com",
+    name:  Faker::Name.name,
+    email: Faker::Internet.unique.email,
     gfe: true,
     service_percentage: 60,
     password: "test123",
     is_inv_manager: true
   )
 
-  location = Location.create(name: "Location #{i}")
+  location = Location.create(name: "Location #{i}", email: Faker::Internet.unique.email)
   location.employees <<  emp
 
-  5.times{|c| emp.clients.create(name: "EMP-#{emp.id} Client #{c}")}
+  5.times{|c| emp.clients.create(name: Faker::Name.name, email: Faker::Internet.unique.email)}
 end
 
 Product.create(
