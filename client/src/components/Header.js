@@ -89,7 +89,7 @@ export default memo(function Header() {
                   Invoice List
                 </Link>
               </button>
-              {(authUserState.user?.is_inv_manager === true ||
+              {/* {(authUserState.user?.is_inv_manager === true ||
                 authUserState.user?.is_admin) === true && (
                 <button
                   onClick={handleMenuSHow}
@@ -106,7 +106,7 @@ export default memo(function Header() {
                     Schedule
                   </Link>
                 </button>
-              )}
+              )} */}
               <button
                 onClick={handleMenuSHow}
                 className={` hover:bg-blue-200 hover:xl:bg-transparent w-full xl:text-sm xl:w-auto px-3 transition-all rounded-md text-lg  font-medium `}

@@ -59,6 +59,7 @@ const ConfirmPayment = () => {
         if (response?.status === 200) {
           toast.success("Reminder has been set successfully");
           window.open(state?.redirect_url, "_blank");
+          navigate("/clients/appointments", { state: "success" });
         }
       } else {
         console.log(state)

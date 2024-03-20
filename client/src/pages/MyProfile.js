@@ -386,7 +386,7 @@ const MyProfile = () => {
               <FileText /> Invoices
             </div>
 
-            <div
+            {/* <div
               role="button"
               onClick={() => {
                 currentTab !== "mySchedule" && setCurrentTab("mySchedule");
@@ -399,7 +399,7 @@ const MyProfile = () => {
               } `}
             >
               <CalendarCheck /> My Schedule
-            </div>
+            </div> */}
 
             <div
               role="button"
