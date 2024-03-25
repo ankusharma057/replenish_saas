@@ -995,7 +995,7 @@ export default function AddInvoices() {
                             } border-2 px-2`}
                             disabled={!selectedProduct}
                           >
-                            &#x2713;
+                            Add
                           </button>
                         </td>
                       </tr>
@@ -1027,7 +1027,7 @@ export default function AddInvoices() {
                               onClick={() => removeProduct(index)}
                               className="text-red-500   border-2 border-red-500 px-2"
                             >
-                              &#10005;
+                              Remove
                             </button>
                           </td>
                         </tr>
@@ -1144,7 +1144,7 @@ export default function AddInvoices() {
                             } border-2 px-2`}
                             disabled={!selectedRetailProduct}
                           >
-                            &#x2713;
+                            Add
                           </button>
                         </td>
                       </tr>
@@ -1173,7 +1173,7 @@ export default function AddInvoices() {
                               onClick={() => removeRetailProduct(index)}
                               className="text-red-500   border-2 border-red-500 px-2"
                             >
-                              &#10005;
+                              Remove
                             </button>
                           </td>
                         </tr>
