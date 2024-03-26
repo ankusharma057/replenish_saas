@@ -751,18 +751,18 @@ export default function AddInvoices() {
                     className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                   />
                 </label>
-                <div className="flex gap-4 mt-2 md:mt-0">
-                  <BeforeAfterMediaModal
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    beforeImages={beforeImages}
-                    setBeforeImages={setBeforeImages}
-                    afterImages={afterImages}
-                    setAfterImages={setAfterImages}
-                    setBlobForAfter={setBlobForAfter}
-                    setBlobForBefore={setBlobForBefore}
-                  />
-                </div>
+                // <div className="flex gap-4 mt-2 md:mt-0">
+                //   <BeforeAfterMediaModal
+                //     showModal={showModal}
+                //     setShowModal={setShowModal}
+                //     beforeImages={beforeImages}
+                //     setBeforeImages={setBeforeImages}
+                //     afterImages={afterImages}
+                //     setAfterImages={setAfterImages}
+                //     setBlobForAfter={setBlobForAfter}
+                //     setBlobForBefore={setBlobForBefore}
+                //   />
+                // </div>
               </div>
             </div>
             <div
