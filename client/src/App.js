@@ -195,7 +195,7 @@ function App() {
                   <>
                     <Route path="/inventories" element={<Inventory />} />
                     <Route path="/employees" element={<Employee />} />
-                    <Route path="/schedule" element={<Schedule />} />
+                    {/* <Route path="/schedule" element={<Schedule />} /> */}
                     <Route path="/treatment" element={<Treatment />} />
                   </>
                 )}

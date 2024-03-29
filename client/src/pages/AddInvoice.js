@@ -11,7 +11,7 @@ import {
 } from "../Server";
 import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
+// import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
 import { useAuthContext } from "../context/AuthUserContext";
 
 const initialFormState = {
@@ -751,18 +751,18 @@ export default function AddInvoices() {
                     className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                   />
                 </label>
-                <div className="flex gap-4 mt-2 md:mt-0">
-                  <BeforeAfterMediaModal
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    beforeImages={beforeImages}
-                    setBeforeImages={setBeforeImages}
-                    afterImages={afterImages}
-                    setAfterImages={setAfterImages}
-                    setBlobForAfter={setBlobForAfter}
-                    setBlobForBefore={setBlobForBefore}
-                  />
-                </div>
+                // <div className="flex gap-4 mt-2 md:mt-0">
+                //   <BeforeAfterMediaModal
+                //     showModal={showModal}
+                //     setShowModal={setShowModal}
+                //     beforeImages={beforeImages}
+                //     setBeforeImages={setBeforeImages}
+                //     afterImages={afterImages}
+                //     setAfterImages={setAfterImages}
+                //     setBlobForAfter={setBlobForAfter}
+                //     setBlobForBefore={setBlobForBefore}
+                //   />
+                // </div>
               </div>
             </div>
             <div
@@ -995,7 +995,7 @@ export default function AddInvoices() {
                             } border-2 px-2`}
                             disabled={!selectedProduct}
                           >
-                            &#x2713;
+                            Add
                           </button>
                         </td>
                       </tr>
@@ -1027,7 +1027,7 @@ export default function AddInvoices() {
                               onClick={() => removeProduct(index)}
                               className="text-red-500   border-2 border-red-500 px-2"
                             >
-                              &#10005;
+                              Remove
                             </button>
                           </td>
                         </tr>
@@ -1144,7 +1144,7 @@ export default function AddInvoices() {
                             } border-2 px-2`}
                             disabled={!selectedRetailProduct}
                           >
-                            &#x2713;
+                            Add
                           </button>
                         </td>
                       </tr>
@@ -1173,7 +1173,7 @@ export default function AddInvoices() {
                               onClick={() => removeRetailProduct(index)}
                               className="text-red-500   border-2 border-red-500 px-2"
                             >
-                              &#10005;
+                              Remove
                             </button>
                           </td>
                         </tr>
