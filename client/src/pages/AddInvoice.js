@@ -751,18 +751,7 @@ export default function AddInvoices() {
                     className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                   />
                 </label>
-                // <div className="flex gap-4 mt-2 md:mt-0">
-                //   <BeforeAfterMediaModal
-                //     showModal={showModal}
-                //     setShowModal={setShowModal}
-                //     beforeImages={beforeImages}
-                //     setBeforeImages={setBeforeImages}
-                //     afterImages={afterImages}
-                //     setAfterImages={setAfterImages}
-                //     setBlobForAfter={setBlobForAfter}
-                //     setBlobForBefore={setBlobForBefore}
-                //   />
-                // </div>
+          
               </div>
             </div>
             <div
@@ -784,6 +773,16 @@ export default function AddInvoices() {
                       className="ml-1"
                     />
                   </label>
+                  {/* <label className="mb-2 block">
+                    Provider Purchased:
+                    <input
+                      type="checkbox"
+                      name="providerPurchased"
+                      checked={formData.providerPurchased}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-1"
+                    />
+                  </label> */}
                   <label className="block">
                     GFE:
                     <input
@@ -795,7 +794,7 @@ export default function AddInvoices() {
                     />
                   </label>
                   <label className="block">
-                    Semaglitude Consulation:
+                    Semaglitude :
                     <input
                       type="checkbox"
                       name="semaglitudeConsultation"
@@ -804,6 +803,7 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
+                  
                   <label className="mb-2 block">
                     Paid by Client Cash:
                     <input

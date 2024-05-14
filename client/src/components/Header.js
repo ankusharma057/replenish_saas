@@ -141,7 +141,7 @@ export default memo(function Header() {
                   </Link>
                 </button>
               )}
-              {(authUserState.user?.is_inv_manager === true ||
+              {/* {(authUserState.user?.is_inv_manager === true ||
                 authUserState.user?.is_admin) === true && (
                 <button
                   onClick={handleMenuSHow}
@@ -158,7 +158,7 @@ export default memo(function Header() {
                     Treatments
                   </Link>
                 </button>
-              )}
+              )} */}
 
               <button
                 onClick={handleMenuSHow}

@@ -467,7 +467,7 @@ const Employee = () => {
                         <tr>
                           <th className="px-4">Service Percentage:</th>
                           <td>
-                            CreateStaffCard{" "}
+                            {/* CreateStaffCard{" "} */}
                             <div className="flex items-center">
                               <LineInput
                                 type="number"
