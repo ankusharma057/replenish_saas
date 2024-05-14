@@ -225,7 +225,10 @@ export default function AddInvoices() {
     }
 
     if (formData?.semaglitudeConsultation) {
-      afterTax.semagConsultFee = 75;
+      // Calculate semaglutide fee based on 20% of the gross client payment
+      const grossClientPayment = formData.paidByClientCash + formData.paidByClientCredit;
+      const semaglutideFee = grossClientPayment * 0.2
+      afterTax.semagConsultFee = semaglutideFee < 0 ? 0 : semaglutideFee;
     }
 
     if (formData?.conciergeFeePaid) {
