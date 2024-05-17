@@ -245,7 +245,7 @@ export default function AddInvoices() {
 
     const semaglitude_percentage =
       selectedProduct?.product_type === "Semaglitude" ||
-      selected_product_types.includes("Semaglitude")
+      selected_product_types.includes("Semaglitude") || formData?.semaglitudeConsultation
         ? 20
         : authUserState.user?.service_percentage;
 
@@ -270,6 +270,7 @@ export default function AddInvoices() {
         (parseInt(authUserState.user?.retail_percentage) || 0)) /
         100 +
       afterTax.conciergeFee;
+
     if (authUserState.user?.gfe && formData?.gfe && totalPaidByClientAT === 0) {
       total = 30;
       if (authUserState.user.email === "houstonbeautifulaesthetics@gmail.com")
