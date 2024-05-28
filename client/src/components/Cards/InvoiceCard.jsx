@@ -11,7 +11,7 @@ const InvoiceCard = ({ invoice, seeMore, finalizeInvoiceSubmit }) => {
         </Card.Title>
         <Button
           onClick={() => seeMore(invoice)}
-          className="mb-3"
+          className="mb-3 text-white"
           variant="info"
         >
           See More Details
@@ -22,6 +22,7 @@ const InvoiceCard = ({ invoice, seeMore, finalizeInvoiceSubmit }) => {
           style={{ display: invoice.is_finalized ? "none" : "inline" }}
           onClick={() => finalizeInvoiceSubmit(invoice)}
           variant="info"
+          className="text-white"
         >
           Finalize Invoice
         </Button>

@@ -717,6 +717,7 @@ export default function AddInvoices() {
                 onClick={() => {
                   addMoreInvoice(true);
                 }}
+                className="!bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                 disabled={invoiceArray?.length >= 4}
               >
                 Add Client
@@ -1197,7 +1198,7 @@ export default function AddInvoices() {
 
                 <Loadingbutton
                   isLoading={loading}
-                  className="w-full sm-hidden md:block bg-blue-500 text-white px-4 py-2"
+                  className="w-full sm-hidden md:block text-white px-4 py-2 !bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                   title="Submit"
                   loadingText={"Adding Invoices..."}
                   type="submit"

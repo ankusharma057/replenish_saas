@@ -294,6 +294,7 @@ function CustomModal({
             {fiInvoiceList === false && (
               <>
                 <Button
+                  className="!bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                   onClick={() => {
                     setShowUpdateModal(true);
                     // onHide();
@@ -469,7 +470,7 @@ function CustomModal({
               </div>
               <div className="flex flex-row justify-content-between">
                 <Button
-                  className="mx-1"
+                  className="mx-1 !bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                   onClick={() => handleCollapse()}
                   variant="primary"
                 >
@@ -477,7 +478,7 @@ function CustomModal({
                 </Button>
                 <Button
                   disabled={!editImages}
-                  className="mx-1"
+                  className="mx-1 !bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                   onClick={() => handleEditImages()}
                   variant="primary"
                 >

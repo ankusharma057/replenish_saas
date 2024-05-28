@@ -437,11 +437,12 @@ const InventoryTab = ({
             </Form>
           ) : (
             <Button
-              className="w-full mb-2"
+              className="w-full text-white mb-2"
               onClick={() => {
                 setIsUpdate(true);
                 setShowAddNew(true);
               }}
+              variant="info"
             >
               Add New
             </Button>

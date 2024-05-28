@@ -360,7 +360,8 @@ const Employee = () => {
                 setShowCreateUserModal(true);
                 setCurrentTab("staff");
               }}
-              className="w-full"
+              variant="info"
+              className="w-full text-white"
             >
               + Add Employee
             </Button>
@@ -381,7 +382,7 @@ const Employee = () => {
                       key={tab.value}
                       id={tab.value}
                       type="radio"
-                      className={` !border-none !no-underline !rounded-t-lg ${
+                      className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 ${
                         currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
                       }`}
                       name="radio"
@@ -563,6 +564,7 @@ const Employee = () => {
                       <Loadingbutton
                         onClick={sendResetPasswordLink}
                         title={"Send"}
+                        className="!bg-cyan-400 !border-cyan-400 hover:!bg-cyan-500 focus:!bg-cyan-500"
                       />
                     </div>
 

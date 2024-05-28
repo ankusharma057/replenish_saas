@@ -75,7 +75,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="name"
             placeholder={`Enter Name`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             type="text"
             name="name"
             onChange={handleChange}
@@ -86,7 +86,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="vendor_name"
             placeholder={`Vendor Name`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             type="text"
             name="vendor_name"
             //   value={formData.vendor_name}
@@ -98,7 +98,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="email"
             placeholder={`Enter Email`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             type="email"
             name="email"
             onChange={handleChange}
@@ -109,7 +109,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="password"
             placeholder={`*******`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             onChange={handleChange}
             type="password"
             name="password"
@@ -120,7 +120,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="service_percentage"
             placeholder={`Enter Service Percentage`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             onChange={handleChange}
             type="number"
             min="0"
@@ -132,7 +132,7 @@ export default function CreateStaffCard({ show, onHide }) {
             controlId="retail_percentage"
             placeholder={`Enter Retail Percentage`}
             required={true}
-            labelClassName="font-medium text-blue-800"
+            labelClassName="font-medium text-cyan-800"
             onChange={handleChange}
             type="number"
             name="retail_percentage"
@@ -142,7 +142,7 @@ export default function CreateStaffCard({ show, onHide }) {
           <div className="mb-4">
             <label
               htmlFor="gfe"
-              className="text-base me-3 font-medium text-blue-800"
+              className="text-base me-3 font-medium text-cyan-800"
             >
               GFE
             </label>
@@ -152,14 +152,14 @@ export default function CreateStaffCard({ show, onHide }) {
               name="gfe"
               value={formData.gfe}
               onChange={handleChange}
-              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
             />
           </div>
 
           <div className="mb-4">
             <label
               htmlFor="is_admin"
-              className="text-base me-3 font-medium text-blue-800"
+              className="text-base me-3 font-medium text-cyan-800"
             >
               Admin
             </label>
@@ -169,14 +169,14 @@ export default function CreateStaffCard({ show, onHide }) {
               name="is_admin"
               value={formData.is_admin}
               onChange={handleChange}
-              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
             />
           </div>
 
           <div className=" ">
             <label
               htmlFor="is_inv_manager"
-              className="text-base me-3 font-medium text-blue-800"
+              className="text-base me-3 font-medium text-cyan-800"
             >
               Inventory Manager
             </label>
@@ -186,7 +186,7 @@ export default function CreateStaffCard({ show, onHide }) {
               name="is_inv_manager"
               value={formData.is_inv_manager}
               onChange={handleChange}
-              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
             />
           </div>
 
@@ -195,7 +195,7 @@ export default function CreateStaffCard({ show, onHide }) {
             title="Sign up"
             loadingText={"Creating User..."}
             type="submit"
-            className="bg-blue-500 w-full  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="!bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           />
         </Form>
       </div>

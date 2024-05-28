@@ -26,6 +26,7 @@ const ClientResetPassword = lazy(() =>
   import("./pages/Clients/ClientResetPassword")
 );
 const ClientRoot = lazy(() => import("./pages/Clients"));
+const AllClientRoot = lazy(() => import("./pages/AllClients"));
 const ClientAppointment = lazy(() =>
   import("./pages/Clients/ClientAppointments")
 );
@@ -150,6 +151,7 @@ function App() {
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />
           <Route path="/clients/signin" element={<ClientSignIn />} />
+          <Route path="/customers" element={<AllClientRoot />} />
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
           <Route
@@ -195,7 +197,7 @@ function App() {
                   <>
                     <Route path="/inventories" element={<Inventory />} />
                     <Route path="/employees" element={<Employee />} />
-                    {/* <Route path="/schedule" element={<Schedule />} /> */}
+                    <Route path="/schedule" element={<Schedule />} />
                     <Route path="/treatment" element={<Treatment />} />
                   </>
                 )}

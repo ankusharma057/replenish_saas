@@ -198,7 +198,7 @@ const Invoice = () => {
                 id={`radio-${idx}`}
                 type="radio"
                 className={`custom-toggle-btn ${
-                  radioValue === radio.value ? "btn-blue" : "btn-white"
+                  radioValue === radio.value ? "!rounded-2xl !font-medium !text-[1.2rem] !px-12 !bg-cyan-400 !border-cyan-500 " : "btn-white"
                 } toggle-button `}
                 name="radio"
                 style={{
@@ -234,9 +234,9 @@ const Invoice = () => {
         <div className="static lg:absolute right-4 ">
           <Button
             type="button"
-            style={{ background: "#0A59CA" }}
+            // style={{ background: "#0A59CA" }}
             onClick={() => setShowMultipleFinalizeModal(true)}
-            className=" whitespace-nowrap px-4"
+            className=" whitespace-nowrap px-4 !bg-cyan-400 !border-cyan-500"
           >
             Finalize Multiple
           </Button>
@@ -295,12 +295,14 @@ const Invoice = () => {
           {/* Pagination controls */}
           <Button
             onClick={() => handlePageChange(currentPage - 1)}
+            className="!bg-cyan-400 !border-cyan-500"
             disabled={currentPage === 1}
           >
             <ChevronLeft />
           </Button>
           <Button
             onClick={() => handlePageChange(currentPage + 1)}
+            className="!bg-cyan-400 !border-cyan-500"
             disabled={
               currentPage ===
               Math.ceil((invoiceList[selectList] || []).length / itemPerPage)

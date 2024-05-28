@@ -49,6 +49,7 @@ const CompanyInvTable = ({
               <Button
                 variant="info"
                 onClick={() => onComInvUpdate(row.original)}
+                className="text-white"
               >
                 Update
               </Button>
@@ -89,12 +90,16 @@ const CompanyInvTable = ({
         <Button
           disabled={!table.getCanPreviousPage()}
           onClick={() => table.previousPage()}
+          variant="info"
+          className="text-white"
         >
           <ChevronLeft />
         </Button>
         <Button
           disabled={!table.getCanNextPage()}
           onClick={() => table.nextPage()}
+          variant="info"
+          className="text-white"
         >
           <ChevronRight />
         </Button>

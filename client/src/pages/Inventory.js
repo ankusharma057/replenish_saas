@@ -596,7 +596,7 @@ const Inventory = () => {
                 id={`radio-${idx}`}
                 type="radio"
                 className={`!flex !justify-center !items-center custom-toggle-btn !p-1 sm:!p-3 !text-sm ${
-                  radioValue === radio.value ? "btn-blue" : "btn-white"
+                  radioValue === radio.value ? "!rounded-2xl !font-medium !text-[1.2rem] !px-12 !bg-cyan-400 !border-cyan-500 " : "btn-white"
                 } toggle-button `}
                 name="radio"
                 value={radio.value}
@@ -648,7 +648,8 @@ const Inventory = () => {
                       update: false,
                     });
                   }}
-                  className="truncate rounded-full !text-sm md:!text-base"
+                  variant="info"
+                  className="truncate text-white rounded-full !text-sm md:!text-base"
                 >
                   Add Inventory
                 </Button>

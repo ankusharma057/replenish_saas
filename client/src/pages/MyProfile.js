@@ -318,7 +318,7 @@ const MyProfile = () => {
       <AsideLayout
         asideContent={
           <div className="bg-white p-2 min-h-[90%] flex flex-col gap-2">
-            <h1 className="text-2xl font-bold text-center text-blue-600">
+            <h1 className="text-2xl font-bold text-center text-cyan-600">
               {authUserState.user?.name}
             </h1>
             <div
@@ -562,7 +562,7 @@ const MyProfile = () => {
           {currentTab === "products" &&
             (authUserState.user?.employees_inventories?.length > 0 ? (
               <div className=" sm:container mx-auto my-3">
-                <h2 className="text-4xl font-bold text-center text-blue-400">
+                <h2 className="text-4xl font-bold text-center text-cyan-400">
                   Products
                 </h2>
                 <Table
@@ -607,6 +607,7 @@ const MyProfile = () => {
                                 setAssigninventory_object(data);
                                 setShowAssignMadal(true);
                               }}
+                              className="text-white"
                             >
                               Assign
                             </Button>
@@ -618,7 +619,7 @@ const MyProfile = () => {
                 </Table>
               </div>
             ) : (
-              <h2 className="text-4xl font-bold text-center text-blue-400">
+              <h2 className="text-4xl font-bold text-center text-cyan-400">
                 No Product Found
               </h2>
             ))}
@@ -627,7 +628,7 @@ const MyProfile = () => {
               (prompt) => !prompt.is_accepted === true
             )?.length > 0 ? (
               <div className="sm:container">
-                <h2 className="text-4xl font-bold text-center text-blue-400">
+                <h2 className="text-4xl font-bold text-center text-cyan-400">
                   Inventory Assigned
                 </h2>
                 <Table bordered hover responsive className="mt-4 text-center">
@@ -678,6 +679,7 @@ const MyProfile = () => {
                                       });
                                     }}
                                     variant="info"
+                                    className="text-white"
                                   >
                                     Accept
                                   </Button>
@@ -700,7 +702,7 @@ const MyProfile = () => {
                 </Table>
               </div>
             ) : (
-              <h2 className="text-4xl font-bold text-center text-blue-400">
+              <h2 className="text-4xl font-bold text-center text-cyan-400">
                 No Assigned Inventory Found
               </h2>
             ))}
@@ -709,7 +711,7 @@ const MyProfile = () => {
               (request) => !request.is_approved
             )?.length > 0 ? (
               <>
-                <h2 className="text-4xl font-bold text-center text-blue-400">
+                <h2 className="text-4xl font-bold text-center text-cyan-400">
                   Pending Requests
                 </h2>
                 <div className=" sm:container mx-auto my-3">
@@ -761,7 +763,7 @@ const MyProfile = () => {
                 </div>
               </>
             ) : (
-              <h2 className="text-4xl font-bold text-center text-blue-400">
+              <h2 className="text-4xl font-bold text-center text-cyan-400">
                 No Pending Requests Found
               </h2>
             ))}
@@ -773,6 +775,8 @@ const MyProfile = () => {
                 <Button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
+                  variant="info"
+                  className="text-white"
                 >
                   <ChevronLeft />
                 </Button>
@@ -784,6 +788,8 @@ const MyProfile = () => {
                       (authUserState.user?.invoices || []).length / itemPerPage
                     )
                   }
+                  variant="info"
+                  className="text-white"
                 >
                   <ChevronRight />
                 </Button>
@@ -808,6 +814,7 @@ const MyProfile = () => {
                                 handleClick();
                               }}
                               variant="info"
+                              className="text-white"
                             >
                               See More Details
                             </Button>
@@ -817,7 +824,7 @@ const MyProfile = () => {
                     );
                   })
                 ) : (
-                  <h2 className="text-4xl font-bold text-center text-blue-400">
+                  <h2 className="text-4xl font-bold text-center text-cyan-400">
                     No Invoice Found
                   </h2>
                 )}

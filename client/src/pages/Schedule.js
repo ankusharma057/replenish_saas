@@ -592,6 +592,8 @@ function Schedule() {
                       onClick={() =>
                         setAddLocationModal((pre) => ({ ...pre, show: true }))
                       }
+                      variant="info"
+                      className="text-white"
                     >
                       Add
                     </Button>
@@ -600,8 +602,8 @@ function Schedule() {
               )}
               <Button
                 onClick={handleAvailabilityButtonClick}
-                variant={"primary"}
-                className="ml-2"
+                variant={"info"}
+                className="ml-2 text-white"
               >
                 Mark Availability
               </Button>
