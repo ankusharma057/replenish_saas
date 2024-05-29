@@ -13,6 +13,8 @@ import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 // import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
 import { useAuthContext } from "../context/AuthUserContext";
+import { MdOutlineCancel } from "react-icons/md";
+import { IoMdAddCircle } from "react-icons/io";
 
 const initialFormState = {
   clientName: "",
@@ -723,12 +725,12 @@ export default function AddInvoices() {
                 Add Client
               </Button>
             </div>
-            <div className="border rounded-sm p-2 mb-4 flex flex-wrap justify-start md:justify-around">
+            <div className="border rounded-lg gap-4 p-2 py-4 items-center mb-4 mt-4 flex flex-col flex-wrap justify-center md:flex-row md:justify-around">
               <div className="text-center">
                 <h4>Provider:</h4>
                 <div>{authUserState.user?.name}</div>
               </div>
-              <div className="flex gap-4 mt-2 md:mt-0">
+              <div className="flex flex-col w-full gap-4 mt-2 md:w-auto md:mt-0 md:flex-row">
                 <label className=" mb-3 block relative">
                   Client Name:
                   <input
@@ -767,8 +769,8 @@ export default function AddInvoices() {
               className="flex flex-col-reverse md:grid"
             >
               <div className=" pb-4 md:pb-1 px-2">
-                <div className="border rounded-sm p-2 mb-4 w-100">
-                  <label className="mb-2 block">
+                <div className="border flex flex-col gap-3 rounded-lg p-2 mb-4 w-100">
+                  <label className=" flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
                     Concierge Fee Paid:
                     <input
                       type="checkbox"
@@ -788,7 +790,7 @@ export default function AddInvoices() {
                       className="ml-1"
                     />
                   </label> */}
-                  <label className="block">
+                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
                     GFE:
                     <input
                       type="checkbox"
@@ -798,8 +800,8 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
-                  <label className="block">
-                    Semaglitude :
+                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
+                    Semaglitude:
                     <input
                       type="checkbox"
                       name="semaglitudeConsultation"
@@ -808,8 +810,8 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
-                  
-                  <label className="mb-2 block">
+                  <div className="border-t-[1px]"></div>
+                  <label className="mb-2 block font-medium px-2">
                     Paid by Client Cash:
                     <input
                       type="number"
@@ -821,7 +823,7 @@ export default function AddInvoices() {
                       className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                     />
                   </label>
-                  <label className="mb-2 block">
+                  <label className="mb-2 block font-medium px-2">
                     Paid by Client Credit:
                     <input
                       type="number"
@@ -833,12 +835,12 @@ export default function AddInvoices() {
                       className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                     />
                   </label>
-                  <label className="block">
+                  <label className="block font-medium px-2">
                     Total paid by client: {getTotalPaidByClient()}
                   </label>
                 </div>
-                <div className="border rounded-sm p-2 mb-4 w-100">
-                  <label className="mb-2 block">
+                <div className="border rounded-lg p-2 mb-4 w-100">
+                  <label className="mb-2 block font-medium p-2">
                     Personal Discount:
                     <input
                       type="number"
@@ -850,7 +852,7 @@ export default function AddInvoices() {
                       className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                     />
                   </label>
-                  <label className="mb-2 block">
+                  <label className="mb-2 block font-medium p-2">
                     Tip:
                     <input
                       type="number"
@@ -863,8 +865,8 @@ export default function AddInvoices() {
                     />
                   </label>
                 </div>
-                <div className="border rounded-sm p-2 mb-4">
-                  <label className="mb-2 block ">
+                <div className="border rounded-lg p-2 mb-4">
+                  <label className="mb-2 block font-medium p-2">
                     Comments:
                     <input
                       type="text"
@@ -875,8 +877,8 @@ export default function AddInvoices() {
                     />
                   </label>
                 </div>
-                <div className="border rounded-sm p-2 mb-4 w-100">
-                  <label className="block">
+                <div className="border rounded-lg p-2 mb-4 w-100">
+                  <label className="block font-medium p-2">
                     Total:
                     <span ref={totalRef}>{Number(getTotal()).toFixed(2)}</span>
                   </label>
@@ -898,7 +900,7 @@ export default function AddInvoices() {
                 </button> */}
               </div>
               <div className="px-2">
-                <div className="border overflow-x-auto rounded-sm p-2 mb-4 products-used">
+                <div className="border rounded-lg p-2 mb-4 products-used">
                   <table className="w-full table-auto ">
                     <thead className="whitespace-normal">
                       <tr>
@@ -911,7 +913,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody className="whitespace-normal">
                       <tr key={1}>
-                        <td ref={suggestProductListRef}>
+                        <td className="relative" ref={suggestProductListRef}>
                           <input
                             type="text"
                             name="productName"
@@ -995,12 +997,12 @@ export default function AddInvoices() {
                             onClick={handleAddProduct}
                             className={`${
                               selectedProduct
-                                ? "text-green-500 border-green-500"
-                                : "text-gray-500 border-gray-500"
-                            } border-2 px-2`}
+                                ? "text-green-500 hover:animate-pulse "
+                                : "text-gray-500 "
+                            } px-2 `}
                             disabled={!selectedProduct}
                           >
-                            Add
+                            <IoMdAddCircle className="w-6 h-6" />
                           </button>
                         </td>
                       </tr>
@@ -1030,9 +1032,9 @@ export default function AddInvoices() {
                             <button
                               type="button"
                               onClick={() => removeProduct(index)}
-                              className="text-red-500   border-2 border-red-500 px-2"
+                              className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
                             >
-                              Remove
+                              <MdOutlineCancel className="w-6 h-6" />
                             </button>
                           </td>
                         </tr>
@@ -1043,7 +1045,7 @@ export default function AddInvoices() {
                     <span className="text-sm">{isAlert?.message}</span>
                   )}
                 </div>
-                <div className="border rounded-sm p-2 overflow-x-auto mb-4 retail-products">
+                <div className="border rounded-lg p-2 mb-4 retail-products">
                   <table className="w-full table-autol">
                     <thead>
                       <tr>
@@ -1056,7 +1058,7 @@ export default function AddInvoices() {
                     </thead>
                     <tbody>
                       <tr>
-                        <td ref={suggestRetailProductListRef}>
+                        <td className="relative" ref={suggestRetailProductListRef}>
                           <input
                             type="text"
                             name="productName"
@@ -1144,12 +1146,12 @@ export default function AddInvoices() {
                             onClick={handleAddRetailProduct}
                             className={`${
                               selectedRetailProduct
-                                ? "text-green-500 border-green-500"
-                                : "text-gray-500 border-gray-500"
-                            } border-2 px-2`}
+                                ? "text-green-500 hover:animate-pulse"
+                                : "text-gray-500 "
+                            } px-2`}
                             disabled={!selectedRetailProduct}
                           >
-                            Add
+                            <IoMdAddCircle className="w-6 h-6" />
                           </button>
                         </td>
                       </tr>
@@ -1176,9 +1178,9 @@ export default function AddInvoices() {
                             <button
                               type="button"
                               onClick={() => removeRetailProduct(index)}
-                              className="text-red-500   border-2 border-red-500 px-2"
+                              className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
                             >
-                              Remove
+                                <MdOutlineCancel className="w-6 h-6" />
                             </button>
                           </td>
                         </tr>
@@ -1189,7 +1191,7 @@ export default function AddInvoices() {
                     <span className="text-sm">{isAlert?.message}</span>
                   )}
                 </div>
-                <div className="border rounded-sm p-2 mb-4">
+                <div className="border rounded-lg p-2 mb-4">
                   <label className="block">
                     Total Product Price Sum:{" "}
                     {Number(getConsumableCostPrice() || 0)?.toFixed(2)}
