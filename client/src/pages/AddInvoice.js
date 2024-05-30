@@ -858,6 +858,7 @@ export default function AddInvoices() {
                       type="number"
                       onWheel={(e) => e.target.blur()}
                       name="tip"
+                      placeholder="0.00"
                       // value={Number(formData.tip).toString()}
                       min="0"
                       onChange={(event) => handleInputChange(event)}
@@ -926,7 +927,7 @@ export default function AddInvoices() {
                             className="w-full p-1 border-gray-500 border rounded-md"
                           />
                           {matchingProducts?.length >= 0 && (
-                            <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
+                            <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
                               {matchingProducts
                                 ?.filter(
                                   (item1) =>
@@ -1063,6 +1064,7 @@ export default function AddInvoices() {
                             type="text"
                             name="productName"
                             id="retail_product_name"
+                            placeholder="Select Product Name"
                             autoComplete="off"
                             value={currentRetailProduct?.name}
                             onClick={handleRetailProductNameChange}
@@ -1071,7 +1073,7 @@ export default function AddInvoices() {
                             // required
                           />
                           {matchingRetailProducts?.length > 0 && (
-                            <div className="absolute bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
+                            <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
                               {matchingRetailProducts
                                 ?.filter(
                                   (item1) =>
