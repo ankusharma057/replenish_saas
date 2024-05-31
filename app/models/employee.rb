@@ -1,4 +1,10 @@
 class Employee < ApplicationRecord
+  rolify
+
+  after_save :update_employee_roles
+
+  attr_accessor :is_admin, :is_inv_manager
+
   validates_uniqueness_of :name
   validates_uniqueness_of :email, case_sensitive: false
 
@@ -18,7 +24,23 @@ class Employee < ApplicationRecord
   has_secure_password
 
   %i[admins inv_managers].each do |role|
-    scope role.to_sym, -> { where(("is_"+role.to_s.chop!).to_sym => true) }
+    scope role.to_sym, -> { role_obj(role.to_s.chop!).employees }
+  end
+
+  def self.role_obj(name)
+    Role.find_by(name: name)
+  end
+
+  def is_admin?
+    has_role?(:admin)
+  end
+
+  def is_inv_manager?
+    has_role?(:inv_manager)
+  end
+
+  def mentor?
+    has_role?(:mentor)
   end
 
   def send_reset_password_mail
@@ -49,5 +71,28 @@ class Employee < ApplicationRecord
   def update_reference
     str = 5.times.map { (4...8).map { ('a'..'z').to_a[rand(26)] }.join }.join("").gsub(/\s+/, "")
     self.update(reference_number: str)
+  end
+
+  # Add role to the employee
+  def update_employee_roles
+    return unless ActiveRecord::Base.connection.table_exists? :roles
+
+    add_roles = []
+    remove_roles = []
+
+    if self.is_admin
+      add_roles << :admin
+    else
+      remove_roles << :admin
+    end
+
+    if self.is_inv_manager
+      add_roles << :inv_manager
+    else
+      remove_roles << :inv_manager
+    end
+
+    add_roles.each { |role| self.add_role role } if !add_roles.empty?
+    remove_roles.each { |role| self.remove_role role } unless remove_roles.empty?
   end
 end

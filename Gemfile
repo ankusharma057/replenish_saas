@@ -9,6 +9,9 @@ gem "rails", "~> 7.0.4", ">= 7.0.4.2"
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
 
+# Use rolify for roles
+gem 'rolify', '~> 6.0', '>= 6.0.1'
+
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
 

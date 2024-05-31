@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_31_070435) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -47,20 +47,35 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
     t.integer "employee_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email"
+    t.string "temp_password"
+    t.string "password_digest"
+    t.string "stripe_id"
+    t.string "timezone", default: "UTC"
+  end
+
+  create_table "employee_locations", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.bigint "location_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_employee_locations_on_employee_id"
+    t.index ["location_id"], name: "index_employee_locations_on_location_id"
   end
 
   create_table "employees", force: :cascade do |t|
     t.string "name"
     t.string "email"
     t.string "password_digest"
-    t.boolean "is_admin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "temp_password"
     t.boolean "gfe"
     t.integer "service_percentage"
-    t.boolean "is_inv_manager"
     t.integer "retail_percentage", default: 0
+    t.string "has_access_only_to", default: "all"
+    t.string "vendor_name"
+    t.string "reference_number"
   end
 
   create_table "employees_inventories", force: :cascade do |t|
@@ -69,6 +84,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
     t.float "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "employees_roles", id: false, force: :cascade do |t|
+    t.bigint "employee_id"
+    t.bigint "role_id"
+    t.index ["employee_id", "role_id"], name: "index_employees_roles_on_employee_id_and_role_id"
+    t.index ["employee_id"], name: "index_employees_roles_on_employee_id"
+    t.index ["role_id"], name: "index_employees_roles_on_role_id"
   end
 
   create_table "inventories", force: :cascade do |t|
@@ -127,6 +150,24 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
     t.float "total_consumable_cost"
   end
 
+  create_table "locations", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.string "session_id"
+    t.string "status"
+    t.bigint "client_id"
+    t.bigint "schedule_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "amount"
+    t.index ["client_id"], name: "index_payments_on_client_id"
+    t.index ["schedule_id"], name: "index_payments_on_schedule_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.string "name"
     t.string "product_type"
@@ -143,6 +184,62 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_22_105246) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "roles", force: :cascade do |t|
+    t.string "name"
+    t.string "resource_type"
+    t.bigint "resource_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
+    t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
+  end
+
+  create_table "schedules", force: :cascade do |t|
+    t.string "product_type"
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.datetime "date"
+    t.bigint "employee_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "client_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "treatment_id"
+    t.integer "location_id"
+    t.string "remainder", default: [], array: true
+    t.index ["client_id"], name: "index_schedules_on_client_id"
+    t.index ["employee_id"], name: "index_schedules_on_employee_id"
+    t.index ["product_id"], name: "index_schedules_on_product_id"
+    t.index ["treatment_id"], name: "index_schedules_on_treatment_id"
+  end
+
+  create_table "treatments", force: :cascade do |t|
+    t.string "name"
+    t.string "duration"
+    t.bigint "product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_treatments_on_product_id"
+  end
+
+  create_table "unavailabilities", force: :cascade do |t|
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.boolean "available"
+    t.bigint "employee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "every_week", default: false
+    t.index ["employee_id"], name: "index_unavailabilities_on_employee_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "employee_locations", "employees"
+  add_foreign_key "employee_locations", "locations"
+  add_foreign_key "schedules", "clients"
+  add_foreign_key "schedules", "employees"
+  add_foreign_key "schedules", "products"
+  add_foreign_key "schedules", "treatments"
+  add_foreign_key "unavailabilities", "employees"
 end
