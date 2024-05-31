@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_31_070435) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_31_135913) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -82,6 +82,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_070435) do
     t.integer "employee_id"
     t.integer "product_id"
     t.float "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "employees_mentors", force: :cascade do |t|
+    t.integer "employee_id"
+    t.integer "mentor_id"
+    t.integer "mentor_percentage", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

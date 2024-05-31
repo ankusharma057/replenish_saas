@@ -2,7 +2,7 @@ class EmployeeSerializer < ActiveModel::Serializer
   attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
-             :roles, :is_admin, :is_inv_manager
+             :roles, :is_admin, :is_inv_manager, :is_mentor, :employees_mentors
 
   has_many :invoices
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
@@ -35,5 +35,9 @@ class EmployeeSerializer < ActiveModel::Serializer
 
   def is_inv_manager
     object.is_inv_manager?
+  end
+
+  def is_mentor
+    object.is_mentor?
   end
 end

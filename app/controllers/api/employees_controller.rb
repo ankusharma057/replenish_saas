@@ -6,7 +6,17 @@ class Api::EmployeesController < ApplicationController
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
-    employees = Employee.all
+    type = params[:type].to_s.downcase
+    scope_name = type.blank? ? nil : "#{type}s"
+
+    if scope_name.blank?
+      employees = Employee.all
+    elsif Employee.respond_to?(scope_name)
+      employees = Employee.send(scope_name)
+    else
+      render json: { error: 'Type is not valid' }, status: :bad_request and return
+    end
+
     render json: employees, status: :ok
   end
 
@@ -106,7 +116,7 @@ class Api::EmployeesController < ApplicationController
   private
 
   def employee_params
-    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager)
+    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager, :is_mentor, employees_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy])
   end
 
   def find_employee
