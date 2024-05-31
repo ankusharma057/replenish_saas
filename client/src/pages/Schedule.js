@@ -582,7 +582,7 @@ function Schedule() {
               {serviceLocation?.length > 0 && (
                 <div className="flex items-center gap-x-2">
                   <Select
-                    className="w-80"
+                    className="w-80 z-40"
                     options={serviceLocation}
                     placeholder="Search Places"
                     onChange={onLocationChange}

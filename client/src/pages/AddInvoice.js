@@ -15,6 +15,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { useAuthContext } from "../context/AuthUserContext";
 import { MdOutlineCancel } from "react-icons/md";
 import { IoMdAddCircle } from "react-icons/io";
+import Select from "react-select";
 
 const initialFormState = {
   clientName: "",
@@ -52,7 +53,8 @@ export default function AddInvoices() {
   const [clientName, setClientName] = useState("");
   const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [productList, setProductList] = useState([]);
+  const [retailProductList, setRetailProductList] = useState([]);
   const [formData, setFormData] = useState({
     ...initialFormState,
   });
@@ -73,6 +75,38 @@ export default function AddInvoices() {
   const [blobsForAfter, setBlobForAfter] = useState([]);
 
   useEffect(() => {
+    const newProducts = []
+    authUserState.user?.employees_inventories.forEach((inventory, index) => {
+      if (
+        inventory?.product !== undefined &&
+        inventory?.product !== null &&
+        inventory?.product !== "" &&
+        inventory?.product?.product_type !== undefined
+      ) {
+        if (!inventory?.product.product_type.includes("Retail")) {
+          newProducts.push({ ...inventory?.product, label: inventory?.product.name, value: index });
+        }
+      }
+      // change to only user
+    });
+    setProductList(newProducts);
+    const newRetailProductList = [];
+    // change to only user
+
+    authUserState.user?.employees_inventories.forEach((inventory, index) => {
+      if (
+        inventory?.product !== undefined &&
+        inventory?.product !== null &&
+        inventory?.product !== "" &&
+        inventory?.product?.product_type !== undefined
+      ) {
+        if (inventory?.product.product_type.includes("Retail")) {
+          newRetailProductList.push({...inventory?.product, label: inventory?.product.name, value: index});
+        }
+      }
+      // change to only user
+    });
+    setRetailProductList(newRetailProductList)
     const handleClickOutside = (event) => {
       if (
         suggestProductListRef.current &&
@@ -96,6 +130,99 @@ export default function AddInvoices() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+  console.log(productList, 'product list new');
+  console.log(retailProductList, 'retail product list new');
+
+  const handleProductListChange = async (selectedOption) => {
+    console.log(selectedOption, 'selected option;');
+    setSelectedProduct(selectedOption);
+    if (selectedOption) {
+      if (Number(selectedOption?.quantity) <= 0.009) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
+      if (selectedOption?.quantity > selectedOption?.maxQtantity) {
+        setIsAlert({
+          productUsedShow: true,
+          message: `Unable to add ${selectedOption?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
+      setCurrentProduct({ name: "", price: 0, quantity: 1 });
+      let productToBeAdded = {
+        ...selectedOption,
+        quantity: 1,
+      };
+      setSelectedProduct(null);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        products: [...formData.products, productToBeAdded],
+      }));
+      const newValues = productList.filter(obj => obj.id !== selectedOption.id);
+      console.log(newValues, "newValues is already in the list");
+      setProductList([...newValues])
+    }
+    // const { data } = await getLocationEmployee(selectedOption?.id);
+    // if (data?.length > 0) {
+    //   setEmployeeList(data);
+    //   setSelectedEmployeeData(null);
+    // }
+  };
+
+  const handleRetailProductListChange = async (selectedOption) => {
+    setSelectedRetailProduct(selectedOption)
+    if (selectedOption) {
+      if (Number(selectedOption?.quantity) <= 0.009) {
+        setIsAlert({
+          retailShow: true,
+          productUsedShow: false,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
+      if (selectedOption?.quantity > selectedOption?.maxQtantity) {
+        setIsAlert({
+          retailShow: true,
+          message: `Unable to add ${selectedOption?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
+
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
+      setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
+      let retailProductToBeAdded = {
+        ...selectedOption,
+        quantity: 1,
+      };
+      setSelectedRetailProduct(null);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        retailProducts: [...formData.retailProducts, retailProductToBeAdded],
+      }));
+      const newValues = retailProductList.filter(obj => obj.id !== selectedOption.id);
+      console.log(newValues, "newValues is already in the list");
+      setRetailProductList([...newValues])
+
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
+    }
+  };
+
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     const inputValue =
@@ -114,22 +241,24 @@ export default function AddInvoices() {
     }
   };
 
-  const removeProduct = (index) => {
+  const removeProduct = (index, product) => {
     const updatedProducts = [...formData.products];
     updatedProducts.splice(index, 1);
     setFormData((prevFormData) => ({
       ...prevFormData,
       products: updatedProducts,
     }));
+    setProductList([...productList, product]);
   };
 
-  const removeRetailProduct = (index) => {
+  const removeRetailProduct = (index, product) => {
     const updatedProducts = [...formData.retailProducts];
     updatedProducts.splice(index, 1);
     setFormData((prevFormData) => ({
       ...prevFormData,
       retailProducts: updatedProducts,
     }));
+    setRetailProductList([...retailProductList, product]);
   };
   const getTotalPaidByClient = () => {
     let totalPaid = formData.paidByClientCash + formData.paidByClientCredit;
@@ -247,7 +376,7 @@ export default function AddInvoices() {
 
     const semaglitude_percentage =
       selectedProduct?.product_type === "Semaglitude" ||
-      selected_product_types.includes("Semaglitude") || formData?.semaglitudeConsultation
+        selected_product_types.includes("Semaglitude") || formData?.semaglitudeConsultation
         ? 20
         : authUserState.user?.service_percentage;
 
@@ -270,7 +399,7 @@ export default function AddInvoices() {
       afterTax.tip +
       (afterTax.retailTotal *
         (parseInt(authUserState.user?.retail_percentage) || 0)) /
-        100 +
+      100 +
       afterTax.conciergeFee;
 
     if (authUserState.user?.gfe && formData?.gfe && totalPaidByClientAT === 0) {
@@ -351,12 +480,13 @@ export default function AddInvoices() {
       input === ""
         ? productList
         : productList?.filter((product) =>
-            product?.name.toLowerCase().includes(input.toLowerCase())
-          );
+          product?.name.toLowerCase().includes(input.toLowerCase())
+        );
     setMatchingProducts(matchedProducts);
   };
   const handleProductSelection = (selectedProductName) => {
     // change to only user
+    console.log(selectedProductName, "selectedProduct");
     const selectedProduct = authUserState.user?.employees_inventories?.find(
       (product) => product?.product?.name === selectedProductName
     );
@@ -372,11 +502,12 @@ export default function AddInvoices() {
               allInvoiceProductsList?.productQuantities[
                 selectedProduct?.product?.id
               ]?.sumofQuantity) ||
-              0
+            0
           ),
         id: selectedProduct.product?.id,
       });
       setSelectedProduct(selectedProduct?.product);
+      handleAddProduct();
       setMatchingProducts([]);
 
       // change to only user
@@ -386,8 +517,15 @@ export default function AddInvoices() {
       setMatchingProducts([]);
     }
   };
-  const handleQuantityChange = (e) => {
-    setCurrentProduct({ ...currentProduct, quantity: e.target.value });
+  const handleQuantityChange = (e, product) => {
+    function changeObjectPropertyValue(objectId, propertyName, newValue) {
+      let objectIndex = formData.products.findIndex(obj => obj.id === objectId); // Find the index of the object by its ID
+      if (objectIndex !== -1) { // If object is found
+          formData.products[objectIndex][propertyName] = newValue; // Change the property value
+      }
+  }
+  changeObjectPropertyValue(product.id, 'quantity', e.target.value);
+    // setFormData({ ...formData, quantity: e.target.value });
   };
   const handleAddProduct = () => {
     if (selectedProduct) {
@@ -448,8 +586,8 @@ export default function AddInvoices() {
       input === ""
         ? retailProductList
         : retailProductList?.filter((product) =>
-            product?.name.toLowerCase().includes(input.toLowerCase())
-          );
+          product?.name.toLowerCase().includes(input.toLowerCase())
+        );
 
     setMatchingRetailProducts(matchedProducts);
   };
@@ -470,7 +608,7 @@ export default function AddInvoices() {
               allInvoiceProductsList?.retailProductQuantities[
                 selectedProduct?.product?.id
               ]?.sumofQuantity) ||
-              0
+            0
           ),
         id: selectedProduct.product?.id,
       });
@@ -487,9 +625,17 @@ export default function AddInvoices() {
     }
   };
 
-  const handleRetailQuantityChange = (e) => {
-    const quantity = parseFloat(e.target.value);
-    setCurrentRetailProduct({ ...currentRetailProduct, quantity });
+  const handleRetailQuantityChange = (e, product) => {
+    function changeObjectPropertyValue(objectId, propertyName, newValue) {
+      let objectIndex = formData.retailProducts.findIndex(obj => obj.id === objectId); // Find the index of the object by its ID
+      if (objectIndex !== -1) { // If object is found
+          formData.retailProducts[objectIndex][propertyName] = newValue; // Change the property value
+      }
+  }
+  changeObjectPropertyValue(product.id, 'quantity', e.target.value);
+    // setFormData({ ...formData, quantity: e.target.value });
+    // const quantity = parseFloat(e.target.value);
+    // setCurrentRetailProduct({ ...currentRetailProduct, quantity });
   };
 
   const handleAddRetailProduct = () => {
@@ -585,7 +731,7 @@ export default function AddInvoices() {
       });
       return;
     }
-        let invoice = {
+    let invoice = {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
       clientname: clientName,
@@ -687,9 +833,9 @@ export default function AddInvoices() {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Failed to create Invoice"
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to create Invoice"
               );
             } finally {
               setLoading(false);
@@ -703,7 +849,8 @@ export default function AddInvoices() {
       ],
     });
   };
-
+  console.log(formData, "Invoice created successfully ");
+  console.log(allInvoiceProductsList,'llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
   return (
     <>
       {/* <Header /> */}
@@ -758,7 +905,7 @@ export default function AddInvoices() {
                     className="w-full mt-1 p-1 border-gray-300 border rounded-md"
                   />
                 </label>
-          
+
               </div>
             </div>
             <div
@@ -915,7 +1062,14 @@ export default function AddInvoices() {
                     <tbody className="whitespace-normal">
                       <tr key={1}>
                         <td className="relative" ref={suggestProductListRef}>
-                          <input
+                          {console.log(authUserState, "product list refresh request")}
+                          <Select
+                            className="w-full z-50"
+                            options={productList}
+                            placeholder="Select Product Name"
+                            onChange={handleProductListChange}
+                          />
+                          {/* <input
                             type="text"
                             name="productName"
                             id="product_name"
@@ -925,7 +1079,7 @@ export default function AddInvoices() {
                             onClick={handleProductNameChange}
                             onChange={handleProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
-                          />
+                          /> */}
                           {matchingProducts?.length >= 0 && (
                             <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
                               {matchingProducts
@@ -966,15 +1120,14 @@ export default function AddInvoices() {
                               +e.target.value <= currentProduct?.maxQtantity
                                 ? handleQuantityChange(e)
                                 : setIsAlert({
-                                    productUsedShow: true,
-                                    message: ` You can only select quantity upto ${
-                                      currentProduct?.maxQtantity || ""
+                                  productUsedShow: true,
+                                  message: ` You can only select quantity upto ${currentProduct?.maxQtantity || ""
                                     } for ${currentProduct?.name}`,
-                                  });
+                                });
                             }}
                             min={0.01}
                             max={currentProduct?.maxQtantity?.toFixed(2)}
-                            className="w-full p-1 
+                            className="w-full !py-1.5 px-1
                           border-gray-300 border rounded-md"
                           />
                         </td>
@@ -984,7 +1137,7 @@ export default function AddInvoices() {
                             name="productPrice"
                             autoComplete="off"
                             value={currentProduct.price}
-                            className="w-full p-1 border-gray-300 border rounded-md"
+                            className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
                         <td>
@@ -992,20 +1145,19 @@ export default function AddInvoices() {
                             currentProduct.quantity * currentProduct.price || 0
                           )?.toFixed(2)}
                         </td>
-                        <td>
+                        {/* <td>
                           <button
                             type="button"
                             onClick={handleAddProduct}
-                            className={`${
-                              selectedProduct
-                                ? "text-green-500 hover:animate-pulse "
-                                : "text-gray-500 "
-                            } px-2 `}
+                            className={`${selectedProduct
+                              ? "text-green-500 hover:animate-pulse "
+                              : "text-gray-500 "
+                              } px-2 `}
                             disabled={!selectedProduct}
                           >
                             <IoMdAddCircle className="w-6 h-6" />
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
                       {formData.products?.map((product, index) => (
                         <tr key={index}>
@@ -1015,9 +1167,55 @@ export default function AddInvoices() {
                             </p>
                           </td>
                           <td>
-                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                            {/* <p className="w-full p-1 border-gray-500 border rounded-md my-1">
                               {Number(product.quantity || 0).toFixed(2)}
-                            </p>
+                            </p> */}
+                            <input
+                              type="number"
+                              onWheel={(e) => e.target.blur()}
+                              step="0.01"
+                              name="productQuantity"
+                              placeholder={`max:${product?.maxQtantity}`}
+                              value={product.quantity}
+                              onChange={(e) => {
+                                setIsAlert({
+                                  productUsedShow: false,
+                                  retailShow: false,
+                                  message: "",
+                                });
+                                +e.target.value <= product.quantity -
+                                Number(
+                                  (allInvoiceProductsList &&
+                                    allInvoiceProductsList?.productQuantities[
+                                      product?.product?.id
+                                    ]?.sumofQuantity) ||
+                                  0
+                                )
+                                  ? handleQuantityChange(e, product)
+                                  : setIsAlert({
+                                    productUsedShow: true,
+                                    message: ` You can only select quantity upto ${product.quantity -
+                                      Number(
+                                        (allInvoiceProductsList &&
+                                          allInvoiceProductsList?.productQuantities[
+                                            product?.product?.id
+                                          ]?.sumofQuantity) ||
+                                        0
+                                      ) || ""
+                                      } for ${product?.name}`,
+                                  });
+                              }}
+                              min={0.01}
+                              max={(product.quantity -
+                                Number(
+                                  (allInvoiceProductsList &&
+                                    allInvoiceProductsList?.productQuantities[
+                                      product?.id
+                                    ]?.sumofQuantity) ||
+                                  0
+                                )).toFixed(2)}
+                              className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                            />
                           </td>
                           <td>
                             <p className="w-full p-1 border-gray-500 border rounded-md my-1">
@@ -1032,7 +1230,7 @@ export default function AddInvoices() {
                           <td>
                             <button
                               type="button"
-                              onClick={() => removeProduct(index)}
+                              onClick={() => removeProduct(index, product)}
                               className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
                             >
                               <MdOutlineCancel className="w-6 h-6" />
@@ -1060,7 +1258,13 @@ export default function AddInvoices() {
                     <tbody>
                       <tr>
                         <td className="relative" ref={suggestRetailProductListRef}>
-                          <input
+                        <Select
+                            className="w-full z-40"
+                            options={retailProductList}
+                            placeholder="Select Product Name"
+                            onChange={handleRetailProductListChange}
+                          />
+                          {/* <input
                             type="text"
                             name="productName"
                             id="retail_product_name"
@@ -1070,8 +1274,8 @@ export default function AddInvoices() {
                             onClick={handleRetailProductNameChange}
                             onChange={handleRetailProductNameChange}
                             className="w-full p-1 border-gray-500 border rounded-md"
-                            // required
-                          />
+                          // required
+                          /> */}
                           {matchingRetailProducts?.length > 0 && (
                             <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
                               {matchingRetailProducts
@@ -1112,19 +1316,18 @@ export default function AddInvoices() {
                                 message: "",
                               });
                               +e.target.value <=
-                              currentRetailProduct?.maxQtantity
+                                currentRetailProduct?.maxQtantity
                                 ? handleRetailQuantityChange(e)
                                 : setIsAlert({
-                                    productUsedShow: false,
-                                    retailShow: true,
-                                    message: ` You can only select quantity upto ${
-                                      currentRetailProduct?.maxQtantity || ""
+                                  productUsedShow: false,
+                                  retailShow: true,
+                                  message: ` You can only select quantity upto ${currentRetailProduct?.maxQtantity || ""
                                     } for ${currentRetailProduct?.name}`,
-                                  });
+                                });
                             }}
                             min="0"
                             max={currentRetailProduct?.maxQtantity?.toFixed(2)}
-                            className="w-full p-1 border-gray-300 border rounded-md"
+                            className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
                         <td>
@@ -1133,29 +1336,28 @@ export default function AddInvoices() {
                             name="productPrice"
                             autoComplete="off"
                             value={currentRetailProduct.price}
-                            className="w-full p-1 border-gray-300 border rounded-md"
+                            className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
                         <td>
                           {Number(
                             currentRetailProduct.quantity *
-                              currentRetailProduct.price || 0
+                            currentRetailProduct.price || 0
                           )?.toFixed(2)}
                         </td>
-                        <td>
+                        {/* <td>
                           <button
                             type="button"
                             onClick={handleAddRetailProduct}
-                            className={`${
-                              selectedRetailProduct
-                                ? "text-green-500 hover:animate-pulse"
-                                : "text-gray-500 "
-                            } px-2`}
+                            className={`${selectedRetailProduct
+                              ? "text-green-500 hover:animate-pulse"
+                              : "text-gray-500 "
+                              } px-2`}
                             disabled={!selectedRetailProduct}
                           >
                             <IoMdAddCircle className="w-6 h-6" />
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
 
                       {formData.retailProducts.map((product, index) => (
@@ -1166,9 +1368,55 @@ export default function AddInvoices() {
                             </p>
                           </td>
                           <td>
-                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                            {/* <p className="w-full p-1 border-gray-500 border rounded-md my-1">
                               {product.quantity}
-                            </p>
+                            </p> */}
+                            <input
+                              type="number"
+                              onWheel={(e) => e.target.blur()}
+                              step="0.01"
+                              name="productQuantity"
+                              placeholder={`max:${product?.maxQtantity}`}
+                              value={product.quantity}
+                              onChange={(e) => {
+                                setIsAlert({
+                                  productUsedShow: false,
+                                  retailShow: false,
+                                  message: "",
+                                });
+                                +e.target.value <= product.quantity -
+                                Number(
+                                  (allInvoiceProductsList &&
+                                    allInvoiceProductsList?.retailProductQuantities[
+                                      product?.product?.id
+                                    ]?.sumofQuantity) ||
+                                  0
+                                )
+                                  ? handleRetailQuantityChange(e, product)
+                                  : setIsAlert({
+                                    productUsedShow: true,
+                                    message: ` You can only select quantity upto ${product.quantity -
+                                      Number(
+                                        (allInvoiceProductsList &&
+                                          allInvoiceProductsList?.retailProductQuantities[
+                                            product?.product?.id
+                                          ]?.sumofQuantity) ||
+                                        0
+                                      ) || ""
+                                      } for ${product?.name}`,
+                                  });
+                              }}
+                              min={0.01}
+                              max={(product.quantity -
+                                Number(
+                                  (allInvoiceProductsList &&
+                                    allInvoiceProductsList?.retailProductQuantities[
+                                      product?.id
+                                    ]?.sumofQuantity) ||
+                                  0
+                                )).toFixed(2)}
+                              className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                            />
                           </td>
                           <td>
                             <p className="w-full p-1 border-gray-500 border rounded-md my-1">
@@ -1179,10 +1427,10 @@ export default function AddInvoices() {
                           <td>
                             <button
                               type="button"
-                              onClick={() => removeRetailProduct(index)}
+                              onClick={() => removeRetailProduct(index, product)}
                               className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
                             >
-                                <MdOutlineCancel className="w-6 h-6" />
+                              <MdOutlineCancel className="w-6 h-6" />
                             </button>
                           </td>
                         </tr>
