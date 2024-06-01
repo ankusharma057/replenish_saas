@@ -5,6 +5,7 @@ class Employee < ApplicationRecord
 
   validates_uniqueness_of :name
   validates_uniqueness_of :email, case_sensitive: false
+  validate :verify_employees_mentors
 
   has_many :invoices
   has_many :products
@@ -23,7 +24,6 @@ class Employee < ApplicationRecord
   has_many :mentors_employees, foreign_key: :mentor_id, class_name: 'EmployeeMentor', dependent: :destroy
   has_many :mentees, through: :mentors_employees, source: :employee
 
-  before_save :verify_employees_mentors
   after_create :update_reference
   after_save :update_employee_roles
   before_destroy :return_inventory
@@ -85,11 +85,19 @@ class Employee < ApplicationRecord
   end
 
   def verify_employees_mentors
+    overall_percentage = self.service_percentage.to_f
+
     self.employees_mentors.each do |employee_mentor|
       mentor = employee_mentor.mentor
       if mentor.nil? || !mentor.is_mentor?
-        employee_mentor.destroy
+        self.errors.add(:mentor, "#{mentor.name} is not a mentor")
+      else
+        overall_percentage += employee_mentor.mentor_percentage.to_f
       end
+    end
+
+    if (overall_percentage > 100)
+      self.errors.add(:service_percentage, "Overall Percentage exceeded(service_percentage + mentors percentage)")
     end
   end
 
