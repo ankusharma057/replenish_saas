@@ -70,6 +70,13 @@ export const getEmployeesList = async (refetch = false) =>
     },
   });
 
+export const getMentorList = async (refetch = false) =>
+  api.get("/api/employees?type=mentor", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getClientEmployeesList = async (refetch = false) =>
   api.get("/api/client/employees", {
     cache: {

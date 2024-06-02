@@ -189,6 +189,23 @@ export default function CreateStaffCard({ show, onHide }) {
               className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
             />
           </div>
+          
+          <div className=" col-span-3 mb-4 ">
+            <label
+              htmlFor="is_mentor"
+              className="text-base me-3 font-medium text-cyan-800"
+            >
+              Mentor
+            </label>
+            <input
+              id="is_mentor"
+              type="checkbox"
+              name="is_mentor"
+              value={formData.is_mentor}
+              onChange={handleChange}
+              className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
+            />
+          </div>
 
           <Loadingbutton
             isLoading={loading}

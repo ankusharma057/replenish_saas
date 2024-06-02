@@ -62,7 +62,7 @@ function CustomModal({
   const [deletedAfterImages, setDeletedAfterImages] = useState([]);
 
   // useEffect for initial assignment of before and after images
-
+console.log(invoiceData,'log')
   useEffect(() => {
     if (invoiceData?.before_images) {
       setBeforeImages([...invoiceData?.before_images]);

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   deleteEmployeeRoute,
   getEmployeesList,
+  getMentorList,
   // getInvoiceList,
   sendResetPasswordLinkRoute,
   updateVendore,
@@ -26,6 +27,10 @@ import AsideLayout from "../components/Layouts/AsideLayout";
 import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 import CreateStaffCard from "../components/Cards/CreateStaffCard";
 import InviteClientsTab from "../components/Tabs/InviteClientsTab";
+import Select from "react-select";
+import { RxCross2 } from "react-icons/rx";
+import { FaPlus } from "react-icons/fa";
+
 const Employee = () => {
   const { authUserState } = useAuthContext();
   // const [invoiceList, setInvoiceList] = useState([]);
@@ -45,6 +50,9 @@ const Employee = () => {
   const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
   const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [mentorList, setMentorList] = useState([])
+  const [addedMentors, setAddedMentors] = useState([])
+  const [currSelectedMentor, setCurrSelectedMentor] = useState();
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -57,6 +65,72 @@ const Employee = () => {
       console.log(error);
     }
   };
+
+  const getMentors = async (refetch = false) => {
+    try {
+      const { data } = await getMentorList(refetch);
+      if (data?.length > 0) {
+        setMentorList(data);
+        // handleSelect(data[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleMentorChange = (currValue) => {
+    console.log(currValue, 'current mentor')
+    setCurrSelectedMentor(currValue)
+    // const isPresent = addedMentors.find(obj => obj.id === currValue.id && obj.name === currValue.name);
+    // if (!isPresent) {
+    //   setAddedMentors([...addedMentors, currValue])
+    // } else {
+    //   toast.info("Mentor already added");
+    // }
+    // console.log(hmm, 'wowo')
+  }
+
+  const handleAddMentor = () => {
+    const isPresent = addedMentors.find(obj => obj.id === currSelectedMentor.id && obj.name === currSelectedMentor.name);
+    if (!isPresent) {
+      setAddedMentors([...addedMentors, currSelectedMentor])
+    //   let newArray = addedMentors.map(obj => {
+    //     return {
+    //         mentor_id: obj.id,
+    //         mentor_percentage: obj.mentor_percentage
+    //     };
+    // });
+    // console.log(newArray,'new Array')
+    if (updateEmployeeInput.employees_mentors_attributes) {
+      setUpdateEmployeeInput((pre) => ({
+        ...pre,
+        employees_mentors_attributes: [...updateEmployeeInput.employees_mentors_attributes, {mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage)}],
+      }));
+    }else{
+      setUpdateEmployeeInput((pre) => ({
+        ...pre,
+        employees_mentors_attributes: [{mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage)}],
+      }));
+    }
+    } else {
+      toast.info("Mentor already added");
+    }
+    // currSelectedMentor
+
+  }
+
+  const removeMentor = (currValue) => {
+    console.log(currValue, 'current mentor')
+    let filteredArray = addedMentors.filter(obj => obj.id !== currValue.id || obj.name !== currValue.name);
+    let filteredUpdatedArray = updateEmployeeInput.employees_mentors_attributes.filter(obj => obj.mentor_id !== currValue.id);
+    setAddedMentors(filteredArray)
+    setUpdateEmployeeInput((pre) => ({
+      ...pre,
+      employees_mentors_attributes: filteredUpdatedArray,
+    }));
+    // console.log(hmm, 'wowo')
+  }
+  console.log(addedMentors, 'addedMentors')
   // const getInvoices = async () => {
   //   // eslint-disable-next-line no-unused-vars
   //   const { data } = await getInvoiceList();
@@ -65,8 +139,9 @@ const Employee = () => {
 
   useEffect(() => {
     getEmployees();
+    getMentors();
     // getInvoices();
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -180,9 +255,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Failed to delete the Employee"
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to delete the Employee"
               );
             } finally {
               setLoading(false);
@@ -207,6 +282,8 @@ const Employee = () => {
 
   const handleSelect = (emp) => {
     setSelectedEmployeeData(emp);
+    setAddedMentors([]);
+    setCurrSelectedMentor(null);
     setRadioTabs([]);
     setUpdateEmployeeInput({});
     setCurrentTab(emp.is_admin ? "invoice" : "profile");
@@ -243,11 +320,10 @@ const Employee = () => {
               collapse();
             }
           }}
-          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${
-            selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none bg-gray-200 "
-              : "cursor-pointer "
-          } `}
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
+            ? "pointer-events-none bg-gray-200 "
+            : "cursor-pointer "
+            } `}
         >
           {employee.name || ""}
         </div>
@@ -269,9 +345,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Some Error Occur"
+                error?.response?.statusText ||
+                error.message ||
+                "Some Error Occur"
               );
             }
           },
@@ -308,9 +384,9 @@ const Employee = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to update Employee"
+        error?.response?.statusText ||
+        error.message ||
+        "Failed to update Employee"
       );
     } finally {
       setLoading(false);
@@ -325,7 +401,7 @@ const Employee = () => {
       [name]: inputValue,
     }));
   };
-
+console.log(updateEmployeeInput,'updateEmployee datat')
   return (
     <>
       <AsideLayout
@@ -382,9 +458,8 @@ const Employee = () => {
                       key={tab.value}
                       id={tab.value}
                       type="radio"
-                      className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 ${
-                        currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
-                      }`}
+                      className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 ${currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
+                        }`}
                       name="radio"
                       value={tab.value}
                       checked={currentTab === tab.value}
@@ -398,9 +473,8 @@ const Employee = () => {
                 })}
               </ButtonGroup>
               <div
-                className={`sm:p-6 rounded-b-lg ${
-                  currentTab === "staff" ? "" : "bg-white"
-                } `}
+                className={`sm:p-6 rounded-b-lg ${currentTab === "staff" ? "" : "bg-white"
+                  } `}
               >
                 {currentTab === "profile" && (
                   <form onSubmit={updateEmployee}>
@@ -497,8 +571,107 @@ const Employee = () => {
                             </div>
                           </td>
                         </tr>
+
+                        <tr>
+                          <th className="px-4">Mentors</th>
+                          <td>
+                            <div className="flex items-center">
+                              {/* <LineInput
+                                type="number"
+                                defaultValue={
+                                  selectedEmployeeData?.retail_percentage
+                                }
+                                onChange={handleUpdateChange}
+                                name="retail_percentage"
+                              /> */}
+                              <Select
+                                className="w-full"
+                                options={mentorList}
+                                getOptionLabel={option => option.name}
+                                onChange={handleMentorChange}
+                                // value={null}
+                                placeholder="Select Mentor"
+                              />
+                              <div className="flex items-center">
+                                <LineInput
+                                  type="number"
+                                  placeholder={'Mentor %'}
+                                  onChange={(e)=> setCurrSelectedMentor({...currSelectedMentor, mentor_percentage: e.target.value})}
+                                  name="mentor_percentage"
+                                />
+                              </div>
+                              <div>
+                                <button disabled={!currSelectedMentor?.mentor_percentage} type="button" className={`${!currSelectedMentor?.mentor_percentage ? "bg-gray-400" : "bg-cyan-400"} bg-cyan-400 rounded-md p-2 text-white mx-2 `} onClick={handleAddMentor}><FaPlus /></button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* <tr className="flex flex-col px-4">
+                          {addedMentors.map((val, index) => {
+                            return (
+                              <td className="py-2" key={index}>
+                                <div className="flex justify-between items-center font-medium rounded-md bg-cyan-400 px-2 text-white p-2">
+                                  <div>{val.name}</div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeMentor(val)}
+                                    className="hover:text-red-500 text-white flex px-2 transition duration-500 hover:animate-pulse"
+                                  >
+                                    <RxCross2 className="w-6 h-6" />
+                                  </button>
+                                </div>
+                              </td>
+                            )
+                          })}
+                        </tr> */}
+
                       </tbody>
                     </table>
+
+                    <div className={`${addedMentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
+                      <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+                          <tr>
+                            <th scope="col" className="px-6 py-3">
+                              Mentor name
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                              Mentor Percentage
+                            </th>
+                            <th scope="col" className="px-6 py-3 w-14">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {addedMentors.map((val, index) => {
+                            return (
+                              <React.Fragment key={index}>
+                                <tr className="odd:bg-white even:bg-gray-50 border-b ">
+                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+                                    {val.name}
+                                  </th>
+                                  <td className="px-6 py-4">
+                                    {val.mentor_percentage}%
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <button
+                                      type="button"
+                                      onClick={() => removeMentor(val)}
+                                      className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+                                    >
+                                      <RxCross2 className="w-6 h-6" />
+                                    </button>                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            )
+                          })
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+
 
                     {Object.keys(updateEmployeeInput).length > 0 && (
                       <div className=" w-full flex justify-end">
