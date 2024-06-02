@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SendNotificationPdfToAdminsMailer < ApplicationMailer
+class SendMentorNotificationPdfToAdminsMailer < ApplicationMailer
   def send_mail
     admin_emails = Employee.admins.map(&:email)
     @invoice_group = params[:group]
@@ -14,7 +14,7 @@ class SendNotificationPdfToAdminsMailer < ApplicationMailer
       to: admin_emails,
       subject: "Invoice created."
     ) do |format|
-      format.html { render "layouts/prompt_email" }
+      format.html { render "layouts/mentor_prompt_email" }
     end
   end
 end

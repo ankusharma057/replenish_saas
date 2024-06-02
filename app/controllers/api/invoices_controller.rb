@@ -25,7 +25,7 @@ class Api::InvoicesController < ApplicationController
   #   # @retail_products = params[:retail_products].pluck("name", "quantity", "retail_price")
 
   #   if @client
-  #     @invoice = @client.invoices.new(invoice_params)
+  #     @invoice = @client.source_invoices.new(invoice_params)
   #     if @invoice.save
   #       @invoice.save_pdf_and_send_mail(@products, @retail_products)
   #       render json: @invoices.last, status: :created
@@ -73,7 +73,7 @@ class Api::InvoicesController < ApplicationController
   def finalize
     if @invoice.finalize_and_attach_pdf
       if @invoice.fellow_invoices_finalized?
-        @invoice.send_group_pdf_mail
+        @invoice.send_group_pdf_mails
         return render json: @invoice, status: :ok
       else
         return render json: {'message' => "Finalize Invoices: #{@invoice.fellow_invoices.where(is_finalized: false).ids} to receive the mail"}, status: :unprocessable_entity
@@ -89,7 +89,7 @@ class Api::InvoicesController < ApplicationController
     invoices.each do |invoice|
       if invoice.finalize_and_attach_pdf
         if invoice.fellow_invoices_finalized?
-          invoice.send_group_pdf_mail
+          invoice.send_group_pdf_mails
           message_hash[:success] << "Invoice #{invoice.id} Finalized" 
         else
           message_hash[:success] << "Finalize Invoices: #{invoice.fellow_invoices.where(is_finalized: false).ids} to receive the mail"
@@ -107,7 +107,7 @@ class Api::InvoicesController < ApplicationController
     fellow_invoices_finalized = @invoice.fellow_invoices_finalized?
     @invoice.reject_and_send_mail(params[:feedback])
     unless fellow_invoices.blank?
-      fellow_invoices.first.send_group_pdf_mail if fellow_invoices && fellow_invoices_finalized
+      fellow_invoices.first.send_group_pdf_mails if fellow_invoices && fellow_invoices_finalized
     end
     end
     

@@ -1,0 +1,2 @@
+class MentorInvoiceGroup < InvoiceGroup
+end

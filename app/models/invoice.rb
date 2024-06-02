@@ -6,6 +6,7 @@ class Invoice < ApplicationRecord
   belongs_to :employee
   belongs_to :client
   belongs_to :invoice_group
+  belongs_to :source_invoice, class_name: 'Invoice', foreign_key: 'source_invoice_id', optional: true
 
   has_many :products_invoices, class_name: 'ProductInvoice'
   has_many :products, through: :products_invoices
@@ -70,15 +71,15 @@ class Invoice < ApplicationRecord
   end
 
   def fellow_invoices
-    invoice_group.invoices.where.not(id: id)
+    invoice_group.fellow_invoices(self)
   end
 
   def fellow_invoices_finalized?
     !fellow_invoices.map(&:is_finalized).include?(false)
   end
 
-  def send_group_pdf_mail
-    invoice_group.send_finalized_mail
+  def send_group_pdf_mails
+    invoice_group.send_finalized_mails(self.source_invoice_id.blank?)
   end
 
   private

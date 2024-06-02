@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-module PdfGroupDownloadable
+module MentorPdfDownloadable
   extend ActiveSupport::Concern
 
   included do
-    def get_html_for_group
+    def get_mentor_html_for_group
       str = '<html lang="ko">
         <head>
           <meta charset="UTF-8">
@@ -33,10 +33,10 @@ module PdfGroupDownloadable
         </head>
         <body>
           <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>'
-      str += "<h3>Bill Amount: #{source_invoices.pluck(:charge).reject{|charge| charge.nil?}.inject(:+)}</h3>"
+      str += "<h3>Bill Amount: #{mentor_invoices.pluck(:charge).reject{|charge| charge.nil?}.inject(:+)}</h3>"
 
 
-      source_invoices.each do |invoice| 
+      mentor_invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
                   <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
@@ -51,17 +51,6 @@ module PdfGroupDownloadable
                   <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
                   <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
 
-                  <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-                  <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
-
-                  <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                  <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
-
-                  <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
-                  <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
-
-                  <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
-                  <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
                 </div>
 
                 <div></div>
@@ -103,7 +92,7 @@ module PdfGroupDownloadable
         str
       end
 
-    def get_html_for_group_finalized
+    def get_mentor_html_for_group_finalized
       str = '<html lang="ko">
         <head>
           <meta charset="UTF-8">
@@ -132,9 +121,9 @@ module PdfGroupDownloadable
         </head>
         <body>
           <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>'
-      str += "<h2>Bill Amount: #{source_invoices.pluck(:charge).reject{|charge| charge.nil?}.inject(:+)}</h2>"
+      str += "<h2>Bill Amount: #{mentor_invoices.pluck(:charge).reject{|charge| charge.nil?}.inject(:+)}</h2>"
 
-      source_invoices.each do |invoice| 
+      mentor_invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
                 <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
@@ -149,20 +138,6 @@ module PdfGroupDownloadable
                 <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
                 <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
 
-                <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
-                <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
-
-                <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                <div style="text-align: left;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
-
-                <div style="text-align: right;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
-                <div style="text-align: left;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
-
-                <div style="text-align: right;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
-                <div style="text-align: left;">  Tip: '"#{invoice.tip}"'</div>
-
-                <div style="text-align: right;">  Overhead Fee Type: '"#{invoice.overhead_fee_type&.capitalize}"'</div>
-                <div style="text-align: left;">  Overhead Fee Value: '"#{invoice.overhead_fee_value}"'</di>
               </div>
 
               <div></div>

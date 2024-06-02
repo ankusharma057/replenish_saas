@@ -7,7 +7,7 @@
   <body>
     <p>
       The Invoices: <%= @invoices.ids %> have been finalized.
-      Employee Name: <%= @invoices.first.employee.name&.capitalize %>
+      Mentor: <%= @invoices&.first&.employee&.name %>,
     </p>
   </body>
 </html>

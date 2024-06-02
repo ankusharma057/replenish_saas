@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SendPdfToInvoiceMailer < ApplicationMailer
+class SendMentorPdfToInvoiceMailer < ApplicationMailer
   def send_mail
     @invoice_group = params[:group]
     @invoices = params[:invoices]
@@ -16,7 +16,7 @@ class SendPdfToInvoiceMailer < ApplicationMailer
       to: emails,
       subject: "Invoice Attachment."
     ) do |format|
-      format.html { render "layouts/invoice_email" }
+      format.html { render "layouts/mentor_invoice_email" }
     end
   end
 end

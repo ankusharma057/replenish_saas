@@ -4,10 +4,10 @@ import { Button, Card } from "react-bootstrap";
 const InvoiceCard = ({ invoice, seeMore, finalizeInvoiceSubmit }) => {
   return (
     <Card className="text-center" border="info" style={{ width: "18rem" }}>
-      <Card.Header as="h5">Invoice Id {invoice.id}</Card.Header>
+      <Card.Header as="h5">{invoice.source_invoice_id ? "Mentor " : ""}Invoice Id {invoice.id}</Card.Header>
       <Card.Body className="">
         <Card.Title className="mb-3">
-          Employee: {invoice.employee?.name}
+          {invoice.source_invoice_id ? "Mentor:" : "Employee:"} {invoice.employee?.name}
         </Card.Title>
         <Button
           onClick={() => seeMore(invoice)}

@@ -6,8 +6,9 @@
   </head>
   <body>
     <p>
-      The Invoices: <%= @invoices.ids %> have been finalized.
-      Employee Name: <%= @invoices.first.employee.name&.capitalize %>
+      Hi. An Invoice has recently been created:
+      Mentor: <%= @invoices&.first&.employee&.name %>,
+      Client: <%= @invoices&.first&.client&.name %>
     </p>
   </body>
 </html>
