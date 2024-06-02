@@ -35,7 +35,7 @@ class Employee < ApplicationRecord
   ROLES = %w[admin inv_manager mentor]
 
   %i[admins inv_managers mentors].each do |role|
-    scope role.to_sym, -> { role_obj(role.to_s.chop!).employees }
+    scope role.to_sym, -> { role_obj(role.to_s.chop!)&.employees }
   end
 
   def self.role_obj(name)
@@ -97,7 +97,7 @@ class Employee < ApplicationRecord
     end
 
     if (overall_percentage > 100)
-      self.errors.add(:service_percentage, "Overall Percentage exceeded(service_percentage + mentors percentage)")
+      self.errors.add(:service_percentage, "Overall assigned percentage exceeded. (service_percentage + mentors percentage = #{overall_percentage})")
     end
   end
 

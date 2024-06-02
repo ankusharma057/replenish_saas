@@ -604,3 +604,7 @@ end
 #         charge: Product.all.sample.retail_price 
 #     )
 # end
+
+[admin inv_manager mentor].each do |role_name|
+    Role.find_or_create_by(name: role_name)
+end

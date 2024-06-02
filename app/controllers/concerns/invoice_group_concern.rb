@@ -30,7 +30,6 @@ module InvoiceGroupConcern
 
     render json: @invoice_group, status: :created
   rescue StandardError => e
-    p e
     render json: { error: e.message }, status: :unprocessable_entity
   end
   
@@ -83,8 +82,8 @@ module InvoiceGroupConcern
 
     employee_mentor = EmployeeMentor.where(employee_id: employee.id, mentor_id: mentor.id).select(:mentor_percentage).first
     mentor_percentage = employee_mentor.mentor_percentage
-    product_total_price = invoice_param["products"].map {|product| product["quantity"] * product["cost_price"] }.sum
-    mentor_price = (product_total_price/100) * mentor_percentage
+    total_price = invoice_param['charge'].to_f
+    mentor_price = (total_price/100) * mentor_percentage
     mentor_price
   end
 
