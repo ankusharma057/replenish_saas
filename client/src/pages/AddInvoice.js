@@ -849,7 +849,20 @@ export default function AddInvoices() {
       ],
     });
   };
-  console.log(formData, "Invoice created successfully ");
+  function findProductQuantity(data, productId) {
+    let quantity = 0;
+
+    // Iterate through the array of objects
+    data.forEach(item => {
+      // Check if the product id matches the specified productId
+      if (item.product.id === productId) {
+        quantity += item.quantity; // Add the quantity of the matching product
+      }
+    });
+
+    return quantity;
+  }
+
   console.log(allInvoiceProductsList, 'llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
   return (
     <>
@@ -1176,7 +1189,7 @@ export default function AddInvoices() {
                               onWheel={(e) => e.target.blur()}
                               step="0.01"
                               name="productQuantity"
-                              placeholder={`max:${product?.maxQtantity}`}
+                              placeholder={`max:${findProductQuantity(authUserState.user.employees_inventories, product.id)}`}
                               value={product.quantity}
                               onChange={(e) => {
                                 setIsAlert({
@@ -1184,37 +1197,16 @@ export default function AddInvoices() {
                                   retailShow: false,
                                   message: "",
                                 });
-                                +e.target.value <= product.quantity -
-                                  Number(
-                                    (allInvoiceProductsList &&
-                                      allInvoiceProductsList?.productQuantities[
-                                        product?.product?.id
-                                      ]?.sumofQuantity) ||
-                                    0
-                                  )
+                                +e.target.value <= findProductQuantity(authUserState.user.employees_inventories, product.id)
                                   ? handleQuantityChange(e, product)
                                   : setIsAlert({
                                     productUsedShow: true,
-                                    message: ` You can only select quantity upto ${product.quantity -
-                                      Number(
-                                        (allInvoiceProductsList &&
-                                          allInvoiceProductsList?.productQuantities[
-                                            product?.product?.id
-                                          ]?.sumofQuantity) ||
-                                        0
-                                      ) || ""
+                                    message: ` You can only select quantity upto ${findProductQuantity(authUserState.user.employees_inventories, product.id) || ""
                                       } for ${product?.name}`,
                                   });
                               }}
                               min={0.01}
-                              max={(product.quantity -
-                                Number(
-                                  (allInvoiceProductsList &&
-                                    allInvoiceProductsList?.productQuantities[
-                                      product?.id
-                                    ]?.sumofQuantity) ||
-                                  0
-                                )).toFixed(2)}
+                              max={(findProductQuantity(authUserState.user.employees_inventories, product.id)).toFixed(2)}
                               className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                             />
                           </td>
@@ -1378,7 +1370,7 @@ export default function AddInvoices() {
                               onWheel={(e) => e.target.blur()}
                               step="0.01"
                               name="productQuantity"
-                              placeholder={`max:${product?.maxQtantity}`}
+                              placeholder={`max:${findProductQuantity(authUserState.user.employees_inventories, product.id)}`}
                               value={product.quantity}
                               onChange={(e) => {
                                 setIsAlert({
@@ -1386,37 +1378,16 @@ export default function AddInvoices() {
                                   retailShow: false,
                                   message: "",
                                 });
-                                +e.target.value <= product.quantity -
-                                  Number(
-                                    (allInvoiceProductsList &&
-                                      allInvoiceProductsList?.retailProductQuantities[
-                                        product?.product?.id
-                                      ]?.sumofQuantity) ||
-                                    0
-                                  )
+                                +e.target.value <= findProductQuantity(authUserState.user.employees_inventories, product.id)
                                   ? handleRetailQuantityChange(e, product)
                                   : setIsAlert({
                                     productUsedShow: true,
-                                    message: ` You can only select quantity upto ${product.quantity -
-                                      Number(
-                                        (allInvoiceProductsList &&
-                                          allInvoiceProductsList?.retailProductQuantities[
-                                            product?.product?.id
-                                          ]?.sumofQuantity) ||
-                                        0
-                                      ) || ""
+                                    message: ` You can only select quantity upto ${findProductQuantity(authUserState.user.employees_inventories, product.id) || ""
                                       } for ${product?.name}`,
                                   });
                               }}
                               min={0.01}
-                              max={(product.quantity -
-                                Number(
-                                  (allInvoiceProductsList &&
-                                    allInvoiceProductsList?.retailProductQuantities[
-                                      product?.id
-                                    ]?.sumofQuantity) ||
-                                  0
-                                )).toFixed(2)}
+                              max={(findProductQuantity(authUserState.user.employees_inventories, product.id)).toFixed(2)}
                               className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                             />
                           </td>
