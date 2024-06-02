@@ -79,48 +79,30 @@ const Employee = () => {
   };
 
   const handleMentorChange = (currValue) => {
-    console.log(currValue, 'current mentor')
     setCurrSelectedMentor(currValue)
-    // const isPresent = addedMentors.find(obj => obj.id === currValue.id && obj.name === currValue.name);
-    // if (!isPresent) {
-    //   setAddedMentors([...addedMentors, currValue])
-    // } else {
-    //   toast.info("Mentor already added");
-    // }
-    // console.log(hmm, 'wowo')
   }
 
   const handleAddMentor = () => {
     const isPresent = addedMentors.find(obj => obj.id === currSelectedMentor.id && obj.name === currSelectedMentor.name);
     if (!isPresent) {
       setAddedMentors([...addedMentors, currSelectedMentor])
-    //   let newArray = addedMentors.map(obj => {
-    //     return {
-    //         mentor_id: obj.id,
-    //         mentor_percentage: obj.mentor_percentage
-    //     };
-    // });
-    // console.log(newArray,'new Array')
-    if (updateEmployeeInput.employees_mentors_attributes) {
-      setUpdateEmployeeInput((pre) => ({
-        ...pre,
-        employees_mentors_attributes: [...updateEmployeeInput.employees_mentors_attributes, {mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage)}],
-      }));
-    }else{
-      setUpdateEmployeeInput((pre) => ({
-        ...pre,
-        employees_mentors_attributes: [{mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage)}],
-      }));
-    }
+      if (updateEmployeeInput.employees_mentors_attributes) {
+        setUpdateEmployeeInput((pre) => ({
+          ...pre,
+          employees_mentors_attributes: [...updateEmployeeInput.employees_mentors_attributes, { mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+        }));
+      } else {
+        setUpdateEmployeeInput((pre) => ({
+          ...pre,
+          employees_mentors_attributes: [{ mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+        }));
+      }
     } else {
       toast.info("Mentor already added");
     }
-    // currSelectedMentor
-
   }
 
   const removeMentor = (currValue) => {
-    console.log(currValue, 'current mentor')
     let filteredArray = addedMentors.filter(obj => obj.id !== currValue.id || obj.name !== currValue.name);
     let filteredUpdatedArray = updateEmployeeInput.employees_mentors_attributes.filter(obj => obj.mentor_id !== currValue.id);
     setAddedMentors(filteredArray)
@@ -128,9 +110,7 @@ const Employee = () => {
       ...pre,
       employees_mentors_attributes: filteredUpdatedArray,
     }));
-    // console.log(hmm, 'wowo')
   }
-  console.log(addedMentors, 'addedMentors')
   // const getInvoices = async () => {
   //   // eslint-disable-next-line no-unused-vars
   //   const { data } = await getInvoiceList();
@@ -401,7 +381,6 @@ const Employee = () => {
       [name]: inputValue,
     }));
   };
-console.log(updateEmployeeInput,'updateEmployee datat')
   return (
     <>
       <AsideLayout
@@ -596,7 +575,7 @@ console.log(updateEmployeeInput,'updateEmployee datat')
                                 <LineInput
                                   type="number"
                                   placeholder={'Mentor %'}
-                                  onChange={(e)=> setCurrSelectedMentor({...currSelectedMentor, mentor_percentage: e.target.value})}
+                                  onChange={(e) => setCurrSelectedMentor({ ...currSelectedMentor, mentor_percentage: e.target.value })}
                                   name="mentor_percentage"
                                 />
                               </div>
@@ -663,6 +642,39 @@ console.log(updateEmployeeInput,'updateEmployee datat')
                                     >
                                       <RxCross2 className="w-6 h-6" />
                                     </button>                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            )
+                          })
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                        
+                    <div className={`${selectedEmployeeData.employees_mentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
+                      <div className="font-bold p-4">Current Mentors:</div>
+                      <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+                          <tr>
+                            <th scope="col" className="px-6 py-3">
+                              Mentor name
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                              Mentor Percentage
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedEmployeeData.employees_mentors.map((val, index) => {
+                            return (
+                              <React.Fragment key={index}>
+                                <tr className="odd:bg-white even:bg-gray-50 border-b ">
+                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+                                    { mentorList.find(obj => obj.id === val.mentor_id).name}
+                                  </th>
+                                  <td className="px-6 py-4">
+                                    {val.mentor_percentage}%
+                                  </td>
                                 </tr>
                               </React.Fragment>
                             )
