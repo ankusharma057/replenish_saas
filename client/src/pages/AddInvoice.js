@@ -14,7 +14,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 // import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
 import { useAuthContext } from "../context/AuthUserContext";
 import { MdOutlineCancel } from "react-icons/md";
-import { IoMdAddCircle } from "react-icons/io";
+import { RxCross2 } from "react-icons/rx";
 import Select from "react-select";
 
 const initialFormState = {
@@ -101,7 +101,7 @@ export default function AddInvoices() {
         inventory?.product?.product_type !== undefined
       ) {
         if (inventory?.product.product_type.includes("Retail")) {
-          newRetailProductList.push({...inventory?.product, label: inventory?.product.name, value: index});
+          newRetailProductList.push({ ...inventory?.product, label: inventory?.product.name, value: index });
         }
       }
       // change to only user
@@ -521,10 +521,10 @@ export default function AddInvoices() {
     function changeObjectPropertyValue(objectId, propertyName, newValue) {
       let objectIndex = formData.products.findIndex(obj => obj.id === objectId); // Find the index of the object by its ID
       if (objectIndex !== -1) { // If object is found
-          formData.products[objectIndex][propertyName] = newValue; // Change the property value
+        formData.products[objectIndex][propertyName] = newValue; // Change the property value
       }
-  }
-  changeObjectPropertyValue(product.id, 'quantity', e.target.value);
+    }
+    changeObjectPropertyValue(product.id, 'quantity', e.target.value);
     // setFormData({ ...formData, quantity: e.target.value });
   };
   const handleAddProduct = () => {
@@ -629,10 +629,10 @@ export default function AddInvoices() {
     function changeObjectPropertyValue(objectId, propertyName, newValue) {
       let objectIndex = formData.retailProducts.findIndex(obj => obj.id === objectId); // Find the index of the object by its ID
       if (objectIndex !== -1) { // If object is found
-          formData.retailProducts[objectIndex][propertyName] = newValue; // Change the property value
+        formData.retailProducts[objectIndex][propertyName] = newValue; // Change the property value
       }
-  }
-  changeObjectPropertyValue(product.id, 'quantity', e.target.value);
+    }
+    changeObjectPropertyValue(product.id, 'quantity', e.target.value);
     // setFormData({ ...formData, quantity: e.target.value });
     // const quantity = parseFloat(e.target.value);
     // setCurrentRetailProduct({ ...currentRetailProduct, quantity });
@@ -850,7 +850,7 @@ export default function AddInvoices() {
     });
   };
   console.log(formData, "Invoice created successfully ");
-  console.log(allInvoiceProductsList,'llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
+  console.log(allInvoiceProductsList, 'llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
   return (
     <>
       {/* <Header /> */}
@@ -1066,6 +1066,7 @@ export default function AddInvoices() {
                           <Select
                             className="w-full z-50"
                             options={productList}
+                            value={null}
                             placeholder="Select Product Name"
                             onChange={handleProductListChange}
                           />
@@ -1140,7 +1141,7 @@ export default function AddInvoices() {
                             className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
-                        <td>
+                        <td className="text-right">
                           {Number(
                             currentProduct.quantity * currentProduct.price || 0
                           )?.toFixed(2)}
@@ -1184,13 +1185,13 @@ export default function AddInvoices() {
                                   message: "",
                                 });
                                 +e.target.value <= product.quantity -
-                                Number(
-                                  (allInvoiceProductsList &&
-                                    allInvoiceProductsList?.productQuantities[
-                                      product?.product?.id
-                                    ]?.sumofQuantity) ||
-                                  0
-                                )
+                                  Number(
+                                    (allInvoiceProductsList &&
+                                      allInvoiceProductsList?.productQuantities[
+                                        product?.product?.id
+                                      ]?.sumofQuantity) ||
+                                    0
+                                  )
                                   ? handleQuantityChange(e, product)
                                   : setIsAlert({
                                     productUsedShow: true,
@@ -1222,7 +1223,7 @@ export default function AddInvoices() {
                               {product.cost_price}
                             </p>
                           </td>
-                          <td>
+                          <td className="text-right">
                             {Number(
                               product.quantity * product.cost_price || 0
                             )?.toFixed(2)}
@@ -1231,9 +1232,9 @@ export default function AddInvoices() {
                             <button
                               type="button"
                               onClick={() => removeProduct(index, product)}
-                              className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
+                              className="hover:text-red-500  text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
                             >
-                              <MdOutlineCancel className="w-6 h-6" />
+                              <RxCross2 className="w-6 h-6" />
                             </button>
                           </td>
                         </tr>
@@ -1258,9 +1259,10 @@ export default function AddInvoices() {
                     <tbody>
                       <tr>
                         <td className="relative" ref={suggestRetailProductListRef}>
-                        <Select
+                          <Select
                             className="w-full z-40"
                             options={retailProductList}
+                            value={null}
                             placeholder="Select Product Name"
                             onChange={handleRetailProductListChange}
                           />
@@ -1339,7 +1341,7 @@ export default function AddInvoices() {
                             className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
-                        <td>
+                        <td className="text-right">
                           {Number(
                             currentRetailProduct.quantity *
                             currentRetailProduct.price || 0
@@ -1385,13 +1387,13 @@ export default function AddInvoices() {
                                   message: "",
                                 });
                                 +e.target.value <= product.quantity -
-                                Number(
-                                  (allInvoiceProductsList &&
-                                    allInvoiceProductsList?.retailProductQuantities[
-                                      product?.product?.id
-                                    ]?.sumofQuantity) ||
-                                  0
-                                )
+                                  Number(
+                                    (allInvoiceProductsList &&
+                                      allInvoiceProductsList?.retailProductQuantities[
+                                        product?.product?.id
+                                      ]?.sumofQuantity) ||
+                                    0
+                                  )
                                   ? handleRetailQuantityChange(e, product)
                                   : setIsAlert({
                                     productUsedShow: true,
@@ -1423,14 +1425,14 @@ export default function AddInvoices() {
                               {product.cost_price}
                             </p>
                           </td>
-                          <td>{product.quantity * product.cost_price}</td>
+                          <td className="text-right">{product.quantity * product.cost_price}</td>
                           <td>
                             <button
                               type="button"
                               onClick={() => removeRetailProduct(index, product)}
-                              className="hover:text-red-500 flex px-2 transition duration-500 hover:animate-pulse"
+                              className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
                             >
-                              <MdOutlineCancel className="w-6 h-6" />
+                              <RxCross2 className="w-6 h-6" />
                             </button>
                           </td>
                         </tr>
