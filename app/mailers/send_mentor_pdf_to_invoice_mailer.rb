@@ -8,7 +8,7 @@ class SendMentorPdfToInvoiceMailer < ApplicationMailer
     attachments["#{@invoices.first.employee.name}-Finalized-Invoices-#{@invoices.ids}-#{DateTime.now.strftime('%d/%m/%y')}.pdf"] = @invoice_group.document.download
 
     emails = Employee.admins.map(&:email)
-    emails << @invoices.first.employee.email
+    emails << @invoices.map{ |invoice| invoice.employee.email}.uniq
     emails << "replenishmd_527@invoicesmelio.com"
 
     mail(

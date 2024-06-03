@@ -7,7 +7,7 @@ class SendMentorNotificationPdfToAdminsMailer < ApplicationMailer
     @invoices = params[:invoices]
 
     attachments["#{@invoices.first.employee.name}-Non-Finalized-Invoices-#{@invoices.ids}-#{DateTime.now.strftime('%d/%m/%y')}.pdf"] = @invoice_group.document.download
-    admin_emails << @invoices.first.employee.email
+    admin_emails << @invoices.map{ |invoice| invoice.employee.email}.uniq
 
     mail(
       from: 'patrick@test.com',
