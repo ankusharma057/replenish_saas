@@ -41,7 +41,9 @@ module MentorPdfDownloadable
         complete_table_str += '<div class="container" style="color: blue;">
                   <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
                   <br>
-                  <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
+                  <div style="text-align: right;">  Mentor: '"#{invoice.employee.name}"'  </div>
+
+                  <div style="text-align: right;">  Mentee: '"#{invoice.source_invoice.employee.name}"'  </div>
 
                   <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
@@ -56,34 +58,6 @@ module MentorPdfDownloadable
                 <div></div>
                 <div class="main-table" style="margin: 30px auto;max-width: 800px">
                 <div class="page-break">'
-
-                invoice.products_hash&.each do |key, value|
-                  table_str = ""
-                  table_str += '<hr color="#323aa8">
-                    <h1 style="margin-bottom: 10px; color: #323aa8">'"#{key.titleize}"':</h1>
-
-                    <table style="width: 100%;margin: 50px 0">
-                      <tbody>
-                        <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
-                          <th width="40%">Product Name</th>
-                          <th width="20%">Quantity</th>
-                          <th width="20%">Price</th>
-                          <th width="20%">Total Price</th>
-                        </tr>'
-                  value&.each do |data|
-                    table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
-                          <td width="40%">'"#{data.first}"'</td>
-                          <td width="20%">'"#{data.second}"'</td>
-                          <td width="20%">'"#{data.last}"'</td>
-                          <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
-                        </tr>'
-                  end
-
-                  table_str += '<tbody>
-                  </table>'
-
-                  complete_table_str += table_str
-                end
             complete_table_str +=  ' </div>
                                       </body>
                                     </html>'
@@ -128,7 +102,9 @@ module MentorPdfDownloadable
         complete_table_str += '<div class="container" style="color: blue;">
                 <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
                 <br>
-                <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
+                <div style="text-align: right;">  Mentor: '"#{invoice.employee.name}"'  </div>
+
+                <div style="text-align: right;">  Mentee: '"#{invoice.source_invoice.employee.name}"'  </div>
 
                 <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
 
@@ -143,34 +119,6 @@ module MentorPdfDownloadable
               <div></div>
               <div class="main-table" style="margin: 30px auto;max-width: 800px">
               <div class="page-break">'
-
-              invoice.products_hash&.each do |key, value|
-                table_str = ""
-                table_str += '<hr color="#323aa8">
-                  <h1 style="margin-bottom: 10px; color: #323aa8">'"#{key.titleize}"':</h1>
-
-                  <table style="width: 100%;margin: 50px 0">
-                    <tbody>
-                      <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
-                        <th width="40%">Product Name</th>
-                        <th width="20%">Quantity</th>
-                        <th width="20%">Price</th>
-                        <th width="20%">Total Price</th>
-                      </tr>'
-                value&.each do |data|
-                  table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
-                        <td width="40%">'"#{data.first}"'</td>
-                        <td width="20%">'"#{data.second}"'</td>
-                        <td width="20%">'"#{data.last}"'</td>
-                        <td width="20%">'"#{(data.second.to_f * data.last.to_f)&.round(2)}"'</td>
-                      </tr>'
-                end
-
-                table_str += '<tbody>
-                </table>'
-
-                complete_table_str += table_str
-              end
           complete_table_str +=  ' </div>
                                     </body>
                                   </html>'
