@@ -519,6 +519,21 @@ const Employee = () => {
                         </tr>
 
                         <tr>
+                          <th className="px-4">Mentor:</th>
+                          <td>
+                            <div className="flex items-center">
+                              <input
+                                defaultChecked={selectedEmployeeData?.is_mentor}
+                                name="is_mentor"
+                                type="checkbox"
+                                onChange={handleUpdateChange}
+                                className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+
+                        <tr>
                           <th className="px-4">Service Percentage:</th>
                           <td>
                             {/* CreateStaffCard{" "} */}
@@ -650,7 +665,7 @@ const Employee = () => {
                         </tbody>
                       </table>
                     </div>
-                        
+
                     <div className={`${selectedEmployeeData.employees_mentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
                       <div className="font-bold p-4">Current Mentors:</div>
                       <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
@@ -670,7 +685,7 @@ const Employee = () => {
                               <React.Fragment key={index}>
                                 <tr className="odd:bg-white even:bg-gray-50 border-b ">
                                   <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
-                                    { mentorList.find(obj => obj.id === val.mentor_id).name}
+                                    {mentorList.find(obj => obj.id === val.mentor_id).name}
                                   </th>
                                   <td className="px-6 py-4">
                                     {val.mentor_percentage}%

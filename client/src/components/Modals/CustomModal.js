@@ -62,7 +62,6 @@ function CustomModal({
   const [deletedAfterImages, setDeletedAfterImages] = useState([]);
 
   // useEffect for initial assignment of before and after images
-console.log(invoiceData,'log')
   useEffect(() => {
     if (invoiceData?.before_images) {
       setBeforeImages([...invoiceData?.before_images]);
@@ -97,8 +96,8 @@ console.log(invoiceData,'log')
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setShowImageEditModal(false);
@@ -139,8 +138,8 @@ console.log(invoiceData,'log')
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -154,16 +153,15 @@ console.log(invoiceData,'log')
       const { data } = await downloadInvoice(invoiceID);
       saveAs(
         data,
-        `${invoiceData?.employee?.name}${
-          invoiceData?.is_finalized ? "-Finalized" : "-Non-Finalized"
+        `${invoiceData?.employee?.name}${invoiceData?.is_finalized ? "-Finalized" : "-Non-Finalized"
         }-Invoice-${invoiceID}.pdf`
       );
       toast.success("Invoice Downloaded successfully.");
     } catch (error) {
       toast.error(
         error.response?.statusText ||
-          error?.message ||
-          "Failed to Download the Invoice"
+        error?.message ||
+        "Failed to Download the Invoice"
       );
     } finally {
       setLoading(false);
@@ -188,8 +186,8 @@ console.log(invoiceData,'log')
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -261,7 +259,16 @@ console.log(invoiceData,'log')
         onHide={onHide}
         title={
           <>
-            InvoiceID: {invoiceID}
+            <div className="flex justify-between gap-4 w-full min-[992px]:min-w-[722px]">
+              <div>
+                Invoice ID: {invoiceID}
+              </div>
+              {invoiceData.source_invoice_id &&
+                <div>
+                  Source Invoice ID: {invoiceData.source_invoice_id}
+                </div>
+              }
+            </div>
             <hr />
             Total: {charge}
           </>
