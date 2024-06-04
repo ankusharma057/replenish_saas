@@ -965,6 +965,7 @@ export default function AddInvoices() {
                     <input
                       type="checkbox"
                       name="semaglitudeConsultation"
+                      disabled={(formData.products.length > 0 || formData.retailProducts.length > 0) ? true : false}
                       checked={formData?.semaglitudeConsultation}
                       onChange={(event) => handleInputChange(event)}
                       className="ml-2"
@@ -1080,6 +1081,7 @@ export default function AddInvoices() {
                             className="w-full z-50"
                             options={productList}
                             value={null}
+                            isDisabled={formData?.semaglitudeConsultation}
                             placeholder="Select Product Name"
                             onChange={handleProductListChange}
                           />
@@ -1255,6 +1257,7 @@ export default function AddInvoices() {
                             className="w-full z-40"
                             options={retailProductList}
                             value={null}
+                            isDisabled={formData?.semaglitudeConsultation}
                             placeholder="Select Product Name"
                             onChange={handleRetailProductListChange}
                           />
