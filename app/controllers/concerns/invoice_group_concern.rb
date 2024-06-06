@@ -77,14 +77,15 @@ module InvoiceGroupConcern
     invoice
   end
 
-  def calculate_charge(employee, mentor, invoice_param)
-    return invoice_param['charge'] if employee.blank?
+  def calculate_charge(source_employee, mentor_or_employee, invoice_param)
+    return invoice_param['charge'] if source_employee.blank?
 
-    employee_mentor = EmployeeMentor.where(employee_id: employee.id, mentor_id: mentor.id).select(:mentor_percentage).first
-    mentor_percentage = employee_mentor.mentor_percentage
-    total_price = invoice_param['charge'].to_f
-    mentor_price = (total_price/100) * mentor_percentage
-    mentor_price
+    employee_mentor = EmployeeMentor.where(employee_id: source_employee.id, mentor_id: mentor_or_employee.id).select(:mentor_percentage).first
+    mentor_percentage = employee_mentor.mentor_percentage.to_f
+    client_cash = invoice_param['paid_by_client_cash'].to_f
+    client_credit = invoice_param['paid_by_client_credit'].to_f
+    mentor_price = (client_cash + (client_credit - (client_credit * 0.031))) * (mentor_percentage/100)
+    mentor_price.round(2)
   end
 
   def attach_images(invoice, invoice_param)
