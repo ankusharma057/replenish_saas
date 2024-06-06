@@ -359,7 +359,7 @@ export default function AddInvoices() {
       // Calculate semaglutide fee based on 20% of the gross client payment
       const grossClientPayment = formData.paidByClientCash + formData.paidByClientCredit;
       const semaglutideFee = grossClientPayment * 0.2
-      afterTax.semagConsultFee = semaglutideFee < 0 ? 0 : semaglutideFee;
+      // afterTax.semagConsultFee = 5000
     }
 
     if (formData?.conciergeFeePaid) {
@@ -412,7 +412,7 @@ export default function AddInvoices() {
       formData?.semaglitudeConsultation &&
       totalPaidByClientAT === 0
     )
-      total = 75;
+      total = 0;
     if (
       !authUserState.user?.gfe &&
       formData?.semaglitudeConsultation &&
@@ -1125,6 +1125,7 @@ export default function AddInvoices() {
                             onWheel={(e) => e.target.blur()}
                             step="0.01"
                             name="productQuantity"
+                            disabled={formData?.semaglitudeConsultation}
                             placeholder={`max:${currentProduct?.maxQtantity}`}
                             value={currentProduct.quantity}
                             onChange={(e) => {
@@ -1152,6 +1153,7 @@ export default function AddInvoices() {
                             type="string"
                             name="productPrice"
                             autoComplete="off"
+                            disabled={formData?.semaglitudeConsultation}
                             value={currentProduct.price}
                             className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
@@ -1304,6 +1306,7 @@ export default function AddInvoices() {
                             onWheel={(e) => e.target.blur()}
                             name="productQuantity"
                             step="0.01"
+                            disabled={formData?.semaglitudeConsultation}
                             placeholder={`max:${currentRetailProduct?.maxQtantity}`}
                             value={currentRetailProduct.quantity}
                             onChange={(e) => {
@@ -1332,6 +1335,7 @@ export default function AddInvoices() {
                             type="string"
                             name="productPrice"
                             autoComplete="off"
+                            disabled={formData?.semaglitudeConsultation}
                             value={currentRetailProduct.price}
                             className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
