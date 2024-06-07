@@ -12,6 +12,7 @@ module PdfDownloadable
           <meta name="x-apple-disable-message-reformatting">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <style type="text/css">
+            html { height: 0; }
             table {
             border-collapse: collapse;
             }
@@ -103,6 +104,7 @@ module PdfDownloadable
           <meta name="x-apple-disable-message-reformatting">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <style type="text/css">
+            html { height: 0; }
             table {
             border-collapse: collapse;
             }
