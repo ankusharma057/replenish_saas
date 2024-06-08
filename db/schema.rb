@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_01_124928) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_08_084706) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -76,6 +76,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_01_124928) do
     t.string "has_access_only_to", default: "all"
     t.string "vendor_name"
     t.string "reference_number"
+    t.boolean "pay_50", default: false
   end
 
   create_table "employees_inventories", force: :cascade do |t|

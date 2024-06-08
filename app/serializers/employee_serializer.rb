@@ -1,6 +1,6 @@
 class EmployeeSerializer < ActiveModel::Serializer
   attributes :id, :name, :vendor_name, :email, :password, :gfe,
-             :service_percentage, :retail_percentage, :inventory_prompts,
+             :service_percentage, :retail_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
              :roles, :is_admin, :is_inv_manager, :is_mentor, :employees_mentors
 
