@@ -42,6 +42,7 @@ import MySchedule from "./MySchedule";
 
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
+  const [userProfileData, setUserProfileData] = useState(authUserState.user)
   const [loading, setLoading] = useState(false);
   const { collapse } = useAsideLayoutContext();
   const [modalShow, setModalShow] = useState(false);
@@ -153,9 +154,9 @@ const MyProfile = () => {
               console.log(error);
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Failed to Transfer the inventory"
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to Transfer the inventory"
               );
             } finally {
               setLoading(false);
@@ -208,8 +209,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -251,8 +252,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -275,8 +276,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -298,8 +299,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message
+        error?.response?.statusText ||
+        error.message
       );
     } finally {
       setLoading(false);
@@ -312,6 +313,50 @@ const MyProfile = () => {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
+
+
+  const handleChargeClient = (event) => {
+    console.log(event.target.checked, 'checked')
+    confirmAlert({
+      title: !event.target.checked ? "Don't charge $50" : "Charge $50?",
+      message: !event.target.checked ? "Are you sure you don't want to charge client $50?" : `Are you sure to charge $50 for client?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const updateVendorDetails = { pay_50: !event.target.checked }
+              const { data } = await updateVendore(
+                authUserState.user.id,
+                updateVendorDetails
+              );
+
+              toast.success("Updated successfully.");
+              if (data) {
+                setUserProfileData(data)
+              }
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                error?.response?.statusText ||
+                error.message ||
+                "Something went wrong."
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+            console.log("Click No");
+          },
+        },
+      ],
+    });
+  }
 
   return (
     <div>
@@ -329,9 +374,8 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${
-                currentTab === "products" && "pointer-events-none bg-gray-200"
-              } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${currentTab === "products" && "pointer-events-none bg-gray-200"
+                } `}
             >
               <Box />
               Products
@@ -346,10 +390,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
-                currentTab === "assignedInventory" &&
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "assignedInventory" &&
                 "pointer-events-none bg-gray-200"
-              } `}
+                } `}
             >
               <ArrowRightLeft /> Assigned Inventory
             </div>
@@ -362,10 +405,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
-                currentTab === "pendingRequest" &&
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "pendingRequest" &&
                 "pointer-events-none bg-gray-200"
-              } `}
+                } `}
             >
               <RotateCw />
               Pending Request
@@ -379,9 +421,8 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
-                currentTab === "invoice" && "pointer-events-none bg-gray-200"
-              } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "invoice" && "pointer-events-none bg-gray-200"
+                } `}
             >
               <FileText /> Invoices
             </div>
@@ -409,9 +450,8 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
-                currentTab === "settings" && "pointer-events-none bg-gray-200"
-              } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "settings" && "pointer-events-none bg-gray-200"
+                } `}
             >
               <Settings /> Settings
             </div>
@@ -488,11 +528,10 @@ const MyProfile = () => {
               type="number"
               controlId="quantity"
               name="quantity"
-              placeholder={`${
-                requestInvetoryInput?.inventory_object?.quantity
-                  ? ` Type Quantity`
-                  : "Select Product First"
-              }`}
+              placeholder={`${requestInvetoryInput?.inventory_object?.quantity
+                ? ` Type Quantity`
+                : "Select Product First"
+                }`}
               onChange={(e) =>
                 setRequestInvetoryInput({
                   ...requestInvetoryInput,
@@ -849,9 +888,21 @@ const MyProfile = () => {
                   </span>
                 </h4>
               </div>
+              <div>
+                <div className="flex gap-4 m-1 items-center">
+                  <div>Charge client $50?</div>
+                  <input
+                    checked={userProfileData.pay_50}
+                    name="pay_50"
+                    type="checkbox"
+                    onChange={handleChargeClient}
+                    className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                </div>
+              </div>
               <div className="flex mr-8">
                 {!(authUserState.user.has_access_only_to === "all") &&
-                authUserState.user?.is_inv_manager ? (
+                  authUserState.user?.is_inv_manager ? (
                   // Show the button if user is authUserState.user.has_access_only_to array and is_inv_manager is true
                   <Button
                     onClick={() => {

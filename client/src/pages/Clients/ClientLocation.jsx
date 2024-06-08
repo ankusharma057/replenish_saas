@@ -75,7 +75,7 @@ const ClientLocation = () => {
         end: lastVisibleDay,
       });
     }
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -88,14 +88,14 @@ const ClientLocation = () => {
       fetchData();
     }
 
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [empId]);
 
   useEffect(() => {
     getEmpByLocId();
     getLocEmp();
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locId, empId]);
 
@@ -112,7 +112,7 @@ const ClientLocation = () => {
     if (state?.selectedTreatMent) {
       setSelectedTreatMent({ ...state.selectedTreatMent });
     }
-    return () => {};
+    return () => { };
   }, [state?.selectedTreatMent]);
 
   const getEmp = async () => {
@@ -162,7 +162,7 @@ const ClientLocation = () => {
     });
   };
 
-  const getEmpSchedule = async (emp,refetch = false) => {
+  const getEmpSchedule = async (emp, refetch = false) => {
     try {
       if (empId) {
         const { data } = await getClientEmployeeSchedule(empId, refetch);
@@ -176,36 +176,36 @@ const ClientLocation = () => {
           empId,
           true
         );
-          const unavailabilityDataNew = unavailibilityData.data.map((d) => ({
-            start_time: new Date(d.start_time),
-            end_time: new Date(d.end_time),
-            available: d.available,
-            id: d.id,
-            every_week: d.every_week,
-          }));
-          const everyWeekUnavailabilities = unavailabilityDataNew.filter(
-            (item) => item.every_week
+        const unavailabilityDataNew = unavailibilityData.data.map((d) => ({
+          start_time: new Date(d.start_time),
+          end_time: new Date(d.end_time),
+          available: d.available,
+          id: d.id,
+          every_week: d.every_week,
+        }));
+        const everyWeekUnavailabilities = unavailabilityDataNew.filter(
+          (item) => item.every_week
+        );
+        const cancelUnavailabilities = unavailabilityDataNew.filter(
+          (item) => item.available
+        );
+        let unavailabilityNewData = [];
+        if (everyWeekUnavailabilities.length > 0) {
+          const unavailData = await getUnavailableEverWeekData(
+            everyWeekUnavailabilities,
+            emp.start_date,
+            emp.end_date,
+            cancelUnavailabilities
           );
-          const cancelUnavailabilities = unavailabilityDataNew.filter(
-            (item) => item.available
-          );
-          let unavailabilityNewData = [];
-          if (everyWeekUnavailabilities.length > 0) {
-            const unavailData = await getUnavailableEverWeekData(
-              everyWeekUnavailabilities,
-              emp.start_date,
-              emp.end_date,
-              cancelUnavailabilities
-            );
-            unavailabilityNewData.push(...unavailData);
-          }
-          const newAvailData = unavailabilityDataNew.filter(
-            (item) => !item.every_week && !item.available
-          );
-          const arr = newData.concat(newAvailData);
-          const arr1 = arr.concat(unavailabilityNewData);
-          console.log(arr1, "aar1");
-          setSelectedEmpSchedules(arr1);
+          unavailabilityNewData.push(...unavailData);
+        }
+        const newAvailData = unavailabilityDataNew.filter(
+          (item) => !item.every_week && !item.available
+        );
+        const arr = newData.concat(newAvailData);
+        const arr1 = arr.concat(unavailabilityNewData);
+        console.log(arr1, "aar1");
+        setSelectedEmpSchedules(arr1);
       }
     } catch (error) {
       console.log(error);
@@ -298,7 +298,7 @@ const ClientLocation = () => {
 
     const { data } = await createClientSchedule(copyAppointMent);
     if (data?.redirect_url) {
-      navigate(`/clients/payment/confirm_payment`, {
+      navigate(`/clients/payment/confirm_payment?empId=${selectedEmployee.id}`, {
         state: {
           redirect_url: data?.redirect_url,
           locId,
@@ -315,9 +315,9 @@ const ClientLocation = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to add appointment."
+        error?.response?.statusText ||
+        error.message ||
+        "Failed to add appointment."
       ); // handle error
     }
   };
@@ -332,11 +332,10 @@ const ClientLocation = () => {
               <span className="text-3xl font-thin">
                 Book an Appointment
                 <span className="text-lg">
-                  {`${
-                    params.get("locations")
+                  {`${params.get("locations")
                       ? ` at ${params.get("locations")}`
                       : ""
-                  }
+                    }
                 Let us come to you!`}
                 </span>
               </span>
@@ -375,11 +374,10 @@ const ClientLocation = () => {
                                 });
                               }, 500);
                             }}
-                            className={`flex flex-col transition-all text-white text-sm cursor-pointer rounded-sm p-2 ${
-                              selectedTreatMent?.treatment?.id === treatment?.id
+                            className={`flex flex-col transition-all text-white text-sm cursor-pointer rounded-sm p-2 ${selectedTreatMent?.treatment?.id === treatment?.id
                                 ? "bg-blue-800"
                                 : "bg-primary-dark-blue hover:bg-black"
-                            }`}
+                              }`}
                           >
                             <span>{treatment?.name}</span>
                             <span>
@@ -441,9 +439,8 @@ const ClientLocation = () => {
                 {(locationAndEmployee || []).map((locEmp) => (
                   <li
                     key={locEmp?.id}
-                    className={`border-b hover:bg-gray-200 ${
-                      locId === String(locEmp?.id) ? "bg-gray-200 " : ""
-                    } transition-all`}
+                    className={`border-b hover:bg-gray-200 ${locId === String(locEmp?.id) ? "bg-gray-200 " : ""
+                      } transition-all`}
                   >
                     <Link
                       to={`/clients/location?locations=${locEmp?.name}&locId=${locEmp?.id}`}
@@ -487,7 +484,7 @@ const ClientLocation = () => {
         title={
           appointmentModal?.isEdit
             ? // ? `Click on "Add new" to create new appointment on same time`
-              `Your appointment`
+            `Your appointment`
             : "New  Appointment"
         }
         footer={

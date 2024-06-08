@@ -5,10 +5,11 @@ import { toast } from "react-toastify";
 import { useAuthContext } from "../../../context/AuthUserContext";
 import ClientLayout from "../../../components/Layouts/ClientLayout";
 import { useLocation } from "react-router-dom";
-import { reminder } from "../../../Server";
+import { getClientEmployee, reminder } from "../../../Server";
 
 const ConfirmPayment = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { authUserState } = useAuthContext();
   const { state } = useLocation();
   const [paymentState, setPaymentState] = useState("");
@@ -25,6 +26,19 @@ const ConfirmPayment = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const getEmp = async () => {
+      const { data } = await getClientEmployee(params.get('empId'));
+      console.log(data, 'destroy')
+      if (data) {
+        setPaymentState(data.pay_50 ? 'now' : 'later')
+      }
+    }
+    if (params.get('empId')) {
+      getEmp()
+    }
+  }, [params])
   const [reminderOptions, setReminderOptions] = useState({
     email2DaysBefore: false,
     email24HoursBefore: false,
@@ -154,30 +168,6 @@ const ConfirmPayment = () => {
             </p>
           </div>
         </div>
-
-        <div className="flex  gap-2">
-          <div className="flex p-3 bg-gray-100 rounded-full w-4 h-4 justify-center items-center">
-            4
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xl">Would you like to pay 50$?*</h2>
-            <Form.Check
-              type="radio"
-              checked={paymentState === "now"}
-              label="Now"
-              id="now"
-              onChange={() => setPaymentState("now")}
-            />
-            <Form.Check
-              type="radio"
-              checked={paymentState === "later"}
-              label="Later"
-              id="later"
-              onChange={() => setPaymentState("later")}
-            />
-          </div>
-        </div>
-
         <div className="flex justify-end">
           <Button onClick={handleFormSubmit}>Confirm</Button>
         </div>
