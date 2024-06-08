@@ -12,7 +12,7 @@ class Api::EmployeesController < ApplicationController
     if scope_name.blank?
       employees = Employee.all
     elsif Employee.respond_to?(scope_name)
-      employees = Employee.send(scope_name)
+      employees = Employee.send(scope_name).exclude_mentors_for_employee(params[:mentor_for_employee_id])
     else
       render json: { error: 'Type is not valid' }, status: :bad_request and return
     end

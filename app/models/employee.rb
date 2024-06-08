@@ -38,6 +38,10 @@ class Employee < ApplicationRecord
     scope role.to_sym, -> { role_obj(role.to_s.chop!)&.employees }
   end
 
+  def self.exclude_mentors_for_employee(employee_id)
+    employee_id.blank? ? all : where.not(id: EmployeeMentor.where(employee_id: employee_id).map(&:mentor_id).uniq)
+  end
+
   def self.role_obj(name)
     Role.find_by(name: name)
   end
