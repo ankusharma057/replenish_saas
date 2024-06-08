@@ -165,19 +165,19 @@ export default memo(function Header() {
                   </Link>
                 </button>
                 <div className="hidden xl:!ml-0 xl:flex xl:items-center xl:pl-[340px]">
-                <Link to="/addInvoice">
-                  <Image
-                    src="/replenish-logo.png"
-                    className="relative z-30"
-                    width="60px"
-                    height="60px"
-                    roundedCircle
-                  />
-                </Link>
-              </div>
+                  <Link to="/addInvoice">
+                    <Image
+                      src="/replenish-logo.png"
+                      className="relative z-30"
+                      width="60px"
+                      height="60px"
+                      roundedCircle
+                    />
+                  </Link>
+                </div>
               </div>
 
-             
+
               <div>
                 <button
                   onClick={handleLogout}
@@ -201,16 +201,20 @@ export default memo(function Header() {
 
   const employeeHeader = (
     <nav className="bg-cyan-400 relative z-20">
-      <div className=" mx-auto md:px-4 sm:pl-6 sm:pr-0 lg:px-8">
-        <div className="flex items-center justify-start h-26">
-          <div className="flex-shrink-0 p-2 relative z-30">
+      <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
+        <div className="flex items-center justify-start xl:justify-center h-26">
+          <div className=" xl:hidden flex-shrink-0 p-2">
             <Link to="/addInvoice">
-              <Image src="/replenish-logo.png" width="60px" roundedCircle />
+              <Image
+                src="/replenish-logo.png"
+                className="relative z-30"
+                width="60px"
+                roundedCircle
+              />
             </Link>
           </div>
-
-          <div className="relative z-10 w-full pr-6 flex justify-end lg:w-auto">
-            <div className="lg:hidden">
+          <div className=" w-full pr-6 flex justify-end xl:w-auto">
+            <div className="xl:hidden">
               <button
                 onClick={handleMenuSHow}
                 className="border-none relative z-30 text-w-full py-3 5xl transition-all text-5xl text-white"
@@ -220,92 +224,89 @@ export default memo(function Header() {
             </div>
             <div
               className={` ${isMenuShow ? "translate-x-full" : ""
-                } lg:block pt-20 lg:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-1/4  gap-y-2 items-center lg:w-auto lg:static flex-col lg:flex-row lg:h-auto ml-10 flex lg:items-baseline space-x-4 transition-all lg:translate-x-0 `}
+                } xl:flex xl:justify-between pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-full gap-y-2 items-center xl:w-full xl:min-w-[1825px] xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-center space-x-4 transition-all xl:translate-x-0  `}
             >
-              <button
-                onClick={handleMenuSHow}
-                className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700"
-              >
-                <Link
-                  className={` ${location.pathname === "/addinvoice"
-                      ? "text-white"
-                      : "text-gray-700"
-                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
-                  to="/addinvoice"
-                >
-                  Submit invoice
-                </Link>
-              </button>
-              <button
-                onClick={handleMenuSHow}
-                className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700"
-              >
-                <Link
-                  className={` ${location.pathname === "/products"
-                      ? "text-white"
-                      : "text-gray-700"
-                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
-                  to="/products"
-                >
-                  Product List
-                </Link>
-              </button>
+              <div className="flex flex-col xl:flex-row">
 
-              {authUserState.user?.is_inv_manager === true && (
-                <>
-                  <button
-                    onClick={handleMenuSHow}
-                    className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700"
+                <button
+                  onClick={handleMenuSHow}
+                  className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                >
+                  <Link
+                    className={`no-underline text-white py-[1rem] inline-block hover:text-white `}
+                    to="/addinvoice"
                   >
-                    <Link
-                      className={` ${location.pathname === "/employees"
-                          ? "text-white"
-                          : "text-gray-700"
-                        } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
-                      to="/employees"
-                    >
-                      All Employees
-                    </Link>
-                  </button>
-
-                  <button
-                    onClick={handleMenuSHow}
-                    className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700"
-                  >
-                    <Link
-                      className={` ${location.pathname === "/inventories"
-                          ? "text-white"
-                          : "text-gray-700"
-                        } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
-                      to="/inventories"
-                    >
-                      Inventories
-                    </Link>
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={handleMenuSHow}
-                className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700"
-              >
-                <Link
-                  className={` ${location.pathname === "/myprofile"
-                      ? "text-white"
-                      : "text-gray-700"
-                    } no-underline text-gray-700 py-[1rem] inline-block hover:text-white `}
-                  to="/myprofile"
+                    Submit invoice
+                  </Link>
+                </button>
+                <button
+                  onClick={handleMenuSHow}
+                  className={`${location.pathname === "/products" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  My Profile
-                </Link>
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="hover:bg-cyan-200 hover:lg:bg-transparent w-full lg:w-auto px-3 transition-all rounded-md text-lg  font-medium text-gray-700 inline-block"
-              >
-                <span>Logout</span>
-              </button>
+                  <Link
+                    className={`no-underline text-white py-[1rem] inline-block `}
+                    to="/products"
+                  >
+                    Product List
+                  </Link>
+                </button>
+                {(authUserState.user?.is_inv_manager === true &&
+                  <>
+                    <button
+                      onClick={handleMenuSHow}
+                      className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                    >
+                      <Link
+                        className={`no-underline text-white py-[1rem] inline-block `}
+                        to="/employees"
+                      >
+                        All Employees
+                      </Link>
+                    </button>
+                    <button
+                      onClick={handleMenuSHow}
+                      className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                    >
+                      <Link
+                        className={`no-underline text-white py-[1rem] inline-block `}
+                        to="/inventories"
+                      >
+                        Inventories
+                      </Link>
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={handleMenuSHow}
+                  className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                >
+                  <Link
+                    className={`no-underline text-white py-[1rem] inline-block `}
+                    to="/myprofile"
+                  >
+                    My Profile
+                  </Link>
+                </button>
+                <div className={`hidden xl:!ml-0 xl:flex xl:items-center ${authUserState.user.is_inv_manager ? "xl:pl-[340px]" : "xl:pl-[580px]"} `}>
+                  <Link to="/addInvoice">
+                    <Image
+                      src="/replenish-logo.png"
+                      className="relative z-30"
+                      width="60px"
+                      height="60px"
+                      roundedCircle
+                    />
+                  </Link>
+                </div>
+              </div>
+              <div>
+                <button
+                  onClick={handleLogout}
+                  className={`${location.pathname === "" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-[26px] transition-all text-lg text-white font-medium `}
+                >
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -314,7 +315,7 @@ export default memo(function Header() {
       <div
         onClick={handleMenuSHow}
         className={`${isMenuShow ? "-translate-x-full" : ""
-          } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 lg:hidden bg-black/50 `}
+          } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );
