@@ -8,6 +8,7 @@ class EmployeeSerializer < ActiveModel::Serializer
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
   has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id
   has_many :employees_inventories, class_name: 'EmployeeInventory'
+  has_many :employees_mentors, class_name: 'EmployeeMentor'
 
   # def employees_inventories
   #   object.employees_inventories&.map do |employee_inventory|
