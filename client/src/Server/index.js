@@ -70,8 +70,8 @@ export const getEmployeesList = async (refetch = false) =>
     },
   });
 
-export const getMentorList = async (refetch = false) =>
-  api.get("/api/employees?type=mentor", {
+export const getMentorList = async (refetch = false, employeeId) =>
+  api.get(`/api/employees?type=mentor${employeeId ? `&mentor_for_employee_id=${employeeId}` : ''}`, {
     cache: {
       ignoreCache: refetch,
     },

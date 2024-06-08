@@ -66,12 +66,14 @@ const Employee = () => {
     }
   };
 
-  const getMentors = async (refetch = false) => {
+  const getMentors = async (refetch = false, employeeId) => {
     try {
-      const { data } = await getMentorList(refetch);
+      const { data } = await getMentorList(refetch, employeeId);
       if (data?.length > 0) {
         setMentorList(data);
         // handleSelect(data[0]);
+      } else {
+        setMentorList([])
       }
     } catch (error) {
       console.log(error);
@@ -261,6 +263,7 @@ const Employee = () => {
   );
 
   const handleSelect = (emp) => {
+    getMentors(false, emp.id)
     setSelectedEmployeeData(emp);
     setAddedMentors([]);
     setCurrSelectedMentor(null);
@@ -381,6 +384,86 @@ const Employee = () => {
       [name]: inputValue,
     }));
   };
+
+  const updateMentor = async (mentorDetails, newMentorPercentage) => {
+    confirmAlert({
+      title: "Update",
+      message: `Are you sure, you want to update mentor percentage?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const updateMentorDetails = { employees_mentors_attributes: [{ id: mentorDetails.id, mentor_percentage: newMentorPercentage }] }
+              const { data } = await updateVendore(
+                selectedEmployeeData.id,
+                updateMentorDetails
+              );
+
+              toast.success("Mentor details updated successfully.");
+              await getEmployees(true);
+              // setUpdateInvoiceInput(data);
+              setSelectedEmployeeData(data);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to update Employee"
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => { },
+        },
+      ],
+    });
+  }
+
+  const deleteMentor = async (mentorDetails) => {
+    confirmAlert({
+      title: "Remove",
+      message: `Are you sure, you want to remove ${String(mentorDetails.mentor.name)} from your mentor list`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const deleteMentorDetails = { employees_mentors_attributes: [{ id: mentorDetails.id, _destroy: 1 }] }
+              const { data } = await updateVendore(
+                selectedEmployeeData.id,
+                deleteMentorDetails
+              );
+
+              toast.success("Mentor removed successfully.");
+              await getEmployees(true);
+              // setUpdateInvoiceInput(data);
+              setSelectedEmployeeData(data);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to update Employee"
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => { },
+        },
+      ],
+    });
+  }
   return (
     <>
       <AsideLayout
@@ -656,7 +739,8 @@ const Employee = () => {
                                       className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
                                     >
                                       <RxCross2 className="w-6 h-6" />
-                                    </button>                                  </td>
+                                    </button>
+                                  </td>
                                 </tr>
                               </React.Fragment>
                             )
@@ -677,20 +761,16 @@ const Employee = () => {
                             <th scope="col" className="px-6 py-3">
                               Mentor Percentage
                             </th>
+                            <th scope="col" className="px-6 py-3 text-center">
+                              Actions
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {selectedEmployeeData.employees_mentors.map((val, index) => {
                             return (
                               <React.Fragment key={index}>
-                                <tr className="odd:bg-white even:bg-gray-50 border-b ">
-                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
-                                    {mentorList.find(obj => obj.id === val.mentor_id).name}
-                                  </th>
-                                  <td className="px-6 py-4">
-                                    {val.mentor_percentage}%
-                                  </td>
-                                </tr>
+                                <EmployeeTableRows deleteMentor={deleteMentor} updateMentorDetails={updateMentor} val={val} />
                               </React.Fragment>
                             )
                           })
@@ -792,3 +872,36 @@ const Employee = () => {
 };
 
 export default Employee;
+
+const EmployeeTableRows = ({ val, deleteMentor, updateMentorDetails }) => {
+  const [newValue, setNewValue] = React.useState()
+  return (
+    <tr className="odd:bg-white even:bg-gray-50 border-b ">
+      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+        {val.mentor.name}
+      </th>
+      <td className="px-6 py-4">
+        <input type="number" onChange={(e) => setNewValue(e.target.value)} max={100} maxLength={3} placeholder={val.mentor_percentage + "%"} />
+      </td>
+      <td className="px-6 py-4 w-14">
+        <div className="flex justify-center">
+          {newValue &&
+            <button
+              type="button"
+              onClick={() => updateMentorDetails(val, newValue)}
+              className="hover:text-green-500 items-center text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+            >
+              Confirm
+            </button>
+          }
+          <button
+            type="button"
+            onClick={() => deleteMentor(val)}
+            className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+          >
+            <RxCross2 className="w-6 h-6" />
+          </button>
+        </div>
+      </td>
+    </tr>)
+}
