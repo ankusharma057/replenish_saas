@@ -15,10 +15,10 @@ const AuthContext = createContext();
 // Create an authentication context provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-
+  const [isFillingForm, setIsFillingForm] = React.useState(false)
   return (
     <AuthContext.Provider
-      value={{ authUserState: state, authUserDispatch: dispatch }}
+      value={{ authUserState: state, authUserDispatch: dispatch, isFillingForm: isFillingForm, setIsFillingForm }}
     >
       {children}
     </AuthContext.Provider>

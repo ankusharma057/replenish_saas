@@ -36,14 +36,14 @@ export default memo(function Header() {
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
         <div className="flex items-center justify-start xl:justify-center h-26">
           <div className=" xl:hidden flex-shrink-0 p-2">
-            <Link to="/addInvoice">
+            <a href="/addInvoice">
               <Image
                 src="/replenish-logo.png"
                 className="relative z-30"
                 width="60px"
                 roundedCircle
               />
-            </Link>
+            </a>
           </div>
           <div className=" w-full pr-6 flex justify-end xl:w-auto">
             <div className="xl:hidden">
@@ -64,23 +64,23 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block hover:text-white `}
-                    to="/addinvoice"
+                    href="/addinvoice"
                   >
                     Submit invoice
-                  </Link>
+                  </a>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/invoicelist" && "bg-[#008989a1]"} hover:bg-[#008989a1]  w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/invoicelist"
+                    href="/invoicelist"
                   >
                     Invoice List
-                  </Link>
+                  </a>
                 </button>
                 {(authUserState.user?.is_inv_manager === true ||
                   authUserState.user?.is_admin) === true && (
@@ -88,36 +88,36 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <Link
+                      <a
                         className={`no-underline text-white py-[1rem] inline-block `}
-                        to="/schedule"
+                        href="/schedule"
                       >
                         Schedule
-                      </Link>
+                      </a>
                     </button>
                   )}
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/employees"
+                    href="/employees"
                   >
                     Staff
-                  </Link>
+                  </a>
                 </button>
 
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/customers"
+                    href="/customers"
                   >
                     Clients
-                  </Link>
+                  </a>
                 </button>
 
                 {(authUserState.user?.is_inv_manager === true ||
@@ -126,12 +126,12 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <Link
+                      <a
                         className={`no-underline text-white py-[1rem] inline-block `}
-                        to="/inventories"
+                        href="/inventories"
                       >
                         Inventories
-                      </Link>
+                      </a>
                     </button>
                   )}
                 {/* {(authUserState.user?.is_inv_manager === true ||
@@ -157,15 +157,15 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/myprofile"
+                    href="/myprofile"
                   >
                     My Profile
-                  </Link>
+                  </a>
                 </button>
                 <div className="hidden xl:!ml-0 xl:flex xl:items-center xl:pl-[340px]">
-                  <Link to="/addInvoice">
+                  <a href="/addInvoice">
                     <Image
                       src="/replenish-logo.png"
                       className="relative z-30"
@@ -173,7 +173,7 @@ export default memo(function Header() {
                       height="60px"
                       roundedCircle
                     />
-                  </Link>
+                  </a>
                 </div>
               </div>
 
@@ -204,14 +204,14 @@ export default memo(function Header() {
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
         <div className="flex items-center justify-start xl:justify-center h-26">
           <div className=" xl:hidden flex-shrink-0 p-2">
-            <Link to="/addInvoice">
+            <a href="/addInvoice">
               <Image
                 src="/replenish-logo.png"
                 className="relative z-30"
                 width="60px"
                 roundedCircle
               />
-            </Link>
+            </a>
           </div>
           <div className=" w-full pr-6 flex justify-end xl:w-auto">
             <div className="xl:hidden">
@@ -232,23 +232,23 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block hover:text-white `}
-                    to="/addinvoice"
+                    href="/addinvoice"
                   >
                     Submit invoice
-                  </Link>
+                  </a>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/products" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/products"
+                    href="/products"
                   >
                     Product List
-                  </Link>
+                  </a>
                 </button>
                 {(authUserState.user?.is_inv_manager === true &&
                   <>
@@ -256,23 +256,23 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <Link
+                      <a
                         className={`no-underline text-white py-[1rem] inline-block `}
-                        to="/employees"
+                        href="/employees"
                       >
                         All Employees
-                      </Link>
+                      </a>
                     </button>
                     <button
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <Link
+                      <a
                         className={`no-underline text-white py-[1rem] inline-block `}
-                        to="/inventories"
+                        href="/inventories"
                       >
                         Inventories
-                      </Link>
+                      </a>
                     </button>
                   </>
                 )}
@@ -280,15 +280,15 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <Link
+                  <a
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/myprofile"
+                    href="/myprofile"
                   >
                     My Profile
-                  </Link>
+                  </a>
                 </button>
                 <div className={`hidden xl:!ml-0 xl:flex xl:items-center ${authUserState.user.is_inv_manager ? "xl:pl-[340px]" : "xl:pl-[580px]"} `}>
-                  <Link to="/addInvoice">
+                  <a href="/addInvoice">
                     <Image
                       src="/replenish-logo.png"
                       className="relative z-30"
@@ -296,7 +296,7 @@ export default memo(function Header() {
                       height="60px"
                       roundedCircle
                     />
-                  </Link>
+                  </a>
                 </div>
               </div>
               <div>

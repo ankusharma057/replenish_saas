@@ -32,7 +32,7 @@ import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
 
 const Employee = () => {
-  const { authUserState } = useAuthContext();
+  const { authUserState, isFillingForm, setIsFillingForm } = useAuthContext();
   // const [invoiceList, setInvoiceList] = useState([]);
   // const [invModalSHow, setInvModalSHow] = useState(false);
   const [employeeList, setEmployeeList] = useState([]);
@@ -126,6 +126,17 @@ const Employee = () => {
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (isFillingForm) {
+      const handleOnBeforeUnload = (event) => {
+        event.preventDefault();
+        return (event.returnValue = '');
+      }
+      window.addEventListener('beforeunload', handleOnBeforeUnload, { capture: true });
+      return () => { window.removeEventListener('beforeunload', handleOnBeforeUnload); };
+    }
+  }, [isFillingForm])
 
   // const openShowInventory = (invoice, employee) => {
   //   setEmployeeInvoices({
@@ -377,6 +388,7 @@ const Employee = () => {
   };
 
   const handleUpdateChange = (e) => {
+    setIsFillingForm(true)
     const { name, value, type, checked } = e.target;
     const inputValue = type === "checkbox" ? checked : value;
     setUpdateEmployeeInput((pre) => ({
