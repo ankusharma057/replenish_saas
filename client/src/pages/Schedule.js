@@ -165,7 +165,7 @@ function Schedule() {
           [emp.id]: arr1,
         };
       });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const getClientName = async (employee_id, refetch = false) => {
@@ -180,7 +180,7 @@ function Schedule() {
           }))
         );
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const getAllLocation = async (refetch = false) => {
@@ -195,7 +195,7 @@ function Schedule() {
   useEffect(() => {
     getEmployees();
     getAllLocation();
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -231,11 +231,10 @@ function Schedule() {
               collapse();
             }
           }}
-          className={`p-2 border-b transition-all duration-700 ${
-            selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none bg-gray-200 rounded-md "
-              : "cursor-pointer "
-          } `}
+          className={`p-2 border-b transition-all duration-700 ${selectedEmployeeData?.id === employee.id
+            ? "pointer-events-none bg-gray-200 rounded-md "
+            : "cursor-pointer "
+            } `}
         >
           {employee.name || ""}
         </div>
@@ -345,9 +344,9 @@ function Schedule() {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to add appointment."
+        error?.response?.statusText ||
+        error.message ||
+        "Failed to add appointment."
       ); // handle error
     }
   };
@@ -400,7 +399,7 @@ function Schedule() {
         e.target?.reset();
         toast.success("New location added successfully.");
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -414,7 +413,7 @@ function Schedule() {
         });
       }
     }
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEmployeeData]);
 
@@ -492,9 +491,9 @@ function Schedule() {
       setAvailabilityModal(initialAvailabilityModal);
       toast.error(
         error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error?.message ||
-          "Failed to update availability"
+        error?.response?.statusText ||
+        error?.message ||
+        "Failed to update availability"
       ); // handle error
     }
   };
@@ -509,7 +508,7 @@ function Schedule() {
             ...appointmentModal,
             remaining_amount: 0,
             paid_amount: appointmentModal.total_amount,
-            show:true
+            show: true
           });
           setEmployeeScheduleEventsData((pre) => {
             return {
@@ -576,13 +575,13 @@ function Schedule() {
         }
       >
         <div className="flex-1  py-10 px-2 bg-white">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
             <h1>{selectedEmployeeData?.name}</h1>
-            <div className="flex">
+            <div className="flex gap-2 flex-col sm:flex-row">
               {serviceLocation?.length > 0 && (
-                <div className="flex items-center gap-x-2">
+                <div className="flex flex-col gap-y-2 sm:flex-row items-center gap-x-2">
                   <Select
-                    className="w-80 z-40"
+                    className="w-80 z-10"
                     options={serviceLocation}
                     placeholder="Search Places"
                     onChange={onLocationChange}
@@ -593,7 +592,7 @@ function Schedule() {
                         setAddLocationModal((pre) => ({ ...pre, show: true }))
                       }
                       variant="info"
-                      className="text-white"
+                      className="text-white flex w-full sm:w-fit"
                     >
                       Add
                     </Button>
@@ -603,7 +602,7 @@ function Schedule() {
               <Button
                 onClick={handleAvailabilityButtonClick}
                 variant={"info"}
-                className="ml-2 text-white"
+                className=" text-white"
               >
                 Mark Availability
               </Button>

@@ -1,0 +1,47 @@
+.rbc-calendar {
+    padding: 30px 26px;
+}
+
+.btn-primary {
+    background-color: #22D3EE;
+    border-color: cyan;
+}
+.btn-primary:hover {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.btn-primary:active:hover {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.btn-primary:focus {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.btn-outline-primary {
+    color: cyan;
+    /* background-color: #22D3EE; */
+    border-color: cyan;
+}
+.btn-outline-primary:hover {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.btn-outline-primary:active:hover {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.btn-outline-primary:focus {
+    background-color: cyan;
+    border-color: cyan;
+}
+
+.rbc-event {
+    background-color: #22D3EE;
+    border-color: transparent !important;
+}

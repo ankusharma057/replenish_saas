@@ -5,17 +5,18 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import { memo } from "react";
 import { useEffect } from "react";
-
+import './calendar.css'
 const localizer = momentLocalizer(moment);
 
 const ScheduleCalender = ({ ...rest }) => {
   const [timeSlots, setTimeSlots] = useState(1);
   const today = new Date();
-  useEffect(()=>{
+  useEffect(() => {
     console.log(rest)
-  },[])
+  }, [])
   return (
     <Calendar
+      className="sm:max-h-[90%]"
       views={[Views.MONTH, Views.WEEK, Views.DAY]}
       selectable
       startAccessor="start_time"
@@ -28,20 +29,13 @@ const ScheduleCalender = ({ ...rest }) => {
       timeslots={timeSlots}
       min={
         new Date(
-          today.getFullYear(), 
-          today.getMonth(), 
-          today.getDate(), 
-          7
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          5
         )
       }
-      max={
-        new Date(
-          today.getFullYear(), 
-          today.getMonth(), 
-          today.getDate(), 
-          20
-        )
-      }
+
       step={60} //Number of time slots per hour
       components={{
         toolbar: (e) => <ScheduleToolbar {...e} />,
