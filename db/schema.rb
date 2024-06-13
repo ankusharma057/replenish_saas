@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_08_084706) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_13_122837) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_08_084706) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "availabilities", force: :cascade do |t|
+    t.date "availability_date"
+    t.bigint "employee_location_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_location_id"], name: "index_availabilities_on_employee_location_id"
+  end
+
+  create_table "availability_timings", force: :cascade do |t|
+    t.time "start_time"
+    t.time "end_time"
+    t.bigint "availabilities_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["availabilities_id"], name: "index_availability_timings_on_availabilities_id"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -245,6 +262,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_08_084706) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "availabilities", "employee_locations"
+  add_foreign_key "availability_timings", "availabilities", column: "availabilities_id"
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "schedules", "clients"

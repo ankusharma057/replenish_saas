@@ -86,6 +86,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :availabilities, only: [:index, :create, :show, :edit, :update, :destroy]
+
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
 
     # Define your application routes per the DSL in https://guides.rubyonrails.org/routi
