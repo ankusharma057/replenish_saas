@@ -293,6 +293,9 @@ export const deleteProduct = async (id) =>
 
 export default api;
 
+export const postAvailability = async (data) =>
+  api.post(`/api/availabilities`, data);
+
 export const getAvailability = async (data, refetch) =>
   api.get(`/api/unavailabilities`, {
     cache: {

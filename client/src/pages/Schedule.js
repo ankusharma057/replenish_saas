@@ -645,7 +645,7 @@ function Schedule() {
             : "New  Appointment"
         }
         footer={
-          <div className="space-x-2">
+          <div className="flex gap-2">
             {appointmentModal.readOnly ? (
               <Button
                 className="btn btn-danger"
