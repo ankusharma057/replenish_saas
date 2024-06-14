@@ -11,6 +11,6 @@ class Api::AvailabilitiesController < ApplicationController
   end
 
   def create
-    create_availability
+    create_or_update_availability
   end
 end

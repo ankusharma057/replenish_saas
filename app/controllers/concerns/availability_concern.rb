@@ -1,17 +1,11 @@
 module AvailabilityConcern
   extend ActiveSupport::Concern
 
-  def create_availability
-    begin
-      availabilities = create_availability_with_timings
-      if availabilities.present?
-        render json: availabilities, status: :created
-      else
-        render json: { error: 'Failed to create availabilities' }, status: :unprocessable_entity
-      end
-    rescue StandardError => e
-      render json: { error: e.message }, status: :unprocessable_entity
-    end
+  def create_or_update_availability
+    create_or_update_availability_with_timings
+    render json: { success: true }
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def availability_params
@@ -19,7 +13,7 @@ module AvailabilityConcern
                                            availability_timings: [:day, timings: [:start_time, :end_time]])
   end
 
-  def create_availability_with_timings
+  def create_or_update_availability_with_timings
     params_with_employee_location = availability_params
     employee_location = EmployeeLocation.find_by(employee_id: params_with_employee_location[:employee_id],
                                                  location_id: params_with_employee_location[:location_id])
@@ -34,23 +28,25 @@ module AvailabilityConcern
 
     all_availabilities = []
     (start_date..end_date).each do |date|
-      day = date.strftime('%A').downcase
-      matching_timings = availability_timings.find { |timing| timing[:day].downcase == day }
+      if date > Date.today
+        day = date.strftime('%A').downcase
+        matching_timings = availability_timings.find { |timing| timing[:day].downcase == day }
 
-      if matching_timings
-        availability = Availabilities.find_or_initialize_by(
-          employee_location_id: employee_location.id,
-          availability_date: date,
-        )
-        availabilities = []
+        if matching_timings
+          availability = Availabilities.find_or_initialize_by(
+            employee_location_id: employee_location.id,
+            availability_date: date,
+          )
+          availabilities = []
 
-        matching_timings[:timings].each do |timing|
-          availabilities << availability.availability_timings.find_or_initialize_by(start_time: timing[:start_time], end_time: timing[:end_time])
+          matching_timings[:timings].each do |timing|
+            availabilities << availability.availability_timings.build(start_time: timing[:start_time], end_time: timing[:end_time])
+          end
+          availability.availability_timings = availabilities
+
+          availability.save!
+          all_availabilities << availability
         end
-        availability.availability_timings = availabilities
-
-        availability.save!
-        all_availabilities << availability
       end
     end
 
