@@ -66,7 +66,7 @@ const AvailabilityModal = (props) => {
       return;
     }
     const res = await postAvailability({ availability: { ...scheduleData, availability_timings: [...availabilityTimings] } })
-    if (res.status === 201) {
+    if (res.status === 201 || res.status === 200) {
       toast.success("Changes Applied Successfully");
       closeModal()
     }

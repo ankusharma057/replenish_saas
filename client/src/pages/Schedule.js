@@ -604,7 +604,7 @@ function Schedule() {
                 variant={"info"}
                 className=" text-white"
               >
-                Mark Availability
+                Manage Shifts
               </Button>
             </div>
           </div>

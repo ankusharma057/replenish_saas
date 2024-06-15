@@ -479,7 +479,7 @@ function MySchedule() {
             </div>
           )}
           <Button onClick={handleAvailabilityButtonClick} variant={"primary"}>
-            Mark Availability
+            Manage Shifts
           </Button>
         </div>
         <ScheduleCalender
