@@ -4,7 +4,10 @@ class Availabilities < ApplicationRecord
 
   accepts_nested_attributes_for :availability_timings, allow_destroy: true
 
-  def self.employee_locations_availabilities(params)
-    where(employee_location_id: EmployeeLocation.where(employee_id: params[:employee_id], location_id: params[:location_id]).pluck(:id))
+  def self.employee_locations_availabilities(param={})
+    param[:from_date] = param[:from_date].present? ? Date.parse(param[:from_date]) : Date.today.beginning_of_month
+    param[:to_date] = param[:to_date].present? ? Date.parse(param[:to_date]) : Date.today.end_of_month
+    employee_location_ids = EmployeeLocation.find_by_employee_or_location(param[:employee_id], param[:location_id]).pluck(:id)
+    includes(:availability_timings, employee_location: [:location]).where(employee_location_id: employee_location_ids, availability_date: param[:from_date]..param[:to_date])
   end
 end
