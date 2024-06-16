@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const ModalWraper = ({ show, onHide, children, title, footer, size }) => {
+const ModalWraper = ({ show, onHide, children, title, footer, size, customClose }) => {
   return (
     <Modal
       show={show}
@@ -19,7 +19,7 @@ const ModalWraper = ({ show, onHide, children, title, footer, size }) => {
       </Modal.Body>
       <Modal.Footer>
         {footer}
-        <Button onClick={onHide}>Close</Button>
+        {!customClose && <Button onClick={onHide}>Close</Button> }
       </Modal.Footer>
     </Modal>
   );

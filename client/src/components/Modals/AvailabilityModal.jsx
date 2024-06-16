@@ -65,6 +65,10 @@ const AvailabilityModal = (props) => {
       toast.error("Please select valid time interval.");
       return;
     }
+    if (!checkTimingsValidity(availabilityTimings)) {
+      toast.error("Please check shift timings and select valid time interval.");
+      return;
+    }
     const res = await postAvailability({ availability: { ...scheduleData, availability_timings: [...availabilityTimings] } })
     if (res.status === 201 || res.status === 200) {
       toast.success("Changes Applied Successfully");
@@ -72,16 +76,43 @@ const AvailabilityModal = (props) => {
     }
     // handleSubmit();
   };
+  let yesterday = moment().subtract(1, "day");
+  function valid(current) {
+    return current.isAfter(yesterday);
+  }
+  const isValidEndDate = (currentDate) => {
+    return currentDate.isSameOrAfter(moment(scheduleData.start_date, 'DD-MM-YYYY'), 'day');
+  };
+  function checkTimingsValidity(schedule) {
+    for (let i = 0; i < schedule.length; i++) {
+      const day = schedule[i];
+      for (let j = 0; j < day.timings.length; j++) {
+        const timing = day.timings[j];
+        const startTime = new Date(`January 1, 2024 ${timing.start_time}`);
+        const endTime = new Date(`January 1, 2024 ${timing.end_time}`);
+
+        // Compare start_time and end_time
+        if (startTime >= endTime) {
+          return false; // Invalid timing found
+        }
+      }
+    }
+    return true; // All timings are valid
+  }
   return (
     <ModalWraper
       show={availabilityModal.show}
       title={'Manage Shifts'}
       onHide={closeModal}
       size={'xl'}
+      customClose={true}
       footer={
         <div className="space-x-2">
+          <Button onClick={closeModal} className="bg-white text-black border-black hover:bg-slate-400">
+            Cancel
+          </Button>
           <Button type="submit" form="appointmentForm">
-            Apply
+            Apply Shift Schedule
           </Button>
         </div>
       }
@@ -119,6 +150,9 @@ const AvailabilityModal = (props) => {
               <div className="flex flex-col w-full gap-2">
                 {/* <span>From</span> */}
                 <Datetime
+                  closeOnSelect={true}
+                  timeFormat={false}
+                  isValidDate={valid}
                   value={availabilityModal.start_time}
                   inputProps={{ placeholder: 'Start Date' }}
                   onChange={(event) => handleInputChange(event, "start_date")}
@@ -128,6 +162,9 @@ const AvailabilityModal = (props) => {
               <div className="flex flex-col w-full gap-2">
                 {/* <span>To</span> */}
                 <Datetime
+                  closeOnSelect={true}
+                  timeFormat={false}
+                  isValidDate={isValidEndDate}
                   value={availabilityModal.end_time}
                   inputProps={{ placeholder: 'End Date' }}
                   onChange={(event) => handleInputChange(event, "end_date")}
@@ -146,6 +183,16 @@ const AvailabilityModal = (props) => {
                   />
                 </div>
               )}
+              <div className="flex gap-4 m-1 items-center">
+                <div>Apply For all locations?</div>
+                <input
+                  checked={scheduleData.update_all_my_locations ?? false}
+                  name="apply_for_all_locations"
+                  type="checkbox"
+                  onChange={(e) => setScheduleData({ ...scheduleData, update_all_my_locations: e.target.checked })}
+                  className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+              </div>
               <div>
                 <div>For the following staff:</div>
                 <div className="flex flex-col gap-2 py-2">
