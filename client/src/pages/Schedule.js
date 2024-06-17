@@ -9,6 +9,7 @@ import {
   createSchedule,
   deleteAppointmentEmployee,
   deleteAvailability,
+  fetchAvailability,
   getAvailability,
   getClients,
   getEmployeesList,
@@ -85,6 +86,7 @@ function Schedule() {
     {}
   );
   const [clientNameOptions, setClientNameOptions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState();
   const [calenderCurrentRange, setCalenderCurrentRange] = useState({
     start_date: "",
     end_date: "",
@@ -126,17 +128,38 @@ function Schedule() {
         treatment_id: d?.treatment?.id || "",
         treatmentObj: d?.treatment,
       }));
+      let location_id = {}
+      if (selectedLocation) {
+        location_id = { location_id: selectedLocation.id }
+      }
+      const currentDate = new Date();
+
+      // Set the date to the 1st day of the current month
+      currentDate.setDate(1);
+
+      // Format the date to YYYY-MM-DD format (if needed)
+      const firstDayOfMonth = currentDate.toISOString().slice(0, 10);
       const availabilityPayload = {
         employee_id: emp.id,
+        from_date: firstDayOfMonth,
+        ...location_id
       };
-      const resp = await getAvailability(availabilityPayload, refetch);
-      const availabilityData = resp.data.map((d) => ({
-        start_time: new Date(d.start_time),
-        end_time: new Date(d.end_time),
-        available: d.available,
-        id: d.id,
-        every_week: d.every_week,
-      }));
+      const resp = await fetchAvailability(availabilityPayload, refetch);
+      const availabilityData = resp.data.filter(item => item.availability_timings.length > 0).map((d) => {
+        if (d.availability_timings.length > 0) {
+          const availabilitiesData = (d.availability_timings.map((t) => {
+            return ({
+              start_time: new Date(t.start_time),
+              end_time: new Date(t.end_time),
+              available: true,
+              id: t.id,
+              // every_week: t.every_week,
+            })
+          }))
+          return { ...availabilitiesData }
+        }
+        return {}
+      });
       console.log(resp, availabilityData, "availabilityData");
       const everyWeekUnavailabilities = availabilityData.filter(
         (item) => item.every_week
@@ -157,7 +180,8 @@ function Schedule() {
       const newAvailData = availabilityData.filter(
         (item) => !item.every_week && !item.available
       );
-      const arr = newData.concat(newAvailData);
+      const transformedData = newAvailData.flatMap(item => Object.values(item));
+      const arr = newData.concat(transformedData);
       const arr1 = arr.concat(unavailabilityNewData);
       setEmployeeScheduleEventsData((pre) => {
         return {
@@ -373,6 +397,7 @@ function Schedule() {
   };
 
   const onLocationChange = async (selectedOption) => {
+    setSelectedLocation(selectedOption);
     const { data } = await getLocationEmployee(selectedOption?.id);
     if (data?.length > 0) {
       setEmployeeList(data);
@@ -619,7 +644,7 @@ function Schedule() {
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
                 const backgroundColor =
-                  "available" in event && !event.available && "#d3d3d3";
+                  "available" in event && event.available && "#d3d3d3";
                 return { style: { backgroundColor } };
               }}
             />
