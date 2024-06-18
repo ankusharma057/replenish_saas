@@ -23,10 +23,16 @@ const AvailabilityModal = (props) => {
   } = props;
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const initialAvailabilityTimings = () => {
+    return daysOfWeek.map((day) => { return { day: day.toLowerCase(), timings: [] } } )
+  }
+
   const [serviceLocation, setServiceLocation] = useState([]);
   const [employeeList, setEmployeeList] = useState();
   const [selectedStaff, setSelectedStaff] = useState();
-  const [availabilityTimings, setAvailabilityTimings] = useState([])
+  const [availabilityTimings, setAvailabilityTimings] = useState(initialAvailabilityTimings)
+
   const [scheduleData, setScheduleData] = useState({});
   const getAllLocation = async (refetch = false) => {
     const { data } = await getLocations(refetch);
