@@ -9,7 +9,6 @@ class Employee < ApplicationRecord
 
   has_many :invoices
   has_many :products
-  has_many :clients
   has_many :schedules
   has_many :employee_locations
   has_many :locations, through: :employee_locations
@@ -23,6 +22,9 @@ class Employee < ApplicationRecord
 
   has_many :mentors_employees, foreign_key: :mentor_id, class_name: 'EmployeeMentor', dependent: :destroy
   has_many :mentees, through: :mentors_employees, source: :employee
+
+  has_many :employee_clients
+  has_many :clients, through: :employee_clients
 
   after_create :update_reference
   after_save :update_employee_roles

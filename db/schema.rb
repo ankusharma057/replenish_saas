@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_13_122837) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_18_102420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,7 +61,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_13_122837) do
 
   create_table "clients", force: :cascade do |t|
     t.string "name"
-    t.integer "employee_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "email"
@@ -69,6 +68,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_13_122837) do
     t.string "password_digest"
     t.string "stripe_id"
     t.string "timezone", default: "UTC"
+  end
+
+  create_table "employee_clients", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.bigint "client_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_employee_clients_on_client_id"
+    t.index ["employee_id"], name: "index_employee_clients_on_employee_id"
   end
 
   create_table "employee_locations", force: :cascade do |t|
@@ -264,6 +272,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_13_122837) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "availabilities", "employee_locations"
   add_foreign_key "availability_timings", "availabilities", column: "availabilities_id"
+  add_foreign_key "employee_clients", "clients"
+  add_foreign_key "employee_clients", "employees"
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "schedules", "clients"

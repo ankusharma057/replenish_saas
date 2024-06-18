@@ -12,7 +12,11 @@ class Api::Client::SchedulesController < ClientApplicationController
 
   def appointments
     schedules = current_client.schedules
+    render json: schedules, status: :ok
+  end
 
+  def balance_due_schedules
+    schedules = current_client.schedules.balance_amount
     render json: schedules, status: :ok
   end
 

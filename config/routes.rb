@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get '/stripe/success', to: 'stripe#success'
       get '/employee_unavailability', to: 'schedules#employee_unavailability'
       get '/appointments', to: 'schedules#appointments'
+      get '/balance_due_schedules', to: 'schedules#balance_due_schedules'
       
       resources :locations, only: [ :index, :create] do
         get :employees, on: :member

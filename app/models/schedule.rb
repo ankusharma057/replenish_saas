@@ -7,6 +7,8 @@ class Schedule < ApplicationRecord
 
   before_create :presisted_schedule
 
+  scope :balance_amount, -> { select { |schedule| schedule.remaining_amt > 0 } }
+
   def presisted_schedule
     res = Schedule.where(start_time: start_time, end_time:  end_time)
     emp_data = res.where(employee_id: employee_id)

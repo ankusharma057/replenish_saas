@@ -1,3 +1,3 @@
 class ClientSerializer < ActiveModel::Serializer
-  attributes :id, :name, :employee_id, :email
+  attributes :id, :name, :employee_ids, :email
 end
