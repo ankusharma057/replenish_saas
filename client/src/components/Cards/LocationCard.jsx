@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const LocationCard = ({ name, path, id }) => {
   return (
     <div>
-      <p className="text-2xl font-medium text-slate-800">{name}</p>
+      <p className="text-2xl font-bold capitalize text-slate-800">{name}</p>
 
       <Link
         to={path || "/clients"}

@@ -68,7 +68,7 @@ const ClientRoot = () => {
 
   useEffect(() => {
     getLocEmp();
-    return () => {};
+    return () => { };
   }, []);
 
   const getLocEmp = async () => {
@@ -87,7 +87,7 @@ const ClientRoot = () => {
       <div className="shadow-md bg-white  flex flex-col rounded-lg p-4">
         <LogoHeader />
         <Heading text="Welcome to our online booking site" />
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col py-4 gap-4">
           {(locationAndEmployee || []).map((locEmp) => (
             <div
               key={locEmp?.id}
@@ -98,7 +98,7 @@ const ClientRoot = () => {
                 name={locEmp?.name}
                 path={`/clients/location?locations=${locEmp?.name}&locId=${locEmp?.id}`}
               />
-              <div className="flex gap-2 flex-wrap">
+              <div className="gap-2 grid grid-cols-2 md:grid-cols-4 flex-wrap">
                 {locEmp?.employees?.map((emp) => (
                   <EmployeeProfileCard
                     key={emp?.id}
