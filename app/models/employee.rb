@@ -31,6 +31,7 @@ class Employee < ApplicationRecord
   before_destroy :return_inventory
 
   accepts_nested_attributes_for :employees_mentors, allow_destroy: true
+  accepts_nested_attributes_for :employee_locations, allow_destroy: true
 
   has_secure_password
 
