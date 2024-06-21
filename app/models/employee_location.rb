@@ -1,7 +1,7 @@
 class EmployeeLocation < ApplicationRecord
   belongs_to :employee
   belongs_to :location
-  has_many :availabilitities, dependent: :destroy
+  has_many :availabilities, dependent: :destroy, class_name: "Availabilities"
 
   validates_uniqueness_of :employee_id, scope: :location_id
 
