@@ -1,6 +1,6 @@
 class Api::LocationsController < ApplicationController
   def index
-    locations = Location.all
+    locations = Location.exclude_locations_for_employee(params[:skip_by_employee_id])
     
     render json: locations, status: :ok
   end
