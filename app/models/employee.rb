@@ -5,7 +5,7 @@ class Employee < ApplicationRecord
 
   validates_uniqueness_of :name
   validates_uniqueness_of :email, case_sensitive: false
-  validate :verify_employees_mentors
+  validate :verify_employee_mentors
 
   has_many :invoices
   has_many :products
@@ -17,8 +17,8 @@ class Employee < ApplicationRecord
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
   has_many :unavailabilities, dependent: :destroy
 
-  has_many :employees_mentors, foreign_key: :employee_id, class_name: 'EmployeeMentor', dependent: :destroy
-  has_many :mentors, through: :employees_mentors, source: :mentor
+  has_many :employee_mentors, foreign_key: :employee_id, class_name: 'EmployeeMentor', dependent: :destroy
+  has_many :mentors, through: :employee_mentors, source: :mentor
 
   has_many :mentors_employees, foreign_key: :mentor_id, class_name: 'EmployeeMentor', dependent: :destroy
   has_many :mentees, through: :mentors_employees, source: :employee
@@ -30,7 +30,7 @@ class Employee < ApplicationRecord
   after_save :update_employee_roles
   before_destroy :return_inventory
 
-  accepts_nested_attributes_for :employees_mentors, allow_destroy: true
+  accepts_nested_attributes_for :employee_mentors, allow_destroy: true
   accepts_nested_attributes_for :employee_locations, allow_destroy: true
 
   has_secure_password
@@ -91,10 +91,10 @@ class Employee < ApplicationRecord
     self.update(reference_number: str)
   end
 
-  def verify_employees_mentors
+  def verify_employee_mentors
     overall_percentage = self.service_percentage.to_f
 
-    self.employees_mentors.each do |employee_mentor|
+    self.employee_mentors.each do |employee_mentor|
       mentor = employee_mentor.mentor
       if mentor.nil? || !mentor.is_mentor?
         self.errors.add(:mentor, "#{mentor.name} is not a mentor")

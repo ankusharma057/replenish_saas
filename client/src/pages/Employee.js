@@ -88,15 +88,15 @@ const Employee = () => {
     const isPresent = addedMentors.find(obj => obj.id === currSelectedMentor.id && obj.name === currSelectedMentor.name);
     if (!isPresent) {
       setAddedMentors([...addedMentors, currSelectedMentor])
-      if (updateEmployeeInput.employees_mentors_attributes) {
+      if (updateEmployeeInput.employee_mentors_attributes) {
         setUpdateEmployeeInput((pre) => ({
           ...pre,
-          employees_mentors_attributes: [...updateEmployeeInput.employees_mentors_attributes, { mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+          employee_mentors_attributes: [...updateEmployeeInput.employee_mentors_attributes, { mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
         }));
       } else {
         setUpdateEmployeeInput((pre) => ({
           ...pre,
-          employees_mentors_attributes: [{ mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+          employee_mentors_attributes: [{ mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
         }));
       }
     } else {
@@ -106,11 +106,11 @@ const Employee = () => {
 
   const removeMentor = (currValue) => {
     let filteredArray = addedMentors.filter(obj => obj.id !== currValue.id || obj.name !== currValue.name);
-    let filteredUpdatedArray = updateEmployeeInput.employees_mentors_attributes.filter(obj => obj.mentor_id !== currValue.id);
+    let filteredUpdatedArray = updateEmployeeInput.employee_mentors_attributes.filter(obj => obj.mentor_id !== currValue.id);
     setAddedMentors(filteredArray)
     setUpdateEmployeeInput((pre) => ({
       ...pre,
-      employees_mentors_attributes: filteredUpdatedArray,
+      employee_mentors_attributes: filteredUpdatedArray,
     }));
   }
   // const getInvoices = async () => {
@@ -407,7 +407,7 @@ const Employee = () => {
           onClick: async () => {
             try {
               setLoading(true);
-              const updateMentorDetails = { employees_mentors_attributes: [{ id: mentorDetails.id, mentor_percentage: newMentorPercentage }] }
+              const updateMentorDetails = { employee_mentors_attributes: [{ id: mentorDetails.id, mentor_percentage: newMentorPercentage }] }
               const { data } = await updateVendore(
                 selectedEmployeeData.id,
                 updateMentorDetails
@@ -447,7 +447,7 @@ const Employee = () => {
           onClick: async () => {
             try {
               setLoading(true);
-              const deleteMentorDetails = { employees_mentors_attributes: [{ id: mentorDetails.id, _destroy: 1 }] }
+              const deleteMentorDetails = { employee_mentors_attributes: [{ id: mentorDetails.id, _destroy: 1 }] }
               const { data } = await updateVendore(
                 selectedEmployeeData.id,
                 deleteMentorDetails
@@ -762,7 +762,7 @@ const Employee = () => {
                       </table>
                     </div>
 
-                    <div className={`${selectedEmployeeData.employees_mentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
+                    <div className={`${selectedEmployeeData.employee_mentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
                       <div className="font-bold p-4">Current Mentors:</div>
                       <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
@@ -779,7 +779,7 @@ const Employee = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {selectedEmployeeData.employees_mentors.map((val, index) => {
+                          {selectedEmployeeData.employee_mentors.map((val, index) => {
                             return (
                               <React.Fragment key={index}>
                                 <EmployeeTableRows deleteMentor={deleteMentor} updateMentorDetails={updateMentor} val={val} />
