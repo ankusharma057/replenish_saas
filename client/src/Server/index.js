@@ -115,6 +115,16 @@ export const getLocations = async (refetch = false) =>
     },
   });
 
+export const getEmployeeLocations = async (
+  employee_id,
+  refetch = false
+) =>
+  api.get(`/api/locations?skip_by_employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getClientLocations = async (refetch = false) =>
   api.get("/api/client/locations", {
     cache: {

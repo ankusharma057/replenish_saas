@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
+  getEmployeeLocations,
   getEmployeesList,
   getMentorList,
   // getInvoiceList,
@@ -53,6 +54,7 @@ const Employee = () => {
   const [mentorList, setMentorList] = useState([])
   const [addedMentors, setAddedMentors] = useState([])
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
+  const [serviceLocation, setServiceLocation] = useState([]);
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -119,6 +121,16 @@ const Employee = () => {
   //   // setInvoiceList(data);
   // };
 
+  const getAllEmployeeLocation = async (employeeId, refetch = false) => {
+    const { data } = await getEmployeeLocations(employeeId, refetch);
+
+    if (data?.length > 0) {
+      setServiceLocation(
+        data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
+      );
+    }
+  };
+
   useEffect(() => {
     getEmployees();
     getMentors();
@@ -126,6 +138,12 @@ const Employee = () => {
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (selectedEmployeeData?.id) {
+      getAllEmployeeLocation(selectedEmployeeData.id)
+    }
+  }, [selectedEmployeeData])
 
   useEffect(() => {
     if (isFillingForm) {
@@ -454,6 +472,46 @@ const Employee = () => {
               );
 
               toast.success("Mentor removed successfully.");
+              await getEmployees(true);
+              // setUpdateInvoiceInput(data);
+              setSelectedEmployeeData(data);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to update Employee"
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => { },
+        },
+      ],
+    });
+  }
+
+  const removeLocation = async (locationDetails) => {
+    confirmAlert({
+      title: "Remove Location",
+      message: `Are you sure, you want to remove ${String(locationDetails.location.name)} from your list`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const deleteLocationDetails = { employee_locations_attributes: [{ id: locationDetails.id, _destroy: 1 }] }
+              const { data } = await updateVendore(
+                selectedEmployeeData.id,
+                deleteLocationDetails
+              );
+
+              toast.success("Location removed successfully.");
               await getEmployees(true);
               // setUpdateInvoiceInput(data);
               setSelectedEmployeeData(data);
@@ -861,6 +919,61 @@ const Employee = () => {
                     </div>
 
                     <InviteClientsTab employee={selectedEmployeeData} />
+                    <form onSubmit={updateEmployee}>
+                      <div className="flex flex-1 relative mt-2">
+                        <Select
+                          className="flex-fill flex-grow-1"
+                          inputId="product_type"
+                          isMulti
+                          onChange={(event) => {
+                            console.log(event, 'location values')
+                            const transformedLocations = event.map(({ id }) => ({ location_id: id }));
+                            setUpdateEmployeeInput((pre) => ({
+                              ...pre,
+                              employee_locations_attributes: [...transformedLocations],
+                            }));
+                          }}
+                          options={serviceLocation}
+                          required
+                          placeholder="Select Locations"
+                        />
+                      </div>
+                      <div className={`${selectedEmployeeData.employee_locations.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg mt-4`}>
+                        <div className="font-bold p-4">Active Locations:</div>
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+                          <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+                            <tr>
+                              <th scope="col" className="px-6 py-3">
+                                Location
+                              </th>
+                              <th scope="col" className="px-6 py-3 text-center">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedEmployeeData.employee_locations.map((val, index) => {
+                              return (
+                                <React.Fragment key={index}>
+                                  <EmployeeLocationTableRows removeLocation={removeLocation} val={val} />
+                                </React.Fragment>
+                              )
+                            })
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                      {Object.keys(updateEmployeeInput).length > 0 && (
+                        <div className=" w-full mt-4 flex justify-end">
+                          <Loadingbutton
+                            isLoading={loading}
+                            title="Update"
+                            loadingText={"Updating Employee..."}
+                            type="submit"
+                          />
+                        </div>
+                      )}
+                    </form>
                   </div>
                 )}
                 {currentTab === "staff" && (
@@ -909,6 +1022,26 @@ const EmployeeTableRows = ({ val, deleteMentor, updateMentorDetails }) => {
           <button
             type="button"
             onClick={() => deleteMentor(val)}
+            className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+          >
+            <RxCross2 className="w-6 h-6" />
+          </button>
+        </div>
+      </td>
+    </tr>)
+}
+
+const EmployeeLocationTableRows = ({ val, removeLocation }) => {
+  return (
+    <tr className="odd:bg-white even:bg-gray-50 border-b ">
+      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap capitalize ">
+        {val.location.name}
+      </th>
+      <td className="px-6 py-4 w-14">
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => removeLocation(val)}
             className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
           >
             <RxCross2 className="w-6 h-6" />

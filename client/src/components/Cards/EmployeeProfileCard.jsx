@@ -17,8 +17,13 @@ const EmployeeProfileCard = ({ image, name, path }) => {
           />
         </div>
       ) : (
-        <CircleUser className="w-24  h-24 text-slate-800" />
-      )}
+        <div className="w-full h-full rounded-lg">
+          <img
+            src={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCPGbG0JcbIEiesh3hZm2QXM8jOSbXEpzECvc0UA8Kq0yt0vVOTSOdtR37og&s'}
+            alt={name}
+            className="w-full h-full object-cover rounded-lg "
+          />
+        </div>)}
 
       {/* <div>
         <p className="break-words">{name}</p>
