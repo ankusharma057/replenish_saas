@@ -591,9 +591,13 @@ Product.all.reload.each do |product|
 end
 
 15.times do
-    Client.create(
-        name: Faker::Books::Dune.character,
-        # employee_id: Employee.all.sample.id
+    Client.create(name: Faker::Books::Dune.character)
+end
+
+Employee.ids.each do |employee_id|
+    EmployeeClient.create(
+        employee_id: employee_id,
+        client_id: Client.take.id
     )
 end
 
