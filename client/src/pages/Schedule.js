@@ -145,12 +145,22 @@ function Schedule() {
         ...location_id
       };
       const resp = await fetchAvailability(availabilityPayload, refetch);
+
+      function convertToDate(dateString, timeString) {
+        // Combine date and time strings
+        const combinedDateTimeString = `${dateString} ${timeString}`;
+
+        // Create a Date object from combined string
+        const dateObj = new Date(combinedDateTimeString);
+
+        return dateObj;
+      }
       const availabilityData = resp.data.filter(item => item.availability_timings.length > 0).map((d) => {
         if (d.availability_timings.length > 0) {
           const availabilitiesData = (d.availability_timings.map((t) => {
             return ({
-              start_time: new Date(t.start_time),
-              end_time: new Date(t.end_time),
+              start_time: convertToDate(d.availability_date, "00:00 AM"),
+              end_time: convertToDate(d.availability_date, "00:00 AM"),
               available: true,
               id: t.id,
               // every_week: t.every_week,
@@ -644,7 +654,7 @@ function Schedule() {
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
                 const backgroundColor =
-                  "available" in event && event.available && "#d3d3d3";
+                  "available" in event && event.available && "#299db9";
                 return { style: { backgroundColor } };
               }}
             />
