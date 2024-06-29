@@ -593,7 +593,7 @@ end
 15.times do
     Client.create(
         name: Faker::Books::Dune.character,
-        employee_id: Employee.all.sample.id
+        # employee_id: Employee.all.sample.id
     )
 end
 
