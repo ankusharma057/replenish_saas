@@ -159,8 +159,8 @@ function Schedule() {
         if (d.availability_timings.length > 0) {
           const availabilitiesData = (d.availability_timings.map((t) => {
             return ({
-              start_time: convertToDate(d.availability_date, "00:00 AM"),
-              end_time: convertToDate(d.availability_date, "00:00 AM"),
+              start_time: convertToDate(d.availability_date, t.start_time),
+              end_time: convertToDate(d.availability_date, t.end_time),
               available: true,
               id: t.id,
               // every_week: t.every_week,
