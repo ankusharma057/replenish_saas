@@ -4,8 +4,11 @@ class Api::ClientsController < ApplicationController
   before_action :find_client, only: [:sign_in, :password_update]
 
   def index
-    clients = Client.all
-    clients = clients.where(employee_id: params[:employee_id]) if params[:employee_id]
+    clients = if params[:employee_id]
+      Employee.where(id: params[:employee_id])&.first&.clients
+    else
+      Client.all
+    end
 
     render json: clients, status: :ok
   end
