@@ -42,7 +42,7 @@ module AvailabilityConcern
         day = date.strftime('%A').downcase
         matching_timings = availability_timings_params.find { |timing| timing[:day].downcase == day }
 
-        if matching_timings
+        if matching_timings["timings"].present?
           availability = Availabilities.find_or_initialize_by(
             employee_location_id: employee_location.id,
             availability_date: date,
