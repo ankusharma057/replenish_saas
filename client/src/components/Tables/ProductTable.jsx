@@ -21,10 +21,10 @@ const ProductTable = ({
   /** @type import("@tanstack/react-table").columnsDef<any>
    */
   const columns = [
-    {
-      header: "ID",
-      accessorKey: "id",
-    },
+    // {
+    //   header: "ID",
+    //   accessorKey: "id",
+    // },
     {
       header: "Product Name",
       accessorKey: "name",
@@ -134,7 +134,7 @@ const ProductTable = ({
                       )}
                       {
                         { asc: "🔼", desc: "🔽" }[
-                          header.column.getIsSorted() ?? null
+                        header.column.getIsSorted() ?? null
                         ]
                       }
                     </div>
