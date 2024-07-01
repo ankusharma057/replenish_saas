@@ -890,7 +890,7 @@ const MyProfile = () => {
               </div>
               <div>
                 <div className="flex gap-4 m-1 items-center">
-                  <div>Charge client $50?</div>
+                  <div>Charge client down payment of $50</div>
                   <input
                     checked={userProfileData.pay_50}
                     name="pay_50"
