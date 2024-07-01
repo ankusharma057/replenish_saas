@@ -350,7 +350,7 @@ export default function AddInvoices() {
       semagConsultFee: 0,
     };
     if (formData?.gfe) {
-      afterTax.gfeFee = 30;
+      afterTax.gfeFee = 20;
       if (authUserState.user?.email === "houstonbeautifulaesthetics@gmail.com")
         afterTax.gfeFee = afterTax.gfeFee + 10;
     }
@@ -403,9 +403,9 @@ export default function AddInvoices() {
       afterTax.conciergeFee;
 
     if (authUserState.user?.gfe && formData?.gfe && totalPaidByClientAT === 0) {
-      total = 30;
+      total = 20;
       if (authUserState.user.email === "houstonbeautifulaesthetics@gmail.com")
-        total = total + 10;
+        total = total + 20;
     }
     if (
       authUserState.user?.gfe &&

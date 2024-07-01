@@ -396,7 +396,7 @@ const MyProfile = () => {
             >
               <ArrowRightLeft /> Assigned Inventory
             </div>
-            <div
+            {/* <div
               role="button"
               onClick={() => {
                 currentTab !== "pendingRequest" &&
@@ -411,7 +411,7 @@ const MyProfile = () => {
             >
               <RotateCw />
               Pending Request
-            </div>
+            </div> */}
 
             <div
               role="button"
