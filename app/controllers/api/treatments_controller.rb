@@ -1,5 +1,5 @@
 class Api::TreatmentsController < ApplicationController
-  
+
   def index    
     render json: Treatment.all
   end
