@@ -14,7 +14,6 @@ class ScheduleSerializer < ActiveModel::Serializer
   end
 
   def location
-    location = Location.find(object.location_id)
-    { id: location.id, name: location.name }
+    object.location
   end
 end

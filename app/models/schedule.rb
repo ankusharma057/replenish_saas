@@ -4,6 +4,7 @@ class Schedule < ApplicationRecord
   belongs_to :product, optional: true
   belongs_to :treatment
   has_many :payments
+  belongs_to :location
 
   before_create :presisted_schedule
 
