@@ -584,10 +584,14 @@ Employee.all.each do |employee|
     employee.employees_inventories.create!(product: Product.all.reload.sample, quantity: 1)
 end
 
+
+employee_ids = Employee.pluck(:id)
+employee_ids.shift
+
 Product.all.reload.each do |product|
     product.create_inventory!(quantity: 1)
 
-    2.times{ |i| product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30") }
+    2.times{ |i| product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30", created_by: i == 0 ? e.id : employee_ids.sample, cost: rand(100), products_used: rand(50)) }
 end
 
 15.times do
