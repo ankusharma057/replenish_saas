@@ -44,7 +44,7 @@ import MySchedule from "./MySchedule";
 
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
-  const [userProfileData, setUserProfileData] = useState(authUserState.user)
+  const [userProfileData, setUserProfileData] = useState(authUserState.user);
   const [loading, setLoading] = useState(false);
   const { collapse } = useAsideLayoutContext();
   const [modalShow, setModalShow] = useState(false);
@@ -97,7 +97,7 @@ const MyProfile = () => {
     }
   };
 
-  console.log("asdasddddddddddsaaaaaaaa", authUserState)
+  console.log("asdasddddddddddsaaaaaaaa", authUserState);
   // added
   const getEmployees = async () => {
     try {
@@ -158,9 +158,9 @@ const MyProfile = () => {
               console.log(error);
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to Transfer the inventory"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to Transfer the inventory"
               );
             } finally {
               setLoading(false);
@@ -213,8 +213,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-        error?.response?.statusText ||
-        error.message
+          error?.response?.statusText ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -256,8 +256,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-        error?.response?.statusText ||
-        error.message
+          error?.response?.statusText ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -280,8 +280,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-        error?.response?.statusText ||
-        error.message
+          error?.response?.statusText ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -303,8 +303,8 @@ const MyProfile = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-        error?.response?.statusText ||
-        error.message
+          error?.response?.statusText ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -318,19 +318,20 @@ const MyProfile = () => {
     setCurrentPage(newPage);
   };
 
-
   const handleChargeClient = (event) => {
-    console.log(event.target.checked, 'checked')
+    console.log(event.target.checked, "checked");
     confirmAlert({
       title: !event.target.checked ? "Don't charge $50" : "Charge $50?",
-      message: !event.target.checked ? "Are you sure you don't want to charge client $50?" : `Are you sure to charge $50 for client?`,
+      message: !event.target.checked
+        ? "Are you sure you don't want to charge client $50?"
+        : `Are you sure to charge $50 for client?`,
       buttons: [
         {
           label: "Yes",
           onClick: async () => {
             try {
               setLoading(true);
-              const updateVendorDetails = { pay_50: !event.target.checked }
+              const updateVendorDetails = { pay_50: !event.target.checked };
               const { data } = await updateVendore(
                 authUserState.user.id,
                 updateVendorDetails
@@ -338,14 +339,14 @@ const MyProfile = () => {
 
               toast.success("Updated successfully.");
               if (data) {
-                setUserProfileData(data)
+                setUserProfileData(data);
               }
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Something went wrong."
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Something went wrong."
               );
             } finally {
               setLoading(false);
@@ -360,7 +361,7 @@ const MyProfile = () => {
         },
       ],
     });
-  }
+  };
 
   return (
     <div>
@@ -378,8 +379,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${currentTab === "products" && "pointer-events-none bg-gray-200"
-                } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${
+                currentTab === "products" && "pointer-events-none bg-gray-200"
+              } `}
             >
               <Box />
               Products
@@ -394,9 +396,10 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "assignedInventory" &&
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "assignedInventory" &&
                 "pointer-events-none bg-gray-200"
-                } `}
+              } `}
             >
               <ArrowRightLeft /> Assigned Inventory
             </div>
@@ -425,8 +428,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "invoice" && "pointer-events-none bg-gray-200"
-                } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "invoice" && "pointer-events-none bg-gray-200"
+              } `}
             >
               <FileText /> Invoices
             </div>
@@ -454,8 +458,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "settings" && "pointer-events-none bg-gray-200"
-                } `}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "settings" && "pointer-events-none bg-gray-200"
+              } `}
             >
               <Settings /> Settings
             </div>
@@ -467,8 +472,9 @@ const MyProfile = () => {
                   collapse();
                 }
               }}
-              className={`p-2 flex flex-row items-center gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "treatment" && "pointer-events-none bg-gray-200"
-                } `}
+              className={`p-2 flex flex-row items-center gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "treatment" && "pointer-events-none bg-gray-200"
+              } `}
             >
               <ImProfile /> Treatments
             </div>
@@ -545,10 +551,11 @@ const MyProfile = () => {
               type="number"
               controlId="quantity"
               name="quantity"
-              placeholder={`${requestInvetoryInput?.inventory_object?.quantity
-                ? ` Type Quantity`
-                : "Select Product First"
-                }`}
+              placeholder={`${
+                requestInvetoryInput?.inventory_object?.quantity
+                  ? ` Type Quantity`
+                  : "Select Product First"
+              }`}
               onChange={(e) =>
                 setRequestInvetoryInput({
                   ...requestInvetoryInput,
@@ -919,7 +926,7 @@ const MyProfile = () => {
               </div>
               <div className="flex mr-8">
                 {!(authUserState.user.has_access_only_to === "all") &&
-                  authUserState.user?.is_inv_manager ? (
+                authUserState.user?.is_inv_manager ? (
                   // Show the button if user is authUserState.user.has_access_only_to array and is_inv_manager is true
                   <Button
                     onClick={() => {
@@ -956,9 +963,11 @@ const MyProfile = () => {
           )}
           {currentTab === "mySchedule" && <MySchedule />}
 
-          {
-            currentTab === "treatment" && <><Treatment selectedEmployess={authUserState.user}></Treatment> </>
-          }
+          {currentTab === "treatment" && (
+            <>
+              <Treatment selectedEmployee={authUserState.user}></Treatment>{" "}
+            </>
+          )}
         </div>
       </AsideLayout>
     </div>

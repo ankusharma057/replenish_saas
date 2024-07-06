@@ -29,21 +29,31 @@ e = Employee.find_by(email: "patricklcarrera@gmail.com")
 location = Location.create(name: "admin_location")
 location.employees <<  e
 
+2.times do |i|
+    emp = Employee.create(
+      name:  "Inv #{Faker::Name.name}",
+      email: "inv-#{Faker::Internet.unique.email}",
+      gfe: true,
+      service_percentage: 60,
+      password: "test123",
+      is_inv_manager: true
+    )
+  end
+
 5.times do |i|
-  emp = Employee.create(
-    name:  Faker::Name.name,
-    email: Faker::Internet.unique.email,
+    emp = Employee.create(
+    name:  "Emp #{Faker::Name.name}",
+    email: "emp-#{Faker::Internet.unique.email}",
     gfe: true,
     service_percentage: 60,
     password: "test123",
-    is_inv_manager: true
-  )
+    )
 
-  location = Location.create(name: "Location #{i}")
-  location.employees <<  emp
-
-  5.times{|c| emp.clients.create(name: Faker::Name.name, email: Faker::Internet.unique.email)}
-end
+    location = Location.create(name: "Location #{i}")
+    location.employees <<  emp
+  
+    5.times{|c| emp.clients.create(name: "Cli #{Faker::Name.name}", email: "cli-#{Faker::Internet.unique.email}")}
+  end
 
 Product.create(
     name: "Botox",
@@ -580,18 +590,28 @@ Product.create(
     retail_price: 300
 )
 
-Employee.all.each do |employee|
-    employee.employees_inventories.create!(product: Product.all.reload.sample, quantity: 1)
-end
+# Employee.all.each do |employee|
+#     employee.employees_inventories.create!(product: Product.all.reload.sample, quantity: 1)
+# end
 
 
 employee_ids = Employee.pluck(:id)
 employee_ids.shift
 
 Product.all.reload.each do |product|
-    product.create_inventory!(quantity: 1)
+    total_product_quantity = 100 + rand(50)
+    product.create_inventory!(quantity: total_product_quantity)
 
-    2.times{ |i| product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30", created_by: i == 0 ? e.id : employee_ids.sample, cost: rand(100), products_used: rand(50)) }
+    2.times do |i|
+        product_quantity = rand(50)
+        if i == 0
+            current_employee_id = e.id
+        else
+            current_employee_id = employee_ids.sample
+            product.employees_inventories.create(employee_id: current_employee_id, quantity: product_quantity + 10)
+        end
+        product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30", created_by: current_employee_id, cost: rand(100), products_used: product_quantity)
+    end
 end
 
 15.times do

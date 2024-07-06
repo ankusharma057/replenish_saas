@@ -1,5 +1,6 @@
 class Api::TreatmentsController < ApplicationController
-  before_action :treatment_created_by
+  # before_action :treatment_created_by
+  skip_before_action :authorized_employee
 
   def index
     render json: Treatment.employee_treatments(params[:employee_id])

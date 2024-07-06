@@ -33,7 +33,7 @@ class Api::Client::SchedulesController < ClientApplicationController
       response_data = Stripe::Payment.create(schedule)
       record_payment_from_session(response_data, schedule, 50)
       puts response_data
-      render json: {schedule: schedule}.merge!({redirect_url: response_data['url']}), status: :created
+      render json: {schedule: ScheduleSerializer.new(schedule)}.merge!({redirect_url: response_data['url']}), status: :created
     else
       render json: {error: schedule.errors}, status: :unprocessable_entity
     end

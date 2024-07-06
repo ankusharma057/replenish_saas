@@ -65,7 +65,7 @@ function ClientSignIn() {
           const { data } = await createClientSchedule(copyAppointMent);
           console.log(data, copyAppointMent)
           if (data?.redirect_url) {
-            navigate(`/clients/payment/confirm_payment`, {
+            navigate(`/clients/payment/confirm_payment?empId=${data?.schedule?.employee?.id}`, {
               state: {
                 redirect_url: data?.redirect_url,
                 locId,

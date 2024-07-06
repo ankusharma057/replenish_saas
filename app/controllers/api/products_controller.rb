@@ -5,7 +5,7 @@ class Api::ProductsController < ApplicationController
   before_action :set_access_control_headers
 
   def index
-    products = Product.all
+    products = params[:employee_id].present? ? Employee.find_by_id(params[:employee_id]).employees_inventories.map(&:product) : Product.all
     render json: products, status: :ok
   end
 

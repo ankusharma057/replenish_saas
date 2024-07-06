@@ -23,7 +23,7 @@ import { useAuthContext } from "../context/AuthUserContext";
 import ModalWraper from "../components/Modals/ModalWraper";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
-const Treatment = ({ selectedEmployess }) => {
+const Treatment = ({ selectedEmployee }) => {
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
   const [searchInput, setSearchInput] = useState("");
@@ -36,18 +36,19 @@ const Treatment = ({ selectedEmployess }) => {
     duration: "",
     desc: "",
     cost: "",
-    products_used: ""
+    products_used: "",
   });
 
   const [radioTabs, setRadioTabs] = useState([
     {
       name: "Admin",
-      value: "admin"
+      value: "admin",
     },
     {
       name: "Employee",
-      value: "employee"
-    }]);
+      value: "employee",
+    },
+  ]);
 
   const [showUpdateTreatmentModal, setShowUpdateTreatmentModal] =
     useState(false);
@@ -57,7 +58,10 @@ const Treatment = ({ selectedEmployess }) => {
 
   const getProducts = async (refetch = false) => {
     try {
-      const { data } = await getProductsListWithId(refetch, selectedEmployess.id);
+      const { data } = await getProductsListWithId(
+        refetch,
+        selectedEmployee.id
+      );
       setProductList(data);
     } catch (error) {
       console.log(error);
@@ -66,7 +70,7 @@ const Treatment = ({ selectedEmployess }) => {
   const getTreatment = async (refetch = false) => {
     try {
       setTreatmentList([]);
-      const { data } = await getTreatmentList(refetch, selectedEmployess.id);
+      const { data } = await getTreatmentList(refetch, selectedEmployee.id);
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
@@ -76,8 +80,12 @@ const Treatment = ({ selectedEmployess }) => {
   const getBaseTreatments = async (refetch = false) => {
     try {
       setTreatmentList([]);
-      const response = await getBaseTreatmentList(refetch, selectedEmployess.id, selectedEmployess.is_admin);
-      const { data } = response || {};  // Use an empty object as default
+      const response = await getBaseTreatmentList(
+        refetch,
+        selectedEmployee.id,
+        selectedEmployee.is_admin
+      );
+      const { data } = response || {}; // Use an empty object as default
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
@@ -94,14 +102,14 @@ const Treatment = ({ selectedEmployess }) => {
     e.preventDefault();
     try {
       const payload = {
-        "name": treatmentForm.name,
-        "duration": treatmentForm.duration,
-        "product_id": treatmentForm.product_id,
-        "description": treatmentForm.desc,
-        "cost": Number(treatmentForm.cost),
-        "products_used": Number(treatmentForm.products_used),
-        "created_by": selectedEmployess.id
-      }
+        name: treatmentForm.name,
+        duration: treatmentForm.duration,
+        product_id: treatmentForm.product_id,
+        description: treatmentForm.desc,
+        cost: Number(treatmentForm.cost),
+        products_used: Number(treatmentForm.products_used),
+        created_by: selectedEmployee.id,
+      };
       await createTreatment(payload);
       setTreatmentForm({
         product_id: "",
@@ -109,14 +117,11 @@ const Treatment = ({ selectedEmployess }) => {
         duration: "",
         cost: "",
         desc: "",
-        products_used: ""
+        products_used: "",
       });
       setShowCreateTreatmentModal(false);
-      if (currentTab == "admin")
-        await getBaseTreatments(true);
-      else
-        await getTreatment(true);
-
+      if (currentTab == "admin") await getBaseTreatments(true);
+      else await getTreatment(true);
     } catch (error) {
       console.log(error);
     }
@@ -130,8 +135,7 @@ const Treatment = ({ selectedEmployess }) => {
       duration: treatment.duration,
       cost: treatment.cost,
       desc: treatment.description,
-      products_used: treatment.products_used
-
+      products_used: treatment.products_used,
     });
     setShowCreateTreatmentModal(true);
   };
@@ -144,8 +148,7 @@ const Treatment = ({ selectedEmployess }) => {
       duration: treatment.duration,
       cost: treatment.cost,
       desc: treatment.description,
-      products_used: treatment.products_used
-
+      products_used: treatment.products_used,
     });
     setShowUpdateTreatmentModal(true);
   };
@@ -164,9 +167,9 @@ const Treatment = ({ selectedEmployess }) => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to Delete the Treatment."
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to Delete the Treatment."
               );
             }
           },
@@ -226,30 +229,33 @@ const Treatment = ({ selectedEmployess }) => {
           )}
           {!authUserState.user?.is_admin && (
             <div className="flex justify-center space-x-2">
-              {
-                currentTab == "admin" ? (
-                  <Button
-                    variant="info"
-                    onClick={() => onTreatmentDuplicateUpdate(row.original)}
-                  >
-                    Duplicate
-                  </Button>
-                ) : <>
+              {currentTab == "admin" ? (
+                <Button
+                  variant="info"
+                  onClick={() => onTreatmentDuplicateUpdate(row.original)}
+                >
+                  Duplicate
+                </Button>
+              ) : (
+                <>
                   <Button
                     variant="info"
                     onClick={() => onTreatmentUpdate(row.original)}
                   >
                     Update
-                  </Button></>
-              }
-              {
-                currentTab == "employee" && <>
-                  <Button variant="danger" onClick={() => onDelete(row.original)}>
+                  </Button>
+                </>
+              )}
+              {currentTab == "employee" && (
+                <>
+                  <Button
+                    variant="danger"
+                    onClick={() => onDelete(row.original)}
+                  >
                     Remove
                   </Button>
                 </>
-              }
-
+              )}
             </div>
           )}
         </>
@@ -278,10 +284,8 @@ const Treatment = ({ selectedEmployess }) => {
 
   useEffect(() => {
     getProducts();
-    if (currentTab == "admin")
-      getBaseTreatments();
-    else
-      getTreatment();
+    if (currentTab == "admin") getBaseTreatments();
+    else getTreatment();
   }, [currentTab]);
 
   return (
@@ -296,7 +300,10 @@ const Treatment = ({ selectedEmployess }) => {
                 id={tab.value}
                 type="radio"
                 className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 
-                  ${currentTab === tab.value ? "!bg-gray-400 !text-white pb-2" : "btn-link"
+                  ${
+                    currentTab === tab.value
+                      ? "!bg-gray-400 !text-white pb-2"
+                      : "btn-link"
                   }`}
                 name="radio"
                 value={tab.value}
@@ -312,7 +319,6 @@ const Treatment = ({ selectedEmployess }) => {
         </ButtonGroup>
       </div>
       <div className="m-4">
-
         <div className="flex items-center gap-x-1 md:gap-x-2">
           <div className="flex items-center gap-x-2 flex-1 relative">
             <Form.Control
@@ -338,7 +344,11 @@ const Treatment = ({ selectedEmployess }) => {
           </div>
           <ModalWraper
             show={showUpdateTreatmentModal || showCreateTreatmentModal}
-            title={showUpdateTreatmentModal ? "Update Treatment" : "Create New Treatment"}
+            title={
+              showUpdateTreatmentModal
+                ? "Update Treatment"
+                : "Create New Treatment"
+            }
             onHide={() => {
               setShowUpdateTreatmentModal(false);
               setShowCreateTreatmentModal(false);
@@ -348,7 +358,7 @@ const Treatment = ({ selectedEmployess }) => {
                 duration: "",
                 desc: "",
                 cost: "",
-                products_used: ""
+                products_used: "",
               });
             }}
             footer={
@@ -358,13 +368,13 @@ const Treatment = ({ selectedEmployess }) => {
                     onClick={async () => {
                       try {
                         const payload = {
-                          "name": treatmentForm.name,
-                          "duration": treatmentForm.duration,
-                          "product_id": treatmentForm.product_id,
-                          "description": treatmentForm.desc,
-                          "cost": Number(treatmentForm.cost),
-                          "products_used": Number(treatmentForm.products_used),
-                        }
+                          name: treatmentForm.name,
+                          duration: treatmentForm.duration,
+                          product_id: treatmentForm.product_id,
+                          description: treatmentForm.desc,
+                          cost: Number(treatmentForm.cost),
+                          products_used: Number(treatmentForm.products_used),
+                        };
                         await updateTreatment(treatmentForm.id, payload);
                         setTreatmentForm({
                           product_id: "",
@@ -372,7 +382,7 @@ const Treatment = ({ selectedEmployess }) => {
                           duration: "",
                           desc: "",
                           cost: "",
-                          products_used: ""
+                          products_used: "",
                         });
                         await getTreatment(true);
                         setShowUpdateTreatmentModal(false);
@@ -485,7 +495,7 @@ const Treatment = ({ selectedEmployess }) => {
                         )}
                         {
                           { asc: "🔼", desc: "🔽" }[
-                          header.column.getIsSorted() ?? null
+                            header.column.getIsSorted() ?? null
                           ]
                         }
                       </div>
@@ -515,7 +525,6 @@ const Treatment = ({ selectedEmployess }) => {
         </Table>
       </div>
     </>
-
   );
 };
 

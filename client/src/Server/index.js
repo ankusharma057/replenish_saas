@@ -62,6 +62,13 @@ export const getProductsList = async (refetch) =>
       ignoreCache: refetch,
     },
   });
+  
+export const getTreatmentsList = async (employee_id, refetch) =>
+  api.get(`/api/treatments?employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
 
 export const getProductsListWithId = async (refetch, id) =>

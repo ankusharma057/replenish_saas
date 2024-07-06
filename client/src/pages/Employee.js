@@ -52,8 +52,8 @@ const Employee = () => {
   const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
   const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-  const [mentorList, setMentorList] = useState([])
-  const [addedMentors, setAddedMentors] = useState([])
+  const [mentorList, setMentorList] = useState([]);
+  const [addedMentors, setAddedMentors] = useState([]);
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
   const [serviceLocation, setServiceLocation] = useState([]);
 
@@ -69,9 +69,6 @@ const Employee = () => {
     }
   };
 
-
-
-
   const getMentors = async (refetch = false, employeeId) => {
     try {
       const { data } = await getMentorList(refetch, employeeId);
@@ -79,7 +76,7 @@ const Employee = () => {
         setMentorList(data);
         // handleSelect(data[0]);
       } else {
-        setMentorList([])
+        setMentorList([]);
       }
     } catch (error) {
       console.log(error);
@@ -87,38 +84,57 @@ const Employee = () => {
   };
 
   const handleMentorChange = (currValue) => {
-    setCurrSelectedMentor(currValue)
-  }
+    setCurrSelectedMentor(currValue);
+  };
 
   const handleAddMentor = () => {
-    const isPresent = addedMentors.find(obj => obj.id === currSelectedMentor.id && obj.name === currSelectedMentor.name);
+    const isPresent = addedMentors.find(
+      (obj) =>
+        obj.id === currSelectedMentor.id && obj.name === currSelectedMentor.name
+    );
     if (!isPresent) {
-      setAddedMentors([...addedMentors, currSelectedMentor])
+      setAddedMentors([...addedMentors, currSelectedMentor]);
       if (updateEmployeeInput.employee_mentors_attributes) {
         setUpdateEmployeeInput((pre) => ({
           ...pre,
-          employee_mentors_attributes: [...updateEmployeeInput.employee_mentors_attributes, { mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+          employee_mentors_attributes: [
+            ...updateEmployeeInput.employee_mentors_attributes,
+            {
+              mentor_id: currSelectedMentor.id,
+              mentor_percentage: parseInt(currSelectedMentor.mentor_percentage),
+            },
+          ],
         }));
       } else {
         setUpdateEmployeeInput((pre) => ({
           ...pre,
-          employee_mentors_attributes: [{ mentor_id: currSelectedMentor.id, mentor_percentage: parseInt(currSelectedMentor.mentor_percentage) }],
+          employee_mentors_attributes: [
+            {
+              mentor_id: currSelectedMentor.id,
+              mentor_percentage: parseInt(currSelectedMentor.mentor_percentage),
+            },
+          ],
         }));
       }
     } else {
       toast.info("Mentor already added");
     }
-  }
+  };
 
   const removeMentor = (currValue) => {
-    let filteredArray = addedMentors.filter(obj => obj.id !== currValue.id || obj.name !== currValue.name);
-    let filteredUpdatedArray = updateEmployeeInput.employee_mentors_attributes.filter(obj => obj.mentor_id !== currValue.id);
-    setAddedMentors(filteredArray)
+    let filteredArray = addedMentors.filter(
+      (obj) => obj.id !== currValue.id || obj.name !== currValue.name
+    );
+    let filteredUpdatedArray =
+      updateEmployeeInput.employee_mentors_attributes.filter(
+        (obj) => obj.mentor_id !== currValue.id
+      );
+    setAddedMentors(filteredArray);
     setUpdateEmployeeInput((pre) => ({
       ...pre,
       employee_mentors_attributes: filteredUpdatedArray,
     }));
-  }
+  };
   // const getInvoices = async () => {
   //   // eslint-disable-next-line no-unused-vars
   //   const { data } = await getInvoiceList();
@@ -139,26 +155,30 @@ const Employee = () => {
     getEmployees();
     getMentors();
     // getInvoices();
-    return () => { };
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (selectedEmployeeData?.id) {
-      getAllEmployeeLocation(selectedEmployeeData.id)
+      getAllEmployeeLocation(selectedEmployeeData.id);
     }
-  }, [selectedEmployeeData])
+  }, [selectedEmployeeData]);
 
   useEffect(() => {
     if (isFillingForm) {
       const handleOnBeforeUnload = (event) => {
         event.preventDefault();
-        return (event.returnValue = '');
-      }
-      window.addEventListener('beforeunload', handleOnBeforeUnload, { capture: true });
-      return () => { window.removeEventListener('beforeunload', handleOnBeforeUnload); };
+        return (event.returnValue = "");
+      };
+      window.addEventListener("beforeunload", handleOnBeforeUnload, {
+        capture: true,
+      });
+      return () => {
+        window.removeEventListener("beforeunload", handleOnBeforeUnload);
+      };
     }
-  }, [isFillingForm])
+  }, [isFillingForm]);
 
   // const openShowInventory = (invoice, employee) => {
   //   setEmployeeInvoices({
@@ -270,9 +290,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to delete the Employee"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to delete the Employee"
               );
             } finally {
               setLoading(false);
@@ -296,7 +316,7 @@ const Employee = () => {
   );
 
   const handleSelect = (emp) => {
-    getMentors(false, emp.id)
+    getMentors(false, emp.id);
     setSelectedEmployeeData(emp);
     setAddedMentors([]);
     setCurrSelectedMentor(null);
@@ -321,7 +341,7 @@ const Employee = () => {
     addTabs.splice(2, 0, {
       name: "Treatments",
       value: "treatment",
-      data: emp
+      data: emp,
     });
 
     if (!emp.is_admin) {
@@ -343,10 +363,11 @@ const Employee = () => {
               collapse();
             }
           }}
-          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
-            ? "pointer-events-none bg-gray-200 "
-            : "cursor-pointer "
-            } `}
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${
+            selectedEmployeeData?.id === employee.id
+              ? "pointer-events-none bg-gray-200 "
+              : "cursor-pointer "
+          } `}
         >
           {employee.name || ""}
         </div>
@@ -368,9 +389,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Some Error Occur"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Some Error Occur"
               );
             }
           },
@@ -407,9 +428,9 @@ const Employee = () => {
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
-        error?.response?.statusText ||
-        error.message ||
-        "Failed to update Employee"
+          error?.response?.statusText ||
+          error.message ||
+          "Failed to update Employee"
       );
     } finally {
       setLoading(false);
@@ -417,7 +438,7 @@ const Employee = () => {
   };
 
   const handleUpdateChange = (e) => {
-    setIsFillingForm(true)
+    setIsFillingForm(true);
     const { name, value, type, checked } = e.target;
     const inputValue = type === "checkbox" ? checked : value;
     setUpdateEmployeeInput((pre) => ({
@@ -436,7 +457,14 @@ const Employee = () => {
           onClick: async () => {
             try {
               setLoading(true);
-              const updateMentorDetails = { employee_mentors_attributes: [{ id: mentorDetails.id, mentor_percentage: newMentorPercentage }] }
+              const updateMentorDetails = {
+                employee_mentors_attributes: [
+                  {
+                    id: mentorDetails.id,
+                    mentor_percentage: newMentorPercentage,
+                  },
+                ],
+              };
               const { data } = await updateVendore(
                 selectedEmployeeData.id,
                 updateMentorDetails
@@ -449,9 +477,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to update Employee"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to update Employee"
               );
             } finally {
               setLoading(false);
@@ -460,23 +488,29 @@ const Employee = () => {
         },
         {
           label: "No",
-          onClick: () => { },
+          onClick: () => {},
         },
       ],
     });
-  }
+  };
 
   const deleteMentor = async (mentorDetails) => {
     confirmAlert({
       title: "Remove",
-      message: `Are you sure, you want to remove ${String(mentorDetails.mentor.name)} from your mentor list`,
+      message: `Are you sure, you want to remove ${String(
+        mentorDetails.mentor.name
+      )} from your mentor list`,
       buttons: [
         {
           label: "Yes",
           onClick: async () => {
             try {
               setLoading(true);
-              const deleteMentorDetails = { employee_mentors_attributes: [{ id: mentorDetails.id, _destroy: 1 }] }
+              const deleteMentorDetails = {
+                employee_mentors_attributes: [
+                  { id: mentorDetails.id, _destroy: 1 },
+                ],
+              };
               const { data } = await updateVendore(
                 selectedEmployeeData.id,
                 deleteMentorDetails
@@ -489,9 +523,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to update Employee"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to update Employee"
               );
             } finally {
               setLoading(false);
@@ -500,23 +534,29 @@ const Employee = () => {
         },
         {
           label: "No",
-          onClick: () => { },
+          onClick: () => {},
         },
       ],
     });
-  }
+  };
 
   const removeLocation = async (locationDetails) => {
     confirmAlert({
       title: "Remove Location",
-      message: `Are you sure, you want to remove ${String(locationDetails.location.name)} from your list`,
+      message: `Are you sure, you want to remove ${String(
+        locationDetails.location.name
+      )} from your list`,
       buttons: [
         {
           label: "Yes",
           onClick: async () => {
             try {
               setLoading(true);
-              const deleteLocationDetails = { employee_locations_attributes: [{ id: locationDetails.id, _destroy: 1 }] }
+              const deleteLocationDetails = {
+                employee_locations_attributes: [
+                  { id: locationDetails.id, _destroy: 1 },
+                ],
+              };
               const { data } = await updateVendore(
                 selectedEmployeeData.id,
                 deleteLocationDetails
@@ -529,9 +569,9 @@ const Employee = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to update Employee"
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to update Employee"
               );
             } finally {
               setLoading(false);
@@ -540,11 +580,11 @@ const Employee = () => {
         },
         {
           label: "No",
-          onClick: () => { },
+          onClick: () => {},
         },
       ],
     });
-  }
+  };
 
   return (
     <>
@@ -602,8 +642,9 @@ const Employee = () => {
                       key={tab.value}
                       id={tab.value}
                       type="radio"
-                      className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 ${currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
-                        }`}
+                      className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 ${
+                        currentTab === tab.value ? "!bg-white pb-2" : "btn-link"
+                      }`}
                       name="radio"
                       value={tab.value}
                       checked={currentTab === tab.value}
@@ -617,8 +658,9 @@ const Employee = () => {
                 })}
               </ButtonGroup>
               <div
-                className={`sm:p-6 rounded-b-lg ${currentTab === "staff" ? "" : "bg-white"
-                  } `}
+                className={`sm:p-6 rounded-b-lg ${
+                  currentTab === "staff" ? "" : "bg-white"
+                } `}
               >
                 {currentTab === "profile" && (
                   <form onSubmit={updateEmployee}>
@@ -746,7 +788,7 @@ const Employee = () => {
                               <Select
                                 className="w-full"
                                 options={mentorList}
-                                getOptionLabel={option => option.name}
+                                getOptionLabel={(option) => option.name}
                                 onChange={handleMentorChange}
                                 // value={null}
                                 placeholder="Select Mentor"
@@ -754,13 +796,31 @@ const Employee = () => {
                               <div className="flex items-center">
                                 <LineInput
                                   type="number"
-                                  placeholder={'Mentor %'}
-                                  onChange={(e) => setCurrSelectedMentor({ ...currSelectedMentor, mentor_percentage: e.target.value })}
+                                  placeholder={"Mentor %"}
+                                  onChange={(e) =>
+                                    setCurrSelectedMentor({
+                                      ...currSelectedMentor,
+                                      mentor_percentage: e.target.value,
+                                    })
+                                  }
                                   name="mentor_percentage"
                                 />
                               </div>
                               <div>
-                                <button disabled={!currSelectedMentor?.mentor_percentage} type="button" className={`${!currSelectedMentor?.mentor_percentage ? "bg-gray-400" : "bg-cyan-400"} bg-cyan-400 rounded-md p-2 text-white mx-2 `} onClick={handleAddMentor}><FaPlus /></button>
+                                <button
+                                  disabled={
+                                    !currSelectedMentor?.mentor_percentage
+                                  }
+                                  type="button"
+                                  className={`${
+                                    !currSelectedMentor?.mentor_percentage
+                                      ? "bg-gray-400"
+                                      : "bg-cyan-400"
+                                  } bg-cyan-400 rounded-md p-2 text-white mx-2 `}
+                                  onClick={handleAddMentor}
+                                >
+                                  <FaPlus />
+                                </button>
                               </div>
                             </div>
                           </td>
@@ -784,11 +844,14 @@ const Employee = () => {
                             )
                           })}
                         </tr> */}
-
                       </tbody>
                     </table>
 
-                    <div className={`${addedMentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
+                    <div
+                      className={`${
+                        addedMentors.length === 0 && "hidden"
+                      } relative overflow-x-auto shadow-md sm:rounded-lg m-4`}
+                    >
                       <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
                           <tr>
@@ -808,7 +871,10 @@ const Employee = () => {
                             return (
                               <React.Fragment key={index}>
                                 <tr className="odd:bg-white even:bg-gray-50 border-b ">
-                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+                                  <th
+                                    scope="row"
+                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+                                  >
                                     {val.name}
                                   </th>
                                   <td className="px-6 py-4">
@@ -825,14 +891,18 @@ const Employee = () => {
                                   </td>
                                 </tr>
                               </React.Fragment>
-                            )
-                          })
-                          }
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
 
-                    <div className={`${selectedEmployeeData.employee_mentors.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg m-4`}>
+                    <div
+                      className={`${
+                        selectedEmployeeData.employee_mentors.length === 0 &&
+                        "hidden"
+                      } relative overflow-x-auto shadow-md sm:rounded-lg m-4`}
+                    >
                       <div className="font-bold p-4">Current Mentors:</div>
                       <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
@@ -849,18 +919,22 @@ const Employee = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {selectedEmployeeData.employee_mentors.map((val, index) => {
-                            return (
-                              <React.Fragment key={index}>
-                                <EmployeeTableRows deleteMentor={deleteMentor} updateMentorDetails={updateMentor} val={val} />
-                              </React.Fragment>
-                            )
-                          })
-                          }
+                          {selectedEmployeeData.employee_mentors.map(
+                            (val, index) => {
+                              return (
+                                <React.Fragment key={index}>
+                                  <EmployeeTableRows
+                                    deleteMentor={deleteMentor}
+                                    updateMentorDetails={updateMentor}
+                                    val={val}
+                                  />
+                                </React.Fragment>
+                              );
+                            }
+                          )}
                         </tbody>
                       </table>
                     </div>
-
 
                     {Object.keys(updateEmployeeInput).length > 0 && (
                       <div className=" w-full flex justify-end">
@@ -938,11 +1012,15 @@ const Employee = () => {
                           inputId="product_type"
                           isMulti
                           onChange={(event) => {
-                            console.log(event, 'location values')
-                            const transformedLocations = event.map(({ id }) => ({ location_id: id }));
+                            console.log(event, "location values");
+                            const transformedLocations = event.map(
+                              ({ id }) => ({ location_id: id })
+                            );
                             setUpdateEmployeeInput((pre) => ({
                               ...pre,
-                              employee_locations_attributes: [...transformedLocations],
+                              employee_locations_attributes: [
+                                ...transformedLocations,
+                              ],
                             }));
                           }}
                           options={serviceLocation}
@@ -950,7 +1028,12 @@ const Employee = () => {
                           placeholder="Select Locations"
                         />
                       </div>
-                      <div className={`${selectedEmployeeData.employee_locations.length === 0 && "hidden"} relative overflow-x-auto shadow-md sm:rounded-lg mt-4`}>
+                      <div
+                        className={`${
+                          selectedEmployeeData.employee_locations.length ===
+                            0 && "hidden"
+                        } relative overflow-x-auto shadow-md sm:rounded-lg mt-4`}
+                      >
                         <div className="font-bold p-4">Active Locations:</div>
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
                           <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
@@ -964,14 +1047,18 @@ const Employee = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {selectedEmployeeData.employee_locations.map((val, index) => {
-                              return (
-                                <React.Fragment key={index}>
-                                  <EmployeeLocationTableRows removeLocation={removeLocation} val={val} />
-                                </React.Fragment>
-                              )
-                            })
-                            }
+                            {selectedEmployeeData.employee_locations.map(
+                              (val, index) => {
+                                return (
+                                  <React.Fragment key={index}>
+                                    <EmployeeLocationTableRows
+                                      removeLocation={removeLocation}
+                                      val={val}
+                                    />
+                                  </React.Fragment>
+                                );
+                              }
+                            )}
                           </tbody>
                         </table>
                       </div>
@@ -995,7 +1082,7 @@ const Employee = () => {
                   />
                 )}
                 {currentTab === "treatment" && (
-                  <Treatment selectedEmployess={selectedEmployeeData} />
+                  <Treatment selectedEmployee={selectedEmployeeData} />
                 )}
               </div>
               <CustomModal
@@ -1014,18 +1101,27 @@ const Employee = () => {
 export default Employee;
 
 const EmployeeTableRows = ({ val, deleteMentor, updateMentorDetails }) => {
-  const [newValue, setNewValue] = React.useState()
+  const [newValue, setNewValue] = React.useState();
   return (
     <tr className="odd:bg-white even:bg-gray-50 border-b ">
-      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+      <th
+        scope="row"
+        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+      >
         {val.mentor.name}
       </th>
       <td className="px-6 py-4">
-        <input type="number" onChange={(e) => setNewValue(e.target.value)} max={100} maxLength={3} placeholder={val.mentor_percentage + "%"} />
+        <input
+          type="number"
+          onChange={(e) => setNewValue(e.target.value)}
+          max={100}
+          maxLength={3}
+          placeholder={val.mentor_percentage + "%"}
+        />
       </td>
       <td className="px-6 py-4 w-14">
         <div className="flex justify-center">
-          {newValue &&
+          {newValue && (
             <button
               type="button"
               onClick={() => updateMentorDetails(val, newValue)}
@@ -1033,7 +1129,7 @@ const EmployeeTableRows = ({ val, deleteMentor, updateMentorDetails }) => {
             >
               Confirm
             </button>
-          }
+          )}
           <button
             type="button"
             onClick={() => deleteMentor(val)}
@@ -1043,13 +1139,17 @@ const EmployeeTableRows = ({ val, deleteMentor, updateMentorDetails }) => {
           </button>
         </div>
       </td>
-    </tr>)
-}
+    </tr>
+  );
+};
 
 const EmployeeLocationTableRows = ({ val, removeLocation }) => {
   return (
     <tr className="odd:bg-white even:bg-gray-50 border-b ">
-      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap capitalize ">
+      <th
+        scope="row"
+        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap capitalize "
+      >
         {val.location.name}
       </th>
       <td className="px-6 py-4 w-14">
@@ -1063,5 +1163,6 @@ const EmployeeLocationTableRows = ({ val, removeLocation }) => {
           </button>
         </div>
       </td>
-    </tr>)
-}
+    </tr>
+  );
+};

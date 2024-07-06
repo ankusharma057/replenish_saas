@@ -16,6 +16,7 @@ import {
   getClientEmployeeSchedule,
   getLocationEmployee,
   getProductsList,
+  getTreatmentsList,
 } from "../../Server";
 import Select from "react-select";
 import { Button, Form } from "react-bootstrap";
@@ -31,6 +32,7 @@ import ClientAsideLayout from "../../components/Layouts/ClientAsideLayout";
 import { useAsideLayoutContext } from "../../context/AsideLayoutContext";
 import { getTimeSlots, getUnavailableEverWeekData } from "../scheduleHelper";
 import { momentLocalizer } from "react-big-calendar";
+import _ from 'lodash';
 
 const localizer = momentLocalizer(moment);
 
@@ -55,6 +57,7 @@ const ClientLocation = () => {
   const [locationAndEmployee, setLocationAndEmployee] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [productsList, setProductsList] = useState([]);
+  const [treatmentsList, setTreatmentsList] = useState([]);
   const [selectedTreatMent, setSelectedTreatMent] = useState(null);
   const [selectedEmpSchedules, setSelectedEmpSchedules] = useState([]);
   const topViewRef = useRef();
@@ -121,8 +124,26 @@ const ClientLocation = () => {
       if (data) {
         setSelectedEmployee(data);
         const { data: products } = await getProductsList();
+        const { data: treatments } = await getTreatmentsList(data?.id);
+
+        console.log("data-treat", data)
+
+        const groupedTreatments = _(treatments)
+              .groupBy('product.id')
+              .map(group => ({
+                product: _.head(group).product,
+                treatments: _.map(group, o => o)
+              }))
+              .value()
+
+        console.log("treatments", treatments);
+
         if (products?.length) {
           setProductsList(products);
+        }
+
+        if (treatments?.length) {
+          setTreatmentsList(groupedTreatments);
         }
       } else {
         setSelectedEmployee(null);
@@ -168,6 +189,7 @@ const ClientLocation = () => {
         const { data } = await getClientEmployeeSchedule(empId, refetch);
         let newData = data?.map((d) => ({
           ...d,
+          schedule: d,
           start_time: new Date(d.start_time),
           end_time: new Date(d.end_time),
           treatment: d?.treatment?.treatment || "",
@@ -227,11 +249,12 @@ const ClientLocation = () => {
   const isEmp = !((!!empId && !selectedEmployee) || !empId);
 
   const handleAddAppointmentSelect = (e) => {
-    if (e?.client_id && e?.client_id === authUserState.client?.id) {
+    console.log("handleAddAppointmentSelect", e);
+    if (e?.client?.id && e?.client?.id === authUserState.client?.id) {
       toast("This slot is already booked by you.");
       return;
     }
-    if (e?.client_id && e?.client_id !== authUserState.client?.id) {
+    if (e?.client?.id && e?.client?.id !== authUserState.client?.id) {
       toast("This slot is already booked.");
       return;
     }
@@ -297,7 +320,8 @@ const ClientLocation = () => {
     };
 
     const { data } = await createClientSchedule(copyAppointMent);
-    if (data?.redirect_url) {
+    console.log("data",data)
+    if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
       navigate(`/clients/payment/confirm_payment?empId=${selectedEmployee.id}`, {
         state: {
           redirect_url: data?.redirect_url,
@@ -308,7 +332,9 @@ const ClientLocation = () => {
         },
       });
     }
-    // toast.success("Appointment added successfully.");
+    else{
+      toast.success("Appointment added successfully.");
+    }
     setAppointmentModal(initialAppointmentModal);
     await getEmpSchedule(true);
     try {
@@ -351,17 +377,17 @@ const ClientLocation = () => {
                 <h3>{selectedEmployee?.name}</h3>
                 <p>Select a treatment</p>
                 <ul className="flex p-0 flex-col gap-2 ">
-                  {(productsList || []).map((product) => (
-                    <li key={product?.id} className="rounded-lg p-2">
-                      {product?.name}
+                  {(treatmentsList || []).map((treatmentObj) => (
+                    <li key={treatmentObj?.product?.id} className="rounded-lg p-2">
+                      {treatmentObj?.product?.name}
                       <ul className="m-0 p-0 text-center space-y-2">
-                        {(product?.treatments || []).map((treatment) => (
+                        {(treatmentObj?.treatments || []).map((treatment) => (
                           <li
                             key={treatment?.id}
                             onClick={(e) => {
                               e.preventDefault(); // Prevent any default behavior
                               setSelectedTreatMent({
-                                product,
+                                product: treatmentObj?.product,
                                 treatment,
                               });
 
@@ -381,7 +407,7 @@ const ClientLocation = () => {
                           >
                             <span>{treatment?.name}</span>
                             <span>
-                              {treatment?.duration} min-{product?.retail_price}$
+                              {treatment?.duration} min-{treatmentObj.product?.retail_price}$
                             </span>
                           </li>
                         ))}

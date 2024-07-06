@@ -60,6 +60,7 @@
     ]
   },
   "devDependencies": {
+    "lodash": "^4.17.21",
     "tailwindcss": "^3.3.5"
   }
 }

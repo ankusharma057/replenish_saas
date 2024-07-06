@@ -68,8 +68,8 @@ function ClientSignup() {
           };
           const { data } = await createClientSchedule(copyAppointMent);
           console.log(data, copyAppointMent);
-          if (data?.redirect_url) {
-            navigate(`/clients/payment/confirm_payment`, {
+          if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
+            navigate(`/clients/payment/confirm_payment?empId=${data?.schedule?.employee?.id}`, {
               state: {
                 redirect_url: data?.redirect_url,
                 locId,
