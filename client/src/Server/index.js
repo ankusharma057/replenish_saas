@@ -63,6 +63,14 @@ export const getProductsList = async (refetch) =>
     },
   });
 
+
+export const getProductsListWithId = async (refetch, id) =>
+  api.get(`/api/products?employee_id=${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getEmployeesList = async (refetch = false) =>
   api.get("/api/employees", {
     cache: {

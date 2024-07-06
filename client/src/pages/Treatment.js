@@ -4,6 +4,7 @@ import {
   deleteTreatment,
   getBaseTreatmentList,
   getProductsList,
+  getProductsListWithId,
   getTreatmentList,
   updateTreatment,
 } from "../Server";
@@ -56,7 +57,7 @@ const Treatment = ({ selectedEmployess }) => {
 
   const getProducts = async (refetch = false) => {
     try {
-      const { data } = await getProductsList(refetch);
+      const { data } = await getProductsListWithId(refetch, selectedEmployess.id);
       setProductList(data);
     } catch (error) {
       console.log(error);
