@@ -1,7 +1,7 @@
 class Api::TreatmentsController < ApplicationController
-  skip_before_action :authorized_employee
+  before_action :treatment_created_by
 
-  def index    
+  def index
     render json: Treatment.employee_treatments(params[:employee_id])
   end
 
@@ -40,4 +40,15 @@ class Api::TreatmentsController < ApplicationController
   def treatment_params
     params.permit(:duration, :product_id, :name, :description, :cost, :products_used, :created_by)
   end
+
+  def treatment_created_by
+    created_by = params[:created_by]
+    employee = Employee.find_by(id: created_by)
+    if employee.present? && employee.has_role?(:admin)
+      return
+    elsif created_by != @employee.id
+      render json: { error: 'Do not have permission to perform this action' }, status: :unprocessable_entity
+    end
+  end
+
 end

@@ -6,7 +6,12 @@ class ApplicationController < ActionController::API
 
   private
   def current_employee
-    @employee = Employee.find_by(id: session[:employee_id])
+    if session[:employee_id].blank? && Rails.env.development?
+      employee_id = params[:current_employee_id]
+    else
+      employee_id = session[:employee_id]
+    end
+    @employee = Employee.find_by(id: employee_id)
   end
 
   def authorized_employee

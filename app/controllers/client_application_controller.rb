@@ -4,7 +4,12 @@ class ClientApplicationController < ActionController::API
 
   private
   def current_client
-    @client = Client.find_by(id: session[:client_id])
+    if session[:client_id].blank? && Rails.env.development?
+      client_id = params[:current_client_id]
+    else
+      client_id = session[:client_id]
+    end
+    @client = Client.find_by(id: client_id)
   end
 
   def authorized_client
