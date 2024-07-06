@@ -20,6 +20,8 @@ import {
   ChevronLeft,
   CalendarCheck,
 } from "lucide-react";
+import { ImProfile } from "react-icons/im";
+import Treatment from "./Treatment";
 
 import {
   acceptInventory,
@@ -95,6 +97,7 @@ const MyProfile = () => {
     }
   };
 
+  console.log("asdasddddddddddsaaaaaaaa", authUserState)
   // added
   const getEmployees = async () => {
     try {
@@ -104,6 +107,7 @@ const MyProfile = () => {
           data.filter((employee) => employee?.id !== authUserState.user?.id)
         );
       }
+
       return;
     } catch (error) {
       console.log(error);
@@ -454,6 +458,19 @@ const MyProfile = () => {
                 } `}
             >
               <Settings /> Settings
+            </div>
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "treatment" && setCurrentTab("treatment");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex flex-row items-center gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${currentTab === "treatment" && "pointer-events-none bg-gray-200"
+                } `}
+            >
+              <ImProfile /> Treatments
             </div>
           </div>
         }
@@ -938,6 +955,10 @@ const MyProfile = () => {
             </div>
           )}
           {currentTab === "mySchedule" && <MySchedule />}
+
+          {
+            currentTab === "treatment" && <><Treatment selectedEmployess={authUserState.user}></Treatment> </>
+          }
         </div>
       </AsideLayout>
     </div>

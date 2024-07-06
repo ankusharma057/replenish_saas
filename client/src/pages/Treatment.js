@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   createTreatment,
   deleteTreatment,
+  getBaseTreatmentList,
   getProductsList,
   getTreatmentList,
   updateTreatment,
@@ -19,17 +20,34 @@ import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
 import { useAuthContext } from "../context/AuthUserContext";
 import ModalWraper from "../components/Modals/ModalWraper";
+import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
-const Treatment = () => {
+const Treatment = ({ selectedEmployess }) => {
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [treatmentList, setTreatmentList] = useState([]);
+  const [currentTab, setCurrentTab] = useState("employee");
+
   const [treatmentForm, setTreatmentForm] = useState({
     product_id: "",
     name: "",
     duration: "",
+    desc: "",
+    cost: "",
+    products_used: ""
   });
+
+  const [radioTabs, setRadioTabs] = useState([
+    {
+      name: "Admin",
+      value: "admin"
+    },
+    {
+      name: "Employee",
+      value: "employee"
+    }]);
+
   const [showUpdateTreatmentModal, setShowUpdateTreatmentModal] =
     useState(false);
   const [showCreateTreatmentModal, setShowCreateTreatmentModal] =
@@ -46,12 +64,25 @@ const Treatment = () => {
   };
   const getTreatment = async (refetch = false) => {
     try {
-      const { data } = await getTreatmentList(refetch);
+      setTreatmentList([]);
+      const { data } = await getTreatmentList(refetch, selectedEmployess.id);
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
     }
   };
+
+  const getBaseTreatments = async (refetch = false) => {
+    try {
+      setTreatmentList([]);
+      const response = await getBaseTreatmentList(refetch, selectedEmployess.id, selectedEmployess.is_admin);
+      const { data } = response || {};  // Use an empty object as default
+      setTreatmentList(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleTreatmentChange = (e) => {
     setTreatmentForm((pre) => ({
       ...pre,
@@ -61,16 +92,47 @@ const Treatment = () => {
   const handleSubmitTreatment = async (e) => {
     e.preventDefault();
     try {
-      await createTreatment(treatmentForm);
+      const payload = {
+        "name": treatmentForm.name,
+        "duration": treatmentForm.duration,
+        "product_id": treatmentForm.product_id,
+        "description": treatmentForm.desc,
+        "cost": Number(treatmentForm.cost),
+        "products_used": Number(treatmentForm.products_used),
+        "created_by": selectedEmployess.id
+      }
+      await createTreatment(payload);
       setTreatmentForm({
         product_id: "",
         name: "",
         duration: "",
+        cost: "",
+        desc: "",
+        products_used: ""
       });
-      await getTreatment(true);
+      setShowCreateTreatmentModal(false);
+      if (currentTab == "admin")
+        await getBaseTreatments(true);
+      else
+        await getTreatment(true);
+
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const onTreatmentDuplicateUpdate = (treatment) => {
+    setTreatmentForm({
+      id: treatment.id,
+      product_id: treatment.product.id,
+      name: treatment.name,
+      duration: treatment.duration,
+      cost: treatment.cost,
+      desc: treatment.description,
+      products_used: treatment.products_used
+
+    });
+    setShowCreateTreatmentModal(true);
   };
 
   const onTreatmentUpdate = (treatment) => {
@@ -79,6 +141,10 @@ const Treatment = () => {
       product_id: treatment.product.id,
       name: treatment.name,
       duration: treatment.duration,
+      cost: treatment.cost,
+      desc: treatment.description,
+      products_used: treatment.products_used
+
     });
     setShowUpdateTreatmentModal(true);
   };
@@ -97,9 +163,9 @@ const Treatment = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Failed to Delete the Treatment."
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to Delete the Treatment."
               );
             }
           },
@@ -124,16 +190,20 @@ const Treatment = () => {
       accessorKey: "name",
     },
     {
+      header: "Description",
+      accessorKey: "description",
+    },
+    {
       header: "Duration (in mins)",
       accessorKey: "duration",
     },
     {
-      header: "Cost Price",
-      accessorKey: "product.cost_price",
+      header: "Cost",
+      accessorKey: "cost",
     },
     {
-      header: "Retails Price",
-      accessorKey: "product.retail_price",
+      header: "Product Used",
+      accessorKey: "products_used",
     },
     {
       header: "Actions",
@@ -151,6 +221,34 @@ const Treatment = () => {
               <Button variant="danger" onClick={() => onDelete(row.original)}>
                 Remove
               </Button>
+            </div>
+          )}
+          {!authUserState.user?.is_admin && (
+            <div className="flex justify-center space-x-2">
+              {
+                currentTab == "admin" ? (
+                  <Button
+                    variant="info"
+                    onClick={() => onTreatmentDuplicateUpdate(row.original)}
+                  >
+                    Duplicate
+                  </Button>
+                ) : <>
+                  <Button
+                    variant="info"
+                    onClick={() => onTreatmentUpdate(row.original)}
+                  >
+                    Update
+                  </Button></>
+              }
+              {
+                currentTab == "employee" && <>
+                  <Button variant="danger" onClick={() => onDelete(row.original)}>
+                    Remove
+                  </Button>
+                </>
+              }
+
             </div>
           )}
         </>
@@ -179,181 +277,244 @@ const Treatment = () => {
 
   useEffect(() => {
     getProducts();
-    getTreatment();
-  }, []);
+    if (currentTab == "admin")
+      getBaseTreatments();
+    else
+      getTreatment();
+  }, [currentTab]);
 
   return (
-    <div className="m-4">
-      <div className="flex items-center gap-x-1 md:gap-x-2">
-        <div className="flex items-center gap-x-2 flex-1 relative">
-          <Form.Control
-            placeholder="Search Product Name here"
-            aria-label="Search Product Name here"
-            className="pr-4!"
-            value={searchInput}
-            onChange={(event) => {
-              setSearchInput(event.target.value);
-            }}
-          />
-          <div>
-            <Button
-              onClick={() => {
-                console.log("Click");
-                setShowCreateTreatmentModal(true);
-              }}
-              className="truncate rounded-full !text-sm md:!text-base"
-            >
-              Add Treatment
-            </Button>
-          </div>
-        </div>
-        <ModalWraper
-          show={showUpdateTreatmentModal || showCreateTreatmentModal}
-          title={showUpdateTreatmentModal ? "Update Treatment" : "Create New Treatment"}
-          onHide={() => {
-            setShowUpdateTreatmentModal(false);
-            setShowCreateTreatmentModal(false);
-            setTreatmentForm({
-              product_id: "",
-              name: "",
-              duration: "",
-            });
-          }}
-          footer={
-            <div className="flex gap-2">
-              {showUpdateTreatmentModal && (
-                <Button
-                  onClick={async () => {
-                    try {
-                      await updateTreatment(treatmentForm.id, treatmentForm);
-                      setTreatmentForm({
-                        product_id: "",
-                        name: "",
-                        duration: "",
-                      });
-                      await getTreatment(true);
-                      setShowUpdateTreatmentModal(false);
-                    } catch (error) {
-                      console.log(error);
-                    }
-                  }}
-                >
-                  Update Treatment
-                </Button>
-              )}
-              {showCreateTreatmentModal && (
-                <Button
-                  onClick={async () => {
-                    try {
-                      await createTreatment(treatmentForm);
-                      setTreatmentForm({
-                        product_id: "",
-                        name: "",
-                        duration: "",
-                      });
-                      await getTreatment(true);
-                      setShowCreateTreatmentModal(false);
-                    } catch (error) {
-                      console.log(error);
-                    }
-                  }}
-                >
-                  Create Treatment
-                </Button>
-              )}
-            </div>
-          }
-        >
-          <Form
-            className="flex flex-col gap-4"
-            onSubmit={handleSubmitTreatment}
-          >
-            <Form.Select
-              aria-label="Default select example"
-              name="product_id"
-              value={treatmentForm.product_id}
-              onChange={handleTreatmentChange}
-              required
-              disabled={showUpdateTreatmentModal}
-            >
-              <option>Select Product</option>
-              {productList.map((product) => (
-                <option value={product.id} key={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </Form.Select>
-
-            <Form.Control
-              type="text"
-              placeholder="Enter Treatment Name"
-              name="name"
-              value={treatmentForm.name}
-              onChange={handleTreatmentChange}
-              required
-            />
-            <Form.Control
-              type="number"
-              placeholder="Enter Duration in mins"
-              name="duration"
-              value={treatmentForm.duration}
-              onChange={handleTreatmentChange}
-              required
-            />
-          </Form>
-        </ModalWraper>
-      </div>
-      <Table
-        bordered
-        hover
-        responsive
-        className="w-full mt-4 max-h-[20rem] text-center"
-      >
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  {header.isPlaceholder ? null : (
-                    <div>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {
-                        { asc: "🔼", desc: "🔽" }[
-                          header.column.getIsSorted() ?? null
-                        ]
-                      }
-                    </div>
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
+    <>
+      <div className="mb-2">
+        <ButtonGroup className="w-full md:w-auto">
+          {radioTabs.map((tab) => {
             return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext(),
-                      cell
-                    )}
-                  </td>
-                ))}
-              </tr>
+              <ToggleButton
+                variant="link"
+                key={tab.value}
+                id={tab.value}
+                type="radio"
+                className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 
+                  ${currentTab === tab.value ? "!bg-gray-400 !text-white pb-2" : "btn-link"
+                  }`}
+                name="radio"
+                value={tab.value}
+                checked={currentTab === tab.value}
+                onChange={(e) => {
+                  setCurrentTab(e.currentTarget.value);
+                }}
+              >
+                {tab.name}
+              </ToggleButton>
             );
           })}
-        </tbody>
-      </Table>
-    </div>
+        </ButtonGroup>
+      </div>
+      <div className="m-4">
+
+        <div className="flex items-center gap-x-1 md:gap-x-2">
+          <div className="flex items-center gap-x-2 flex-1 relative">
+            <Form.Control
+              placeholder="Search Product Name here"
+              aria-label="Search Product Name here"
+              className="pr-4!"
+              value={searchInput}
+              onChange={(event) => {
+                setSearchInput(event.target.value);
+              }}
+            />
+            <div>
+              <Button
+                onClick={() => {
+                  console.log("Click");
+                  setShowCreateTreatmentModal(true);
+                }}
+                className="truncate rounded-full !text-sm md:!text-base"
+              >
+                Add Treatment
+              </Button>
+            </div>
+          </div>
+          <ModalWraper
+            show={showUpdateTreatmentModal || showCreateTreatmentModal}
+            title={showUpdateTreatmentModal ? "Update Treatment" : "Create New Treatment"}
+            onHide={() => {
+              setShowUpdateTreatmentModal(false);
+              setShowCreateTreatmentModal(false);
+              setTreatmentForm({
+                product_id: "",
+                name: "",
+                duration: "",
+                desc: "",
+                cost: "",
+                products_used: ""
+              });
+            }}
+            footer={
+              <div className="flex gap-2">
+                {showUpdateTreatmentModal && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const payload = {
+                          "name": treatmentForm.name,
+                          "duration": treatmentForm.duration,
+                          "product_id": treatmentForm.product_id,
+                          "description": treatmentForm.desc,
+                          "cost": Number(treatmentForm.cost),
+                          "products_used": Number(treatmentForm.products_used),
+                        }
+                        await updateTreatment(treatmentForm.id, payload);
+                        setTreatmentForm({
+                          product_id: "",
+                          name: "",
+                          duration: "",
+                          desc: "",
+                          cost: "",
+                          products_used: ""
+                        });
+                        await getTreatment(true);
+                        setShowUpdateTreatmentModal(false);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  >
+                    Update Treatment
+                  </Button>
+                )}
+                {showCreateTreatmentModal && (
+                  <Button
+                    onClick={async (e) => {
+                      try {
+                        handleSubmitTreatment(e);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  >
+                    Create Treatment
+                  </Button>
+                )}
+              </div>
+            }
+          >
+            <Form
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmitTreatment}
+            >
+              <Form.Select
+                aria-label="Default select example"
+                name="product_id"
+                value={treatmentForm.product_id}
+                onChange={handleTreatmentChange}
+                required
+                disabled={showUpdateTreatmentModal}
+              >
+                <option>Select Product</option>
+                {productList.map((product) => (
+                  <option value={product.id} key={product.id}>
+                    {product.name}
+                  </option>
+                ))}
+              </Form.Select>
+
+              <Form.Control
+                type="text"
+                placeholder="Enter Treatment Name"
+                name="name"
+                value={treatmentForm.name}
+                onChange={handleTreatmentChange}
+                required
+              />
+              <Form.Control
+                type="text"
+                placeholder="Enter Description"
+                name="desc"
+                value={treatmentForm.desc}
+                onChange={handleTreatmentChange}
+                required
+              />
+              <Form.Control
+                type="number"
+                placeholder="Enter Cost"
+                name="cost"
+                value={treatmentForm.cost}
+                onChange={handleTreatmentChange}
+                required
+              />
+              <Form.Control
+                type="number"
+                placeholder="Enter Duration in mins"
+                name="duration"
+                value={treatmentForm.duration}
+                onChange={handleTreatmentChange}
+                required
+              />
+              <Form.Control
+                type="number"
+                placeholder="Enter Product Units"
+                name="products_used"
+                value={treatmentForm.products_used}
+                onChange={handleTreatmentChange}
+                required
+              />
+            </Form>
+          </ModalWraper>
+        </div>
+        <Table
+          bordered
+          hover
+          responsive
+          className="w-full mt-4 max-h-[20rem] text-center"
+        >
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    {header.isPlaceholder ? null : (
+                      <div>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {
+                          { asc: "🔼", desc: "🔽" }[
+                          header.column.getIsSorted() ?? null
+                          ]
+                        }
+                      </div>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => {
+              return (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                        cell
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </div>
+    </>
+
   );
 };
 

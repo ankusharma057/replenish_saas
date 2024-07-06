@@ -350,12 +350,27 @@ export const deleteAppointmentEmployee = async (id) =>
 export const reminder = async (id, data) =>
   api.post(`/api/client/schedules/${id}/remainder`, data);
 
-export const getTreatmentList = async (refetch) =>
-  api.get(`/api/treatments`, {
+export const getTreatmentList = async (refetch, id) =>
+  api.get(`/api/treatments?employee_id=${id}`, {
     cache: {
       ignoreCache: refetch,
     },
   });
+
+export const getBaseTreatmentList = async (refetch, id, isAdmin) => {
+  let url = `/api/base_treatments`;
+  if (!isAdmin) {
+    url = `/api/base_treatments?employee_id=${id}`
+  }
+  const res = api.get(url, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+  return res;
+}
+
 
 export const createTreatment = async (data) =>
   api.post(`/api/treatments`, data);
