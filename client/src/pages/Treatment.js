@@ -122,63 +122,21 @@ const Treatment = () => {
 
   const handleSelect = (emp) => {
     setSelectedEmployeeData(emp);
-    checkValidation();
     if (currentTab === "base-treatments") getBaseTreatments();
     else getTreatment();
   };
 
   const handleTreatmentChange = (e) => {
-    checkValidation();
     setTreatmentForm((pre) => ({
       ...pre,
       [e.target.name]: e.target.value,
     }));
+
+    setErrorsForm({});
   };
-
-  const checkValidation = () => {
-    const errorss = validateForm(treatmentForm);
-    if (errorss.length > 0) {
-      setErrorsForm(errorss);
-      // Handle errors, e.g., display them to the user
-      console.log("Validation errors:", errorss);
-      // return false;
-    }
-  }
-
-  const validateForm = () => {
-    const errors = [];
-
-    if (!treatmentForm.product_id) {
-      errors.push({ name: "product_id", value: "Product must exist" });
-    }
-
-    if (!treatmentForm.name) {
-      errors.push({ name: "name", value: "Name can't be blank" });
-    }
-
-    if (!treatmentForm.duration) {
-      errors.push({ name: "duration", value: "Duration can't be blank" });
-    } else if (isNaN(treatmentForm.duration)) {
-      errors.push({ name: "duration", value: "Duration is not a number" });
-    }
-
-    if (!treatmentForm.cost) {
-      errors.push({ name: "cost", value: "Product can't be blank" });  // Assuming 'Product' here refers to cost
-    }
-
-    return errors;
-  };
-
 
   const handleSubmitTreatment = async (e) => {
     e.preventDefault();
-    const errorss = validateForm(treatmentForm);
-    if (errorss.length > 0) {
-      setErrorsForm(errorss);
-      // Handle errors, e.g., display them to the user
-      console.log("Validation errors:", errorss);
-      // return false;
-    }
 
     try {
       const payload = {
@@ -190,18 +148,28 @@ const Treatment = () => {
         quantity: Number(treatmentForm.quantity),
         created_by: selectedEmployeeData.id,
       };
-      await createTreatment(payload);
-      setTreatmentForm({
-        product_id: "",
-        name: "",
-        duration: "",
-        cost: "",
-        desc: "",
-        quantity: "",
-      });
-      setShowCreateTreatmentModal(false);
-      if (currentTab === "base-treatments") await getBaseTreatments(true);
-      else await getTreatment(true);
+      
+      const response = await createTreatment(payload);
+
+      if (response.status === 200) {
+        if (response?.data?.error) {
+          setErrorsForm(response?.data?.error || {})
+        } else {
+          setTreatmentForm({
+            product_id: "",
+            name: "",
+            duration: "",
+            cost: "",
+            desc: "",
+            quantity: "",
+          });
+          setErrorsForm({});
+
+          setShowCreateTreatmentModal(false);
+          if (currentTab === "base-treatments") await getBaseTreatments(true);
+          else await getTreatment(true);
+        }
+      }
     } catch (error) {
       console.log(error);
     }
@@ -217,6 +185,7 @@ const Treatment = () => {
       desc: treatment.description,
       quantity: treatment.quantity,
     });
+    setErrorsForm({});
     setShowCreateTreatmentModal(true);
   };
 
@@ -230,6 +199,7 @@ const Treatment = () => {
       desc: treatment.description,
       quantity: treatment.quantity,
     });
+    setErrorsForm({});
     setShowUpdateTreatmentModal(true);
   };
   const onDelete = (treatment) => {
@@ -484,6 +454,7 @@ const Treatment = () => {
                     onClick={() => {
                       console.log("Click");
                       setShowCreateTreatmentModal(true);
+                      setErrorsForm({});
                     }}
                     className="truncate rounded-full !text-sm md:!text-base"
                   >
@@ -509,6 +480,7 @@ const Treatment = () => {
                     cost: "",
                     quantity: "",
                   });
+                  setErrorsForm({});
                 }}
                 footer={
                   <div className="flex gap-2">
@@ -524,17 +496,29 @@ const Treatment = () => {
                               cost: Number(treatmentForm.cost),
                               quantity: Number(treatmentForm.quantity),
                             };
-                            await updateTreatment(treatmentForm.id, payload);
-                            setTreatmentForm({
-                              product_id: "",
-                              name: "",
-                              duration: "",
-                              desc: "",
-                              cost: "",
-                              quantity: "",
-                            });
-                            await getTreatment(true);
-                            setShowUpdateTreatmentModal(false);
+
+                            const updateResponse = await updateTreatment(treatmentForm.id, payload);
+
+                            if (updateResponse.status === 200) {
+                              if (updateResponse?.data?.error) {
+                                setErrorsForm(updateResponse?.data?.error || {})
+                              } else {
+                                setTreatmentForm({
+                                  product_id: "",
+                                  name: "",
+                                  duration: "",
+                                  cost: "",
+                                  desc: "",
+                                  quantity: "",
+                                });
+                                setErrorsForm({});
+
+                                if (currentTab === "base-treatments") await getBaseTreatments(true);
+                                else await getTreatment(true);
+
+                                setShowUpdateTreatmentModal(false);
+                              }
+                            }
                           } catch (error) {
                             console.log(error);
                           }
@@ -581,7 +565,7 @@ const Treatment = () => {
                       ))}
                     </Form.Select>
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "product_id")?.value}
+                      {errorForm.product_id && errorForm.product_id[0]}
                     </span>
                   </Form.Group>
 
@@ -596,7 +580,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "name")?.value}
+                    {errorForm.name && errorForm.name[0]}
                     </span>
                   </Form.Group>
 
@@ -611,7 +595,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "desc")?.value}
+                    {errorForm.description && errorForm.description[0]}
                     </span>
                   </Form.Group>
 
@@ -626,7 +610,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "cost")?.value}
+                      {errorForm.cost && errorForm.cost[0]}
                     </span>
                   </Form.Group>
 
@@ -641,7 +625,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "duration")?.value}
+                      {errorForm.duration && errorForm.duration[0]}
                     </span>
                   </Form.Group>
 
@@ -656,7 +640,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                      {errorForm.find(a => a.name === "quantity")?.value}
+                      {errorForm.quantity && errorForm.quantity[0]}
                     </span>
                   </Form.Group>
                 </Form>

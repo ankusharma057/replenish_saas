@@ -410,7 +410,7 @@ const ClientLocation = () => {
                           >
                             <span>{treatment?.name}</span>
                             <span>
-                              {treatment?.duration} min-{treatmentObj.product?.retail_price}$
+                              {treatment?.duration} min-{treatment?.cost}$
                             </span>
                           </li>
                         ))}

@@ -15,7 +15,7 @@ class Api::TreatmentsController < ApplicationController
     if treatment.save
       render json: treatment
     else
-      render json: { error: treatment.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: treatment.errors.as_json }, status: :ok
     end
   end
 
@@ -24,7 +24,7 @@ class Api::TreatmentsController < ApplicationController
     if treatment.update(treatment_params)
       render json: treatment
     else
-      render json: {error: 'Something went wrong with the Treatment!'}, status: :unprocessable_entity
+      render json: { error: treatment.errors.as_json }, status: :ok
     end
   end
 
