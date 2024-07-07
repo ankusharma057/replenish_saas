@@ -22,10 +22,6 @@ class Schedule < ApplicationRecord
     amount - paid_amt.to_d
   end
 
-  # def amount
-  #   product.retail_price
-  # end
-
   def amount
     treatment&.cost.to_f
   end

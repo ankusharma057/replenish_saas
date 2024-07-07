@@ -332,8 +332,11 @@ const ClientLocation = () => {
         },
       });
     }
-    else{
+    else if(data.schedule) {
       toast.success("Appointment added successfully.");
+    }  
+    else {
+      toast.error("Something went wrong. Please try again.");
     }
     setAppointmentModal(initialAppointmentModal);
     await getEmpSchedule(true);

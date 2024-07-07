@@ -147,7 +147,11 @@ function ClientSchedule() {
                     }
                   } catch (error) {
                     if (error.response.status === 422) {
-                      toast.error("Something went wrong. Please try again later.");
+                      if (error.response?.data?.error === "No inventories") {
+                        toast.error("No inventories. Please try again later.");
+                      } else {
+                        toast.error("Something went wrong. Please try again later.");
+                      }
                     } else {
                       toast.error(
                         "Payment failed, Please contact administrator."

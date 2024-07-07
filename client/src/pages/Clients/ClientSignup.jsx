@@ -78,6 +78,11 @@ function ClientSignup() {
                 id: data?.schedule?.id,
               },
             });
+          } else if(data.schedule) {
+            navigate(`/clients/location${window.location.search}`, {
+              replace: true,
+            });
+            toast.success("Appointment added successfully.");
           } else {
             navigate(`/clients/location${window.location.search}`, {
               replace: true,

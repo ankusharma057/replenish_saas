@@ -64,7 +64,7 @@ function ClientSignIn() {
           };
           const { data } = await createClientSchedule(copyAppointMent);
           console.log(data, copyAppointMent)
-          if (data?.redirect_url) {
+          if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
             navigate(`/clients/payment/confirm_payment?empId=${data?.schedule?.employee?.id}`, {
               state: {
                 redirect_url: data?.redirect_url,
@@ -74,11 +74,16 @@ function ClientSignIn() {
                 id: data?.schedule?.id,
               },
             });
+          } else if(data.schedule) {
+            navigate(`/clients/location${window.location.search}`, {
+              replace: true,
+            });
+            toast.success("Appointment added successfully.");
           } else {
             navigate(`/clients/location${window.location.search}`, {
               replace: true,
             });
-          toast.error("Something went wrong. Please try again.")
+            toast.error("Something went wrong. Please try again.");
           }
         }
         // navigate(`/clients/location${window.location.search}`, {

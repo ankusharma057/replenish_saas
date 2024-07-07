@@ -70,7 +70,7 @@ const Treatment = () => {
     quantity: "",
   });
 
-  const [radioTabs, setRadioTabs] = useState([
+  const [radioTabs] = useState([
     {
       name: "Base Treatments",
       value: "base-treatments",
