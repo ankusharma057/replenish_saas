@@ -52,6 +52,7 @@ class Schedule < ApplicationRecord
   end
 
   def check_for_inventory
-    self.employee.employees_inventories.pluck(:product_id).include?(self.product_id)
+    employee_inventory = self.employee.employees_inventories.where(product_id: self.product_id).first
+    employee_inventory ?  self.treatment.quantity <= employee_inventory.quantity : false
   end
 end

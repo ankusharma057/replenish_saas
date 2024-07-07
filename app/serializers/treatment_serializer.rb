@@ -1,3 +1,3 @@
 class TreatmentSerializer < ActiveModel::Serializer
-  attributes :id, :name, :description, :cost, :products_used, :duration, :employee, :product
+  attributes :id, :name, :description, :cost, :quantity, :duration, :employee, :product
 end

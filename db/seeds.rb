@@ -610,7 +610,7 @@ Product.all.reload.each do |product|
             current_employee_id = employee_ids.sample
             product.employees_inventories.create(employee_id: current_employee_id, quantity: product_quantity + 10)
         end
-        product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30", created_by: current_employee_id, cost: rand(100), products_used: product_quantity)
+        product.treatments.create(name: "#{product.name}'s #{i + 1} treatment", duration: "30", created_by: current_employee_id, cost: rand(100), quantity: product_quantity)
     end
 end
 

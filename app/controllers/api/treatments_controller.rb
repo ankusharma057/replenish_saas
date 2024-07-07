@@ -1,13 +1,13 @@
 class Api::TreatmentsController < ApplicationController
-  # before_action :treatment_created_by
-  skip_before_action :authorized_employee
+  before_action :treatment_created_by, only: %i[create update destroy]
+  skip_before_action :authorized_employee, only: %i[index]
 
   def index
     render json: Treatment.employee_treatments(params[:employee_id])
   end
 
   def base_treatments
-    render json: Treatment.filtered_treatments(params[:employee_id])
+    render json: Treatment.base_treatments
   end
 
   def create
@@ -39,7 +39,7 @@ class Api::TreatmentsController < ApplicationController
 
   private
   def treatment_params
-    params.permit(:duration, :product_id, :name, :description, :cost, :products_used, :created_by)
+    params.permit(:duration, :product_id, :name, :description, :cost, :quantity, :created_by)
   end
 
   def treatment_created_by
