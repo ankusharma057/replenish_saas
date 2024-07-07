@@ -31,7 +31,6 @@ import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 import Select from "react-select";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
-import Treatment from "./Treatment";
 
 const Employee = () => {
   const { authUserState, isFillingForm, setIsFillingForm } = useAuthContext();
@@ -337,12 +336,6 @@ const Employee = () => {
         data: getEmployees,
       });
     }
-
-    addTabs.splice(2, 0, {
-      name: "Treatments",
-      value: "treatment",
-      data: emp,
-    });
 
     if (!emp.is_admin) {
       addTabs.splice(0, 0, { name: "Profile", value: "profile" });
@@ -1080,9 +1073,6 @@ const Employee = () => {
                     show={showCreateUserModal}
                     onHide={() => setShowCreateUserModal(false)}
                   />
-                )}
-                {currentTab === "treatment" && (
-                  <Treatment selectedEmployee={selectedEmployeeData} />
                 )}
               </div>
               <CustomModal
