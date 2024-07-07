@@ -15,7 +15,7 @@ class Api::TreatmentsController < ApplicationController
     if treatment.save
       render json: treatment
     else
-      render json: {error: 'Something went wrong with the Treatment!'}, status: :unprocessable_entity
+      render json: { error: treatment.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -44,10 +44,10 @@ class Api::TreatmentsController < ApplicationController
 
   def treatment_created_by
     created_by = params[:created_by]
-    employee = Employee.find_by(id: created_by)
-    if employee.present? && employee.has_role?(:admin)
+    current_employee = @employee
+    if current_employee.has_role?(:admin)
       return
-    elsif created_by != @employee.id
+    elsif created_by != current_employee&.id
       render json: { error: 'Do not have permission to perform this action' }, status: :unprocessable_entity
     end
   end
