@@ -39,9 +39,10 @@ const Treatment = () => {
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(authUserState.user);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [errorForm, setErrorsForm] = useState([]);
 
- 
-  
+
+
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getEmployeesList(refetch);
@@ -56,7 +57,7 @@ const Treatment = () => {
 
   useEffect(() => {
     getEmployees();
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -121,18 +122,63 @@ const Treatment = () => {
 
   const handleSelect = (emp) => {
     setSelectedEmployeeData(emp);
+    checkValidation();
     if (currentTab === "base-treatments") getBaseTreatments();
     else getTreatment();
   };
 
   const handleTreatmentChange = (e) => {
+    checkValidation();
     setTreatmentForm((pre) => ({
       ...pre,
       [e.target.name]: e.target.value,
     }));
   };
+
+  const checkValidation = () => {
+    const errorss = validateForm(treatmentForm);
+    if (errorss.length > 0) {
+      setErrorsForm(errorss);
+      // Handle errors, e.g., display them to the user
+      console.log("Validation errors:", errorss);
+      // return false;
+    }
+  }
+
+  const validateForm = () => {
+    const errors = [];
+
+    if (!treatmentForm.product_id) {
+      errors.push({ name: "product_id", value: "Product must exist" });
+    }
+
+    if (!treatmentForm.name) {
+      errors.push({ name: "name", value: "Name can't be blank" });
+    }
+
+    if (!treatmentForm.duration) {
+      errors.push({ name: "duration", value: "Duration can't be blank" });
+    } else if (isNaN(treatmentForm.duration)) {
+      errors.push({ name: "duration", value: "Duration is not a number" });
+    }
+
+    if (!treatmentForm.cost) {
+      errors.push({ name: "cost", value: "Product can't be blank" });  // Assuming 'Product' here refers to cost
+    }
+
+    return errors;
+  };
+
+
   const handleSubmitTreatment = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
+    const errorss = validateForm(treatmentForm);
+    if (errorss.length > 0) {
+      setErrorsForm(errorss);
+      // Handle errors, e.g., display them to the user
+      console.log("Validation errors:", errorss);
+      // return false;
+    }
 
     try {
       const payload = {
@@ -201,9 +247,9 @@ const Treatment = () => {
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
-                  error?.response?.statusText ||
-                  error.message ||
-                  "Failed to Delete the Treatment."
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to Delete the Treatment."
               );
             }
           },
@@ -332,11 +378,10 @@ const Treatment = () => {
               collapse();
             }
           }}
-          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${
-            selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none bg-gray-200 "
-              : "cursor-pointer "
-          } `}
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
+            ? "pointer-events-none bg-gray-200 "
+            : "cursor-pointer "
+            } `}
         >
           {employee.name || ""}
         </div>
@@ -405,10 +450,9 @@ const Treatment = () => {
                     id={tab.value}
                     type="radio"
                     className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 
-                      ${
-                        currentTab === tab.value
-                          ? "!bg-gray-400 !text-white pb-2"
-                          : "btn-link"
+                      ${currentTab === tab.value
+                        ? "!bg-gray-400 !text-white pb-2"
+                        : "btn-link"
                       }`}
                     name="radio"
                     value={tab.value}
@@ -536,6 +580,9 @@ const Treatment = () => {
                         </option>
                       ))}
                     </Form.Select>
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "product_id")?.value}
+                    </span>
                   </Form.Group>
 
                   <Form.Group controlId="formTreatmentName">
@@ -548,6 +595,9 @@ const Treatment = () => {
                       onChange={handleTreatmentChange}
                       required
                     />
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "name")?.value}
+                    </span>
                   </Form.Group>
 
                   <Form.Group controlId="formTreatmentDescription">
@@ -560,6 +610,9 @@ const Treatment = () => {
                       onChange={handleTreatmentChange}
                       required
                     />
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "desc")?.value}
+                    </span>
                   </Form.Group>
 
                   <Form.Group controlId="formTreatmentCost">
@@ -572,6 +625,9 @@ const Treatment = () => {
                       onChange={handleTreatmentChange}
                       required
                     />
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "cost")?.value}
+                    </span>
                   </Form.Group>
 
                   <Form.Group controlId="formTreatmentDuration">
@@ -584,6 +640,9 @@ const Treatment = () => {
                       onChange={handleTreatmentChange}
                       required
                     />
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "duration")?.value}
+                    </span>
                   </Form.Group>
 
                   <Form.Group controlId="formTreatmentQuantity">
@@ -596,6 +655,9 @@ const Treatment = () => {
                       onChange={handleTreatmentChange}
                       required
                     />
+                    <span className="text-red-400 text-sm">
+                      {errorForm.find(a => a.name === "quantity")?.value}
+                    </span>
                   </Form.Group>
                 </Form>
               </ModalWraper>
@@ -640,7 +702,7 @@ const Treatment = () => {
                             )}
                             {
                               { asc: "🔼", desc: "🔽" }[
-                                header.column.getIsSorted() ?? null
+                              header.column.getIsSorted() ?? null
                               ]
                             }
                           </div>
@@ -669,9 +731,9 @@ const Treatment = () => {
               </tbody>
             </Table>
           </div>
-          </div>
-        </AsideLayout>
-      
+        </div>
+      </AsideLayout>
+
     </>
   );
 };
