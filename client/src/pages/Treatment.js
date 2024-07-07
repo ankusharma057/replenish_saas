@@ -97,10 +97,17 @@ const Treatment = () => {
       console.log(error);
     }
   };
-  const getTreatment = async (refetch = false) => {
+  const getTreatment = async (refetch = false, emp = {}) => {
     try {
+      let empId;
+      if (emp.id) {
+        empId = emp.id
+      } else {
+        empId = selectedEmployeeData.id
+      }
+
       setTreatmentList([]);
-      const { data } = await getTreatmentList(refetch, selectedEmployeeData.id);
+      const { data } = await getTreatmentList(refetch, empId);
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
@@ -123,7 +130,7 @@ const Treatment = () => {
   const handleSelect = (emp) => {
     setSelectedEmployeeData(emp);
     if (currentTab === "base-treatments") getBaseTreatments();
-    else getTreatment();
+    else getTreatment(true, emp);
   };
 
   const handleTreatmentChange = (e) => {
@@ -148,7 +155,7 @@ const Treatment = () => {
         quantity: Number(treatmentForm.quantity),
         created_by: selectedEmployeeData.id,
       };
-      
+
       const response = await createTreatment(payload);
 
       if (response.status === 200) {
@@ -580,7 +587,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                    {errorForm.name && errorForm.name[0]}
+                      {errorForm.name && errorForm.name[0]}
                     </span>
                   </Form.Group>
 
@@ -595,7 +602,7 @@ const Treatment = () => {
                       required
                     />
                     <span className="text-red-400 text-sm">
-                    {errorForm.description && errorForm.description[0]}
+                      {errorForm.description && errorForm.description[0]}
                     </span>
                   </Form.Group>
 
