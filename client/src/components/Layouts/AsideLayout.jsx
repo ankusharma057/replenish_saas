@@ -3,12 +3,13 @@ import { Button } from "react-bootstrap";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useAsideLayoutContext } from "../../context/AsideLayoutContext";
 
-const AsideLayout = ({ asideContent, children }) => {
+const AsideLayout = ({ asideContent, children, hideAsideContent=false }) => {
   const { isCollapsed, collapse } = useAsideLayoutContext();
 
   return (
     <div className="flex relative h-screen overflow-x-auto bg-gray-100">
-      {isCollapsed && (
+      {!hideAsideContent && <>
+        {isCollapsed && (
         <Button onClick={collapse} className="absolute left-4 top-1">
           <ChevronRight />
         </Button>
@@ -30,6 +31,7 @@ const AsideLayout = ({ asideContent, children }) => {
         )}
         {!isCollapsed && asideContent}
       </aside>
+      </>}
       {children}
     </div>
   );

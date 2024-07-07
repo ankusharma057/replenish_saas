@@ -38,17 +38,17 @@ class Api::TreatmentsController < ApplicationController
   end
 
   private
+
   def treatment_params
     params.permit(:duration, :product_id, :name, :description, :cost, :quantity, :created_by)
   end
 
   def treatment_created_by
     created_by = params[:created_by]
-    current_employee = @employee
-    if current_employee.has_role?(:admin)
+    if current_employee.is_admin?
       return
-    elsif created_by != current_employee&.id
-      render json: { error: 'Do not have permission to perform this action' }, status: :unprocessable_entity
+    else
+      params[:created_by] = current_employee&.id
     end
   end
 

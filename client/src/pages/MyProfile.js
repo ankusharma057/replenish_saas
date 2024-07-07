@@ -464,20 +464,6 @@ const MyProfile = () => {
             >
               <Settings /> Settings
             </div>
-            <div
-              role="button"
-              onClick={() => {
-                currentTab !== "treatment" && setCurrentTab("treatment");
-                if (window.innerWidth < 1024) {
-                  collapse();
-                }
-              }}
-              className={`p-2 flex flex-row items-center gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
-                currentTab === "treatment" && "pointer-events-none bg-gray-200"
-              } `}
-            >
-              <ImProfile /> Treatments
-            </div>
           </div>
         }
       >

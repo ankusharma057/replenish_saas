@@ -4,11 +4,11 @@ import {
   deleteTreatment,
   getBaseTreatmentList,
   getProductsList,
-  getProductsListWithId,
   getTreatmentList,
   updateTreatment,
+  getEmployeesList
 } from "../Server";
-import { Button, Form, Table } from "react-bootstrap";
+import { Button, Form, Table, ButtonGroup, ToggleButton } from "react-bootstrap";
 import {
   flexRender,
   getCoreRowModel,
@@ -17,18 +17,48 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
 import { useAuthContext } from "../context/AuthUserContext";
 import ModalWraper from "../components/Modals/ModalWraper";
-import { ButtonGroup, ToggleButton } from "react-bootstrap";
+import AsideLayout from "../components/Layouts/AsideLayout";
+import { ChevronDown } from "lucide-react";
+import SearchInput from "../components/Input/SearchInput";
+import { FixedSizeList as List } from "react-window";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
-const Treatment = ({ selectedEmployee }) => {
+const Treatment = () => {
+  const { collapse } = useAsideLayoutContext();
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [treatmentList, setTreatmentList] = useState([]);
-  const [currentTab, setCurrentTab] = useState("employee");
+  const [currentTab, setCurrentTab] = useState("my-treatments");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [employeeList, setEmployeeList] = useState([]);
+  const [selectedEmployeeData, setSelectedEmployeeData] = useState(authUserState.user);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+
+ 
+  
+  const getEmployees = async (refetch = false) => {
+    try {
+      const { data } = await getEmployeesList(refetch);
+      if (data?.length > 0) {
+        setEmployeeList(data);
+        // handleSelect(data[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getEmployees();
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [treatmentForm, setTreatmentForm] = useState({
     product_id: "",
@@ -36,17 +66,17 @@ const Treatment = ({ selectedEmployee }) => {
     duration: "",
     desc: "",
     cost: "",
-    products_used: "",
+    quantity: "",
   });
 
   const [radioTabs, setRadioTabs] = useState([
     {
-      name: "Admin",
-      value: "admin",
+      name: "Base Treatments",
+      value: "base-treatments",
     },
     {
-      name: "Employee",
-      value: "employee",
+      name: "My Treatments",
+      value: "my-treatments",
     },
   ]);
 
@@ -58,9 +88,8 @@ const Treatment = ({ selectedEmployee }) => {
 
   const getProducts = async (refetch = false) => {
     try {
-      const { data } = await getProductsListWithId(
-        refetch,
-        selectedEmployee.id
+      const { data } = await getProductsList(
+        refetch
       );
       setProductList(data);
     } catch (error) {
@@ -70,7 +99,7 @@ const Treatment = ({ selectedEmployee }) => {
   const getTreatment = async (refetch = false) => {
     try {
       setTreatmentList([]);
-      const { data } = await getTreatmentList(refetch, selectedEmployee.id);
+      const { data } = await getTreatmentList(refetch, selectedEmployeeData.id);
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
@@ -81,15 +110,19 @@ const Treatment = ({ selectedEmployee }) => {
     try {
       setTreatmentList([]);
       const response = await getBaseTreatmentList(
-        refetch,
-        selectedEmployee.id,
-        selectedEmployee.is_admin
+        refetch
       );
       const { data } = response || {}; // Use an empty object as default
       setTreatmentList(data);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleSelect = (emp) => {
+    setSelectedEmployeeData(emp);
+    if (currentTab === "base-treatments") getBaseTreatments();
+    else getTreatment();
   };
 
   const handleTreatmentChange = (e) => {
@@ -99,7 +132,8 @@ const Treatment = ({ selectedEmployee }) => {
     }));
   };
   const handleSubmitTreatment = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
+
     try {
       const payload = {
         name: treatmentForm.name,
@@ -107,8 +141,8 @@ const Treatment = ({ selectedEmployee }) => {
         product_id: treatmentForm.product_id,
         description: treatmentForm.desc,
         cost: Number(treatmentForm.cost),
-        products_used: Number(treatmentForm.products_used),
-        created_by: selectedEmployee.id,
+        quantity: Number(treatmentForm.quantity),
+        created_by: selectedEmployeeData.id,
       };
       await createTreatment(payload);
       setTreatmentForm({
@@ -117,10 +151,10 @@ const Treatment = ({ selectedEmployee }) => {
         duration: "",
         cost: "",
         desc: "",
-        products_used: "",
+        quantity: "",
       });
       setShowCreateTreatmentModal(false);
-      if (currentTab == "admin") await getBaseTreatments(true);
+      if (currentTab === "base-treatments") await getBaseTreatments(true);
       else await getTreatment(true);
     } catch (error) {
       console.log(error);
@@ -135,7 +169,7 @@ const Treatment = ({ selectedEmployee }) => {
       duration: treatment.duration,
       cost: treatment.cost,
       desc: treatment.description,
-      products_used: treatment.products_used,
+      quantity: treatment.quantity,
     });
     setShowCreateTreatmentModal(true);
   };
@@ -148,7 +182,7 @@ const Treatment = ({ selectedEmployee }) => {
       duration: treatment.duration,
       cost: treatment.cost,
       desc: treatment.description,
-      products_used: treatment.products_used,
+      quantity: treatment.quantity,
     });
     setShowUpdateTreatmentModal(true);
   };
@@ -206,8 +240,8 @@ const Treatment = ({ selectedEmployee }) => {
       accessorKey: "cost",
     },
     {
-      header: "Product Used",
-      accessorKey: "products_used",
+      header: "Quantity",
+      accessorKey: "quantity",
     },
     {
       header: "Actions",
@@ -229,7 +263,7 @@ const Treatment = ({ selectedEmployee }) => {
           )}
           {!authUserState.user?.is_admin && (
             <div className="flex justify-center space-x-2">
-              {currentTab == "admin" ? (
+              {currentTab === "base-treatments" ? (
                 <Button
                   variant="info"
                   onClick={() => onTreatmentDuplicateUpdate(row.original)}
@@ -246,7 +280,7 @@ const Treatment = ({ selectedEmployee }) => {
                   </Button>
                 </>
               )}
-              {currentTab == "employee" && (
+              {currentTab === "my-treatments" && (
                 <>
                   <Button
                     variant="danger"
@@ -282,248 +316,362 @@ const Treatment = ({ selectedEmployee }) => {
     },
   });
 
+  const filteredEmployeeList = employeeList?.filter((employee) =>
+    employee?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+  );
+
+  const EmployeeItem = ({ index, style }) => {
+    const employee = filteredEmployeeList[index];
+    return (
+      employee && (
+        <div
+          style={style}
+          onClick={() => {
+            selectedEmployeeData?.id !== employee.id && handleSelect(employee);
+            if (window.innerWidth < 1024) {
+              collapse();
+            }
+          }}
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${
+            selectedEmployeeData?.id === employee.id
+              ? "pointer-events-none bg-gray-200 "
+              : "cursor-pointer "
+          } `}
+        >
+          {employee.name || ""}
+        </div>
+      )
+    );
+  };
+
+
   useEffect(() => {
     getProducts();
-    if (currentTab == "admin") getBaseTreatments();
+    if (currentTab === "base-treatments") getBaseTreatments();
     else getTreatment();
   }, [currentTab]);
 
+
   return (
     <>
-      <div className="mb-2">
-        <ButtonGroup className="w-full md:w-auto">
-          {radioTabs.map((tab) => {
-            return (
-              <ToggleButton
-                variant="link"
-                key={tab.value}
-                id={tab.value}
-                type="radio"
-                className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 
-                  ${
-                    currentTab === tab.value
-                      ? "!bg-gray-400 !text-white pb-2"
-                      : "btn-link"
-                  }`}
-                name="radio"
-                value={tab.value}
-                checked={currentTab === tab.value}
-                onChange={(e) => {
-                  setCurrentTab(e.currentTarget.value);
-                }}
-              >
-                {tab.name}
-              </ToggleButton>
-            );
-          })}
-        </ButtonGroup>
-      </div>
-      <div className="m-4">
-        <div className="flex items-center gap-x-1 md:gap-x-2">
-          <div className="flex items-center gap-x-2 flex-1 relative">
-            <Form.Control
-              placeholder="Search Product Name here"
-              aria-label="Search Product Name here"
-              className="pr-4!"
-              value={searchInput}
-              onChange={(event) => {
-                setSearchInput(event.target.value);
-              }}
-            />
+      <AsideLayout
+        hideAsideContent={!authUserState?.user?.is_admin}
+        asideContent={
+          <>
             <div>
-              <Button
-                onClick={() => {
-                  console.log("Click");
-                  setShowCreateTreatmentModal(true);
-                }}
-                className="truncate rounded-full !text-sm md:!text-base"
-              >
-                Add Treatment
-              </Button>
+              <SearchInput
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </div>
-          <ModalWraper
-            show={showUpdateTreatmentModal || showCreateTreatmentModal}
-            title={
-              showUpdateTreatmentModal
-                ? "Update Treatment"
-                : "Create New Treatment"
-            }
-            onHide={() => {
-              setShowUpdateTreatmentModal(false);
-              setShowCreateTreatmentModal(false);
-              setTreatmentForm({
-                product_id: "",
-                name: "",
-                duration: "",
-                desc: "",
-                cost: "",
-                products_used: "",
-              });
-            }}
-            footer={
-              <div className="flex gap-2">
-                {showUpdateTreatmentModal && (
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const payload = {
-                          name: treatmentForm.name,
-                          duration: treatmentForm.duration,
-                          product_id: treatmentForm.product_id,
-                          description: treatmentForm.desc,
-                          cost: Number(treatmentForm.cost),
-                          products_used: Number(treatmentForm.products_used),
-                        };
-                        await updateTreatment(treatmentForm.id, payload);
-                        setTreatmentForm({
-                          product_id: "",
-                          name: "",
-                          duration: "",
-                          desc: "",
-                          cost: "",
-                          products_used: "",
-                        });
-                        await getTreatment(true);
-                        setShowUpdateTreatmentModal(false);
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
+            <div className="border-t-2  py-2 bg-white">
+              <h1 className="text-xl flex gap-x-2 items-center justify-center">
+                All Staff <ChevronDown />
+              </h1>
+              <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
+                {(employeeList || []).length > 0 && (
+                  <List
+                    height={window.innerHeight - 450}
+                    itemCount={employeeList.length}
+                    itemSize={45}
+                    width={"100%"}
                   >
-                    Update Treatment
-                  </Button>
-                )}
-                {showCreateTreatmentModal && (
-                  <Button
-                    onClick={async (e) => {
-                      try {
-                        handleSubmitTreatment(e);
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                  >
-                    Create Treatment
-                  </Button>
+                    {EmployeeItem}
+                  </List>
                 )}
               </div>
-            }
-          >
-            <Form
-              className="flex flex-col gap-4"
-              onSubmit={handleSubmitTreatment}
+            </div>
+            <Button
+              onClick={() => {
+                setShowCreateUserModal(true);
+                setCurrentTab("staff");
+              }}
+              variant="info"
+              className="w-full text-white"
             >
-              <Form.Select
-                aria-label="Default select example"
-                name="product_id"
-                value={treatmentForm.product_id}
-                onChange={handleTreatmentChange}
-                required
-                disabled={showUpdateTreatmentModal}
-              >
-                <option>Select Product</option>
-                {productList.map((product) => (
-                  <option value={product.id} key={product.id}>
-                    {product.name}
-                  </option>
-                ))}
-              </Form.Select>
-
-              <Form.Control
-                type="text"
-                placeholder="Enter Treatment Name"
-                name="name"
-                value={treatmentForm.name}
-                onChange={handleTreatmentChange}
-                required
-              />
-              <Form.Control
-                type="text"
-                placeholder="Enter Description"
-                name="desc"
-                value={treatmentForm.desc}
-                onChange={handleTreatmentChange}
-                required
-              />
-              <Form.Control
-                type="number"
-                placeholder="Enter Cost"
-                name="cost"
-                value={treatmentForm.cost}
-                onChange={handleTreatmentChange}
-                required
-              />
-              <Form.Control
-                type="number"
-                placeholder="Enter Duration in mins"
-                name="duration"
-                value={treatmentForm.duration}
-                onChange={handleTreatmentChange}
-                required
-              />
-              <Form.Control
-                type="number"
-                placeholder="Enter Product Units"
-                name="products_used"
-                value={treatmentForm.products_used}
-                onChange={handleTreatmentChange}
-                required
-              />
-            </Form>
-          </ModalWraper>
-        </div>
-        <Table
-          bordered
-          hover
-          responsive
-          className="w-full mt-4 max-h-[20rem] text-center"
-        >
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
+              + Add Employee
+            </Button>
+          </>
+        }>
+        <div className="flex py-10 px-6 flex-1 items-center flex-col">
+          <div className="mb-2">
+            <ButtonGroup className="w-full md:w-auto">
+              {radioTabs.map((tab) => {
+                return (
+                  <ToggleButton
+                    variant="link"
+                    key={tab.value}
+                    id={tab.value}
+                    type="radio"
+                    className={` !border-none !no-underline !rounded-t-lg !text-cyan-500 
+                      ${
+                        currentTab === tab.value
+                          ? "!bg-gray-400 !text-white pb-2"
+                          : "btn-link"
+                      }`}
+                    name="radio"
+                    value={tab.value}
+                    checked={currentTab === tab.value}
+                    onChange={(e) => {
+                      setCurrentTab(e.currentTarget.value);
+                    }}
                   >
-                    {header.isPlaceholder ? null : (
-                      <div>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {
-                          { asc: "🔼", desc: "🔽" }[
-                            header.column.getIsSorted() ?? null
-                          ]
-                        }
-                      </div>
+                    {tab.name}
+                  </ToggleButton>
+                );
+              })}
+            </ButtonGroup>
+          </div>
+          <div className="m-4">
+            <div className="flex items-center gap-x-1 md:gap-x-2">
+              <div className="flex items-center gap-x-2 flex-1 relative">
+                <Form.Control
+                  placeholder="Search Product Name here"
+                  aria-label="Search Product Name here"
+                  className="pr-4!"
+                  value={searchInput}
+                  onChange={(event) => {
+                    setSearchInput(event.target.value);
+                  }}
+                />
+                <div>
+                  <Button
+                    onClick={() => {
+                      console.log("Click");
+                      setShowCreateTreatmentModal(true);
+                    }}
+                    className="truncate rounded-full !text-sm md:!text-base"
+                  >
+                    Add Treatment
+                  </Button>
+                </div>
+              </div>
+              <ModalWraper
+                show={showUpdateTreatmentModal || showCreateTreatmentModal}
+                title={
+                  showUpdateTreatmentModal
+                    ? "Update Treatment"
+                    : "Create New Treatment"
+                }
+                onHide={() => {
+                  setShowUpdateTreatmentModal(false);
+                  setShowCreateTreatmentModal(false);
+                  setTreatmentForm({
+                    product_id: "",
+                    name: "",
+                    duration: "",
+                    desc: "",
+                    cost: "",
+                    quantity: "",
+                  });
+                }}
+                footer={
+                  <div className="flex gap-2">
+                    {showUpdateTreatmentModal && (
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const payload = {
+                              name: treatmentForm.name,
+                              duration: treatmentForm.duration,
+                              product_id: treatmentForm.product_id,
+                              description: treatmentForm.desc,
+                              cost: Number(treatmentForm.cost),
+                              quantity: Number(treatmentForm.quantity),
+                            };
+                            await updateTreatment(treatmentForm.id, payload);
+                            setTreatmentForm({
+                              product_id: "",
+                              name: "",
+                              duration: "",
+                              desc: "",
+                              cost: "",
+                              quantity: "",
+                            });
+                            await getTreatment(true);
+                            setShowUpdateTreatmentModal(false);
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                      >
+                        Update Treatment
+                      </Button>
                     )}
-                  </th>
+                    {showCreateTreatmentModal && (
+                      <Button type="submit"
+                        onClick={async (e) => {
+                          try {
+                            handleSubmitTreatment(e);
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                      >
+                        Create Treatment
+                      </Button>
+                    )}
+                  </div>
+                }
+              >
+                <Form
+                  className="flex flex-col gap-4"
+                  onSubmit={handleSubmitTreatment}
+                >
+                  <Form.Group controlId="formProduct">
+                    <Form.Label>Product</Form.Label>
+                    <Form.Select
+                      aria-label="Default select example"
+                      name="product_id"
+                      value={treatmentForm.product_id}
+                      onChange={handleTreatmentChange}
+                      required
+                      disabled={showUpdateTreatmentModal}
+                    >
+                      <option>Select Product</option>
+                      {productList.map((product) => (
+                        <option value={product.id} key={product.id}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+
+                  <Form.Group controlId="formTreatmentName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Treatment Name"
+                      name="name"
+                      value={treatmentForm.name}
+                      onChange={handleTreatmentChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="formTreatmentDescription">
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Description"
+                      name="desc"
+                      value={treatmentForm.desc}
+                      onChange={handleTreatmentChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="formTreatmentCost">
+                    <Form.Label>Cost</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Enter Cost"
+                      name="cost"
+                      value={treatmentForm.cost}
+                      onChange={handleTreatmentChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="formTreatmentDuration">
+                    <Form.Label>Duration (in mins)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Enter Duration in mins"
+                      name="duration"
+                      value={treatmentForm.duration}
+                      onChange={handleTreatmentChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group controlId="formTreatmentQuantity">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Enter Product Units"
+                      name="quantity"
+                      value={treatmentForm.quantity}
+                      onChange={handleTreatmentChange}
+                      required
+                    />
+                  </Form.Group>
+                </Form>
+              </ModalWraper>
+            </div>
+            <div className="flex gap-x-4 justify-end mt-4 ">
+              <Button
+                disabled={!table.getCanPreviousPage()}
+                onClick={() => table.previousPage()}
+                variant="info"
+                className="text-white"
+              >
+                <ChevronLeft />
+              </Button>
+              <Button
+                disabled={!table.getCanNextPage()}
+                onClick={() => table.nextPage()}
+                variant="info"
+                className="text-white"
+              >
+                <ChevronRight />
+              </Button>
+            </div>
+            <Table
+              bordered
+              hover
+              responsive
+              className="w-full mt-4 max-h-[20rem] text-center"
+            >
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {header.isPlaceholder ? null : (
+                          <div>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {
+                              { asc: "🔼", desc: "🔽" }[
+                                header.column.getIsSorted() ?? null
+                              ]
+                            }
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                        cell
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => {
+                  return (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                            cell
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+        </AsideLayout>
+      
     </>
   );
 };

@@ -43,7 +43,7 @@ const CompanyInvTable = ({
 
       cell: ({ row }) => (
         <>
-          {userProfile.user?.is_admin && (
+          {(userProfile.user?.is_admin || userProfile.user?.is_inv_manager) && (
             <div className="flex justify-center space-x-2">
               <Button onClick={() => onAssign(row.original)}>Assign</Button>
               <Button

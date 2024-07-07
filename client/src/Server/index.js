@@ -372,11 +372,8 @@ export const getTreatmentList = async (refetch, id) =>
     },
   });
 
-export const getBaseTreatmentList = async (refetch, id, isAdmin) => {
+export const getBaseTreatmentList = async (refetch) => {
   let url = `/api/base_treatments`;
-  if (!isAdmin) {
-    url = `/api/base_treatments?employee_id=${id}`
-  }
   const res = api.get(url, {
     cache: {
       ignoreCache: refetch,

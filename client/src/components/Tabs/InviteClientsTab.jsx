@@ -162,7 +162,7 @@ const InviteClientsTab = ({ employee }) => {
                   }`}
                   onClick={() => handleCopy(link)}
                 >
-                  <span><button>Admin Location</button></span>
+                  <span><button>{loc.name}</button></span>
                   <span>
                     {copiedLink === link ? (
                       <CopyCheck className="cursor-pointer text-blue-500" />

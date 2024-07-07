@@ -196,9 +196,9 @@ function App() {
                   authUserState.user?.is_admin) && (
                   <>
                     <Route path="/inventories" element={<Inventory />} />
+                    <Route path="/treatments" element={<Treatment />} />
                     <Route path="/employees" element={<Employee />} />
                     <Route path="/schedule" element={<Schedule />} />
-                    <Route path="/treatment" element={<Treatment />} />
                   </>
                 )}
 
@@ -214,6 +214,7 @@ function App() {
                 </>
               ) : (
                 <>
+                  <Route path="/treatments" element={<Treatment />} />
                   <Route path="/myprofile" element={<MyProfile />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
