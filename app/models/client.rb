@@ -1,9 +1,9 @@
 class Client < ApplicationRecord
     has_secure_password validations: false
-    has_many :invoices
-    has_many :schedules
-    has_many :payments
-    has_many :employee_clients
+    has_many :invoices, dependent: :destroy
+    has_many :schedules, dependent: :destroy
+    has_many :payments, dependent: :destroy
+    has_many :employee_clients, dependent: :destroy
     has_many :employees, through: :employee_clients
 
     validates :name, presence: true

@@ -454,6 +454,10 @@ const Inventory = () => {
     console.log(values, "values");
     return values;
   };
+  console.log(
+    authUserState.user?.is_inv_manager,
+    "authUserState.user?.inv_manager"
+  );
 
   useEffect(() => {
     console.log(productTypeFilter[radioValue], "productTypeFilter");
@@ -590,26 +594,34 @@ const Inventory = () => {
       <div className=" lg:container h-screen flex flex-col items-center max-w-full  mx-auto">
         <div className="mt-8 font-bold mb-8 text-center text-blue-400">
           <ButtonGroup className="mb-2 gap-3 border w-full md:w-auto border-gray-200 p-3 ">
-            {radios.map((radio, idx) => (
-              <ToggleButton
-                key={idx}
-                id={`radio-${idx}`}
-                type="radio"
-                className={`!flex !justify-center !items-center custom-toggle-btn !p-1 sm:!p-3 !text-sm ${
-                  radioValue === radio.value ? "!rounded-2xl !font-medium !text-[1.2rem] !px-12 !bg-cyan-400 !border-cyan-500 " : "btn-white"
-                } toggle-button `}
-                name="radio"
-                value={radio.value}
-                checked={radioValue === radio.value}
-                onChange={(e) => {
-                  console.log(e.currentTarget.value, "e.currentTarget.value");
-                  setRadioValue(e.currentTarget.value);
-                }}
-                onClick={() => radio.data && radio.data()}
-              >
-                {radio.name}
-              </ToggleButton>
-            ))}
+            {radios.map((radio, idx) => {
+              if (radio.value === "products" && authUserState.user?.is_inv_manager && !authUserState.user?.is_admin) {
+                return null;
+              }
+
+              return (
+                <ToggleButton
+                  key={idx}
+                  id={`radio-${idx}`}
+                  type="radio"
+                  className={`!flex !justify-center !items-center custom-toggle-btn !p-1 sm:!p-3 !text-sm ${
+                    radioValue === radio.value
+                      ? "!rounded-2xl !font-medium !text-[1.2rem] !px-12 !bg-cyan-400 !border-cyan-500 "
+                      : "btn-white"
+                  } toggle-button `}
+                  name="radio"
+                  value={radio.value}
+                  checked={radioValue === radio.value}
+                  onChange={(e) => {
+                    console.log(e.currentTarget.value, "e.currentTarget.value");
+                    setRadioValue(e.currentTarget.value);
+                  }}
+                  onClick={() => radio.data && radio.data()}
+                >
+                  {radio.name}
+                </ToggleButton>
+              );
+            })}
           </ButtonGroup>
 
           <div className="flex items-center gap-x-1 md:gap-x-2">
@@ -798,7 +810,6 @@ const Inventory = () => {
               </ul>
             </div>
           )}
-
         {radioValue === "products" && (
           <ProductsTab
             show={showAddProductModal}
