@@ -321,15 +321,21 @@ const ClientLocation = () => {
 
     const { data } = await createClientSchedule(copyAppointMent);
     console.log("data",data)
-    if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
-      navigate(`/clients/payment/confirm_payment?empId=${selectedEmployee.id}`, {
-        state: {
-          redirect_url: data?.redirect_url,
+    if (data?.redirect_url) {
+      const stateObject = {
           locId,
           empId,
           selectedTreatMent,
           id: data?.schedule.id,
-        },
+      };
+
+      if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
+        stateObject.redirect_url = data?.redirect_url;
+      }else{
+        stateObject.redirect_url = `/clients/appointments`;
+      }
+      navigate(`/clients/payment/confirm_payment?empId=${empId}`, {
+        state: stateObject,
       });
     }
     else if(data.schedule) {
