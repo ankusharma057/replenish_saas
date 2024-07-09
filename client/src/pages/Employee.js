@@ -115,7 +115,7 @@ const Employee = () => {
           ],
         }));
       }
-    } else {
+    } else {  
       toast.info("Mentor already added");
     }
   };

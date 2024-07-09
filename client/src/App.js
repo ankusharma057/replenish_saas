@@ -123,7 +123,7 @@ function App() {
     } else if (
       !authUserState.user?.is_admin &&
       !authUserState.user?.is_inv_manager &&
-      ["/invoicelist", "/schedule", "/employees"].includes(location.pathname) &&
+      ["/invoicelist", "/employees"].includes(location.pathname) &&
       authUserState.user?.id
     ) {
       navigate("/myprofile");
@@ -217,6 +217,7 @@ function App() {
                   <Route path="/treatments" element={<Treatment />} />
                   <Route path="/myprofile" element={<MyProfile />} />
                   <Route path="/products" element={<Products />} />
+                  <Route path="/schedule" element={<Schedule />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
                 </>
               )}
