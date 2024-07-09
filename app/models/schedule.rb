@@ -10,6 +10,16 @@ class Schedule < ApplicationRecord
 
   scope :balance_amount, -> { select { |schedule| schedule.remaining_amt > 0 } }
 
+  default_scope { where(is_cancelled: false) }
+
+  def cancel_schedule(current_employee)
+    update(is_cancelled: true, cancelled_by: current_employee.id, cancelled_at: DateTime.now)
+  end
+
+  def cancel_client_schedule(current_client)
+    update(is_cancelled: true, cancelled_by: current_client.id, cancelled_at: DateTime.now)
+  end
+
   def presisted_schedule
     res = Schedule.where(start_time: start_time, end_time:  end_time)
     emp_data = res.where(employee_id: employee_id)

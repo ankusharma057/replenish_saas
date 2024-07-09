@@ -66,7 +66,7 @@ class Api::Client::SchedulesController < ClientApplicationController
 
   def destroy
     schedule = Schedule.find_by(id: params[:id])
-    if schedule.destroy
+    if schedule && schedule.cancel_client_schedule(current_client)
       render json: {message: "Schedule deleted."}, status: :ok
     else
       render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
