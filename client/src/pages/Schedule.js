@@ -130,6 +130,7 @@ function Schedule() {
 
       const newData = data.map((d) => ({
         ...d,
+        schedule: d,
         start_time: new Date(d.start_time),
         end_time: new Date(d.end_time),
         treatment: d?.treatment?.name || "",
@@ -226,7 +227,7 @@ function Schedule() {
   };
 
   const getAllLocation = async (refetch = false) => {
-    const { data } = await getLocations(refetch);
+    const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
 
     if (data?.length > 0) {
       setServiceLocation(
@@ -235,8 +236,13 @@ function Schedule() {
     }
   };
   useEffect(() => {
-    getEmployees();
-    getAllLocation();
+    if (authUserState.user.is_admin) {
+      getEmployees();
+      getAllLocation();
+    } else {
+      handleSelectEmployee(authUserState.user);
+      getAllLocation();
+    }
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -447,11 +453,21 @@ function Schedule() {
 
   const onLocationChange = async (selectedOption) => {
     setSelectedLocation(selectedOption);
-    const { data } = await getLocationEmployee(selectedOption?.id);
-    if (data?.length > 0) {
-      setEmployeeList(data);
-      setSelectedEmployeeData(null);
+
+    if (authUserState.user.is_admin) {
+      const { data } = await getLocationEmployee(selectedOption?.id);
+      if (data?.length > 0) {
+        setEmployeeList(data);
+        setSelectedEmployeeData(null);
+      }
+    } else {
+      getEmployeeSchedule({
+        id: authUserState?.user?.id,
+        start_date: calenderCurrentRange.start_date,
+        end_date: calenderCurrentRange.end_date,
+      });
     }
+
   };
 
   const addLocation = async (e) => {
@@ -616,6 +632,7 @@ function Schedule() {
   return (
     <>
       <AsideLayout
+        hideAsideContent={!authUserState?.user?.is_admin}
         asideContent={
           <>
             <div>

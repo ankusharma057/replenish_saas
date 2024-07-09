@@ -38,7 +38,7 @@ module AvailabilityConcern
 
     all_availabilities = []
     (start_date..end_date).each do |date|
-      if date > Date.today
+      if date >= Date.today
         day = date.strftime('%A').downcase
         matching_timings = availability_timings_params.find { |timing| timing[:day].downcase == day }
 

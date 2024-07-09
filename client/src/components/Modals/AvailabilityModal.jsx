@@ -6,7 +6,8 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
-import { getLocationEmployee, getLocations, postAvailability } from "../../Server";
+import { getLocationEmployee, getLocations, postAvailability, getEmployeeLocations } from "../../Server";
+import { useAuthContext } from "../../context/AuthUserContext";
 import Select from "react-select";
 
 const availability = [
@@ -15,6 +16,8 @@ const availability = [
 ];
 
 const AvailabilityModal = (props) => {
+  const { authUserState } = useAuthContext();
+
   const {
     availabilityModal,
     closeModal,
@@ -35,7 +38,7 @@ const AvailabilityModal = (props) => {
 
   const [scheduleData, setScheduleData] = useState({});
   const getAllLocation = async (refetch = false) => {
-    const { data } = await getLocations(refetch);
+    const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
 
     if (data?.length > 0) {
       setServiceLocation(
@@ -44,10 +47,22 @@ const AvailabilityModal = (props) => {
     }
   };
   const onLocationChange = async (selectedOption) => {
-    const { data } = await getLocationEmployee(selectedOption?.id);
-    if (data?.length > 0) {
-      setEmployeeList(data);
-      setScheduleData({ ...scheduleData, location_id: selectedOption.id })
+    // const { data } = await getLocationEmployee(selectedOption?.id);
+
+    if (authUserState.user.is_admin) {
+      const { data } = await getLocationEmployee(selectedOption?.id);
+
+      if (data?.length > 0) {
+        setEmployeeList(data);
+        setScheduleData({ ...scheduleData, location_id: selectedOption.id })
+      }
+    } else {
+      const data = [...authUserState?.user]
+
+      if (data?.length > 0) {
+        setEmployeeList(data);
+        setScheduleData({ ...scheduleData, location_id: selectedOption.id })
+      }
     }
   };
   useEffect(() => {
