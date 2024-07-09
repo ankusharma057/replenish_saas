@@ -126,7 +126,6 @@ function Schedule() {
         refetch
       );
 
-      console.log("data",data);
 
       const newData = data.map((d) => ({
         ...d,
@@ -179,7 +178,6 @@ function Schedule() {
         }
         return {}
       });
-      console.log(resp, availabilityData, "availabilityData");
       const everyWeekUnavailabilities = availabilityData.filter(
         (item) => item.every_week
       );
@@ -309,7 +307,6 @@ function Schedule() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleAddAppointmentSelect = ({ start, end, ...rest }, readOnly) => {
-    console.log("rest",rest);
     let formateData = {
       show: true,
       start_time: start,
@@ -324,11 +321,9 @@ function Schedule() {
         readOnly: true,
       };
     }
-    console.log(formateData, "formateData");
     if (!rest.hasOwnProperty("available")) {
       setRemoveAvailabilityData(formateData);
       setAppointmentModal(formateData);
-      console.log("hi");
       // setRemoveAvailabilityModal(true);
     }
     // formateData.timeSlots =
@@ -342,10 +337,8 @@ function Schedule() {
         ...rest,
         readOnly: false,
       };
-
-      console.log("hello");
+      setRemoveAvailabilityData(formateData);
       // setRemoveAvailabilityModal(false);
-       console.log("restasdasd",formateData)
       setAppointmentModal(formateData);
     }
   };
@@ -397,7 +390,6 @@ function Schedule() {
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
     delete copyAppointMent.selectedTimeSlot;
-    console.log("copyAppointMent",copyAppointMent)
 
     const { data } = await createSchedule(copyAppointMent);
     let newCopyAppointMent = {
@@ -407,13 +399,19 @@ function Schedule() {
       paid_amount: data?.paid_amount,
       remaining_amount: data?.remaining_amount,
     };
-    setEmployeeScheduleEventsData((pre) => {
-      const prevData = pre[selectedEmployeeData.id] || [];
-      return {
-        ...pre,
-        [selectedEmployeeData.id]: [...prevData, newCopyAppointMent],
-      };
+
+    getEmployeeSchedule({
+      id: selectedEmployeeData.id,
+      start_date: calenderCurrentRange.start_date,
+      end_date: calenderCurrentRange.end_date,
     });
+    // setEmployeeScheduleEventsData((pre) => {
+    //   const prevData = pre[selectedEmployeeData.id] || [];
+    //   return {
+    //     ...pre,
+    //     [selectedEmployeeData.id]: [...prevData, newCopyAppointMent],
+    //   };
+    // });
     setAppointmentModal(initialAppointmentModal);
     toast.success("Appointment added successfully.");
     try {
@@ -438,7 +436,6 @@ function Schedule() {
       formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
     }
 
-    console.log("date---->", date)
     setCalenderCurrentRange({
       start_date: formattedStartDate,
       end_date: formattedEndDate,
@@ -574,6 +571,7 @@ function Schedule() {
             };
           });
         }
+
       }
       setAvailabilityModal(initialAvailabilityModal);
       toast.success("Availability updated successfully.");
@@ -593,7 +591,6 @@ function Schedule() {
       .then((res) => {
         if (res.status === 201) {
           toast.success("Payment done successfully.");
-          console.log(res);
           setAppointmentModal({
             ...appointmentModal,
             remaining_amount: 0,
@@ -704,14 +701,14 @@ function Schedule() {
             <ScheduleCalender
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
               onSelectEvent={(event) => {
+                console.log("events",event);
                 handleAddAppointmentSelect(event, true);
         
               }}
               // onSelectSlot={handleAddAppointmentSelect}
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
-                const backgroundColor =
-                  "available" in event && event.available ? "#EAF6FF" : "#299db9";
+                const backgroundColor = ( "available" in event && event.available ) ? "#EAF6FF" :"#299db9";                      
                 return { style: { backgroundColor } };
               }}
             />
