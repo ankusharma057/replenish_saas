@@ -68,7 +68,7 @@ const ConfirmPayment = () => {
     try {
       if (paymentState === "now") {
         const response = await reminder(state?.id, {
-          remainder: reminderOptionsSorted,
+          reminder: reminderOptionsSorted,
         });
         if (response?.status === 200) {
           toast.success("Reminder has been set successfully");
@@ -78,7 +78,7 @@ const ConfirmPayment = () => {
       } else {
         console.log(state)
         const response = await reminder(state?.id, {
-          remainder: reminderOptionsSorted,
+          reminder: reminderOptionsSorted,
         });
         if (response?.status === 200) {
           toast.success("Reminder has been set successfully");

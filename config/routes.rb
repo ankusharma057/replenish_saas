@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  require 'sidekiq/web'
+mount Sidekiq::Web => '/sidekiq'
 
   namespace :api do
     namespace :client do
@@ -21,7 +23,7 @@ Rails.application.routes.draw do
 
       resources :schedules, only: %i(index create show destroy) do
         post :remaining_pay, on: :member
-        post :remainder, on: :member
+        post :reminder, on: :member
       end
 
       resources :products, only: %i(index)

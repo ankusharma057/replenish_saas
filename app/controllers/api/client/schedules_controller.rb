@@ -39,12 +39,12 @@ class Api::Client::SchedulesController < ClientApplicationController
     end
   end
 
-  def remainder
+  def reminder
     @schedule = current_client.schedules.find_by(id: params[:id])
     if @schedule
-      @schedule.update(remainder: params[:remainder])
-      @schedule.update_remainder
-      render json: {message: "Remainder Updated with #{@schedule.remainder}!!"}, status: :ok
+      @schedule.update(reminder: params[:reminder])
+      @schedule.update_reminder
+      render json: {message: "Reminder Updated with #{@schedule.reminder}!!"}, status: :ok
     else
       render json: {error: "Schedule not found"}, status: :unprocessable_entity
     end

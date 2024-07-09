@@ -34,14 +34,15 @@ class Schedule < ApplicationRecord
     client.timezone
   end
 
-  def update_remainder
-    data = self.remainder
+  def update_reminder
+    data = self.reminder
     return nil if data.blank?
-    return 'past sechdule' if  self.start_time.in_time_zone(timezone) < DateTime.now.in_time_zone(timezone)
+    return 'past schedule' if self.start_time.in_time_zone(timezone) < DateTime.now.in_time_zone(timezone)
     data.each do |evt|
       e = evt.split('_')
       if e.first == "email"
-        EmailRemainderJob.perform_at(self.start_time.in_time_zone(timezone) - e.last.to_i.hour, self.id)
+        send_time = self.start_time.in_time_zone(timezone) - e.last.to_i.hours
+        EmailReminderJob.set(wait_until: send_time).perform_later(self.id)
       elsif e.first == "text"
       end
     end

@@ -363,7 +363,7 @@ export const deleteAppointmentEmployee = async (id) =>
   api.delete(`/api/schedules/${id}`);
 
 export const reminder = async (id, data) =>
-  api.post(`/api/client/schedules/${id}/remainder`, data);
+  api.post(`/api/client/schedules/${id}/reminder`, data);
 
 export const getTreatmentList = async (refetch, id) =>
   api.get(`/api/treatments?employee_id=${id}`, {
