@@ -196,3 +196,9 @@ input[type="number"] {
 .rbc-events-container {
   margin-right: 0 !important;
 }
+
+.rbc-event-content {
+  text-wrap: nowrap;
+  font-size: small;
+  margin-top: 2px;
+}
