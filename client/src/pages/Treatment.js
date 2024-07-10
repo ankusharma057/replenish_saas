@@ -72,7 +72,7 @@ const Treatment = () => {
 
   const [radioTabs] = useState([
     {
-      name: "Base Treatments",
+      name: "Treatments",
       value: "base-treatments",
     },
     {

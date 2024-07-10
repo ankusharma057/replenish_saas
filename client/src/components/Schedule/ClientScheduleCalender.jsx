@@ -37,10 +37,18 @@ const ClientScheduleCalender = ({ ...rest }) => {
             today.getFullYear(), 
             today.getMonth(), 
             today.getDate(), 
-            0
+            7
           )
         }
-     
+        max={
+          new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            19
+          )
+        }
+
         components={{
           toolbar: (e) => <ClientScheduleToolbar {...e} />,
         }}
