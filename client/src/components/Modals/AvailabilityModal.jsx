@@ -36,7 +36,8 @@ const AvailabilityModal = (props) => {
   const [selectedStaff, setSelectedStaff] = useState();
   const [availabilityTimings, setAvailabilityTimings] = useState(initialAvailabilityTimings)
 
-  const [scheduleData, setScheduleData] = useState({});
+  const [scheduleData, setScheduleData] = useState({update_all_my_locations: false});
+  
   const getAllLocation = async (refetch = false) => {
     const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
 
@@ -48,10 +49,11 @@ const AvailabilityModal = (props) => {
   };
   const onLocationChange = async (selectedOption) => {
     // const { data } = await getLocationEmployee(selectedOption?.id);
+console.log("selectedOption",selectedOption);
 
     if (authUserState.user.is_admin) {
       const { data } = await getLocationEmployee(selectedOption?.id);
-
+      console.log("ghghghghhgh");
       if (data?.length > 0) {
         setEmployeeList(data);
         setScheduleData({ ...scheduleData, location_id: selectedOption.id })
@@ -77,6 +79,7 @@ const AvailabilityModal = (props) => {
 
   const handleDone = async (e) => {
     e.preventDefault();
+
     if (
       !scheduleData.end_date ||
       !scheduleData.start_date ||
@@ -118,18 +121,26 @@ const AvailabilityModal = (props) => {
         }
       }
     }
+    handleSubmit();
     return true; // All timings are valid
   }
+
+  const closeModalWithResetForm = () => {
+    closeModal();
+    setScheduleData({ ...scheduleData, update_all_my_locations: false })
+    setEmployeeList([])
+  }
+
   return (
     <ModalWraper
       show={availabilityModal.show}
       title={'Manage Shifts'}
-      onHide={closeModal}
+      onHide={closeModalWithResetForm}
       size={'xl'}
       customClose={true}
       footer={
         <div className="space-x-2">
-          <Button onClick={closeModal} className="bg-white text-black border-black hover:bg-slate-400">
+          <Button onClick={()=>{closeModal();setScheduleData({ ...scheduleData, update_all_my_locations: false }); setEmployeeList([])}} className="bg-white text-black border-black hover:bg-slate-400">
             Cancel
           </Button>
           <Button type="submit" form="appointmentForm">
@@ -151,20 +162,6 @@ const AvailabilityModal = (props) => {
               )
             })}
           </div>
-          {/* <div className="flex flex-col gap-2">
-          <>
-            <label htmlFor="availability">Availability</label>
-            <Select
-              inputId="availability"
-              onChange={(selectedOption) =>
-                setSelectedAvailability(selectedOption)
-              }
-              options={availability}
-              required
-              placeholder="Select availability"
-            />
-          </>
-        </div> */}
           <div className="flex flex-col gap-2">
             <div>Apply this shift schedule to the following dates:</div>
             <div className="flex gap-2 items-center">
@@ -207,7 +204,7 @@ const AvailabilityModal = (props) => {
               <div className="flex gap-4 m-1 items-center">
                 <div>Apply For all locations?</div>
                 <input
-                  checked={scheduleData.update_all_my_locations ?? false}
+                  checked={scheduleData.update_all_my_locations }
                   name="apply_for_all_locations"
                   type="checkbox"
                   onChange={(e) => setScheduleData({ ...scheduleData, update_all_my_locations: e.target.checked })}

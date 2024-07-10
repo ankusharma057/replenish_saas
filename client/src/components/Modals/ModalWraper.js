@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 
-const ModalWraper = ({ show, onHide, children, title, footer, size, customClose }) => {
+const ModalWraper = ({ show, onHide, children, title, footer, size,customClose }) => {
   return (
     <Modal
       show={show}

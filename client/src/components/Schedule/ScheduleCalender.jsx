@@ -32,7 +32,16 @@ const ScheduleCalender = ({ ...rest }) => {
           today.getFullYear(),
           today.getMonth(),
           today.getDate(),
-          0
+          7
+        )
+      }
+
+      max={
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          19
         )
       }
 

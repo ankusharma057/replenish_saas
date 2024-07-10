@@ -57,6 +57,7 @@ const initialAvailabilityModal = {
   end_time: null,
   readOnly: false,
   every_week: false,
+  update_all_my_locations: false
 };
 
 const initialAddLocationModal = {
@@ -77,6 +78,7 @@ function Schedule() {
   const [appointmentModal, setAppointmentModal] = useState(
     initialAppointmentModal
   );
+
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
@@ -92,6 +94,7 @@ function Schedule() {
 
   const [clientNameOptions, setClientNameOptions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState();
+
   const [calenderCurrentRange, setCalenderCurrentRange] = useState({
     start_date: "",
     end_date: "",
@@ -99,14 +102,15 @@ function Schedule() {
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
   const getEmployees = async (refetch = false) => {
     try {
-      const { data } = await getEmployeesList(refetch);
+      const { data } = await getLocationEmployee(1);
+
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
           ...emp,
           label: emp?.name,
           value: emp?.id,
         }));
-        setEmployeeList(a);
+        setEmployeeList(data);
         setAllEmployeeList(a);
         handleSelectEmployee(data[0]);
       }
@@ -336,6 +340,7 @@ function Schedule() {
         ...formateData,
         ...rest,
         readOnly: false,
+        location_id :selectedLocation?.id || 1
       };
       setRemoveAvailabilityData(formateData);
       // setRemoveAvailabilityModal(false);
@@ -450,11 +455,15 @@ function Schedule() {
 
   const onLocationChange = async (selectedOption) => {
     setSelectedLocation(selectedOption);
-
     if (authUserState.user.is_admin) {
       const { data } = await getLocationEmployee(selectedOption?.id);
       if (data?.length > 0) {
         setEmployeeList(data);
+        setAppointmentModal((pre) => ({
+          ...pre,
+          location_id: selectedOption?.id,
+        }))
+        handleSelectEmployee(data[0]);
         setSelectedEmployeeData(null);
       }
     } else {
@@ -574,6 +583,14 @@ function Schedule() {
 
       }
       setAvailabilityModal(initialAvailabilityModal);
+      getEmployeeSchedule(
+        {
+          id: selectedEmployeeData.id,
+          start_date: calenderCurrentRange.start_date,
+          end_date: calenderCurrentRange.end_date,
+        },
+        true
+      );
       toast.success("Availability updated successfully.");
     } catch (error) {
       setAvailabilityModal(initialAvailabilityModal);
@@ -673,6 +690,7 @@ function Schedule() {
                     options={serviceLocation}
                     placeholder="Search Places"
                     onChange={onLocationChange}
+                    defaultValue={serviceLocation[0]}
                   />
                   {authUserState.user?.is_admin && (
                     <Button
@@ -687,13 +705,15 @@ function Schedule() {
                   )}
                 </div>
               )}
-              <Button
-                onClick={handleAvailabilityButtonClick}
-                variant={"info"}
-                className=" text-white"
-              >
-                Manage Shifts
-              </Button>
+
+              {authUserState.user?.is_admin && (
+                <Button
+                  onClick={handleAvailabilityButtonClick}
+                  variant={"info"}
+                  className=" text-white"
+                >
+                  Manage Shifts
+                </Button>)}
             </div>
           </div>
 
@@ -701,7 +721,6 @@ function Schedule() {
             <ScheduleCalender
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
               onSelectEvent={(event) => {
-                console.log("events",event);
                 handleAddAppointmentSelect(event, true);
         
               }}
@@ -885,21 +904,6 @@ function Schedule() {
               </div>
             ) : (
               <>
-                <label htmlFor="location">Location</label>
-                <Select
-                  isClearable
-                  isCreatable
-                  inputId="location"
-                  onChange={(selectedOption) =>
-                    setAppointmentModal((pre) => ({
-                      ...pre,
-                      location_id: selectedOption?.value,
-                    }))
-                  }
-                  options={selectedEmployeeLocations}
-                  required
-                  placeholder="Select a location"
-                />
               </>
             )}
           </div>
