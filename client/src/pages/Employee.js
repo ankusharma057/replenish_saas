@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
-  getEmployeeLocations,
+  getLocationsWithoutEmployee,
   getEmployeesList,
   getMentorList,
   // getInvoiceList,
@@ -141,7 +141,7 @@ const Employee = () => {
   // };
 
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
-    const { data } = await getEmployeeLocations(employeeId, refetch);
+    const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
 
     if (data?.length > 0) {
       setServiceLocation(

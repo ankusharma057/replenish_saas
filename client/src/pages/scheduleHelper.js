@@ -20,17 +20,35 @@ const getDividedSlots = (duration, start_time, maxTime) => {
     if (newSlot.end.getTime() <= maxTime.getTime()) slots.push(newSlot);
     else break;
   }
+  console.log("slots-asdasdads->>>>>>>>", slots);
+  console.log("wddwdwd", maxTime);
+
   return slots;
 };
 
-export const getTimeSlots = (duration, start_time, userScheduleEventsData) => {
+export const getTimeSlots = (duration, start_time, userScheduleEventsData, end_time = "", available = true) => {
   let slots = [];
   if (start_time === null || start_time === undefined) return slots;
-  const maxTime = new Date(start_time.getTime() + 60 * 60000);
+  let maxTime = new Date(start_time.getTime() + 60 * 60000);
+
+
+  if (end_time != "" && !available) {
+    maxTime = new Date(end_time.getTime() + 60000);
+  }
+
   const durationNotMatched = userScheduleEventsData?.some((eventData) => {
     if (eventData.start_time.getTime() === start_time.getTime()) {
+      if (eventData.available === undefined) {
+        return false;
+      }
+      if (eventData.available) {
+        return false;
+      }
       let durationCheck = eventData.end_time - eventData.start_time;
       durationCheck = Math.round(durationCheck / 60000);
+      console.log("slots--->", durationCheck)
+      console.log("slots--->", eventData)
+
       if (durationCheck === parseInt(duration)) {
         return false;
       } else {
@@ -49,12 +67,12 @@ export const getTimeSlots = (duration, start_time, userScheduleEventsData) => {
   const currentDayBookedSlots =
     userScheduleEventsData?.length > 0
       ? userScheduleEventsData?.filter((eventData) => {
-          return (
-            eventData.start_time.getDate() === start_time.getDate() &&
-            eventData.start_time.getTime() < maxTime.getTime() &&
-            eventData.start_time.getTime() > start_time.getTime()
-          );
-        })
+        return (
+          eventData.start_time.getDate() === start_time.getDate() &&
+          eventData.start_time.getTime() < maxTime.getTime() &&
+          eventData.start_time.getTime() > start_time.getTime()
+        );
+      })
       : [];
   if (currentDayBookedSlots.length > 0) {
     const sortedCurrentDayBookedSlots = currentDayBookedSlots.sort(function (
@@ -101,6 +119,7 @@ export const getTimeSlots = (duration, start_time, userScheduleEventsData) => {
     }
     return fixedSlots;
   } else {
+    console.log("maxTime", maxTime);
     const res = getDividedSlots(duration, start_time, maxTime);
     return res;
   }

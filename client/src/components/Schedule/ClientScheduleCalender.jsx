@@ -3,6 +3,7 @@ import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import { memo } from "react";
+import './calendar.css'
 import ClientScheduleToolbar from "./ClientScheduleToolbar";
 
 const localizer = momentLocalizer(moment);
@@ -36,17 +37,10 @@ const ClientScheduleCalender = ({ ...rest }) => {
             today.getFullYear(), 
             today.getMonth(), 
             today.getDate(), 
-            7
+            0
           )
         }
-        max={
-          new Date(
-            today.getFullYear(), 
-            today.getMonth(), 
-            today.getDate(), 
-            20
-          )
-        }
+     
         components={{
           toolbar: (e) => <ClientScheduleToolbar {...e} />,
         }}

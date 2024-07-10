@@ -113,6 +113,13 @@ export const getClientEmployeeSchedule = async (employee_id, refetch = false) =>
     },
   });
 
+  export const getEmployeeAvailablities = async (employee_id, refetch = false) =>
+    api.get(`api/availabilities?employee_id=${employee_id}`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+
 export const getClientEmployeeAvailability = async (
   employee_id,
   refetch = false
@@ -130,7 +137,7 @@ export const getLocations = async (refetch = false) =>
     },
   });
 
-export const getEmployeeLocations = async (
+export const getLocationsWithoutEmployee = async (
   employee_id,
   refetch = false
 ) =>
@@ -139,6 +146,16 @@ export const getEmployeeLocations = async (
       ignoreCache: refetch,
     },
   });
+
+  export const getEmployeeLocations = async (
+    employee_id,
+    refetch = false
+  ) =>
+    api.get(`/api/locations?employee_id=${employee_id}`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
 
 export const getClientLocations = async (refetch = false) =>
   api.get("/api/client/locations", {

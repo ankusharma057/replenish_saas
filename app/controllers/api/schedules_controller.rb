@@ -46,7 +46,7 @@ class Api::SchedulesController < ApplicationController
   
   private
   def schedule_param
-    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id)
+    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id)
   end
 
   def set_client

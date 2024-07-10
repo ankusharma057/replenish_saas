@@ -32,7 +32,7 @@ const ScheduleCalender = ({ ...rest }) => {
           today.getFullYear(),
           today.getMonth(),
           today.getDate(),
-          5
+          0
         )
       }
 

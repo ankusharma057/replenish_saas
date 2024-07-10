@@ -13,6 +13,7 @@ import {
   getAllLocationAndEmployee,
   getClientEmployee,
   getClientEmployeeAvailability,
+  getEmployeeAvailablities,
   getClientEmployeeSchedule,
   getLocationEmployee,
   getProductsList,
@@ -182,7 +183,6 @@ const ClientLocation = () => {
       end_date: formattedEndDate,
     });
   };
-
   const getEmpSchedule = async (emp, refetch = false) => {
     try {
       if (empId) {
@@ -194,11 +194,26 @@ const ClientLocation = () => {
           end_time: new Date(d.end_time),
           treatment: d?.treatment?.treatment || "",
         }));
-        const unavailibilityData = await getClientEmployeeAvailability(
-          empId,
-          true
+
+        const availibilityData = await getEmployeeAvailablities(
+          empId,true
         );
-        const unavailabilityDataNew = unavailibilityData.data.map((d) => ({
+
+        const unavailibilityData = await getClientEmployeeAvailability(
+          empId,true
+        );
+ 
+        const availabilityTimings = availibilityData.data.map(d => {
+          return d.availability_timings.map(obj => ({
+            start_time: new Date(d.availability_date + " " + obj.start_time),
+            end_time: new Date(d.availability_date + " " + obj.end_time),
+            available: true
+          }));
+        });
+
+        const availabilityDataNew = availabilityTimings.flatMap(obj=>obj)
+
+        const unavailabilityDataNew = unavailibilityData.data.map((d) => ({ 
           start_time: new Date(d.start_time),
           end_time: new Date(d.end_time),
           available: d.available,
@@ -225,7 +240,7 @@ const ClientLocation = () => {
           (item) => !item.every_week && !item.available
         );
         const arr = newData.concat(newAvailData);
-        const arr1 = arr.concat(unavailabilityNewData);
+        const arr1 = arr.concat(unavailabilityNewData,availabilityDataNew);
         console.log(arr1, "aar1");
         setSelectedEmpSchedules(arr1);
       }
@@ -249,7 +264,7 @@ const ClientLocation = () => {
   const isEmp = !((!!empId && !selectedEmployee) || !empId);
 
   const handleAddAppointmentSelect = (e) => {
-    console.log("handleAddAppointmentSelect", e);
+    // console.log("handleAddAppointmentSelect", e);
     if (e?.client?.id && e?.client?.id === authUserState.client?.id) {
       toast("This slot is already booked by you.");
       return;
@@ -266,10 +281,12 @@ const ClientLocation = () => {
       return toast("Please select the treatment");
     }
 
-    const start = e.start;
-    const end = e.end;
-
+    const start = e.start_time;
+    const end = e.end_time;
     const duration = selectedTreatMent?.treatment?.duration;
+
+   const a =  getTimeSlots(duration, start, selectedEmpSchedules, end, e.available? false : true)
+
     let formateData = {
       show: true,
       start_time: start,
@@ -278,8 +295,10 @@ const ClientLocation = () => {
         : moment(start).add(+duration, "minutes").toDate(),
       date: moment(start).format("DD/MM/YYYY"),
       isEdit: true,
-      timeSlots: getTimeSlots(duration, start, selectedEmpSchedules),
+      timeSlots: a,
     };
+   console.log("formateData",formateData);
+
     localStorage.setItem("formateData", JSON.stringify(formateData));
     formateData.timeSlots = formateData.timeSlots.filter((slot) => {
       let slotTime = moment(slot.start);
@@ -293,10 +312,17 @@ const ClientLocation = () => {
           (slotEndTime.hour() === 20 && slotEndTime.minute() === 0)
         );
       } else {
-        return false;
+        return true;
       }
     });
-    setAppointmentModal(formateData);
+    if(e.available){
+      console.log("")
+      setAppointmentModal({...formateData, isEdit:true });
+    }
+    else{
+      setAppointmentModal(formateData);
+    }
+
   };
 
   const addAppointMentSubmit = async (e) => {
@@ -445,11 +471,10 @@ const ClientLocation = () => {
                 <ClientScheduleCalender
                   onSelectEvent={(e) => handleAddAppointmentSelect(e)}
                   events={selectedEmpSchedules || []}
-                  onSelectSlot={handleAddAppointmentSelect}
+                  // onSelectSlot={handleAddAppointmentSelect}
                   onRangeChange={onCalenderRangeChange}
                   eventPropGetter={(event) => {
-                    const backgroundColor =
-                      "available" in event && !event.available && "#d3d3d3";
+                    const backgroundColor = ( "available" in event && event.available ) ? "#EAF6FF" :"#000";                      
                     return { style: { backgroundColor } };
                   }}
                 />
@@ -519,8 +544,8 @@ const ClientLocation = () => {
         title={
           appointmentModal?.isEdit
             ? // ? `Click on "Add new" to create new appointment on same time`
-            `Your appointment`
-            : "New  Appointment"
+            "New  Appointment"
+            : `Your appointment`
         }
         footer={
           <div className="space-x-2">
@@ -539,6 +564,7 @@ const ClientLocation = () => {
           </div>
         }
       >
+        {/* subhash */}
         <form
           id="appointmentForm"
           onSubmit={addAppointMentSubmit}

@@ -12,13 +12,16 @@ import {
   fetchAvailability,
   getAvailability,
   getClients,
+  getLocationsWithoutEmployee,
   getEmployeesList,
   getLocationEmployee,
   getLocations,
   getSchedule,
+  getTreatmentList,
   markAvailability,
   remainingBalancePaidToEmployee,
   updateAvailability,
+  getEmployeeLocations,
 } from "../Server";
 import * as dates from "react-big-calendar/lib/utils/dates";
 
@@ -81,10 +84,12 @@ function Schedule() {
     ...initialAvailabilityModal,
   });
   const [selectedAvailability, setSelectedAvailability] = useState();
+  const [selectedEmployeeLocations, setSelectedEmployeeLocations] = useState();
 
   const [employeeScheduleEventsData, setEmployeeScheduleEventsData] = useState(
     {}
   );
+
   const [clientNameOptions, setClientNameOptions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState();
   const [calenderCurrentRange, setCalenderCurrentRange] = useState({
@@ -120,6 +125,9 @@ function Schedule() {
         },
         refetch
       );
+
+      console.log("data",data);
+
       const newData = data.map((d) => ({
         ...d,
         start_time: new Date(d.start_time),
@@ -236,18 +244,32 @@ function Schedule() {
   const handleSelectEmployee = async (emp) => {
     if (emp) {
       getClientName(emp.id);
-      const treatmentOption = (emp.employees_inventories || []).map((inv) => {
+      const { data } = await getTreatmentList(false, emp.id);
+      
+      const treatmentOption = (data || []).map((inv) => {
         return {
-          label: inv.product.name,
-          value: inv.product.id,
+          label: inv.name,
+          value: inv.id,
           product_type: inv.product.product_type,
           quantity: inv.quantity,
-          duration: inv.product.duration,
+          duration: inv.duration,
         };
       });
       setSelectedEmployeeData({ ...emp, treatmentOption });
+      getAllLocationsByEmployee(emp.id)
     }
   };
+  const getAllLocationsByEmployee = async (id) =>{
+    const {data} = await getEmployeeLocations(id)
+    const locationOption = (data || []).map((inv) => {
+      return {
+        label: inv.name,
+        value: inv.id,
+      };
+    });
+    setSelectedEmployeeLocations(locationOption);
+  }
+
   const filteredEmployeeList = employeeList?.filter((employee) =>
     employee?.name?.toLowerCase()?.includes(employeeSearch?.toLowerCase())
   );
@@ -281,6 +303,7 @@ function Schedule() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleAddAppointmentSelect = ({ start, end, ...rest }, readOnly) => {
+    console.log("rest",rest);
     let formateData = {
       show: true,
       start_time: start,
@@ -296,16 +319,27 @@ function Schedule() {
       };
     }
     console.log(formateData, "formateData");
-    if (rest?.available === false) {
+    if (!rest.hasOwnProperty("available")) {
       setRemoveAvailabilityData(formateData);
-      setRemoveAvailabilityModal(true);
+      setAppointmentModal(formateData);
+      console.log("hi");
+      // setRemoveAvailabilityModal(true);
     }
     // formateData.timeSlots =
     // moment(formateData?.timeSlots[1]?.start).format("hh:mm A") === "08:00 PM"
     //   ? formateData.timeSlots.slice(0, 1)
     //   : formateData.timeSlots;
-    if (rest?.available !== false) {
-      setRemoveAvailabilityModal(false);
+
+    if (rest.hasOwnProperty("available")) {
+      formateData = {
+        ...formateData,
+        ...rest,
+        readOnly: false,
+      };
+
+      console.log("hello");
+      // setRemoveAvailabilityModal(false);
+       console.log("restasdasd",formateData)
       setAppointmentModal(formateData);
     }
   };
@@ -357,6 +391,8 @@ function Schedule() {
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
     delete copyAppointMent.selectedTimeSlot;
+    console.log("copyAppointMent",copyAppointMent)
+
     const { data } = await createSchedule(copyAppointMent);
     let newCopyAppointMent = {
       ...copyAppointMent,
@@ -395,10 +431,13 @@ function Schedule() {
       formattedStartDate = moment(date[0]).format("MM/DD/YYYY");
       formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
     }
+
+    console.log("date---->", date)
     setCalenderCurrentRange({
       start_date: formattedStartDate,
       end_date: formattedEndDate,
     });
+    
     getEmployeeSchedule({
       id: selectedEmployeeData.id,
       start_date: formattedStartDate,
@@ -649,12 +688,13 @@ function Schedule() {
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
               onSelectEvent={(event) => {
                 handleAddAppointmentSelect(event, true);
+        
               }}
-              onSelectSlot={handleAddAppointmentSelect}
+              // onSelectSlot={handleAddAppointmentSelect}
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
                 const backgroundColor =
-                  "available" in event && event.available && "#299db9";
+                  "available" in event && event.available ? "#EAF6FF" : "#299db9";
                 return { style: { backgroundColor } };
               }}
             />
@@ -735,7 +775,9 @@ function Schedule() {
                         var timeSlots = getTimeSlots(
                           selectedOption?.duration,
                           appointmentModal.start_time,
-                          employeeScheduleEventsData[selectedEmployeeData.id]
+                          employeeScheduleEventsData[selectedEmployeeData.id],
+                          appointmentModal.end_time,
+                          appointmentModal.readOnly
                         );
                         timeSlots = timeSlots?.filter((slot) => {
                           let slotTime = moment(slot.start);
@@ -766,6 +808,7 @@ function Schedule() {
                       placeholder="Select a Treatment"
                       required
                     />
+                   
                   </>
                 )}
               </div>
@@ -807,6 +850,41 @@ function Schedule() {
                   options={clientNameOptions}
                   required
                   placeholder="Select a client"
+                />
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {appointmentModal?.readOnly ? (
+              <div>
+                <span>Location</span>
+                <br></br>
+                <span>
+                  {/* {(clientNameOptions || []).find(
+                    (op) => op?.value === appointmentModal?.client_id
+                  )?.label || ""} */}
+                  {appointmentModal?.client?.name ||
+                    appointmentModal?.client_name ||
+                    ""}
+                </span>
+              </div>
+            ) : (
+              <>
+                <label htmlFor="location">Location</label>
+                <Select
+                  isClearable
+                  isCreatable
+                  inputId="location"
+                  onChange={(selectedOption) =>
+                    setAppointmentModal((pre) => ({
+                      ...pre,
+                      location_id: selectedOption?.value,
+                    }))
+                  }
+                  options={selectedEmployeeLocations}
+                  required
+                  placeholder="Select a location"
                 />
               </>
             )}
