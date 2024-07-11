@@ -126,6 +126,7 @@ function Schedule() {
           employee_id: emp.id,
           start_date: emp.start_date,
           end_date: emp.end_date,
+          location_id: emp?.location_id || selectedLocation?.id
         },
         refetch
       );
@@ -140,10 +141,7 @@ function Schedule() {
         treatment_id: d?.treatment?.id || "",
         treatmentObj: d?.treatment,
       }));
-      let location_id = {}
-      if (selectedLocation) {
-        location_id = { location_id: selectedLocation.id }
-      }
+
       const currentDate = new Date();
 
       // Set the date to the 1st day of the current month
@@ -154,8 +152,9 @@ function Schedule() {
       const availabilityPayload = {
         employee_id: emp.id,
         from_date: firstDayOfMonth,
-        ...location_id
+        location_id: emp?.location_id || selectedLocation?.id
       };
+      console.log("availabilityPayload", availabilityPayload)
       const resp = await fetchAvailability(availabilityPayload, refetch);
 
       function convertToDate(dateString, timeString) {
@@ -232,6 +231,10 @@ function Schedule() {
     const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
 
     if (data?.length > 0) {
+      setSelectedLocation(previousState => {
+        return { ...previousState, ...data[0] }
+      });
+
       setServiceLocation(
         data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
       );
@@ -242,8 +245,8 @@ function Schedule() {
       getEmployees();
       getAllLocation();
     } else {
-      handleSelectEmployee(authUserState.user);
       getAllLocation();
+      handleSelectEmployee(authUserState.user);
     }
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -368,6 +371,7 @@ function Schedule() {
       id: selectedEmployeeData.id,
       start_date: calenderCurrentRange.start_date,
       end_date: calenderCurrentRange.end_date,
+      location_id: selectedLocation?.id
     });
     setRemoveAvailabilityModal(false);
     toast.success("Availability removed successfully.");
@@ -409,6 +413,7 @@ function Schedule() {
       id: selectedEmployeeData.id,
       start_date: calenderCurrentRange.start_date,
       end_date: calenderCurrentRange.end_date,
+      location_id: selectedLocation?.id
     });
     // setEmployeeScheduleEventsData((pre) => {
     //   const prevData = pre[selectedEmployeeData.id] || [];
@@ -450,11 +455,15 @@ function Schedule() {
       id: selectedEmployeeData.id,
       start_date: formattedStartDate,
       end_date: formattedEndDate,
+      location_id: selectedLocation?.id
     });
   };
 
   const onLocationChange = async (selectedOption) => {
-    setSelectedLocation(selectedOption);
+    setSelectedLocation(previousState => {
+      return { ...previousState, ...selectedOption }
+    });
+
     if (authUserState.user.is_admin) {
       const { data } = await getLocationEmployee(selectedOption?.id);
       if (data?.length > 0) {
@@ -471,6 +480,7 @@ function Schedule() {
         id: authUserState?.user?.id,
         start_date: calenderCurrentRange.start_date,
         end_date: calenderCurrentRange.end_date,
+        location_id: selectedOption?.id
       });
     }
 
@@ -588,6 +598,7 @@ function Schedule() {
           id: selectedEmployeeData.id,
           start_date: calenderCurrentRange.start_date,
           end_date: calenderCurrentRange.end_date,
+          location_id: selectedLocation?.id
         },
         true
       );
@@ -1026,6 +1037,7 @@ function Schedule() {
                       id: selectedEmployeeData.id,
                       start_date: calenderCurrentRange.start_date,
                       end_date: calenderCurrentRange.end_date,
+                      location_id: selectedLocation?.id
                     },
                     true
                   );
