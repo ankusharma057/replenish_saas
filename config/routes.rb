@@ -21,6 +21,8 @@ mount Sidekiq::Web => '/sidekiq'
 
       resources :employees, only: %i(index show)
 
+      resources :intake_forms
+
       resources :schedules, only: %i(index create show destroy) do
         post :remaining_pay, on: :member
         post :reminder, on: :member
@@ -90,6 +92,9 @@ mount Sidekiq::Web => '/sidekiq'
     end
 
     resources :availabilities, only: [:index, :create, :show, :edit, :update, :destroy]
+
+    resources :intake_forms
+    resources :response_intake_forms
 
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
 

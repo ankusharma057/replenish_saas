@@ -3,6 +3,9 @@ class Treatment < ApplicationRecord
   has_many :schedules, dependent: :destroy
   belongs_to :employee, class_name: 'Employee', foreign_key: :created_by
 
+  has_many :treatment_intake_forms, dependent: :destroy
+  has_many :intake_forms, through: :treatment_intake_forms
+
   validates :name, :duration, :product_id, :created_by, presence: true
   validates :cost, presence: true, numericality: { greater_than: 0 }
   validates :quantity, presence: true, numericality: { greater_than: 0 }

@@ -17,6 +17,7 @@ class Employee < ApplicationRecord
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
   has_many :unavailabilities, dependent: :destroy
   has_many :treatments, foreign_key: :created_by, dependent: :destroy
+  has_many :intake_forms, dependent: :destroy
 
   has_many :employee_mentors, foreign_key: :employee_id, class_name: 'EmployeeMentor', dependent: :destroy
   has_many :mentors, through: :employee_mentors, source: :mentor

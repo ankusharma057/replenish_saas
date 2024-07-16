@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_09_091800) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_15_121003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -128,6 +128,21 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_09_091800) do
     t.index ["role_id"], name: "index_employees_roles_on_role_id"
   end
 
+  create_table "intake_forms", force: :cascade do |t|
+    t.string "name"
+    t.integer "prompt_type"
+    t.date "effective_date"
+    t.string "valid_for"
+    t.text "introduction"
+    t.jsonb "form_data"
+    t.integer "appointment_type"
+    t.bigint "employee_id", null: false
+    t.boolean "deleted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_intake_forms_on_employee_id"
+  end
+
   create_table "inventories", force: :cascade do |t|
     t.integer "product_id"
     t.float "quantity"
@@ -219,6 +234,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_09_091800) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "response_intake_forms", force: :cascade do |t|
+    t.integer "intake_form_id", null: false
+    t.integer "client_id", null: false
+    t.jsonb "response_form_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string "name"
     t.string "resource_type"
@@ -249,6 +272,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_09_091800) do
     t.index ["employee_id"], name: "index_schedules_on_employee_id"
     t.index ["product_id"], name: "index_schedules_on_product_id"
     t.index ["treatment_id"], name: "index_schedules_on_treatment_id"
+  end
+
+  create_table "treatment_intake_forms", force: :cascade do |t|
+    t.bigint "treatment_id", null: false
+    t.bigint "intake_form_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["intake_form_id"], name: "index_treatment_intake_forms_on_intake_form_id"
+    t.index ["treatment_id"], name: "index_treatment_intake_forms_on_treatment_id"
   end
 
   create_table "treatments", force: :cascade do |t|
@@ -283,9 +315,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_09_091800) do
   add_foreign_key "employee_clients", "employees"
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
+  add_foreign_key "intake_forms", "employees"
   add_foreign_key "schedules", "clients"
   add_foreign_key "schedules", "employees"
   add_foreign_key "schedules", "products"
   add_foreign_key "schedules", "treatments"
+  add_foreign_key "treatment_intake_forms", "intake_forms"
+  add_foreign_key "treatment_intake_forms", "treatments"
   add_foreign_key "unavailabilities", "employees"
 end
