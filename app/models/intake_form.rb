@@ -9,9 +9,10 @@ class IntakeForm < ApplicationRecord
 
 
   validates :name, presence: { message: "Name can't be blank"  }, uniqueness: { message: "Form name already exists" }
+  validates :effective_date, presence: { message: "Effective date can't be blank"  }
   validates :prompt_type, presence: { message: "Prompt type can't be blank"  }
   validates :valid_for, presence: { message: "Valid for can't be blank"  }
-  validates :introduction, presence: { message: "Introduction can't be blank"  }
+  validates :form_data, presence: { message: "Form data can't be blank"  }
 
   enum prompt_type: { automatic: 0, manual: 1 }
 

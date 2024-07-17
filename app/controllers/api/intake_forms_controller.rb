@@ -13,7 +13,7 @@ class Api::IntakeFormsController < ApplicationController
       associate_employees_and_treatments
       render json: @intake_form, status: :created
     else
-      render json: @intake_form.errors, status: :unprocessable_entity
+      render json: {error: @intake_form.errors }, status: :unprocessable_entity
     end
   end
 
@@ -22,7 +22,7 @@ class Api::IntakeFormsController < ApplicationController
       update_associations
       render json: @intake_form
     else
-      render json: @intake_form.errors, status: :unprocessable_entity
+      render json: {error: @intake_form.errors }, status: :unprocessable_entity
     end
   end
 
@@ -30,7 +30,7 @@ class Api::IntakeFormsController < ApplicationController
     if @intake_form.destroy
       render json: @intake_form
     else
-      render json: @intake_form.errors, status: :unprocessable_entity
+      render json: {error: @intake_form.errors }, status: :unprocessable_entity
     end
   end
 
