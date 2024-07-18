@@ -45,206 +45,206 @@ const Specific_treatments = ["Specific_treatments1", "Specific_treatments2", "Sp
 const profile_fields = [
   {
     input_name: "First Name",
-    name:"first-name",
+    name: "first-name",
     include_in_intake: true,
     input_type: "text",
     required: true,
-    
+
   },
   {
     input_name: "Last Name",
-    name:"last-name",
+    name: "last-name",
     include_in_intake: true,
     input_type: "text",
     required: true,
-    
+
   },
   {
     input_name: "Email",
-    name:"email",
+    name: "email",
     include_in_intake: true,
     input_type: "Email",
     required: true,
-    
+
   },
   {
     input_name: "Preferred Name (if dirrerent)",
-    name:"preferred-name",
+    name: "preferred-name",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    discription:"<div style='font-size:14px;'><em> Help Text Displayed:</em>  This is the name you identity with, Providing this allows the staff to address you appropriatly </div>"
-    
+    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em>  This is the name you identity with, Providing this allows the staff to address you appropriatly </div>"
+
   },
   {
     input_name: "Prefix/Title",
-    name:"prefix-title",
+    name: "prefix-title",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Pronouns",
-    name:"pronouns",
+    name: "pronouns",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Home Phone",
-    name:"home-phone",
+    name: "home-phone",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "Mobile Phone",
-    name:"mobile-phone",
+    name: "mobile-phone",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    discription:"<div style='font-size:14px;'><em> Help Text Displayed:</em> A mobile phone is required if you would like to receive SMS appropriatly reminders </div>"
-    
+    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em> A mobile phone is required if you would like to receive SMS appropriatly reminders </div>"
+
   },
   {
     input_name: "Work Phone",
-    name:"work-phone",
+    name: "work-phone",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "Fax Phone",
-    name:"fax-phone",
+    name: "fax-phone",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "Address",
-    name:"address",
+    name: "address",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Date of Birth",
-    name:"dob",
+    name: "dob",
     include_in_intake: false,
     input_type: "date",
     required: false,
-    
+
   },
   {
     input_name: "Gender",
-    name:"gender",
+    name: "gender",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    discription:"<div style='font-size:14px;'><em> Help Text Displayed:</em>  Refers to current gender which may be different then what is indicated on your insurance policies or medical record  </div>"
+    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em>  Refers to current gender which may be different then what is indicated on your insurance policies or medical record  </div>"
   },
   {
     input_name: "Sex",
-    name:"sex",
+    name: "sex",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    discription:"<div style='font-size:14px;'><em> Help Text Displayed:</em> This field may be used for submitting claims to your insurance provider. Please ensure the sex you provide here mathches what your insurance provider has one file or what is indicated on your midical record</div>"
-    
+    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em> This field may be used for submitting claims to your insurance provider. Please ensure the sex you provide here mathches what your insurance provider has one file or what is indicated on your midical record</div>"
+
   },
   {
     input_name: "Personal Health Number",
-    name:"personal-health-number",
+    name: "personal-health-number",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "Guardian",
-    name:"guardian",
+    name: "guardian",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Emergency Contact",
-    name:"emergency-contact",
+    name: "emergency-contact",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "Family Doctor",
-    name:"family-doctor",
+    name: "family-doctor",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Name of referring Professional",
-    name:"referring-professional",
+    name: "referring-professional",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Occupation",
-    name:"occupation",
+    name: "occupation",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Employer",
-    name:"employer",
+    name: "employer",
     include_in_intake: false,
     input_type: "number",
     required: false,
-    
+
   },
   {
     input_name: "How did you hear about us?",
-    name:"long1",
+    name: "long1",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Who were you referred to?",
-    name:"long2",
+    name: "long2",
     include_in_intake: false,
     input_type: "text",
     required: false,
-    
+
   },
   {
     input_name: "Yes, I would like to receive news and special promotions by email",
-    name:"long3",
+    name: "long3",
     include_in_intake: false,
     input_type: "text",
     required: false,
   }
 ];
 
-const automaticOrManual=[
-  { value: 'automatic', label: 'Automatically propmt patients who have not co' },
+const automaticOrManual = [
+  { value: 'automatic', label: 'Automatic' },
   { value: 'manual', label: 'Manual' },
 ]
 
-const valiadte=[
+const valiadte = [
   { value: 'forever', label: 'Forever' },
   { value: '3 Month', label: '3-Month' },
   { value: '1 Month', label: '1-Month' },
@@ -256,16 +256,16 @@ const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
   const [selectedTab, setSelectedTab] = useState(0);
   const [intakeFormData, setIntakeFormData] = useState({
-      form_data: {step1: profile_fields},
-      employee_id: authUserState?.user?.id,
-      prompt_type: "automatic",
-      valid_for: "1 Month"
+    form_data: { step1: profile_fields },
+    employee_id: authUserState?.user?.id,
+    prompt_type: "automatic",
+    valid_for: "1 Month"
   })
   const [intakeFormDatas, setIntakeFormDatas] = useState()
   const [intakeFormError, setIntakeFormError] = useState()
   const [editedId, setEditedId] = useState()
 
-console.log("intakeFormDatassss",intakeFormData);
+  console.log("intakeFormDatassss", intakeFormData);
 
   const [profileFields, setProfileFields] = useState(profile_fields);
 
@@ -274,7 +274,7 @@ console.log("intakeFormDatassss",intakeFormData);
   const handleOnChange = (fieldName, index, value) => {
     const copyProfileFields = [...intakeFormData?.form_data?.step1];
     copyProfileFields[index][fieldName] = value;
-    setIntakeFormData((prev)=>({...prev,...["form_data"]["step1"]=copyProfileFields}));
+    setIntakeFormData((prev) => ({ ...prev, ...["form_data"]["step1"] = copyProfileFields }));
   };
 
   const [consents, setConsents] = useState([
@@ -321,7 +321,7 @@ console.log("intakeFormDatassss",intakeFormData);
   };
 
 
-  
+
   const submitData = async (e) => {
     e.preventDefault()
     try {
@@ -339,16 +339,16 @@ console.log("intakeFormDatassss",intakeFormData);
   const upadteData = async (e) => {
     e.preventDefault()
     try {
-      const response = await updateIntakeForm(intakeFormData.id,intakeFormData);
+      const response = await updateIntakeForm(intakeFormData.id, intakeFormData);
       if (response.status === 200) {
         toast.success("Intake form successfully updated");
         setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
-        console.log("response",response);
+        console.log("response", response);
         setIntakeFormData(response?.data)
       }
     } catch (error) {
       toast.error("Something Went Wrong ");
-       setIntakeFormError(error?.response?.data?.error)
+      setIntakeFormError(error?.response?.data?.error)
     }
   };
 
@@ -363,7 +363,6 @@ console.log("intakeFormDatassss",intakeFormData);
     try {
       const response = await getIntakeForm(editedId);
       if (response.status === 200) {
-        console.log(response.data);
         setIntakeFormData(response.data);
       } else {
         // Handle other response statuses if needed
@@ -372,23 +371,23 @@ console.log("intakeFormDatassss",intakeFormData);
       // Handle errors if the request fails
     }
   };
-  
+
   useEffect(() => {
     if (editedId) {
       console.log("bkohgbkiodfkihbi");
       editData();
     }
   }, [editedId]);
-  
 
 
 
-  
+
+
   return (
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab == 2 ? "h-[90rem]" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
-          {editedId ? <h2>Update Intake Form</h2> :<h2>New Intake Form</h2>}
+          {editedId ? <h2>Update Intake Form</h2> : <h2>New Intake Form</h2>}
           <Link className="no-underline" to={"/intake-forms"}><div className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div></Link>
         </div>
         <div className=" ">
@@ -400,7 +399,7 @@ console.log("intakeFormDatassss",intakeFormData);
               </div>
             </div>
             {/* Tab contents */}
-            <form onSubmit={(e)=>{(editedId) ? upadteData(e) : submitData(e)}} className=" py-2   m-0">
+            <form onSubmit={(e) => { (editedId) ? upadteData(e) : submitData(e) }} className=" py-2   m-0">
               <div className="h-full ">
                 {selectedTab === 0 && <div className="">
                   <div className="h-[50px] flex items-center">
@@ -419,7 +418,7 @@ console.log("intakeFormDatassss",intakeFormData);
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px] ">
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
-                            <input className="focus:outline-none w-full" type="text" value={intakeFormData.name} required onChange={(e) => {setIntakeFormData((prev)=>({...prev,["name"]:e.target.value}))}} />
+                            <input className="focus:outline-none w-full" type="text" value={intakeFormData.name} required onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["name"]: e.target.value })) }} />
                           </div>
                           <div className="text-red-400 text-sm">
                             {intakeFormError?.name}
@@ -439,13 +438,16 @@ console.log("intakeFormDatassss",intakeFormData);
                           {/* <DropDown options={automaticOrManual} onChange={(value) => {setIntakeFormData((prev)=>({...prev,["prompt_type"]:value}))}} default_value={"automatic"} /> */}
                           <Select
                             inputId="availableEmployee"
-                            value={setIntakeFormDatas.name}
+                            value={automaticOrManual.find(option => option.value === intakeFormData.prompt_type)}
                             isClearable
                             onChange={(e) => {
-                              setIntakeFormData((prev)=>({...prev,["prompt_type"]:e?.value}))
+                              setIntakeFormData((prev) => ({ ...prev, ["prompt_type"]: e?.value }))
                             }}
+
                             options={automaticOrManual}
-                            placeholder={"Automatically propmt patients who have not co"}
+                            // placeholder={"Automatic"}
+                            defaultValue={"Automatic"}
+                            // value={"Automatic"}
                             required
                           />
                           <div className="text-red-400 text-sm">
@@ -464,7 +466,7 @@ console.log("intakeFormDatassss",intakeFormData);
                         </div>
                         <label className="w-1/4 flex flex-col gap-[1px]" htmlFor="date" >
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
-                            <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => {setIntakeFormData((prev)=>({...prev,["effective_date"]:e.target.value}))}} />
+                            <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["effective_date"]: e.target.value })) }} />
                           </div>
                           <div className="text-red-400 text-sm">
                             {intakeFormError?.effective_date}
@@ -486,10 +488,10 @@ console.log("intakeFormDatassss",intakeFormData);
                             inputId="availableEmployee"
                             isClearable
                             onChange={(e) => {
-                              setIntakeFormData((prev)=>({...prev,["valid_for"]:e?.value}))
+                              setIntakeFormData((prev) => ({ ...prev, ["valid_for"]: e?.value }))
                             }}
                             options={valiadte}
-                            placeholder={"Forever"}
+                            value={valiadte.find(option => option.value === intakeFormData.valid_for)}
                             required
                           />
                           <div className="text-red-400 text-sm">
@@ -507,7 +509,7 @@ console.log("intakeFormDatassss",intakeFormData);
                         </div>
                         <div className="w-1/4 ">
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full" >
-                            <textarea value={intakeFormData.introduction} onChange={(e) => {setIntakeFormData((prev)=>({...prev,["introduction"]:e.target.value}))}} className="w-full focus:outline-none h-full" />
+                            <textarea value={intakeFormData.introduction} onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["introduction"]: e.target.value })) }} className="w-full focus:outline-none h-full" />
                           </div>
                         </div>
                       </div>
@@ -593,7 +595,7 @@ console.log("intakeFormDatassss",intakeFormData);
                           <div key={index} className={`grid grid-cols-[75%,25%] `}>
                             <div>
                               <div>{field.input_name}</div>
-                              <div dangerouslySetInnerHTML={{ __html: field?.discription}}></div>
+                              <div dangerouslySetInnerHTML={{ __html: field?.discription }}></div>
                             </div>
                             <div className="inline-grid grid-cols-[60%,40%] justify-center">
                               <div className="flex items-center justify-center">
