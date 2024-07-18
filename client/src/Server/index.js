@@ -42,6 +42,20 @@ export const getClients = async (employee_id, refetch) =>
     },
   });
 
+  export const getIntakeForms = async ( refetch) =>
+  api.get("/api/intake_forms", {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
+
+  export const getIntakeForm = async (id, refetch) =>
+    api.get(`/api/intake_forms/${id}`, {
+      cache: {
+        ignoreCache: refetch,
+      }
+    });
+
 export const getInventoryList = async (refetch) =>
   api.get("/api/inventories", {
     cache: {
@@ -293,6 +307,11 @@ export const createSchedule = async (data) => api.post(`/api/schedules`, data);
 export const createClientSchedule = async (data) =>
   api.post(`/api/client/schedules`, data);
 
+export const createIntakeForm = async (data) =>
+  api.post(`/api/intake_forms`, {
+    intake_form: data,
+  });
+
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);
 
@@ -409,3 +428,4 @@ export const updateTreatment = async (id, data) =>
 
 export const deleteTreatment = async (id) =>
   api.delete(`/api/treatments/${id}`);
+

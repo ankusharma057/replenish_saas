@@ -9,6 +9,7 @@ import { getClientProfile, getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
+import { IntakeFormPreview } from "./pages/IntakeFormPreview";
 
 const ConfirmPayment = lazy(() =>
   import("./pages/Clients/payment/ConfirmPayment")
@@ -44,6 +45,8 @@ const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const Employee = lazy(() => import("./pages/Employee"));
 const Products = lazy(() => import("./pages/Products"));
 const Treatment = lazy(() => import("./pages/Treatment"));
+const IntakeForm = lazy(() => import("./pages/IntakeForm"));
+const NewIntakeForm = lazy(() => import("./pages/NewIntakeForm"));
 
 function App() {
   const navigate = useNavigate();
@@ -138,12 +141,14 @@ function App() {
   ]);
 
   return (
-    <div className="overflow-x-hidden h-screen">
+    <div className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"h-screen"} `}>
       <Suspense fallback={<SuspenseLoading />}>
         {authUserState.client ? (
           <ClientHeader />
         ) : authUserState.user ? (
-          <Header />
+          (window.location.pathname != "/intake-form-preview/"
+            &&
+          <Header />)
         ) : null}
 
         <Routes>
@@ -154,6 +159,7 @@ function App() {
           <Route path="/customers" element={<AllClientRoot />} />
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
+          <Route path="/intake-form-preview/:id?" element={<IntakeFormPreview />} />
           <Route
             path="/clients/payment/success"
             element={<ClientPaymentSuccess />}
@@ -199,6 +205,8 @@ function App() {
                     <Route path="/treatments" element={<Treatment />} />
                     <Route path="/employees" element={<Employee />} />
                     <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/intake-forms" element={<IntakeForm />} />
+                    <Route path="/new-intake-form" element={<NewIntakeForm />} />
                   </>
                 )}
 
@@ -209,6 +217,8 @@ function App() {
                   <Route path="/invoicelist" element={<Invoice />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
+                  <Route path="/intake-forms" element={<IntakeForm />} />
+                  <Route path="/new-intake-forms" element={<NewIntakeForm />} />
                   {/* <Route path="/signup" element={<Signup />} /> */}
                   <Route path="/myprofile" element={<MyProfile />} />
                 </>
@@ -219,6 +229,8 @@ function App() {
                   <Route path="/products" element={<Products />} />
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
+                  <Route path="/intake-forms" element={<IntakeForm />} />
+
                 </>
               )}
             </>

@@ -80,7 +80,6 @@ const ClientLocation = () => {
       });
     }
     return () => { };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -360,7 +359,7 @@ const ClientLocation = () => {
       }else{
         stateObject.redirect_url = `/clients/appointments`;
       }
-      navigate(`/clients/payment/confirm_payment?empId=${empId}`, {
+      navigate(`/clients/payment/confirm_payment?empId=${empId}&&treatment=${selectedTreatMent?.treatment?.id}`, {
         state: stateObject,
       });
     }
@@ -420,7 +419,7 @@ const ClientLocation = () => {
                           <li
                             key={treatment?.id}
                             onClick={(e) => {
-                              e.preventDefault(); // Prevent any default behavior
+                              e.preventDefault();
                               setSelectedTreatMent({
                                 product: treatmentObj?.product,
                                 treatment,
@@ -564,7 +563,7 @@ const ClientLocation = () => {
           </div>
         }
       >
-        {/* subhash */}
+
         <form
           id="appointmentForm"
           onSubmit={addAppointMentSubmit}

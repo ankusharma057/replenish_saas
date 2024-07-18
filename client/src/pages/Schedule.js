@@ -79,6 +79,8 @@ function Schedule() {
     initialAppointmentModal
   );
 
+  console.log(allEmployeeList,"allEmployeeList");
+
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );

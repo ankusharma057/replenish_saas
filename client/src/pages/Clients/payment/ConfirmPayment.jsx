@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuthContext } from "../../../context/AuthUserContext";
 import ClientLayout from "../../../components/Layouts/ClientLayout";
@@ -13,6 +13,9 @@ const ConfirmPayment = () => {
   const { authUserState } = useAuthContext();
   const { state } = useLocation();
   const [paymentState, setPaymentState] = useState("");
+
+
+  console.log("authUserState", authUserState);
 
   useEffect(() => {
     if (!state?.redirect_url) {
@@ -91,6 +94,10 @@ const ConfirmPayment = () => {
     }
   };
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const myParam = urlParams.get('treatment');
+
+
   return (
     <ClientLayout>
       <Form className="flex bg-white flex-col gap-2 p-6 rounded-lg">
@@ -139,14 +146,16 @@ const ConfirmPayment = () => {
             <h2 className="text-xl">Cancellation Policy</h2>
             <div className="flex justify-between">
               <p>Please fill out our online intake form</p>
-              <Button
-                disabled
-                variant="outline-dark"
-                className="!cursor-not-allowed"
-                size="sm"
-              >
-                Fill out intake form
-              </Button>
+              <Link className="text-black" to={`/intake-form-preview/?treatment=${myParam}`}>
+                <Button
+                  disabled={!myParam}
+                  variant="outline-dark"
+                  className="!cursor-not-allowed"
+                  size="sm"
+                >
+                  Fill out intake form
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -11,7 +11,6 @@ export default memo(function Header() {
   const [isMenuShow, setisMenuShow] = useState(true);
   const navigate = useNavigate();
   const { authUserState, authUserDispatch } = useAuthContext();
-  console.log("authUserState", authUserState.user?.is_inv_manager);
 
   const location = useLocation();
   const handleLogout = async () => {
@@ -107,6 +106,17 @@ export default memo(function Header() {
                   >
                     Staff
                   </a>
+                </button>
+                <button
+                    onClick={handleMenuSHow}
+                    className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-forms") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                  >
+                    <a
+                      className={`no-underline text-white py-[1rem] inline-block `}
+                      href="/intake-forms"
+                    >
+                      Intake Forms
+                    </a>
                 </button>
 
                 <button

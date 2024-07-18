@@ -202,3 +202,31 @@ input[type="number"] {
   font-size: small;
   margin-top: 2px;
 }
+
+.tabs{
+  padding: 9px 15px;
+}
+
+.selected-tab{
+  border: 2px solid #E5E7EB;
+  box-sizing: border-box;
+  border-bottom-color: #fff;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  background-color: #fff;
+}
+
+.required-checkbox[type=checkbox]{
+accent-color: black !important;
+}
+
+.non-required-checkbox[type=checkbox]{
+  accent-color: #3a95f0 !important;
+  }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+}
