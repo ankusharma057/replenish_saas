@@ -5,7 +5,8 @@ import { toast } from "react-toastify";
 import { useAuthContext } from "../../../context/AuthUserContext";
 import ClientLayout from "../../../components/Layouts/ClientLayout";
 import { useLocation } from "react-router-dom";
-import { getClientEmployee, reminder } from "../../../Server";
+import { getClientEmployee, getIntakeFormsWithTreatment, reminder } from "../../../Server";
+import { IoClose } from "react-icons/io5";
 
 const ConfirmPayment = () => {
   const navigate = useNavigate();
@@ -13,9 +14,10 @@ const ConfirmPayment = () => {
   const { authUserState } = useAuthContext();
   const { state } = useLocation();
   const [paymentState, setPaymentState] = useState("");
+  const [intakeForms, setIntakeForms] = useState();
 
 
-  console.log("authUserState", authUserState);
+  console.log("authUserState", intakeForms);
 
   useEffect(() => {
     if (!state?.redirect_url) {
@@ -27,6 +29,20 @@ const ConfirmPayment = () => {
       toast.error("Please login first.");
       return;
     }
+
+    const getIntakeForms = async() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const treatmentId = urlParams.get('treatment');
+      try{
+        const response = await getIntakeFormsWithTreatment(20);
+        console.log("response",response);
+        if(response.status === 200){
+          setIntakeForms(response.data)
+        }
+      }
+      catch(err){}
+    }
+    getIntakeForms()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,8 +110,7 @@ const ConfirmPayment = () => {
     }
   };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const myParam = urlParams.get('treatment');
+
 
 
   return (
@@ -144,9 +159,9 @@ const ConfirmPayment = () => {
           </div>
           <div className="flex flex-col flex-1 gap-2">
             <h2 className="text-xl">Cancellation Policy</h2>
-            <div className="flex justify-between">
+            <div className="flex flex-col justify-between">
               <p>Please fill out our online intake form</p>
-              <Link className="text-black" to={`/intake-form-preview/?treatment=${myParam}`}>
+              {/* <Link className="text-black" to={`/clients/intake-form/?treatment_id=${myParam}`}>
                 <Button
                   disabled={!myParam}
                   variant="outline-dark"
@@ -155,7 +170,23 @@ const ConfirmPayment = () => {
                 >
                   Fill out intake form
                 </Button>
-              </Link>
+              </Link> */}
+              <div className="border w-[50%] rounded-md p-2 px-3">
+                <div className="flex flex-col gap-1">
+                  {Array.isArray(intakeForms) && intakeForms.length > 0 ? intakeForms.map((form, i) => (
+                    <div key={i} className="grid grid-cols-[1fr,auto] items-center">
+                      <div>{form?.name}</div>
+                      <div>
+                        <Link className="no-underline" target="_blank" to={`/clients/intake-form/?id=${form?.id}`}>
+                          <div className={`cursor-pointer text-white px-2 rounded-md py-[3px] ${form?.submitted ? "bg-green-400" : "bg-red-400"}`}>
+                            Fill out intake form
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  )):'No Intake Forms Are Available'}
+                </div>
+              </div>
             </div>
           </div>
         </div>

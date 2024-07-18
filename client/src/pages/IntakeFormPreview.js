@@ -22,8 +22,9 @@ export const IntakeFormPreview = () => {
     fetchData();
   }, []);
 
-  <Link className="no-underline" to={"/intake-forms"}><div className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div></Link>
+const createIntakeForm = () => {
 
+}
 
   return (
     <div className={`bg-gray-100 min-h-screen`}>
@@ -37,7 +38,7 @@ export const IntakeFormPreview = () => {
               <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has </div>
               <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
             </div>
-            <form className="w-full " onSubmit={() => { alert("form submited sucessfully") }}>
+            <form className="w-full " onSubmit={() => { alert("form submited sucessfully");createIntakeForm() }}>
               <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
                 {Array.isArray(intakeForm?.form_data?.step1) && intakeForm?.form_data?.step1.map((field, index) => (
                   <div key={index} className={` flex flex-wrap   ${field.include_in_intake ? "block" : "hidden"}`}>
@@ -51,11 +52,11 @@ export const IntakeFormPreview = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="flex items-center justify-center py-3 ">
+              <div className="flex items-center justify-center py-3 ">
                 <button type="submit" className="bg-[#22d3ee] text-white px-5 h-[35px] rounded-md">
                   Submit
                 </button>
-              </div> */}
+              </div>
             </form>
           </div>
           <div className='w-[50rem] mx-auto bg-white gap-2 rounded-xl'>

@@ -237,6 +237,14 @@ export const getEmployeeServiceLocation = async (
     },
   });
 };
+
+export const getIntakeFormsWithTreatment = async (id, refetch = false) =>
+  api.get(`/api/client/intake_forms?treatment_id=${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const loginUser = async (data) => api.post("/api/login", data);
 export const signupClient = async (data) =>
   api.post("/api/client/sign_up", data);

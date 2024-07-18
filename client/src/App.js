@@ -121,6 +121,9 @@ function App() {
     // if (!authUserState.client && isClientSignInOrSignUp) {
     //   navigate("/clients/signin");
     // } else
+
+    console.log("authUserState",location.pathname);
+    console.log("authUsedvdvdvdrState",authUserState.client,isNotClient );
     if (authUserState.client && isNotClient) {
       navigate("/clients");
     } else if (
@@ -159,7 +162,7 @@ function App() {
           <Route path="/customers" element={<AllClientRoot />} />
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
-          <Route path="/intake-form-preview/:id?" element={<IntakeFormPreview />} />
+          <Route path="/clients/intake-form/:id?" element={<IntakeFormPreview />} />
           <Route
             path="/clients/payment/success"
             element={<ClientPaymentSuccess />}
