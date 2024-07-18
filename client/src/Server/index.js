@@ -312,6 +312,11 @@ export const createIntakeForm = async (data) =>
     intake_form: data,
   });
 
+  export const updateIntakeForm = async (id,data) =>
+    api.patch(`/api/intake_forms/${id}`, {
+      intake_form: data,
+    });
+
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);
 

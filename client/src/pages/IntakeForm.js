@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
 import { Button, Form } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaArrowsAltV } from "react-icons/fa";
 import { getIntakeForms } from "../Server";
 
@@ -10,6 +10,10 @@ import { getIntakeForms } from "../Server";
 const IntakeForm = () => {
   const { authUserState } = useAuthContext();
   const[intakeForms,setIntakeForms]=useState()
+  const[editIntakeForm,setEditIntakeForm]=useState()
+  const navigate = useNavigate();
+
+  console.log(editIntakeForm);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +42,12 @@ const IntakeForm = () => {
         </div>
         <div className=" h-[calc(100%-100px)] overflow-y-auto  ">
           <div className="  h-full ">
-            <div className="h-[90px] ">Form details</div>
+            <div className="h-[90px] ">
+            <div className='flex flex-col items-center text-[14px] gap-1 py-3'>
+              <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has Lorem Ipsum is simply dummy </div>
+              <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy</div>
+            </div>
+            </div>
             <div className="h-[calc(100%-90px)] flex flex-col gap-2 border p-3 rounded-lg">
               {Array.isArray(intakeForms) && intakeForms.map((form, i) => (
                 <div key={i} className="grid grid-cols-[auto,1fr,230px] gap-4  p-[10px] border-b  ">
@@ -56,7 +65,7 @@ const IntakeForm = () => {
                   <div className="self-start grid grid-cols-[1fr,1fr,50px] gap-1 pt-1 text-[15px]">
                     <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Duplicate</button></Link>
                     <Link className="text-black" to={`/intake-form-preview/?id=${form.id}`}><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Preview</button></Link>
-                    <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md">Edit</button>
+                    <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?intake-form-id=${form.id}`)}}>Edit</button>
                   </div>
                 </div>
               ))}

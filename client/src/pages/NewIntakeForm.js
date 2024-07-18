@@ -3,7 +3,7 @@ import { useAuthContext } from "../context/AuthUserContext";
 import { Link, Navigate } from "react-router-dom";
 import { DropDown } from "../components/DropDown/DropDown";
 import IntakeForm from "./IntakeForm";
-import { createIntakeForm, getIntakeForms } from "../Server";
+import { createIntakeForm, getIntakeForm, getIntakeForms, updateIntakeForm } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
 
@@ -137,7 +137,7 @@ const profile_fields = [
     input_name: "Date of Birth",
     name:"dob",
     include_in_intake: false,
-    input_type: "text",
+    input_type: "date",
     required: false,
     
   },
@@ -261,9 +261,15 @@ const NewIntakeForm = () => {
       prompt_type: "automatic",
       valid_for: "1 Month"
   })
+  const [intakeFormDatas, setIntakeFormDatas] = useState()
+  const [intakeFormError, setIntakeFormError] = useState()
+  const [editedId, setEditedId] = useState()
+
+console.log("intakeFormDatassss",intakeFormData);
+
   const [profileFields, setProfileFields] = useState(profile_fields);
 
-  console.log("intakeFormData",intakeFormData);
+  // console.log("intakeFormData",intakeFormData);
 
   const handleOnChange = (fieldName, index, value) => {
     const copyProfileFields = [...intakeFormData?.form_data?.step1];
@@ -323,33 +329,70 @@ const NewIntakeForm = () => {
       if (response.status === 201) {
         toast.success("Intake form successfully created");
         setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
-        setIntakeFormData({
-          form_data: {step1: profile_fields},
-          employee_id: authUserState?.user?.id,
-          prompt_type: "automatic",
-          valid_for: "1 Month"
-      })
       }
     } catch (error) {
-      if (error?.response?.data?.exception) {
-        toast.error(error.response.data.error["exception"]);
-      } else {
-        Object.keys(error?.response?.data?.error).map((key) => {
-          toast.error(error.response.data.error[key][0]);
-        });
+      toast.error("Something Went Wrong ");
+      setIntakeFormError(error?.response?.data?.error)
+    }
+  };
+
+  const upadteData = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await updateIntakeForm(intakeFormData.id,intakeFormData);
+      if (response.status === 200) {
+        toast.success("Intake form successfully updated");
+        setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
+        console.log("response",response);
+        setIntakeFormData(response?.data)
       }
+    } catch (error) {
+      toast.error("Something Went Wrong ");
+       setIntakeFormError(error?.response?.data?.error)
+    }
+  };
+
+
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setEditedId(urlParams.get('intake-form-id'))
+  }, [])
+
+  const editData = async () => {
+    try {
+      const response = await getIntakeForm(editedId);
+      if (response.status === 200) {
+        console.log(response.data);
+        setIntakeFormData(response.data);
+      } else {
+        // Handle other response statuses if needed
+      }
+    } catch (err) {
+      // Handle errors if the request fails
     }
   };
   
+  useEffect(() => {
+    if (editedId) {
+      console.log("bkohgbkiodfkihbi");
+      editData();
+    }
+  }, [editedId]);
+  
+
+
+
+  
   return (
-    <div className={`bg-gray-200  p-3 px-4 ${selectedTab == 2 ? "h-[90rem]" : "h-[calc(100%-72px)]" }`}>
-      <div className="w-[82rem] mx-auto h-full bg-white rounded-md px-16 py-1">
+    <div className={`bg-gray-200   p-3 px-4 ${selectedTab == 2 ? "h-[90rem]" : ""}`}>
+      <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
-          <h2>New Intake Form</h2>
+          {editedId ? <h2>Update Intake Form</h2> :<h2>New Intake Form</h2>}
           <Link className="no-underline" to={"/intake-forms"}><div className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div></Link>
         </div>
-        <div className=" h-[calc(100%-100px)]">
-          <div className="h-full  pb-0 ">
+        <div className=" ">
+          <div className="h-full  pb-0">
             {/* Tabs */}
             <div className="h-[55px] flex items-end border-b-[2px] relative ">
               <div className="flex w-full absolute bottom-[-2px]">
@@ -357,15 +400,15 @@ const NewIntakeForm = () => {
               </div>
             </div>
             {/* Tab contents */}
-            <form onSubmit={(e)=>{submitData(e)}} className="h-[calc(100%-55px)] py-2  m-0">
+            <form onSubmit={(e)=>{(editedId) ? upadteData(e) : submitData(e)}} className=" py-2   m-0">
               <div className="h-full ">
-                {selectedTab === 0 && <div className="h-full">
+                {selectedTab === 0 && <div className="">
                   <div className="h-[50px] flex items-center">
                     <div>
                       <h3 className="m-0">General</h3>
                     </div>
                   </div>
-                  <div className=" h-[calc(100%-50px)] overflow-y-auto ">
+                  <div className="  ">
                     <div className="h-[65%] flex flex-col justify-between">
                       {/* input 1 */}
                       <div className="flex ">
@@ -374,9 +417,12 @@ const NewIntakeForm = () => {
                             Name -<em> Requied *</em>
                           </label>
                         </div>
-                        <div className="w-1/4">
+                        <div className="w-1/4 flex flex-col gap-[1px] ">
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
                             <input className="focus:outline-none w-full" type="text" value={intakeFormData.name} required onChange={(e) => {setIntakeFormData((prev)=>({...prev,["name"]:e.target.value}))}} />
+                          </div>
+                          <div className="text-red-400 text-sm">
+                            {intakeFormError?.name}
                           </div>
                         </div>
                       </div>
@@ -389,10 +435,11 @@ const NewIntakeForm = () => {
                             <div><em>Choose if client will be automaticaly prompted to complete this take form.</em></div>
                           </label>
                         </div>
-                        <div className="w-1/4">
+                        <div className="w-1/4 flex flex-col gap-[1px]">
                           {/* <DropDown options={automaticOrManual} onChange={(value) => {setIntakeFormData((prev)=>({...prev,["prompt_type"]:value}))}} default_value={"automatic"} /> */}
                           <Select
                             inputId="availableEmployee"
+                            value={setIntakeFormDatas.name}
                             isClearable
                             onChange={(e) => {
                               setIntakeFormData((prev)=>({...prev,["prompt_type"]:e?.value}))
@@ -401,6 +448,9 @@ const NewIntakeForm = () => {
                             placeholder={"Automatically propmt patients who have not co"}
                             required
                           />
+                          <div className="text-red-400 text-sm">
+                            {intakeFormError?.prompt_type}
+                          </div>
                         </div>
                       </div>
                       <hr />
@@ -412,9 +462,12 @@ const NewIntakeForm = () => {
                             <div><em>Reqiure clientes to fill out this intake form for their first booking after this date. even if they <br /> have previously filled out an intake form. Leave blank to not require this intake form for <br /> clients that have already visited </em></div>
                           </div>
                         </div>
-                        <label className="w-1/4" htmlFor="date" >
+                        <label className="w-1/4 flex flex-col gap-[1px]" htmlFor="date" >
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
                             <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => {setIntakeFormData((prev)=>({...prev,["effective_date"]:e.target.value}))}} />
+                          </div>
+                          <div className="text-red-400 text-sm">
+                            {intakeFormError?.effective_date}
                           </div>
                         </label>
                       </div>
@@ -427,7 +480,7 @@ const NewIntakeForm = () => {
                             <div><em>client should complete this intake from again after this period </em></div>
                           </label>
                         </div>
-                        <div className="w-1/4">
+                        <div className="w-1/4 flex flex-col gap-[1px]">
                           {/* <DropDown options={valiadte} onChange={(value) => {setIntakeFormData((prev)=>({...prev,["valid_for"]:value}))}} default_value={"forever"} /> */}
                           <Select
                             inputId="availableEmployee"
@@ -439,6 +492,9 @@ const NewIntakeForm = () => {
                             placeholder={"Forever"}
                             required
                           />
+                          <div className="text-red-400 text-sm">
+                            {intakeFormError?.valid_for}
+                          </div>
                         </div>
                       </div>
                       <hr />
@@ -446,7 +502,7 @@ const NewIntakeForm = () => {
                       <div className="flex ">
                         <div className="w-3/4 text-[18px]">
                           <label>
-                            introduction
+                            Introduction
                           </label>
                         </div>
                         <div className="w-1/4 ">
@@ -456,13 +512,13 @@ const NewIntakeForm = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="h-[35%] grid grid-rows-[17%,64%,19%]">
+                    <div className="">
                       <div>Introduction preview:</div>
                       <div className="flex flex-col gap-[10px]">
-                        <div className="h-1/2 flex items-center text-gray-500 border-[2px] px-3">{intakeFormData?.introduction}</div>
-                        <div className="h-1/2 flex items-center bg-slate-200 px-3 text-[18px] text-[#49c1c7]">View Formating instructions</div>
+                        <div className="h-[60px] flex items-center text-gray-500 border-[2px] px-3">{intakeFormData?.introduction}</div>
+                        <div className="h-[60px] flex items-center bg-slate-200 px-3 text-[18px] text-[#49c1c7]">View Formating instructions</div>
                       </div>
-                      <div className="flex items-center justify-end py-1">
+                      <div className=" flex items-center justify-end py-1">
                         <button className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" onClick={() => { setSelectedTab(2) }}>
                           Next
                         </button>
@@ -518,7 +574,7 @@ const NewIntakeForm = () => {
                       <h3 className="m-0">Profile Fields</h3>
                     </div>
                   </div>
-                  <div className=" h-[calc(100%-50px)] py-2 ">
+                  <div className="  py-2 ">
                     <div className="h-full  pr-2">
                       <div className="h-[70px] sticky top-0 bg-white z-20 grid grid-rows-[auto,1fr]">
                         <h6 className="">Select the fields you would like the Client to fill out in this intake form: </h6>
@@ -532,8 +588,8 @@ const NewIntakeForm = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-3  h-[calc(100%-70px)]  ">
-                        {intakeFormData?.form_data.step1.map((field, index) => (
+                      <div className="flex flex-col gap-3    ">
+                        {(Array.isArray(intakeFormData?.form_data?.step1) && intakeFormData?.form_data?.step1).map((field, index) => (
                           <div key={index} className={`grid grid-cols-[75%,25%] `}>
                             <div>
                               <div>{field.input_name}</div>
@@ -563,7 +619,7 @@ const NewIntakeForm = () => {
                         ))}
                         <div className="flex items-center justify-end py-1 px-10 gap-2">
                           <button type="submit" className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" >
-                          Submit
+                            {editedId ? "Update" : "Submit"}
                           </button>
                         </div>
                       </div>
