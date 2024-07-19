@@ -10,6 +10,8 @@ class Treatment < ApplicationRecord
   validates :cost, presence: true, numericality: { greater_than: 0 }
   validates :quantity, presence: true, numericality: { greater_than: 0 }
 
+  accepts_nested_attributes_for :treatment_intake_forms, allow_destroy: true
+
   scope :base_treatments, -> {
     joins(employee: :roles)
       .where(roles: { name: 'admin' })

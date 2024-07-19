@@ -63,6 +63,13 @@ export const getInventoryList = async (refetch) =>
     },
   });
 
+  export const getTreatmentIntakeForms = async (treatment_id, refetch) =>
+    api.get(`/api/intake_forms?treatment_id=${treatment_id}`, {
+      cache: {
+        ignoreCache: refetch,
+      }
+    });
+
 export const getInvoiceList = async (refetch) =>
   api.get("/api/invoices", {
     cache: {

@@ -40,7 +40,7 @@ class Api::TreatmentsController < ApplicationController
   private
 
   def treatment_params
-    params.permit(:duration, :product_id, :name, :description, :cost, :quantity, :created_by)
+    params.permit(:duration, :product_id, :name, :description, :cost, :quantity, :created_by, treatment_intake_forms_attributes: [:id, :treatment_id, :intake_form_id, :_destroy])
   end
 
   def treatment_created_by

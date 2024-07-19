@@ -3,7 +3,7 @@ class Api::IntakeFormsController < ApplicationController
   before_action :set_intake_form, only: %i[update destroy show]
 
   def index
-    @intake_forms = IntakeForm.by_appointment_type(params[:employee_id])
+    @intake_forms = IntakeForm.treatment_intake_forms(params)
     render json: @intake_forms
   end
 

@@ -4,6 +4,7 @@ import {
   deleteTreatment,
   getBaseTreatmentList,
   getProductsList,
+  getTreatmentIntakeForms,
   getTreatmentList,
   updateTreatment,
   getEmployeesList
@@ -27,11 +28,14 @@ import { ChevronDown } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import Select from "react-select";
+import { RxCross2 } from "react-icons/rx";
 
 const Treatment = () => {
   const { collapse } = useAsideLayoutContext();
   const { authUserState } = useAuthContext();
   const [productList, setProductList] = useState([]);
+  const [intakeForm, setIntakeForm] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [treatmentList, setTreatmentList] = useState([]);
   const [currentTab, setCurrentTab] = useState("my-treatments");
@@ -40,8 +44,7 @@ const Treatment = () => {
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(authUserState.user);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [errorForm, setErrorsForm] = useState([]);
-
-
+  const [loading, setLoading] = useState(false);
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -68,7 +71,10 @@ const Treatment = () => {
     desc: "",
     cost: "",
     quantity: "",
+    treatment_intake_forms_attributes: [],
   });
+
+  const [existingForms, setExistingForms] = useState([]);
 
   const [radioTabs] = useState([
     {
@@ -97,6 +103,16 @@ const Treatment = () => {
       console.log(error);
     }
   };
+
+  const getIntakeForm = async (treatmentId, refetch = false) => {
+    try {
+      const { data } = await getTreatmentIntakeForms(treatmentId, refetch);
+        setIntakeForm(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getTreatment = async (refetch = false, emp = {}) => {
     try {
       let empId;
@@ -154,6 +170,7 @@ const Treatment = () => {
         cost: Number(treatmentForm.cost),
         quantity: Number(treatmentForm.quantity),
         created_by: selectedEmployeeData.id,
+        treatment_intake_forms_attributes: [...treatmentForm.treatment_intake_forms_attributes],
       };
 
       const response = await createTreatment(payload);
@@ -169,6 +186,7 @@ const Treatment = () => {
             cost: "",
             desc: "",
             quantity: "",
+            treatment_intake_forms_attributes: [],
           });
           setErrorsForm({});
 
@@ -191,7 +209,15 @@ const Treatment = () => {
       cost: treatment.cost,
       desc: treatment.description,
       quantity: treatment.quantity,
+      treatment_intake_forms_attributes: [],
     });
+    const existingFormsData = treatment.treatment_intake_forms.map((form) => ({
+      ...form,
+      intake_form: intakeForm.find((f) => f.id === form.intake_form_id) || form.intake_form, // Ensure full data structure
+    }));
+
+    setExistingForms(existingFormsData);
+
     setErrorsForm({});
     setShowCreateTreatmentModal(true);
   };
@@ -205,10 +231,20 @@ const Treatment = () => {
       cost: treatment.cost,
       desc: treatment.description,
       quantity: treatment.quantity,
+      treatment_intake_forms_attributes: [], // Reset new intake forms
     });
+
+    const existingFormsData = treatment.treatment_intake_forms.map((form) => ({
+      ...form,
+      intake_form: intakeForm.find((f) => f.id === form.intake_form_id) || form.intake_form, // Ensure full data structure
+    }));
+
+    setExistingForms(existingFormsData);
+
     setErrorsForm({});
     setShowUpdateTreatmentModal(true);
   };
+
   const onDelete = (treatment) => {
     confirmAlert({
       title: "Confirm to submit",
@@ -267,6 +303,10 @@ const Treatment = () => {
       accessorKey: "quantity",
     },
     {
+      header: "Intake Forms",
+      accessorKey: "treatment_intake_forms_attributes",
+    },
+    {
       header: "Actions",
       accessorKey: "actions",
       cell: ({ row }) => (
@@ -275,7 +315,7 @@ const Treatment = () => {
             <div className="flex justify-center space-x-2">
               <Button
                 variant="info"
-                onClick={() => onTreatmentUpdate(row.original)}
+                onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id);}}
               >
                 Update
               </Button>
@@ -289,7 +329,7 @@ const Treatment = () => {
               {currentTab === "base-treatments" ? (
                 <Button
                   variant="info"
-                  onClick={() => onTreatmentDuplicateUpdate(row.original)}
+                  onClick={() =>{ onTreatmentDuplicateUpdate(row.original); getIntakeForm(row.original?.id);}}
                 >
                   Duplicate
                 </Button>
@@ -297,7 +337,7 @@ const Treatment = () => {
                 <>
                   <Button
                     variant="info"
-                    onClick={() => onTreatmentUpdate(row.original)}
+                    onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id);}}
                   >
                     Update
                   </Button>
@@ -366,13 +406,61 @@ const Treatment = () => {
     );
   };
 
-
   useEffect(() => {
     getProducts();
+    getIntakeForm("", true);
     if (currentTab === "base-treatments") getBaseTreatments();
     else getTreatment();
   }, [currentTab]);
 
+  const removeIntakeForm = async (intakeFormDetails) => {
+    confirmAlert({
+      title: "Remove Intake Form",
+      message: `Are you sure you want to remove ${String(intakeFormDetails.intake_form.name)} from your list?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const deleteIntakeForms = {
+                treatment_intake_forms_attributes: [
+                  { id: intakeFormDetails.id, _destroy: 1 },
+                ],
+              };
+              const { data } = await updateTreatment(treatmentForm?.id, deleteIntakeForms);
+              toast.success("Intake Form removed successfully.");
+              await getEmployees(true);
+
+              setTreatmentForm((pre) => ({
+                ...pre,
+                treatment_intake_forms_attributes: pre.treatment_intake_forms_attributes.filter(
+                  (form) => form.id !== intakeFormDetails.id
+                ),
+              }));
+              setExistingForms((pre) => pre.filter((form) => form.id !== intakeFormDetails.id));
+
+              setSelectedEmployeeData(data);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                error?.response?.statusText ||
+                error.message ||
+                "Failed to remove Intake Form."
+              );
+            } finally {
+              setLoading(false);
+            };
+            getIntakeForm(treatmentForm?.id);
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
   return (
     <>
@@ -459,9 +547,11 @@ const Treatment = () => {
                 <div>
                   <Button
                     onClick={() => {
-                      console.log("Click");
                       setShowCreateTreatmentModal(true);
                       setErrorsForm({});
+                      setExistingForms([]);
+                      getIntakeForm("", true);
+
                     }}
                     className="truncate rounded-full !text-sm md:!text-base"
                   >
@@ -486,12 +576,13 @@ const Treatment = () => {
                     desc: "",
                     cost: "",
                     quantity: "",
+                    treatment_intake_forms_attributes: [],
                   });
                   setErrorsForm({});
                 }}
                 footer={
                   <div className="flex gap-2">
-                    {showUpdateTreatmentModal && (
+                    {showUpdateTreatmentModal  && (
                       <Button
                         onClick={async () => {
                           try {
@@ -502,6 +593,7 @@ const Treatment = () => {
                               description: treatmentForm.desc,
                               cost: Number(treatmentForm.cost),
                               quantity: Number(treatmentForm.quantity),
+                              treatment_intake_forms_attributes: [...treatmentForm.treatment_intake_forms_attributes],
                             };
 
                             const updateResponse = await updateTreatment(treatmentForm.id, payload);
@@ -517,6 +609,7 @@ const Treatment = () => {
                                   cost: "",
                                   desc: "",
                                   quantity: "",
+                                  treatment_intake_forms_attributes: [],
                                 });
                                 setErrorsForm({});
 
@@ -650,6 +743,68 @@ const Treatment = () => {
                       {errorForm.quantity && errorForm.quantity[0]}
                     </span>
                   </Form.Group>
+
+                  <Form.Group controlId="formIntakeForm">
+                    <Form.Label>Intake Forms</Form.Label>
+                    <div className="flex flex-1 relative mt-2">
+                      <Select
+                        className="flex-fill flex-grow-1"
+                        inputId="product_type"
+                        isMulti
+                        onChange={(event) => {
+                          const transformedLocations = event.map(({ id }) => {
+                            const selectedForm = intakeForm.find((form) => form.id === id);
+                            return {
+                              intake_form_id: id,
+                              treatment_id: treatmentForm.id,
+                              intake_form: selectedForm, // Ensure intake_form is included
+                            };
+                          });
+
+                          setTreatmentForm((pre) => ({
+                            ...pre,
+                            treatment_intake_forms_attributes: transformedLocations,
+                          }));
+                        }}
+                        options={intakeForm.map((intakeForm) => ({
+                          value: intakeForm.id,
+                          label: intakeForm.name,
+                          id: intakeForm.id
+                        }))}
+                        required
+                        placeholder="Select Intake Forms"
+                      />
+                    </div>
+                    {/* {showUpdateTreatmentModal && showCreateTreatmentModal && ( */}
+                      <table className="w-full mt-2 text-sm text-left rtl:text-right text-gray-500 ">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+                          <tr>
+                            <th scope="col" className="px-6 py-3">
+                              Intake Form
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-center">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...existingForms, ...treatmentForm.treatment_intake_forms_attributes].map(
+                            (val, index) => (
+                              <React.Fragment key={index}>
+                                <EmployeeLocationTableRows
+                                  removeIntakeForm={removeIntakeForm}
+                                  val={val}
+                                />
+                              </React.Fragment>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    {/* )} */}
+                    <span className="text-red-400 text-sm">
+                      {errorForm.treatment_intake_forms_attributes && errorForm.treatment_intake_forms_attributes[0]}
+                    </span>
+                  </Form.Group>
                 </Form>
               </ModalWraper>
             </div>
@@ -724,8 +879,33 @@ const Treatment = () => {
           </div>
         </div>
       </AsideLayout>
-
     </>
+  );
+};
+
+const EmployeeLocationTableRows = ({ val, removeIntakeForm }) => {
+  return (
+    <tr className="odd:bg-white even:bg-gray-50 border-b ">
+      <th
+        scope="row"
+        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap capitalize "
+      >
+        {val.intake_form?.name}
+      </th>
+      <td className="px-6 py-4 w-14">
+        <div className="flex justify-center">
+        {!val.intake_form_id && (
+          <button
+            type="button"
+            onClick={() => removeIntakeForm(val)}
+            className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+          >
+            <RxCross2 className="w-6 h-6" />
+          </button>
+        )}
+        </div>
+      </td>
+    </tr>
   );
 };
 
