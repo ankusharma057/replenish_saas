@@ -60,6 +60,7 @@ const Treatment = () => {
 
   useEffect(() => {
     getEmployees();
+    setSelectedEmployeeData();
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -440,7 +441,7 @@ const Treatment = () => {
               }));
               setExistingForms((pre) => pre.filter((form) => form.id !== intakeFormDetails.id));
 
-              setSelectedEmployeeData(data);
+              setSelectedEmployeeData(selectedEmployeeData);
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||

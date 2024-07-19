@@ -30,22 +30,33 @@ class IntakeForm < ApplicationRecord
       intake_forms = IntakeForm.joins(:treatments).includes(:response_intake_forms).where(treatments: { id: params[:treatment_id] })
 
       intake_forms.each do |intake_form|
-        if intake_form.response_intake_forms.blank?
-          intake_form.submitted = false
-        else
-          intake_form.response_intake_forms.where(client_id: current_client.id).each do |response|
-            if valid_response?(intake_form, response)
-              intake_form.submitted = true
-            else
-              intake_form.submitted = false
-            end
-          end
-        end
+        self.get_submitted_intake_forms(intake_form, current_client)
       end
-
       intake_forms
     else
       all
+    end
+  end
+
+  def self.client_intake_form(intake_form, current_client)
+    if intake_form.present?
+      intake_form = IntakeForm.find(intake_form.id)
+      self.get_submitted_intake_forms(intake_form, current_client)
+      intake_form
+    end
+  end
+
+  def self.get_submitted_intake_forms(intake_form, current_client)
+    if intake_form.response_intake_forms.blank?
+      intake_form.submitted = false
+    else
+      intake_form.response_intake_forms.where(client_id: current_client.id).each do |response|
+        if self.valid_response?(intake_form, response)
+          intake_form.submitted = true
+        else
+          intake_form.submitted = false
+        end
+      end
     end
   end
 
