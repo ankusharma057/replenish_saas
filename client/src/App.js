@@ -9,7 +9,6 @@ import { getClientProfile, getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
-import { IntakeFormPreview } from "./pages/IntakeFormPreview";
 
 const ConfirmPayment = lazy(() =>
   import("./pages/Clients/payment/ConfirmPayment")
@@ -47,6 +46,10 @@ const Products = lazy(() => import("./pages/Products"));
 const Treatment = lazy(() => import("./pages/Treatment"));
 const IntakeForm = lazy(() => import("./pages/IntakeForm"));
 const NewIntakeForm = lazy(() => import("./pages/NewIntakeForm"));
+const IntakeFormPreview = lazy(() => import("./pages/IntakeFormPreview"));
+
+// import { IntakeFormPreview } from "./pages/IntakeFormPreview";
+
 
 function App() {
   const navigate = useNavigate();
@@ -122,8 +125,6 @@ function App() {
     //   navigate("/clients/signin");
     // } else
 
-    console.log("authUserState",location.pathname);
-    console.log("authUsedvdvdvdrState",authUserState.client,isNotClient );
     if (authUserState.client && isNotClient) {
       navigate("/clients");
     } else if (
@@ -163,6 +164,7 @@ function App() {
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
           <Route path="/clients/intake-form/:id?" element={<IntakeFormPreview />} />
+          <Route path="/intake-form-preview/:id?" element={<IntakeFormPreview />} />
           <Route
             path="/clients/payment/success"
             element={<ClientPaymentSuccess />}

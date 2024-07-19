@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
 import { Button, Form } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { FaArrowsAltV } from "react-icons/fa";
 import { getIntakeForms } from "../Server";
 
 
@@ -19,7 +18,7 @@ const IntakeForm = () => {
     const fetchData = async () => {
       try {
         const response = await getIntakeForms();
-        if (response.status == 200) {
+        if (response.status === 200) {
           setIntakeForms(response.data)
         }
       } catch (error) {
@@ -30,7 +29,7 @@ const IntakeForm = () => {
   }, []);
 
   return (
-    <div className="h-[calc(100%-72px)] bg-gray-200 py-3">
+    <div className="min-h-[calc(100vh-72px)] bg-gray-200 py-3">
       <div className={`  h-full w-[82rem] mx-auto p-[2rem] rounded-md bg-white`}>
         <div className="h-[100px] flex items-center w-full border-[1px] rounded-lg px-3">
           <div className="flex justify-between w-full">
@@ -64,7 +63,7 @@ const IntakeForm = () => {
                   </div>
                   <div className="self-start grid grid-cols-[1fr,1fr,50px] gap-1 pt-1 text-[15px]">
                     <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Duplicate</button></Link>
-                    <Link  target="_blank" className="text-black" to={`/clients/intake-form/?id=${form?.id}`}><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Preview</button></Link>
+                    <Link  target="_blank" className="text-black" to={`/intake-form-preview/?id=${form?.id}`}><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Preview</button></Link>
                     <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?intake-form-id=${form.id}`)}}>Edit</button>
                   </div>
                 </div>

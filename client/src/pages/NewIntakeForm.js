@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
-import { Link, Navigate } from "react-router-dom";
-import { DropDown } from "../components/DropDown/DropDown";
-import IntakeForm from "./IntakeForm";
-import { createIntakeForm, getIntakeForm, getIntakeForms, updateIntakeForm } from "../Server";
+import { Link } from "react-router-dom";
+import { createIntakeForm, getIntakeForm, updateIntakeForm } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
 
@@ -155,7 +153,7 @@ const profile_fields = [
     include_in_intake: false,
     input_type: "text",
     required: false,
-    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em> This field may be used for submitting claims to your insurance provider. Please ensure the sex you provide here mathches what your insurance provider has one file or what is indicated on your midical record</div>"
+    discription: "<div style='font-size:14px;'><em> Help Text Displayed:</em> This field may be used for submitting claims to your insurance provider. Please ensure the sex you provide here matches what your insurance provider has one file or what is indicated on your midical record</div>"
 
   },
   {
@@ -216,7 +214,7 @@ const profile_fields = [
   },
   {
     input_name: "How did you hear about us?",
-    name: "long1",
+    name: "how did you hear about us?",
     include_in_intake: false,
     input_type: "text",
     required: false,
@@ -224,7 +222,7 @@ const profile_fields = [
   },
   {
     input_name: "Who were you referred to?",
-    name: "long2",
+    name: "who were you referred to?",
     include_in_intake: false,
     input_type: "text",
     required: false,
@@ -232,7 +230,7 @@ const profile_fields = [
   },
   {
     input_name: "Yes, I would like to receive news and special promotions by email",
-    name: "long3",
+    name: "yes, I would like to receive news and special promotions by email",
     include_in_intake: false,
     input_type: "text",
     required: false,
@@ -246,9 +244,31 @@ const automaticOrManual = [
 
 const valiadte = [
   { value: 'forever', label: 'Forever' },
-  { value: '3 Month', label: '3-Month' },
-  { value: '1 Month', label: '1-Month' },
-  { value: '1 Year', label: '1-Year' },
+  { value: '3 days', label: '3 days' },
+  { value: '1 week', label: '1 week' },
+  { value: '2 weeks', label: '2 weeks' },
+  { value: '3 weeks', label: '3 weeks' },
+  { value: '1 month', label: '1 month' },
+  { value: '2 months', label: '2 months' },
+  { value: '3 months', label: '3 months' },
+  { value: '4 months', label: '4 months' },
+  { value: '5 months', label: '5 months' },
+  { value: '6 months', label: '6 months' },
+  { value: '7 months', label: '7 months' },
+  { value: '8 months', label: '8 months' },
+  { value: '9 months', label: '9 months' },
+  { value: '10 months', label: '10 months' },
+  { value: '11 months', label: '11 months' },
+  { value: '1 year', label: '1 year' },
+  { value: '2 years', label: '2 years' },
+  { value: '3 years', label: '3 years' },
+  { value: '4 years', label: '4 years' },
+  { value: '5 years', label: '5 years' },
+  { value: '6 years', label: '6 years' },
+  { value: '7 years', label: '7 years' },
+  { value: '8 years', label: '8 years' },
+  { value: '9 years', label: '9 years' },
+  { value: '10 years', label: '10 years' }
 ]
 
 
@@ -259,7 +279,7 @@ const NewIntakeForm = () => {
     form_data: { step1: profile_fields },
     employee_id: authUserState?.user?.id,
     prompt_type: "automatic",
-    valid_for: "1 Month"
+    valid_for: "forever"
   })
   const [intakeFormDatas, setIntakeFormDatas] = useState()
   const [intakeFormError, setIntakeFormError] = useState()
@@ -384,7 +404,7 @@ const NewIntakeForm = () => {
 
 
   return (
-    <div className={`bg-gray-200   p-3 px-4 ${selectedTab == 2 ? "h-[90rem]" : ""}`}>
+    <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "h-[90rem]" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
           {editedId ? <h2>Update Intake Form</h2> : <h2>New Intake Form</h2>}
@@ -413,7 +433,7 @@ const NewIntakeForm = () => {
                       <div className="flex ">
                         <div className="w-3/4">
                           <label className="text-[18px] ">
-                            Name -<em> Requied *</em>
+                            Name -<em> Required</em>
                           </label>
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px] ">
@@ -430,8 +450,8 @@ const NewIntakeForm = () => {
                       <div className="flex ">
                         <div className="w-3/4 ">
                           <label >
-                            <div className="text-[18px] "> Automatic or Manual -<em> Requied</em></div>
-                            <div><em>Choose if client will be automaticaly prompted to complete this take form.</em></div>
+                            <div className="text-[18px] "> Automatic or Manual -<em> Required</em></div>
+                            <div><em>Choose if client will be automatically prompted to complete this take form.</em></div>
                           </label>
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px]">
@@ -460,16 +480,13 @@ const NewIntakeForm = () => {
                       <div className="flex ">
                         <div className="w-3/4 ">
                           <div className=" ">
-                            <div className="text-[18px]">Required for New Existing Clients as of this Date *</div>
-                            <div><em>Reqiure clientes to fill out this intake form for their first booking after this date. even if they <br /> have previously filled out an intake form. Leave blank to not require this intake form for <br /> clients that have already visited </em></div>
+                            <div className="text-[18px]">Required for New & Existing Clients as of this Date</div>
+                            <div><em>Require clientes to fill out this intake form for their first booking after this date. even if they <br /> have previously filled out an intake form. Leave blank to not require this intake form for <br /> clients that have already visited </em></div>
                           </div>
                         </div>
                         <label className="w-1/4 flex flex-col gap-[1px]" htmlFor="date" >
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
                             <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["effective_date"]: e.target.value })) }} />
-                          </div>
-                          <div className="text-red-400 text-sm">
-                            {intakeFormError?.effective_date}
                           </div>
                         </label>
                       </div>
@@ -478,7 +495,7 @@ const NewIntakeForm = () => {
                       <div className="flex ">
                         <div className="w-3/4  ">
                           <label >
-                            <div className="text-[18px]"> Validate for -<em> Requied </em></div>
+                            <div className="text-[18px]"> Validate for -<em> Required </em></div>
                             <div><em>client should complete this intake from again after this period </em></div>
                           </label>
                         </div>
@@ -518,7 +535,7 @@ const NewIntakeForm = () => {
                       <div>Introduction preview:</div>
                       <div className="flex flex-col gap-[10px]">
                         <div className="h-[60px] flex items-center text-gray-500 border-[2px] px-3">{intakeFormData?.introduction}</div>
-                        <div className="h-[60px] flex items-center bg-slate-200 px-3 text-[18px] text-[#49c1c7]">View Formating instructions</div>
+                        <div className="h-[60px] flex items-center bg-slate-200 px-3 text-[18px] text-[#49c1c7]">View Formatting Instructions</div>
                       </div>
                       <div className=" flex items-center justify-end py-1">
                         <button className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" onClick={() => { setSelectedTab(2) }}>

@@ -1,30 +1,94 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { getIntakeForm } from '../Server';
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { createResponseIntakeForm, getIntakeForm, getResponseIntakeForm } from '../Server';
+import { useAuthContext } from '../context/AuthUserContext';
+import { toast } from 'react-toastify';
+import { act } from 'react';
 
-export const IntakeFormPreview = () => {
-  const [intakeForm, setIntakeForm] = useState()
+const IntakeFormPreview = () => {
+  const { authUserState } = useAuthContext();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const intake_formId = searchParams.get("id");
+  const client_id = searchParams.get("client");
+  const submitted = searchParams.get("is_submitted");
+  const [intakeFormFields, setIntakeFormFields] = useState()
+  const [intakeFormData, setIntakeFormData] = useState({
+    response_intake_form: {
+      intake_form_id: intake_formId,
+      client_id: client_id,
+      response_form_data: {
+        step1: {},
+        step2: {},
+        step3: {}
+      }
+    }
+  })
+
+
+
+  const handleChange = (e, fieldName) => {
+    setIntakeFormData((prev) => ({
+      ...prev,
+      response_intake_form: {
+        ...prev.response_intake_form,
+        response_form_data: {
+          ...prev.response_intake_form.response_form_data,
+          step1: { ...prev.response_intake_form.response_form_data.step1, [fieldName]: e.target.value }
+        }
+      }
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await createResponseIntakeForm(intakeFormData)
+      if (response.status === 201) {
+        toast.success("form submited sucessfully")
+      }
+      else {
+
+        toast.error("Something went wrong")
+      }
+    }
+    catch {
+    }
+  }
+
+
+  const fetchIntakeForm = async () => {
+    try {
+      const response = await getIntakeForm(intake_formId);
+      if (response.status === 200) {
+        setIntakeFormFields(response?.data)
+      }
+    } catch (error) {
+      console.error('Error fetching intake forms:', error);
+    }
+  };
+
+  const fetchExistingIntakeForm = async () => {
+    try {
+      const response = await getResponseIntakeForm(intake_formId);
+      if (response.status === 200) {
+          console.log("response", response?.data?.intake_form?.effective_date);
+      }
+    } catch (error) {
+      console.error('Error fetching intake forms:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const searchParams = new URLSearchParams(window.location.search);
-        const id = searchParams.get('id');
-        const response = await getIntakeForm(id);
-        console.log(response);
-        if (response.status == 200) {
-          setIntakeForm(response?.data)
-        }
-      } catch (error) {
-        console.error('Error fetching intake forms:', error);
-      }
-    };
-    fetchData();
+    (location.pathname.includes("clients") && fetchExistingIntakeForm())
+    fetchIntakeForm();
+    if(submitted === "true"){
+      toast.success("Form Already Submitted")
+      setTimeout(() => { window.location.replace("/clients"); }, 1000);
+    }
   }, []);
 
-const createIntakeForm = () => {
 
-}
 
   return (
     <div className={`bg-gray-100 min-h-screen`}>
@@ -38,25 +102,25 @@ const createIntakeForm = () => {
               <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has </div>
               <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
             </div>
-            <form className="w-full " onSubmit={() => { alert("form submited sucessfully");createIntakeForm() }}>
+            <form className="w-full " onSubmit={(e) => { handleSubmit(e) }}>
               <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
-                {Array.isArray(intakeForm?.form_data?.step1) && intakeForm?.form_data?.step1.map((field, index) => (
-                  <div key={index} className={` flex flex-wrap   ${field.include_in_intake ? "block" : "hidden"}`}>
+                {Array.isArray(intakeFormFields?.form_data?.step1) && intakeFormFields?.form_data?.step1.map((field, index) => (
+                  <div key={index} className={` flex flex-wrap   ${field?.include_in_intake ? "block" : "hidden"}`}>
                     <div>
-                      <label>{field.input_name} {field.required && <span className={`text-[13px]`}>(Required)</span>}</label>
+                      <label>{field?.input_name} {field?.required && <span className={`text-[13px]`}>(Required)</span>}</label>
                       {/* <div dangerouslySetInnerHTML={{__html: field?.discription}}></div> */}
                     </div>
                     <div className="border-[1px] w-full self-start px-2 py-[6px] rounded-md border-gray-300 bg-slate-50" >
-                      <input className="focus:outline-none w-full bg-slate-50" name={field.name} required={field.required} type={field.input_type} />
+                      <input className="focus:outline-none w-full bg-slate-50" name={field?.name} required={field?.required} type={field?.input_type} onChange={(e) => { handleChange(e, field?.name) }} />
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-center py-3 ">
+              {location.pathname.includes("clients") && <div className="flex items-center justify-center py-3 ">
                 <button type="submit" className="bg-[#22d3ee] text-white px-5 h-[35px] rounded-md">
                   Submit
                 </button>
-              </div>
+              </div>}
             </form>
           </div>
           <div className='w-[50rem] mx-auto bg-white gap-2 rounded-xl'>
@@ -71,3 +135,4 @@ const createIntakeForm = () => {
   )
 }
 
+export default IntakeFormPreview;

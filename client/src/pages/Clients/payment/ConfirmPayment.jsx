@@ -16,9 +16,6 @@ const ConfirmPayment = () => {
   const [paymentState, setPaymentState] = useState("");
   const [intakeForms, setIntakeForms] = useState();
 
-
-  console.log("authUserState", intakeForms);
-
   useEffect(() => {
     if (!state?.redirect_url) {
       navigate("/clients");
@@ -30,26 +27,24 @@ const ConfirmPayment = () => {
       return;
     }
 
-    const getIntakeForms = async() => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const treatmentId = urlParams.get('treatment');
-      try{
-        const response = await getIntakeFormsWithTreatment(20);
-        console.log("response",response);
-        if(response.status === 200){
+    const getIntakeForms = async () => {
+      try {
+        const response = await getIntakeFormsWithTreatment(params.get('treatment'));
+        if (response.status === 200) {
           setIntakeForms(response.data)
         }
       }
-      catch(err){}
+      catch (err) { }
     }
     getIntakeForms()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [formStage]);
+
+
 
   useEffect(() => {
     const getEmp = async () => {
       const { data } = await getClientEmployee(params.get('empId'));
-      console.log(data, 'destroy')
       if (data) {
         setPaymentState(data.pay_50 ? 'now' : 'later')
       }
@@ -66,12 +61,21 @@ const ConfirmPayment = () => {
   });
 
   const handleReminderChange = (option) => {
-    console.log("option", option, reminderOptions);
     setReminderOptions((prevOptions) => ({
       ...prevOptions,
       [option]: !prevOptions[option],
     }));
   };
+
+  const checkAllFormsSubmitted = () => {
+    const allFormsSubmitted = (intakeForms || []).filter((data) => (data.submitted === false))
+    if (allFormsSubmitted.length === 0) {
+      return false
+    }
+    else {
+      return true
+    }
+  }
 
   const handleFormSubmit = async () => {
     let reminderOptionsSorted = [
@@ -85,24 +89,28 @@ const ConfirmPayment = () => {
       return;
     }
     try {
-      if (paymentState === "now") {
-        const response = await reminder(state?.id, {
-          reminder: reminderOptionsSorted,
-        });
-        if (response?.status === 200) {
-          toast.success("Reminder has been set successfully");
-          window.open(state?.redirect_url, "_blank");
-          navigate("/clients/appointments", { state: "success" });
-        }
-      } else {
-        console.log(state)
-        const response = await reminder(state?.id, {
-          reminder: reminderOptionsSorted,
-        });
-        if (response?.status === 200) {
-          toast.success("Reminder has been set successfully");
-          toast.success("Appointment has been created successfully");
-          navigate("/clients/appointments", { state: "success" });
+      if (checkAllFormsSubmitted()) {
+        toast.error("Please Fillout Intake Forms")
+      }
+      else {
+        if (paymentState === "now") {
+          const response = await reminder(state?.id, {
+            reminder: reminderOptionsSorted,
+          });
+          if (response?.status === 200) {
+            toast.success("Reminder has been set successfully");
+            window.open(state?.redirect_url, "_blank");
+            navigate("/clients/appointments", { state: "success" });
+          }
+        } else {
+          const response = await reminder(state?.id, {
+            reminder: reminderOptionsSorted,
+          });
+          if (response?.status === 200) {
+            toast.success("Reminder has been set successfully");
+            toast.success("Appointment has been created successfully");
+            navigate("/clients/appointments", { state: "success" });
+          }
         }
       }
     } catch (error) {
@@ -161,30 +169,20 @@ const ConfirmPayment = () => {
             <h2 className="text-xl">Cancellation Policy</h2>
             <div className="flex flex-col justify-between">
               <p>Please fill out our online intake form</p>
-              {/* <Link className="text-black" to={`/clients/intake-form/?treatment_id=${myParam}`}>
-                <Button
-                  disabled={!myParam}
-                  variant="outline-dark"
-                  className="!cursor-not-allowed"
-                  size="sm"
-                >
-                  Fill out intake form
-                </Button>
-              </Link> */}
               <div className="border w-[50%] rounded-md p-2 px-3">
                 <div className="flex flex-col gap-1">
                   {Array.isArray(intakeForms) && intakeForms.length > 0 ? intakeForms.map((form, i) => (
                     <div key={i} className="grid grid-cols-[1fr,auto] items-center">
                       <div>{form?.name}</div>
                       <div>
-                        <Link className="no-underline" target="_blank" to={`/clients/intake-form/?id=${form?.id}`}>
+                        <Link className="no-underline" target="_blank" to={`/clients/intake-form/?id=${form?.id}&is_submitted=${form?.submitted}&client=${authUserState.client.id}`}>
                           <div className={`cursor-pointer text-white px-2 rounded-md py-[3px] ${form?.submitted ? "bg-green-400" : "bg-red-400"}`}>
                             Fill out intake form
                           </div>
                         </Link>
                       </div>
                     </div>
-                  )):'No Intake Forms Are Available'}
+                  )) : 'No Intake Forms Are Available'}
                 </div>
               </div>
             </div>

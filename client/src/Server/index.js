@@ -56,6 +56,13 @@ export const getClients = async (employee_id, refetch) =>
       }
     });
 
+    export const getResponseIntakeForm = async (id, refetch) =>
+      api.get(`/api/response_intake_forms/${id}`, {
+        cache: {
+          ignoreCache: refetch,
+        }
+      });
+
 export const getInventoryList = async (refetch) =>
   api.get("/api/inventories", {
     cache: {
@@ -327,10 +334,13 @@ export const createIntakeForm = async (data) =>
     intake_form: data,
   });
 
-  export const updateIntakeForm = async (id,data) =>
-    api.patch(`/api/intake_forms/${id}`, {
-      intake_form: data,
-    });
+export const createResponseIntakeForm = async (data) =>
+  api.post(`api/response_intake_forms`, data);
+
+export const updateIntakeForm = async (id,data) =>
+  api.patch(`/api/intake_forms/${id}`, {
+    intake_form: data,
+  });
 
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);
@@ -396,6 +406,8 @@ export const getAvailability = async (data, refetch) =>
       ...data,
     },
   });
+
+
 
 export const markAvailability = async (data) =>
   api.post(`/api/unavailabilities`, data);
