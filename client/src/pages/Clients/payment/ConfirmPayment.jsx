@@ -29,7 +29,7 @@ const ConfirmPayment = () => {
 
     const getIntakeForms = async () => {
       try {
-        const response = await getIntakeFormsWithTreatment(params.get('treatment'));
+        const response = await getIntakeFormsWithTreatment(params.get('treatment_id'));
         if (response.status === 200) {
           setIntakeForms(response.data)
         }
@@ -38,7 +38,7 @@ const ConfirmPayment = () => {
     }
     getIntakeForms()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formStage]);
+  }, []);
 
 
 
@@ -175,7 +175,7 @@ const ConfirmPayment = () => {
                     <div key={i} className="grid grid-cols-[1fr,auto] items-center">
                       <div>{form?.name}</div>
                       <div>
-                        <Link className="no-underline" target="_blank" to={`/clients/intake-form/?id=${form?.id}&is_submitted=${form?.submitted}&client=${authUserState.client.id}`}>
+                        <Link className="no-underline" target="_blank" to={`/clients/intake-form/?intake_form_id=${form?.id}&client_id=${authUserState.client.id}`}>
                           <div className={`cursor-pointer text-white px-2 rounded-md py-[3px] ${form?.submitted ? "bg-green-400" : "bg-red-400"}`}>
                             Fill out intake form
                           </div>

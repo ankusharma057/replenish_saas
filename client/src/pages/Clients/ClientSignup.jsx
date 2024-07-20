@@ -81,7 +81,7 @@ function ClientSignup() {
             }else{
               stateObject.redirect_url = `/clients/appointments`;
             }
-            navigate(`/clients/payment/confirm_payment?empId=${empId}`, {
+            navigate(`/clients/payment/confirm_payment?empId=${empId}&treatment_id=${selectedTreatMent?.treatment?.id}`, {
               state: stateObject,
             });
           } else if(data.schedule) {

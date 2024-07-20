@@ -106,7 +106,7 @@ const ClientLocation = () => {
     if (selectedTreatMent) {
       localStorage.setItem("treatment", JSON.stringify(selectedTreatMent));
       console.log(selectedTreatMent, "state?.selectedTreatMent");
-      updatedParams.set("treatment", selectedTreatMent.treatment.id);
+      updatedParams.set("treatment_id", selectedTreatMent.treatment.id);
       setParams(updatedParams);
     }
   }, [selectedTreatMent]);
@@ -359,7 +359,7 @@ const ClientLocation = () => {
       }else{
         stateObject.redirect_url = `/clients/appointments`;
       }
-      navigate(`/clients/payment/confirm_payment?empId=${empId}&&treatment=${selectedTreatMent?.treatment?.id}`, {
+      navigate(`/clients/payment/confirm_payment?empId=${empId}&treatment_id=${selectedTreatMent?.treatment?.id}`, {
         state: stateObject,
       });
     }

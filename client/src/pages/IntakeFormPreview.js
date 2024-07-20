@@ -4,15 +4,18 @@ import { createResponseIntakeForm, getIntakeForm, getResponseIntakeForm } from '
 import { useAuthContext } from '../context/AuthUserContext';
 import { toast } from 'react-toastify';
 import { act } from 'react';
+import ModalWraper from '../components/Modals/ModalWraper';
+import Loadingbutton from '../components/Buttons/Loadingbutton';
 
 const IntakeFormPreview = () => {
   const { authUserState } = useAuthContext();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const intake_formId = searchParams.get("id");
-  const client_id = searchParams.get("client");
-  const submitted = searchParams.get("is_submitted");
+  const intake_formId = searchParams.get("intake_form_id");
+  console.log(intake_formId);
+  const client_id = searchParams.get("client_id");
   const [intakeFormFields, setIntakeFormFields] = useState()
+  const [model, setModel] = useState(true)
   const [intakeFormData, setIntakeFormData] = useState({
     response_intake_form: {
       intake_form_id: intake_formId,
@@ -24,8 +27,6 @@ const IntakeFormPreview = () => {
       }
     }
   })
-
-
 
   const handleChange = (e, fieldName) => {
     setIntakeFormData((prev) => ({
@@ -48,7 +49,6 @@ const IntakeFormPreview = () => {
         toast.success("form submited sucessfully")
       }
       else {
-
         toast.error("Something went wrong")
       }
     }
@@ -56,23 +56,15 @@ const IntakeFormPreview = () => {
     }
   }
 
-
   const fetchIntakeForm = async () => {
     try {
-      const response = await getIntakeForm(intake_formId);
-      if (response.status === 200) {
-        setIntakeFormFields(response?.data)
-      }
-    } catch (error) {
-      console.error('Error fetching intake forms:', error);
-    }
-  };
-
-  const fetchExistingIntakeForm = async () => {
-    try {
-      const response = await getResponseIntakeForm(intake_formId);
-      if (response.status === 200) {
-          console.log("response", response?.data?.intake_form?.effective_date);
+      const { data, status } = await getIntakeForm(intake_formId);
+      if (status === 200) {
+        setIntakeFormFields(data)
+        if(data?.submitted){
+          // toast.success("Form Already Submitted")
+          // setTimeout(() => { window.location.replace("/clients") }, 1000);
+        }
       }
     } catch (error) {
       console.error('Error fetching intake forms:', error);
@@ -80,17 +72,15 @@ const IntakeFormPreview = () => {
   };
 
   useEffect(() => {
-    (location.pathname.includes("clients") && fetchExistingIntakeForm())
     fetchIntakeForm();
-    if(submitted === "true"){
-      toast.success("Form Already Submitted")
-      setTimeout(() => { window.location.replace("/clients"); }, 1000);
-    }
-  }, []);
-
-
+    // if(intakeFormFields?.submitted){
+    //   toast.success("Form Already Submitted")
+    //   setTimeout(() => { window.location.replace("/clients") }, 1000);
+    // }
+  }, [intake_formId]);
 
   return (
+    <>
     <div className={`bg-gray-100 min-h-screen`}>
       <div className='w-[75rem] mx-auto h-full'>
         <div className='text-center text-[34px] font-semibold '>ReplenishMD</div>
@@ -132,6 +122,31 @@ const IntakeFormPreview = () => {
         </div>
       </div>
     </div>
+
+    <ModalWraper
+        show={model}
+        // onHide={() => setAddLocationModal(initialAddLocationModal)}
+        customClose={false}
+        title={"You Already Submit This Form"}
+        footer={
+          <Loadingbutton
+            type="submit"
+            title="redirect"
+            isLoading={true}
+            loadingText="redirecting..."
+            form="addLocation"
+          />
+        }
+      >
+        <form
+          id="addLocation"
+          // onSubmit={addLocation}
+          className="text-lg flex flex-col gap-y-2"
+        >
+
+        </form>
+      </ModalWraper>
+  </>
   )
 }
 

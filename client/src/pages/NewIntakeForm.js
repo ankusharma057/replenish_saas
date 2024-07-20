@@ -404,7 +404,7 @@ const NewIntakeForm = () => {
 
 
   return (
-    <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "h-[90rem]" : ""}`}>
+    <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
           {editedId ? <h2>Update Intake Form</h2> : <h2>New Intake Form</h2>}
@@ -607,9 +607,9 @@ const NewIntakeForm = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-3    ">
+                      <div className="flex flex-col h-full   ">
                         {(Array.isArray(intakeFormData?.form_data?.step1) && intakeFormData?.form_data?.step1).map((field, index) => (
-                          <div key={index} className={`grid grid-cols-[75%,25%] `}>
+                          <div key={index} className={`grid grid-cols-[75%,25%] py-[10px] `}>
                             <div>
                               <div>{field.input_name}</div>
                               <div dangerouslySetInnerHTML={{ __html: field?.discription }}></div>
