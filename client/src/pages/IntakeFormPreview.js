@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
-import { createResponseIntakeForm, getIntakeForm, getResponseIntakeForm } from '../Server';
+import { createResponseIntakeForm, getIntakeForm, getResponseIntakeForm, getClientIntakeForm } from '../Server';
 import { useAuthContext } from '../context/AuthUserContext';
 import { toast } from 'react-toastify';
-import { act } from 'react';
 import ModalWraper from '../components/Modals/ModalWraper';
-import Loadingbutton from '../components/Buttons/Loadingbutton';
 
 const IntakeFormPreview = () => {
   const { authUserState } = useAuthContext();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const intake_formId = searchParams.get("intake_form_id");
+  const intake_formId = searchParams.get("intake_form_id") || searchParams.get("id");
+  const isClientPage = searchParams.get("intake_form_id") ? true : false
   console.log(intake_formId);
   const client_id = searchParams.get("client_id");
   const [intakeFormFields, setIntakeFormFields] = useState()
-  const [model, setModel] = useState(true)
+  const [model, setModel] = useState({show: false, title: ""})
   const [intakeFormData, setIntakeFormData] = useState({
     response_intake_form: {
       intake_form_id: intake_formId,
@@ -27,6 +26,11 @@ const IntakeFormPreview = () => {
       }
     }
   })
+
+  const closeCurrentTab = () => {
+    setModel({show: false, title: ""});
+    window.close();
+  }
 
   const handleChange = (e, fieldName) => {
     setIntakeFormData((prev) => ({
@@ -46,7 +50,8 @@ const IntakeFormPreview = () => {
     try {
       const response = await createResponseIntakeForm(intakeFormData)
       if (response.status === 201) {
-        toast.success("form submited sucessfully")
+        toast.success("Form submited sucessfully")
+        setModel({show: true, title: "Form submited sucessfully. You can close this tab."})
       }
       else {
         toast.error("Something went wrong")
@@ -58,12 +63,12 @@ const IntakeFormPreview = () => {
 
   const fetchIntakeForm = async () => {
     try {
-      const { data, status } = await getIntakeForm(intake_formId);
+      const { data, status } = isClientPage ? await getClientIntakeForm(intake_formId) : await getIntakeForm(intake_formId);
       if (status === 200) {
         setIntakeFormFields(data)
         if(data?.submitted){
+          setModel({show: true, title: "You already submitted this intake form. You can close this tab."})
           // toast.success("Form Already Submitted")
-          // setTimeout(() => { window.location.replace("/clients") }, 1000);
         }
       }
     } catch (error) {
@@ -73,11 +78,8 @@ const IntakeFormPreview = () => {
 
   useEffect(() => {
     fetchIntakeForm();
-    // if(intakeFormFields?.submitted){
-    //   toast.success("Form Already Submitted")
-    //   setTimeout(() => { window.location.replace("/clients") }, 1000);
-    // }
-  }, [intake_formId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -124,27 +126,12 @@ const IntakeFormPreview = () => {
     </div>
 
     <ModalWraper
-        show={model}
-        // onHide={() => setAddLocationModal(initialAddLocationModal)}
+        show={model.show}
+        onHide={() => closeCurrentTab()}
         customClose={false}
-        title={"You Already Submit This Form"}
-        footer={
-          <Loadingbutton
-            type="submit"
-            title="redirect"
-            isLoading={true}
-            loadingText="redirecting..."
-            form="addLocation"
-          />
-        }
+        title={""}
       >
-        <form
-          id="addLocation"
-          // onSubmit={addLocation}
-          className="text-lg flex flex-col gap-y-2"
-        >
-
-        </form>
+        {model.title}
       </ModalWraper>
   </>
   )

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -15,6 +15,41 @@ const ConfirmPayment = () => {
   const { state } = useLocation();
   const [paymentState, setPaymentState] = useState("");
   const [intakeForms, setIntakeForms] = useState();
+  const [isTabVisible, setIsTabVisible] = useState(true);
+
+  const handleVisibilityChange = useCallback(() => {
+    setIsTabVisible(document.visibilityState === 'visible');
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  console.log(isTabVisible)
+
+  useEffect(() => {
+    const refreshIntakeForms = () => {
+      getIntakeForms()
+    }
+
+    if (isTabVisible) {
+      refreshIntakeForms();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTabVisible]);
+
+  const getIntakeForms = async () => {
+      try {
+        const response = await getIntakeFormsWithTreatment(params.get('treatment_id'));
+        if (response.status === 200) {
+          setIntakeForms(response.data)
+        }
+      }
+      catch (err) { }
+    }
 
   useEffect(() => {
     if (!state?.redirect_url) {
@@ -27,20 +62,9 @@ const ConfirmPayment = () => {
       return;
     }
 
-    const getIntakeForms = async () => {
-      try {
-        const response = await getIntakeFormsWithTreatment(params.get('treatment_id'));
-        if (response.status === 200) {
-          setIntakeForms(response.data)
-        }
-      }
-      catch (err) { }
-    }
     getIntakeForms()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-
 
   useEffect(() => {
     const getEmp = async () => {

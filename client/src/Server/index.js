@@ -42,7 +42,7 @@ export const getClients = async (employee_id, refetch) =>
     },
   });
 
-  export const getIntakeForms = async ( refetch) =>
+  export const getIntakeForms = async (refetch) =>
   api.get("/api/intake_forms", {
     cache: {
       ignoreCache: refetch,
@@ -50,11 +50,18 @@ export const getClients = async (employee_id, refetch) =>
   });
 
   export const getIntakeForm = async (id, refetch) =>
-    api.get(`/api/client/intake_forms/${id}`, {
+    api.get(`/api/intake_forms/${id}`, {
       cache: {
         ignoreCache: refetch,
       }
     });
+
+    export const getClientIntakeForm = async (id, refetch) =>
+      api.get(`/api/client/intake_forms/${id}`, {
+        cache: {
+          ignoreCache: refetch,
+        }
+      });
 
     export const getResponseIntakeForm = async (id, refetch) =>
       api.get(`/api/response_intake_forms/${id}`, {
