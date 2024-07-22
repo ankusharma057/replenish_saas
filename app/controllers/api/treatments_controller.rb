@@ -37,6 +37,15 @@ class Api::TreatmentsController < ApplicationController
     end
   end
 
+  def show
+    treatment = Treatment.find_by(id: params[:id])
+    if treatment.present?
+      render json: treatment, status: :ok
+    else
+      render json: {error: 'Treatment does not exist'}, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def treatment_params
