@@ -160,7 +160,7 @@ const profile_fields = [
     input_name: "Personal Health Number",
     name: "personal-health-number",
     include_in_intake: false,
-    input_type: "number",
+    input_type: "text",
     required: false,
 
   },
@@ -208,7 +208,7 @@ const profile_fields = [
     input_name: "Employer",
     name: "employer",
     include_in_intake: false,
-    input_type: "number",
+    input_type: "text",
     required: false,
 
   },
@@ -430,7 +430,7 @@ const NewIntakeForm = () => {
                   <div className="  ">
                     <div className="h-[65%] flex flex-col justify-between">
                       {/* input 1 */}
-                      <div className="flex ">
+                      <div className="flex">
                         <div className="w-3/4">
                           <label className="text-[18px] ">
                             Name -<em> Required</em>
@@ -609,7 +609,7 @@ const NewIntakeForm = () => {
                       </div>
                       <div className="flex flex-col h-full   ">
                         {(Array.isArray(intakeFormData?.form_data?.step1) && intakeFormData?.form_data?.step1).map((field, index) => (
-                          <div key={index} className={`grid grid-cols-[75%,25%] py-[10px] `}>
+                          <div key={index} className={`grid grid-cols-[75%,25%] py-[10px] border-b`}>
                             <div>
                               <div>{field.input_name}</div>
                               <div dangerouslySetInnerHTML={{ __html: field?.discription }}></div>
