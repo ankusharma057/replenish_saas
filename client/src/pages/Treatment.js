@@ -7,7 +7,8 @@ import {
   getTreatmentIntakeForms,
   getTreatmentList,
   updateTreatment,
-  getEmployeesList
+  getEmployeesList,
+  getTreatmentIntakeForm
 } from "../Server";
 import { Button, Form, Table, ButtonGroup, ToggleButton } from "react-bootstrap";
 import {
@@ -60,7 +61,6 @@ const Treatment = () => {
 
   useEffect(() => {
     getEmployees();
-    setSelectedEmployeeData();
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -150,6 +150,15 @@ const Treatment = () => {
     else getTreatment(true, emp);
   };
 
+  const getAllTreatmentIntakeForms = async (treatmentId, refetch = true) => {
+    try {
+      const { data }  = await getTreatmentIntakeForm(treatmentId, refetch);
+        setExistingForms(data?.treatment_intake_forms)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleTreatmentChange = (e) => {
     setTreatmentForm((pre) => ({
       ...pre,
@@ -177,7 +186,9 @@ const Treatment = () => {
       const response = await createTreatment(payload);
 
       if (response.status === 200) {
+        toast.success("Treatment Created Successfully");
         if (response?.data?.error) {
+          toast.error(response?.data?.error?.name || "Failed to create treatment");
           setErrorsForm(response?.data?.error || {})
         } else {
           setTreatmentForm({
@@ -212,12 +223,6 @@ const Treatment = () => {
       quantity: treatment.quantity,
       treatment_intake_forms_attributes: [],
     });
-    const existingFormsData = treatment.treatment_intake_forms.map((form) => ({
-      ...form,
-      intake_form: intakeForm.find((f) => f.id === form.intake_form_id) || form.intake_form, // Ensure full data structure
-    }));
-
-    setExistingForms(existingFormsData);
 
     setErrorsForm({});
     setShowCreateTreatmentModal(true);
@@ -235,13 +240,6 @@ const Treatment = () => {
       treatment_intake_forms_attributes: [], // Reset new intake forms
     });
 
-    const existingFormsData = treatment.treatment_intake_forms.map((form) => ({
-      ...form,
-      intake_form: intakeForm.find((f) => f.id === form.intake_form_id) || form.intake_form, // Ensure full data structure
-    }));
-
-    setExistingForms(existingFormsData);
-
     setErrorsForm({});
     setShowUpdateTreatmentModal(true);
   };
@@ -255,7 +253,7 @@ const Treatment = () => {
           label: "Yes",
           onClick: async () => {
             try {
-              const { data } = await deleteTreatment(treatment.id);
+              const { data } = await deleteTreatment(treatment.id, true);
               toast.success(`${treatment?.name} Deleted Successfully.`);
               await getTreatment(true);
             } catch (error) {
@@ -272,7 +270,6 @@ const Treatment = () => {
           label: "No",
           onClick: () => {
             // setshowModal(true);
-            console.log("Click No");
           },
         },
       ],
@@ -316,7 +313,7 @@ const Treatment = () => {
             <div className="flex justify-center space-x-2">
               <Button
                 variant="info"
-                onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id);}}
+                onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id); getAllTreatmentIntakeForms(row.original?.id, true)}}
               >
                 Update
               </Button>
@@ -330,7 +327,7 @@ const Treatment = () => {
               {currentTab === "base-treatments" ? (
                 <Button
                   variant="info"
-                  onClick={() =>{ onTreatmentDuplicateUpdate(row.original); getIntakeForm(row.original?.id);}}
+                  onClick={() =>{ onTreatmentDuplicateUpdate(row.original); getIntakeForm(row.original?.id)}}
                 >
                   Duplicate
                 </Button>
@@ -338,7 +335,7 @@ const Treatment = () => {
                 <>
                   <Button
                     variant="info"
-                    onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id);}}
+                    onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id); getAllTreatmentIntakeForms(row.original?.id, true)}}
                   >
                     Update
                   </Button>
@@ -414,33 +411,27 @@ const Treatment = () => {
     else getTreatment();
   }, [currentTab]);
 
+
   const removeIntakeForm = async (intakeFormDetails) => {
     confirmAlert({
       title: "Remove Intake Form",
-      message: `Are you sure you want to remove ${String(intakeFormDetails.intake_form.name)} from your list?`,
+      message: `Are you sure you want to remove ${String(intakeFormDetails?.name)} from your list?`,
       buttons: [
         {
           label: "Yes",
           onClick: async () => {
             try {
               setLoading(true);
+              getAllTreatmentIntakeForms(treatmentForm?.id, true)
               const deleteIntakeForms = {
                 treatment_intake_forms_attributes: [
                   { id: intakeFormDetails.id, _destroy: 1 },
                 ],
               };
-              const { data } = await updateTreatment(treatmentForm?.id, deleteIntakeForms);
+              const { data } = await updateTreatment(treatmentForm?.id, deleteIntakeForms, true);
               toast.success("Intake Form removed successfully.");
               await getEmployees(true);
-
-              setTreatmentForm((pre) => ({
-                ...pre,
-                treatment_intake_forms_attributes: pre.treatment_intake_forms_attributes.filter(
-                  (form) => form.id !== intakeFormDetails.id
-                ),
-              }));
-              setExistingForms((pre) => pre.filter((form) => form.id !== intakeFormDetails.id));
-
+              setExistingForms(data?.treatment_intake_forms)
               setSelectedEmployeeData(selectedEmployeeData);
             } catch (error) {
               toast.error(
@@ -550,7 +541,7 @@ const Treatment = () => {
                     onClick={() => {
                       setShowCreateTreatmentModal(true);
                       setErrorsForm({});
-                      setExistingForms([]);
+                      // setExistingForms([]);
                       getIntakeForm("", true);
 
                     }}
@@ -596,11 +587,13 @@ const Treatment = () => {
                               quantity: Number(treatmentForm.quantity),
                               treatment_intake_forms_attributes: [...treatmentForm.treatment_intake_forms_attributes],
                             };
-
-                            const updateResponse = await updateTreatment(treatmentForm.id, payload);
-
+                            const updateResponse = await updateTreatment(treatmentForm.id, payload, true);
                             if (updateResponse.status === 200) {
+                              toast.success("Treatment Updated Successfully");
+                              setExistingForms(updateResponse?.data?.treatment_intake_forms)
+                              getAllTreatmentIntakeForms(updateResponse?.data?.id, true)
                               if (updateResponse?.data?.error) {
+                                toast.error(updateResponse?.data?.error?.name || "Failed to update treatment");
                                 setErrorsForm(updateResponse?.data?.error || {})
                               } else {
                                 setTreatmentForm({
@@ -767,7 +760,7 @@ const Treatment = () => {
                             treatment_intake_forms_attributes: transformedLocations,
                           }));
                         }}
-                        options={intakeForm.map((intakeForm) => ({
+                        options={intakeForm?.map((intakeForm) => ({
                           value: intakeForm.id,
                           label: intakeForm.name,
                           id: intakeForm.id
@@ -776,7 +769,7 @@ const Treatment = () => {
                         placeholder="Select Intake Forms"
                       />
                     </div>
-                    {/* {showUpdateTreatmentModal && showCreateTreatmentModal && ( */}
+                    {showUpdateTreatmentModal && (
                       <table className="w-full mt-2 text-sm text-left rtl:text-right text-gray-500 ">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
                           <tr>
@@ -789,19 +782,17 @@ const Treatment = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {[...existingForms, ...treatmentForm.treatment_intake_forms_attributes].map(
-                            (val, index) => (
-                              <React.Fragment key={index}>
-                                <EmployeeLocationTableRows
-                                  removeIntakeForm={removeIntakeForm}
-                                  val={val}
-                                />
-                              </React.Fragment>
-                            )
-                          )}
+                        {existingForms.map((val, index) => (
+                          <React.Fragment key={index}>
+                              <EmployeeLocationTableRows
+                                removeIntakeForm={removeIntakeForm}
+                                val={val}
+                              />
+                          </React.Fragment>
+                        ))}
                         </tbody>
                       </table>
-                    {/* )} */}
+                    )}
                     <span className="text-red-400 text-sm">
                       {errorForm.treatment_intake_forms_attributes && errorForm.treatment_intake_forms_attributes[0]}
                     </span>
@@ -894,7 +885,7 @@ const EmployeeLocationTableRows = ({ val, removeIntakeForm }) => {
         {val.intake_form?.name}
       </th>
       <td className="px-6 py-4 w-14">
-        <div className="flex justify-center">
+        <div className="flex justify-center"> 
         {!val.intake_form_id && (
           <button
             type="button"

@@ -458,13 +458,45 @@ export const getBaseTreatmentList = async (refetch) => {
   return res;
 }
 
+export const getTreatmentIntakeForm = async (id, refetch) => {
+  let url = `/api/treatments/${id}`;
+  const res = api.get(url, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
-export const createTreatment = async (data) =>
-  api.post(`/api/treatments`, data);
+  return res;
+  }
 
-export const updateTreatment = async (id, data) =>
-  api.put(`/api/treatments/${id}`, data);
+export const createTreatment = async (data, refetch) =>{
+let url = `/api/treatments`;
+  const res = api.post(url, data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
-export const deleteTreatment = async (id) =>
-  api.delete(`/api/treatments/${id}`);
+  return res;
+}
+
+export const updateTreatment = async (id, data, refetch) => {
+  let url = `/api/treatments/${id}`;
+  const res = api.put(url, data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+
+export const deleteTreatment = async (id, refetch) =>{
+  let url = `/api/treatments/${id}`;
+  const res = api.delete(url, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
 
