@@ -209,6 +209,8 @@ const IntakeFormPreview = () => {
       saveStrokeToHistory();
     };
 
+    console.log("scscs",intakeFormFields?.form_data?.consents?.consentForms);
+
   return (
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
@@ -259,9 +261,15 @@ const IntakeFormPreview = () => {
                 <div className={`${intakeFormFields?.form_data?.consents?.consentForms.length === index+1 && !intakeFormFields?.form_data?.consents?.signature ? "border-none" : "border-b"} p-2`} key={index}>
                 <div className='text-[20px] font-normal'>{consent?.name}</div>
                 <div className='py-3'>{consent?.text}</div>
-                <div className='flex items-center gap-2'>
-                  <input type="checkbox" />
-                  <div className='flex gap-2'><span> {consent?.type}</span><span><em> Require</em></span></div>
+                <div className='flex flex-col gap-1'>
+                {(consent?.type === "must agree" || consent?.type === "agree or disagree")   && <div className='flex items-center gap-2'>
+                    <input type="checkbox" />
+                    <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
+                  </div>}
+                  { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
+                    <input type="checkbox" />
+                    <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
+                  </div>}
                 </div>
               </div>
             ))}
