@@ -196,12 +196,12 @@ const ConfirmPayment = () => {
               <div className="border w-[50%] rounded-md p-2 px-3">
                 <div className="flex flex-col gap-1">
                   {Array.isArray(intakeForms) && intakeForms.length > 0 ? intakeForms.map((form, i) => (
-                    <div key={i} className="grid grid-cols-[1fr,auto] items-center">
+                    <div key={i} className="grid grid-cols-[1fr,180px] items-center">
                       <div>{form?.name}</div>
                       <div>
                         <Link className="no-underline" target="_blank" to={`/clients/intake-form/?intake_form_id=${form?.id}&client_id=${authUserState.client.id}`}>
-                          <div className={`cursor-pointer text-white px-2 rounded-md py-[3px] ${form?.submitted ? "bg-green-400" : "bg-red-400"}`}>
-                            Fill out intake form
+                          <div className={`cursor-pointer text-white px-2 text-center rounded-md py-[3px] ${form?.submitted ? "bg-green-400" : "bg-red-400"}`}>
+                            {form?.submitted ? "Filled out" : "Fill out"}
                           </div>
                         </Link>
                       </div>

@@ -5,7 +5,6 @@ import { createIntakeForm, getIntakeForm, updateIntakeForm } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
 
-
 const Tabs = [
   {
     tab_name: "General",
@@ -27,18 +26,15 @@ const Tabs = [
   //   tab_name: "Questionnaires",
   //   value: 4
   // },
-  // {
-  //   tab_name: "Consents",
-  //   value: 5
-  // },
+  {
+    tab_name: "Consents",
+    value: 5
+  },
   // {
   //   tab_name: "Form Preview",
   //   value: 6
   // }
 ]
-
-const specific_staff_member = ["specific_staff_member 1", "specific_staff_member 2", "specific_staff_member 3"]
-const Specific_treatments = ["Specific_treatments1", "Specific_treatments2", "Specific_treatments3"]
 
 const profile_fields = [
   {
@@ -270,80 +266,148 @@ const valiadte = [
   { value: '9 years', label: '9 years' },
   { value: '10 years', label: '10 years' }
 ]
-
+const consentType = [
+  { value: 'must agree', label: 'Must Agree' },
+  { value: 'agree or disagree', label: 'Agree or Disagree' },
+  { value: 'acnowledge with initials', label: 'Acknowledge with Initials' },
+]
+const initialConsent =  { name: "", text: "",type:"must agree", declaration : "" }
 
 const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
   const [selectedTab, setSelectedTab] = useState(0);
   const [intakeFormData, setIntakeFormData] = useState({
-    form_data: { step1: profile_fields },
+    form_data: {
+      profile_fields: profile_fields,
+      // step2:[],
+      consents:{
+        signature:false,
+        consentForms: [initialConsent]}},
     employee_id: authUserState?.user?.id,
     prompt_type: "automatic",
     valid_for: "forever"
-  })
-  const [intakeFormDatas, setIntakeFormDatas] = useState()
-  const [intakeFormError, setIntakeFormError] = useState()
-  const [editedId, setEditedId] = useState()
-
-  console.log("intakeFormDatassss", intakeFormData);
-
-  const [profileFields, setProfileFields] = useState(profile_fields);
-
-  // console.log("intakeFormData",intakeFormData);
+  });
+  const [intakeFormError, setIntakeFormError] = useState({
+    name:"",
+    prompt_type:"",
+    valid_for:"",
+    form_data:{consents:{
+      signature:"",
+      consentForms: []
+    }}
+  });
+  const [editedId, setEditedId] = useState();
 
   const handleOnChange = (fieldName, index, value) => {
-    const copyProfileFields = [...intakeFormData?.form_data?.step1];
+    const copyProfileFields = [...intakeFormData?.form_data?.profile_fields];
     copyProfileFields[index][fieldName] = value;
-    setIntakeFormData((prev) => ({ ...prev, ...["form_data"]["step1"] = copyProfileFields }));
+    setIntakeFormData((prev) => ({ ...prev, form_data: { ...prev?.form_data, profile_fields: copyProfileFields } }));
   };
 
-  const [consents, setConsents] = useState([
-    { name: "", text: "", declaration: "", disagreeOption: "" },
-  ]);
-
   const addConsent = () => {
-    setConsents([
-      ...consents,
-      { name: "", text: "", declaration: "", disagreeOption: "" },
-    ]);
+    setIntakeFormData((prev)=>({...prev,form_data:{...prev?.form_data,consents:{...prev?.form_data?.consents,consentForms:[...prev?.form_data?.consents?.consentForms,initialConsent]}}}))
   };
 
   const removeConsent = (index) => {
-    if (index > 0) {
-      const newConsents = consents.filter((_, i) => i !== index);
-      setConsents(newConsents);
+    if (index >= 0) {
+      const newConsents = intakeFormData?.form_data?.consents?.consentForms
+      const afterDelete = newConsents.filter((_,i)=>(index !== i))
+      setIntakeFormData((prev)=>({...prev,form_data:{...prev?.form_data,consents:{...prev?.form_data?.consents,consentForms:afterDelete}}}))
+
     }
   };
 
   const handleConsentChange = (index, field, value) => {
-    const newConsents = [...consents];
-    newConsents[index][field] = value;
-    setConsents(newConsents);
-  };
+    setIntakeFormData((prevState) => {
+      const updatedConsents = [...prevState?.form_data?.consents?.consentForms];
+      const updatedConsent = { ...updatedConsents[index], [field]: value };
 
-  const generateConsentData = () => {
-    const consentData = consents.reduce((acc, consent, index) => {
-      acc[`consent-${index + 1}`] = {
-        "consent-name": consent.name,
-        "consent-text": consent.text,
-        "consent-declaration": consent.declaration,
-        "consent-disagreeOption": consent.disagreeOption,
+      if (field === "type") {
+        if (value === "agree or disagree") {
+          updatedConsent.declaration = "";
+          updatedConsent.disagreeOption = "";
+        } else if (value === "must agree") {
+          updatedConsent.declaration = "";
+          delete updatedConsent?.disagreeOption;
+        } else {
+          delete updatedConsent.declaration;
+          delete updatedConsent.disagreeOption;
+        }
+      }
+
+      updatedConsents[index] = updatedConsent;
+
+      return {
+        ...prevState,
+        form_data: {
+          ...prevState?.form_data,
+          consents: {
+            ...prevState?.form_data?.consents,consentForms:updatedConsents
+          },
+        },
       };
-      return acc;
-    }, {});
-
-    return { Consents: consentData };
+    });
   };
 
-  const handleSubmit = () => {
-    const consentData = generateConsentData();
-    console.log(JSON.stringify(consentData, null, 2));
+  const formValidation = () => {
+    let hasError = false;
+
+    const newConsentsError = intakeFormData?.form_data?.consents?.consentForms?.map(() => ({}));
+
+    intakeFormData?.form_data?.consents?.consentForms?.forEach((consent, index) => {
+      const { name, text, type, declaration, disagreeOption } = consent;
+      const consentErrors = {};
+
+      if (name === "") consentErrors.name = "Name can't be blank";
+      if (type === "") consentErrors.type = "Type can't be blank";
+      if (declaration === "") consentErrors.declaration = "Declaration can't be blank";
+      if (disagreeOption === "") consentErrors.disagreeOption = "Disagree Option can't be blank";
+
+      if (Object.keys(consentErrors)?.length > 0) {
+        hasError = true;
+        newConsentsError[index] = consentErrors;
+      }
+    });
+
+    const newFormErrors = {
+      ...intakeFormError,
+      form_data: {
+        ...intakeFormError?.form_data,
+        consents: {
+          ...intakeFormError?.form_data?.consents,consentForms:newConsentsError
+        }
+      }
+    };
+
+    if (intakeFormData?.name === "") {
+      hasError = true;
+      setIntakeFormError((prev)=>({...prev,["name"]:"Name can't be blank"}))
+    }
+
+    if (intakeFormData?.prompt_type === "") {
+      hasError = true;
+      setIntakeFormError((prev)=>({...prev,["prompt_type"]:"prompt_type can't be blank"}))
+    }
+
+    if (intakeFormData?.valid_for === "") {
+      hasError = true;
+      setIntakeFormError((prev)=>({...prev,["valid_for"]:"valid_for can't be blank"}))
+
+    }
+
+    setIntakeFormError(newFormErrors);
+
+    if (hasError) {
+      toast.error("Something went wrong");
+      return false;
+    } else {
+      return true;
+    }
   };
-
-
 
   const submitData = async (e) => {
     e.preventDefault()
+    if(formValidation()){
     try {
       const response = await createIntakeForm(intakeFormData);
       if (response.status === 201) {
@@ -351,31 +415,34 @@ const NewIntakeForm = () => {
         setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
       }
     } catch (error) {
-      toast.error("Something Went Wrong ");
-      setIntakeFormError(error?.response?.data?.error)
+      toast.error("Something went wrong");
+      console.log("err", error?.response?.data?.error);
+      setIntakeFormError((prev)=>({...prev,...error?.response?.data?.error}))
     }
+  }
   };
+
 
   const upadteData = async (e) => {
     e.preventDefault()
+    if(formValidation()){
     try {
-      const response = await updateIntakeForm(intakeFormData.id, intakeFormData);
-      if (response.status === 200) {
+      const response = await updateIntakeForm(intakeFormData?.id, intakeFormData);
+      if (response?.status === 200) {
         toast.success("Intake form successfully updated");
         setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
-        console.log("response", response);
         setIntakeFormData(response?.data)
       }
     } catch (error) {
       toast.error("Something Went Wrong ");
-      setIntakeFormError(error?.response?.data?.error)
+      console.log("err", error?.response?.data?.error);
+      setIntakeFormError((prev)=>({...prev,...error?.response?.data?.error}))
     }
+  }
   };
 
-
-
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window?.location?.search);
     setEditedId(urlParams.get('intake-form-id'))
   }, [])
 
@@ -385,22 +452,16 @@ const NewIntakeForm = () => {
       if (response.status === 200) {
         setIntakeFormData(response.data);
       } else {
-        // Handle other response statuses if needed
       }
     } catch (err) {
-      // Handle errors if the request fails
     }
   };
 
   useEffect(() => {
     if (editedId) {
-      console.log("bkohgbkiodfkihbi");
       editData();
     }
   }, [editedId]);
-
-
-
 
 
   return (
@@ -455,7 +516,6 @@ const NewIntakeForm = () => {
                           </label>
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px]">
-                          {/* <DropDown options={automaticOrManual} onChange={(value) => {setIntakeFormData((prev)=>({...prev,["prompt_type"]:value}))}} default_value={"automatic"} /> */}
                           <Select
                             inputId="availableEmployee"
                             value={automaticOrManual.find(option => option.value === intakeFormData.prompt_type)}
@@ -465,9 +525,7 @@ const NewIntakeForm = () => {
                             }}
 
                             options={automaticOrManual}
-                            // placeholder={"Automatic"}
                             defaultValue={"Automatic"}
-                            // value={"Automatic"}
                             required
                           />
                           <div className="text-red-400 text-sm">
@@ -500,7 +558,6 @@ const NewIntakeForm = () => {
                           </label>
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px]">
-                          {/* <DropDown options={valiadte} onChange={(value) => {setIntakeFormData((prev)=>({...prev,["valid_for"]:value}))}} default_value={"forever"} /> */}
                           <Select
                             inputId="availableEmployee"
                             isClearable
@@ -608,7 +665,7 @@ const NewIntakeForm = () => {
                         </div>
                       </div>
                       <div className="flex flex-col h-full   ">
-                        {(Array.isArray(intakeFormData?.form_data?.step1) && intakeFormData?.form_data?.step1).map((field, index) => (
+                        {(Array.isArray(intakeFormData?.form_data?.profile_fields) && intakeFormData?.form_data?.profile_fields).map((field, index) => (
                           <div key={index} className={`grid grid-cols-[75%,25%] py-[10px] border-b`}>
                             <div>
                               <div>{field.input_name}</div>
@@ -637,8 +694,8 @@ const NewIntakeForm = () => {
                           </div>
                         ))}
                         <div className="flex items-center justify-end py-1 px-10 gap-2">
-                          <button type="submit" className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" >
-                            {editedId ? "Update" : "Submit"}
+                          <button type="button" onClick={() => { setSelectedTab(5) }} className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" >
+                            Next
                           </button>
                         </div>
                       </div>
@@ -708,18 +765,12 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 )} */}
-                {/* {selectedTab === 5 && (
+                {selectedTab === 5 && (
                   <div className="h-full overflow-y-auto">
                     <div className="p-3 w-full">
                       <div>
                         <div className="flex justify-between">
                           <h3 className="pb-1">Consents</h3>
-                          <button
-                            className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md"
-                            onClick={addConsent}
-                          >
-                            Add Consent
-                          </button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
@@ -732,7 +783,7 @@ const NewIntakeForm = () => {
                             </p>
                           </div>
                           <div>
-                            <input type="checkbox" />
+                            <input type="checkbox" checked={intakeFormData?.form_data?.consents?.signature} onChange={(e)=>{setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data, consents:{...prev.form_data.consents,signature:e?.target?.checked}}}))}}/>
                             <label className="ml-2">Require Signature</label>
                           </div>
                         </div>
@@ -742,10 +793,8 @@ const NewIntakeForm = () => {
                         Require the client to agree to any number of consents
                         or waivers:
                       </p>
-
-                      {consents.map((consent, index) => (
+                      {Array.isArray(intakeFormData?.form_data?.consents?.consentForms) && intakeFormData?.form_data?.consents?.consentForms.map((consent, index) => (
                         <div key={index} className="mt-4">
-
                           <div className="flex justify-between">
                             <div className="w-[5%]">
                               <div className="step">
@@ -780,6 +829,7 @@ const NewIntakeForm = () => {
                                       }
                                     />
                                   </div>
+                                  {intakeFormError?.form_data?.consents?.consentForms[index]?.name && <div className="text-red-400 text-sm">{intakeFormError?.form_data?.consents?.consentForms[index]?.name}</div>}
                                 </div>
                               </div>
                               <hr />
@@ -809,6 +859,37 @@ const NewIntakeForm = () => {
                               </div>
                               <hr />
                               <div className="flex">
+                                <div className="w-3/4">
+                                  <label className="text-[18px] text-gray-500 pb-2">
+                                    Type -<em> Required</em>
+                                  </label>
+                                  <p className="m-0">
+                                    <em>
+                                      The type of acknowledgment the client will make
+                                    </em>
+                                  </p>
+                                </div>
+                                <div className="w-1/4">
+                                  <Select
+                                    inputId="type"
+                                    value={consentType.find(option => option.value === consent.type)}
+                                    isClearable
+                                    onChange={(e) =>
+                                      handleConsentChange(
+                                        index,
+                                        "type",
+                                        e?.value
+                                      )
+                                    }
+                                    options={consentType}
+                                    defaultValue={"Automatic"}
+                                    required
+                                  />
+                                  {intakeFormError?.form_data?.consents?.consentForms[index]?.type &&<div className="text-red-400 text-sm">{intakeFormError?.form_data?.consents?.consentForms[index]?.type}</div>}
+                                </div>
+                              </div>
+                              <hr />
+                              <div className={`flex ${consent.type === "agree or disagree" || consent.type === "must agree"  ? "" : "hidden"}`}>
                                 <div className="w-3/4 text-[18px] text-gray-400">
                                   <label>
                                     Declaration - <em>Required</em>
@@ -821,7 +902,7 @@ const NewIntakeForm = () => {
                                     </em>
                                   </p>
                                 </div>
-                                <div className="w-1/4">
+                                <div className="w-1/4 py-1">
                                   <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full">
                                     <textarea
                                       onChange={(e) =>
@@ -835,10 +916,11 @@ const NewIntakeForm = () => {
                                       value={consent.declaration}
                                     />
                                   </div>
+                                  {intakeFormError?.form_data?.consents?.consentForms[index]?.declaration &&<div className="text-red-400 text-sm ">{intakeFormError?.form_data?.consents?.consentForms[index]?.declaration}</div>}
                                 </div>
                               </div>
-                              <hr />
-                              <div className="flex">
+                              <hr className={`${consent.type === "agree or disagree" || consent.type === "must agree"  ? "" : "hidden"}`}/>
+                              <div className={`flex ${consent.type === "agree or disagree" ? "" : "hidden"}`}>
                                 <div className="w-3/4 text-[18px] text-gray-400">
                                   <label>
                                     Disagree Option (Leave Blank to require client
@@ -867,17 +949,18 @@ const NewIntakeForm = () => {
                                       value={consent.disagreeOption}
                                     />
                                   </div>
+                                  {intakeFormError?.form_data?.consents?.consentForms[index]?.disagreeOption &&<div className="text-red-400 text-sm">{intakeFormError?.form_data?.consents?.consentForms[index]?.disagreeOption}</div>}
                                 </div>
                               </div>
-                              <hr />
+                              <hr className={`${consent.type === "agree or disagree" ? "" : "hidden"}`}/>
                               <div className="flex justify-between">
-                                {index > 0 && (
-                                  <button
-                                    className="bg-red-500 text-white px-3 h-[35px] rounded-md"
+                                {index >= 0 && (
+                                  <div
+                                    className="bg-red-500 text-white px-3 h-[35px] flex items-center rounded-md cursor-pointer"
                                     onClick={() => removeConsent(index)}
                                   >
                                     Remove Consent
-                                  </button>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -887,16 +970,21 @@ const NewIntakeForm = () => {
                       ))}
                     </div>
                   
-                    <div className="flex justify-end py-1 mr-4">
-                      <button
-                        className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md"
-                        onClick={handleSubmit}
-                      >
-                        Submit
+                    <div className="flex justify-between py-1 mr-4">
+                    <div className="pl-[73px]">
+                         <div
+                            className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md flex items-center cursor-pointer"
+                            onClick={addConsent}
+                          >
+                            Add Consent
+                          </div>
+                    </div>
+                      <button type="submit" className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md">
+                      {editedId ? "Update" : "Submit"}
                       </button>
                     </div>
                   </div>
-                )} */}
+                )}
                 {/* {selectedTab === 6 && <div className="h-full">
                   <div className="h-[60px] flex items-center ">
                     <div className="w-full">

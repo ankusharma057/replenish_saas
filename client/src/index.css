@@ -1,6 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Herr+Von+Muellerhoff&display=swap');
+
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.pinyon-script-regular {
+  font-family: "Pinyon Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 30px;
+}
+
+.great-vibes-regular {
+  font-family: "Great Vibes", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 30px;
+}
+
+.herr-von-muellerhoff-regular {
+  font-family: "Herr Von Muellerhoff", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 30px;
+}
+
+.drop-down{
+ font-size: 18px !important;
+}
 
 body {
   margin: 0;
@@ -229,4 +260,8 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
+}
+
+.fonts{
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
