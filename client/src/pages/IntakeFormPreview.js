@@ -96,6 +96,45 @@ const IntakeFormPreview = () => {
       }}}}))
   }
 
+  const handleAgreedChange = (checkboxTag, index) =>{
+    setIntakeFormData((prev)=>({...prev, response_intake_form:{
+      ...prev.response_intake_form,response_form_data:{
+        ...prev.response_intake_form.response_form_data,consents:{
+          ...prev.response_intake_form.response_form_data.consents, consentForms:{
+            ...prev.response_intake_form.response_form_data.consents.consentForms,
+              [index]: {
+                ...prev.response_intake_form.response_form_data.consents.consentForms[index], agreed: checkboxTag.checked
+              }
+            }
+      }}}}))
+  }
+  
+  const handleInitialChange = (inputBox, index) =>{
+    setIntakeFormData((prev)=>({...prev, response_intake_form:{
+      ...prev.response_intake_form,response_form_data:{
+        ...prev.response_intake_form.response_form_data,consents:{
+          ...prev.response_intake_form.response_form_data.consents, consentForms:{
+            ...prev.response_intake_form.response_form_data.consents.consentForms,
+              [index]: {
+                ...prev.response_intake_form.response_form_data.consents.consentForms[index], initialValue: inputBox.value
+              }
+            }
+      }}}}))
+  }
+  
+  const handleAgreeOrDisagreeChange = (radioTag, index) =>{
+    setIntakeFormData((prev)=>({...prev, response_intake_form:{
+      ...prev.response_intake_form,response_form_data:{
+        ...prev.response_intake_form.response_form_data,consents:{
+          ...prev.response_intake_form.response_form_data.consents, consentForms:{
+            ...prev.response_intake_form.response_form_data.consents.consentForms,
+              [index]: {
+                ...prev.response_intake_form.response_form_data.consents.consentForms[index], ...{ agreed: radioTag.value === "agreed", disAgreed: radioTag.value !== "agreed" }
+              }
+            }
+      }}}}))
+  }
+
   const handleChange = (formCategory,e, fieldName) => {
     setIntakeFormData((prev) => ({
       ...prev,
@@ -135,6 +174,10 @@ const IntakeFormPreview = () => {
       const { data, status } = isClientPage ? await getClientIntakeForm(intake_formId) : await getIntakeForm(intake_formId);
       if (status === 200) {
         setIntakeFormFields(data)
+        setIntakeFormData((prev)=>({...prev, response_intake_form: {...prev.response_intake_form,response_form_data: {...prev.response_intake_form.response_form_data,consents:{
+          ...prev.response_intake_form.response_form_data.consents, consentForms: data.form_data.consents.consentForms
+        }}}}))
+
         if(data?.submitted){
           setModel({show: true, title: "You already submitted this intake form. You can close this tab."})
           // toast.success("Form Already Submitted")
@@ -189,6 +232,7 @@ const IntakeFormPreview = () => {
         <div className='flex  justify-end  w-full h-16 items-end'>
           {/* <Link className="no-underline" to={"/intake-forms"}><div className='text-[17px] py-2'>Return to Intake Form </div></Link> */}
           </div>
+          <form className="w-full " onSubmit={(e) => { handleSubmit(e) }}>
         <div className='flex flex-col gap-6 font-light'>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 1 of 4</span> </div>
@@ -196,25 +240,18 @@ const IntakeFormPreview = () => {
               <div>Online intake forms allow you to collect contact information, family and medical history, and consent from your client. The client response will become part of their profile and chart.</div>
               <div>{intakeFormFields?.employee?.name} will automatically prompt clients to fill out an intake form in any email sent prior to their first visit. After their first visit, you can send them a link to fill out the intake form from their client profile.</div>
             </div>
-            <form className="w-full " onSubmit={(e) => { handleSubmit(e) }}>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
-                {Array.isArray(intakeFormFields?.form_data?.profile_fields) && intakeFormFields?.form_data?.profile_fields.map((field, index) => (
-                  <div key={index} className={` flex flex-wrap   ${field?.include_in_intake ? "block" : "hidden"}`}>
-                    <div>
-                      <label>{field?.input_name} {field?.required && <span className={`text-[13px]`}>(Required)</span>}</label>
-                    </div>
-                    <div className="border-[1px] w-full self-start px-2 py-[6px] rounded-md border-gray-300 bg-slate-50" >
-                      <input className="focus:outline-none w-full bg-slate-50" name={field?.name} required={field?.required} type={field?.input_type} onChange={(e) => { handleChange("profile_fields",e, field?.name,) }} />
-                    </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
+              {Array.isArray(intakeFormFields?.form_data?.profile_fields) && intakeFormFields?.form_data?.profile_fields.map((field, index) => (
+                <div key={index} className={` flex flex-wrap   ${field?.include_in_intake ? "block" : "hidden"}`}>
+                  <div>
+                    <label>{field?.input_name} {field?.required && <span className={`text-[13px]`}>(Required)</span>}</label>
                   </div>
-                ))}
-              </div>
-              {isClientPage && <div className="flex items-center justify-center py-3 ">
-                <button type="submit" className="bg-[#22d3ee] text-white px-5 h-[35px] rounded-md">
-                  Submit
-                </button>
-              </div>}
-            </form>
+                  <div className="border-[1px] w-full self-start px-2 py-[6px] rounded-md border-gray-300 bg-slate-50" >
+                    <input className="focus:outline-none w-full bg-slate-50" name={field?.name} required={field?.required} type={field?.input_type} onChange={(e) => { handleChange("profile_fields",e, field?.name,) }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 4</span> </div>
@@ -233,14 +270,22 @@ const IntakeFormPreview = () => {
                 <div className='text-[20px] font-normal'>{consent?.name}</div>
                 <div className='py-3'>{consent?.text}</div>
                 <div className='flex flex-col gap-1'>
-                {(consent?.type === "must agree" || consent?.type === "agree or disagree")   && <div className='flex items-center gap-2'>
-                    <input type="checkbox" />
+                {(consent?.type === "must agree")   && <div className='flex items-center gap-2'>
+                    <input type="checkbox" name="agreed" required onChange={(e)=>{handleAgreedChange(e.target, index)}} />
                     <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
                   </div>}
+
                   { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
-                    <input type="checkbox" />
+                    <input type="radio" required name="isAgreed" value="agreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
+                    <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
+                    <input type="radio" required name="isAgreed" value="disAgreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
                     <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
                   </div>}
+
+                  {(consent?.type === "acnowledge with initials")   && <div className='flex items-center gap-2'>
+                    <input type="input" required name="initial" className='border-b' onChange={(e)=>{handleInitialChange(e.target, index)}} />
+                  </div>}
+
                 </div>
               </div>
             ))}
@@ -303,10 +348,15 @@ const IntakeFormPreview = () => {
 
             </>}
               </div>
-
+              {isClientPage && <div className="flex items-center justify-end py-3 ">
+                <button type="submit" className="bg-[#22d3ee] text-white px-5 h-[35px] rounded-md">
+                  Submit
+                </button>
+              </div>}
             </div>
           </div>
         </div>
+        </form>
       </div>
     </div>
 
