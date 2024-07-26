@@ -40,6 +40,7 @@ import ScheduleCalender from "../components/Schedule/ScheduleCalender";
 import { getTimeSlots, getUnavailableEverWeekData } from "./scheduleHelper";
 import AvailabilityModal from "../components/Modals/AvailabilityModal";
 import RemoveAvailability from "../components/Schedule/RemoveAvailability";
+import { confirmAlert } from "react-confirm-alert";
 
 const localizer = momentLocalizer(moment);
 
@@ -79,14 +80,17 @@ function Schedule() {
     initialAppointmentModal
   );
 
-  console.log(allEmployeeList,"allEmployeeList");
-
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
   const [availabilityModal, setAvailabilityModal] = useState({
     ...initialAvailabilityModal,
   });
+
+  const [changes, setChanges] = useState(false)
+  console.log(changes,"fgregfegeg");
+  useEffect(()=>{setChanges(false)},[availabilityModal?.show,addLocationModal?.show,appointmentModal?.show])
+
   const [selectedAvailability, setSelectedAvailability] = useState();
   const [selectedEmployeeLocations, setSelectedEmployeeLocations] = useState();
 
@@ -314,6 +318,7 @@ function Schedule() {
   const [removeAvailabilityModal, setRemoveAvailabilityModal] = useState(false);
   const [removeAvailabilityData, setRemoveAvailabilityData] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
 
   const handleAddAppointmentSelect = ({ start, end, ...rest }, readOnly) => {
     let formateData = {
@@ -751,7 +756,31 @@ function Schedule() {
       {/* Availability modal */}
       <AvailabilityModal
         availabilityModal={availabilityModal}
-        closeModal={() => setAvailabilityModal(initialAvailabilityModal)}
+        setChanges={setChanges}
+        closeModal={() => {
+          if(changes){
+            confirmAlert({
+              title: "Confirm to Close",
+              message: `Are you Discard the Changes ?`,
+              buttons: [
+                {
+                  label: "Yes",
+                  onClick:  () => {
+                    setAvailabilityModal(initialAvailabilityModal)
+                  },
+                },
+                {
+                  label: "No",
+                  onClick: () => {
+                  },
+                },
+              ],
+            });
+          }
+          else{
+            setAvailabilityModal(initialAvailabilityModal)
+          }
+          }}
         handleSubmit={handleSubmit}
         setSelectedAvailability={(o) => setSelectedAvailability(o)}
       />
@@ -759,7 +788,30 @@ function Schedule() {
       {/* Add appointment modal */}
       <ModalWraper
         show={appointmentModal.show}
-        onHide={() => setAppointmentModal(initialAppointmentModal)}
+        onHide={() =>{
+          if(changes){
+            confirmAlert({
+              title: "Confirm to Close",
+              message: `Are you Discard the Changes ?`,
+              buttons: [
+                {
+                  label: "Yes",
+                  onClick:  () => {
+                    setAppointmentModal(initialAppointmentModal)
+                  },
+                },
+                {
+                  label: "No",
+                  onClick: () => {
+                  },
+                },
+              ],
+            });
+          }
+          else{
+            setAppointmentModal(initialAppointmentModal)}
+          }
+        }
         title={
           appointmentModal?.readOnly
             ? `Appointment Details`
@@ -818,6 +870,7 @@ function Schedule() {
                       inputId="treatment"
                       isClearable
                       onChange={(selectedOption) => {
+                        setChanges(true);
                         var timeSlots = getTimeSlots(
                           selectedOption?.duration,
                           appointmentModal.start_time,
@@ -886,12 +939,13 @@ function Schedule() {
                   //     (op) => op.value === appointmentModal?.client_id
                   //   ) || ""
                   // }
-                  onChange={(selectedOption) =>
+                  onChange={(selectedOption) => {
+                    setChanges(true); 
                     setAppointmentModal((pre) => ({
                       ...pre,
                       client_name: selectedOption?.label,
                       client_id: selectedOption?.value,
-                    }))
+                    }))}
                   }
                   options={clientNameOptions}
                   required
@@ -1074,7 +1128,30 @@ function Schedule() {
       {/* create location modal */}
       <ModalWraper
         show={addLocationModal.show}
-        onHide={() => setAddLocationModal(initialAddLocationModal)}
+        onHide={() => {
+          if(changes){
+            confirmAlert({
+              title: "Confirm to Close",
+              message: `Are you Discard the Changes ?`,
+              buttons: [
+                {
+                  label: "Yes",
+                  onClick:  () => {
+                    setAddLocationModal(initialAddLocationModal)
+                  },
+                },
+                {
+                  label: "No",
+                  onClick: () => {
+                  },
+                },
+              ],
+            });
+          }
+          else{
+            setAddLocationModal(initialAddLocationModal)
+          }
+        }}
         title={"Add New Location"}
         footer={
           <Loadingbutton
@@ -1096,6 +1173,7 @@ function Schedule() {
             label="Location"
             name="location"
             onChange={(e) => {
+              setChanges(true)
               setAddLocationModal((pre) => ({
                 ...pre,
                 location: e.target.value,
@@ -1111,6 +1189,7 @@ function Schedule() {
             isClearable
             isMulti
             onChange={(emp) => {
+              setChanges(true)
               setAddLocationModal((pre) => ({
                 ...pre,
                 employees: emp,

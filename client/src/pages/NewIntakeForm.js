@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
-import { Link } from "react-router-dom";
 import { createIntakeForm, getIntakeForm, updateIntakeForm } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { confirmAlert } from "react-confirm-alert";
+import { useNavigate } from 'react-router-dom';
 
 const Tabs = [
   {
@@ -266,6 +267,7 @@ const valiadte = [
   { value: '9 years', label: '9 years' },
   { value: '10 years', label: '10 years' }
 ]
+
 const consentType = [
   { value: 'must agree', label: 'Must Agree' },
   { value: 'agree or disagree', label: 'Agree or Disagree' },
@@ -275,7 +277,9 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
 
 const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
+  const navigate = useNavigate();  
   const [selectedTab, setSelectedTab] = useState(0);
+  const [changes, setChanges] = useState(false)
   const [intakeFormData, setIntakeFormData] = useState({
     form_data: {
       profile_fields: profile_fields,
@@ -299,6 +303,7 @@ const NewIntakeForm = () => {
   const [editedId, setEditedId] = useState();
 
   const handleOnChange = (fieldName, index, value) => {
+    setChanges(true);
     const copyProfileFields = [...intakeFormData?.form_data?.profile_fields];
     copyProfileFields[index][fieldName] = value;
     setIntakeFormData((prev) => ({ ...prev, form_data: { ...prev?.form_data, profile_fields: copyProfileFields } }));
@@ -318,6 +323,7 @@ const NewIntakeForm = () => {
   };
 
   const handleConsentChange = (index, field, value) => {
+    setChanges(true);
     setIntakeFormData((prevState) => {
       const updatedConsents = [...prevState?.form_data?.consents?.consentForms];
       const updatedConsent = { ...updatedConsents[index], [field]: value };
@@ -463,13 +469,37 @@ const NewIntakeForm = () => {
     }
   }, [editedId]);
 
+  const returnToIntakeForm = () => {
+    confirmAlert({
+      title: "Return To Intake Forms ",
+      message: `Are you sure Return to Intake Forms ?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            navigate('/intake-forms');
+            setChanges(false)
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+          },
+        },
+      ],
+    });
+  }
+
+  console.log("dsdsds",changes);
 
   return (
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
           {editedId ? <h2>Update Intake Form</h2> : <h2>New Intake Form</h2>}
-          <Link className="no-underline" to={"/intake-forms"}><div className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div></Link>
+          {/* <Link className="no-underline" to={"/intake-forms"}> */}
+            <div onClick={()=>{(changes) ?returnToIntakeForm() : navigate('/intake-forms');}} className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div>
+          {/* </Link> */}
         </div>
         <div className=" ">
           <div className="h-full  pb-0">
@@ -499,7 +529,7 @@ const NewIntakeForm = () => {
                         </div>
                         <div className="w-1/4 flex flex-col gap-[1px] ">
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
-                            <input className="focus:outline-none w-full" type="text" value={intakeFormData.name} required onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["name"]: e.target.value })) }} />
+                            <input className="focus:outline-none w-full" type="text" value={intakeFormData.name} required onChange={(e) => { setChanges(true); setIntakeFormData((prev) => ({ ...prev, ["name"]: e.target.value })) }} />
                           </div>
                           <div className="text-red-400 text-sm">
                             {intakeFormError?.name}
@@ -521,6 +551,7 @@ const NewIntakeForm = () => {
                             value={automaticOrManual.find(option => option.value === intakeFormData.prompt_type)}
                             isClearable
                             onChange={(e) => {
+                              setChanges(true);
                               setIntakeFormData((prev) => ({ ...prev, ["prompt_type"]: e?.value }))
                             }}
 
@@ -544,7 +575,7 @@ const NewIntakeForm = () => {
                         </div>
                         <label className="w-1/4 flex flex-col gap-[1px]" htmlFor="date" >
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300" >
-                            <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["effective_date"]: e.target.value })) }} />
+                            <input className="focus:outline-none w-full" value={intakeFormData.effective_date} id="date" type="date" onChange={(e) => {setChanges(true); setIntakeFormData((prev) => ({ ...prev, ["effective_date"]: e.target.value })) }} />
                           </div>
                         </label>
                       </div>
@@ -562,6 +593,7 @@ const NewIntakeForm = () => {
                             inputId="availableEmployee"
                             isClearable
                             onChange={(e) => {
+                              setChanges(true);
                               setIntakeFormData((prev) => ({ ...prev, ["valid_for"]: e?.value }))
                             }}
                             options={valiadte}
@@ -583,7 +615,7 @@ const NewIntakeForm = () => {
                         </div>
                         <div className="w-1/4 ">
                           <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full" >
-                            <textarea value={intakeFormData.introduction} onChange={(e) => { setIntakeFormData((prev) => ({ ...prev, ["introduction"]: e.target.value })) }} className="w-full focus:outline-none h-full" />
+                            <textarea value={intakeFormData.introduction} onChange={(e) => { setChanges(true); setIntakeFormData((prev) => ({ ...prev, ["introduction"]: e.target.value })) }} className="w-full focus:outline-none h-full" />
                           </div>
                         </div>
                       </div>
@@ -783,7 +815,7 @@ const NewIntakeForm = () => {
                             </p>
                           </div>
                           <div>
-                            <input type="checkbox" checked={intakeFormData?.form_data?.consents?.signature} onChange={(e)=>{setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data, consents:{...prev.form_data.consents,signature:e?.target?.checked}}}))}}/>
+                            <input type="checkbox" checked={intakeFormData?.form_data?.consents?.signature} onChange={(e)=>{ setChanges(true); setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data, consents:{...prev.form_data.consents,signature:e?.target?.checked}}}))}}/>
                             <label className="ml-2">Require Signature</label>
                           </div>
                         </div>
@@ -820,12 +852,14 @@ const NewIntakeForm = () => {
                                       className="focus:outline-none w-full"
                                       type="text"
                                       value={consent.name}
-                                      onChange={(e) =>
+                                      onChange={(e) =>{
+                                        setChanges(true);
                                         handleConsentChange(
                                           index,
                                           "name",
                                           e.target.value
                                         )
+                                      }
                                       }
                                     />
                                   </div>
@@ -843,12 +877,14 @@ const NewIntakeForm = () => {
                                 <div className="w-1/4">
                                   <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full">
                                     <textarea
-                                      onChange={(e) =>
+                                      onChange={(e) =>{
+                                        setChanges(true);
                                         handleConsentChange(
                                           index,
                                           "text",
                                           e.target.value
-                                        )
+                                        )                                         
+                                      }
                                       }
                                       className="w-full focus:outline-none h-full"
                                       rows="3"
@@ -874,12 +910,13 @@ const NewIntakeForm = () => {
                                     inputId="type"
                                     value={consentType.find(option => option.value === consent.type)}
                                     isClearable
-                                    onChange={(e) =>
+                                    onChange={(e) =>{
+                                      setChanges(true);
                                       handleConsentChange(
                                         index,
                                         "type",
                                         e?.value
-                                      )
+                                      )}
                                     }
                                     options={consentType}
                                     defaultValue={"Automatic"}
@@ -905,12 +942,13 @@ const NewIntakeForm = () => {
                                 <div className="w-1/4 py-1">
                                   <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full">
                                     <textarea
-                                      onChange={(e) =>
+                                      onChange={(e) =>{
+                                        setChanges(true);
                                         handleConsentChange(
                                           index,
                                           "declaration",
                                           e.target.value
-                                        )
+                                        )}
                                       }
                                       className="w-full focus:outline-none h-full"
                                       value={consent.declaration}
@@ -938,12 +976,13 @@ const NewIntakeForm = () => {
                                 <div className="w-1/4">
                                   <div className="border-[1px] px-2 py-[6px] rounded-sm border-gray-300 h-full">
                                     <textarea
-                                      onChange={(e) =>
+                                      onChange={(e) =>{
+                                        setChanges(true);
                                         handleConsentChange(
                                           index,
                                           "disagreeOption",
                                           e.target.value
-                                        )
+                                        )}
                                       }
                                       className="w-full focus:outline-none h-full"
                                       value={consent.disagreeOption}
@@ -957,7 +996,7 @@ const NewIntakeForm = () => {
                                 {index >= 0 && (
                                   <div
                                     className="bg-red-500 text-white px-3 h-[35px] flex items-center rounded-md cursor-pointer"
-                                    onClick={() => removeConsent(index)}
+                                    onClick={() =>{setChanges(true); removeConsent(index)}}
                                   >
                                     Remove Consent
                                   </div>
@@ -972,7 +1011,7 @@ const NewIntakeForm = () => {
                   
                     <div className="flex justify-between py-1 mr-4">
                     <div className="pl-[73px]">
-                         <div
+                      <div
                             className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md flex items-center cursor-pointer"
                             onClick={addConsent}
                           >

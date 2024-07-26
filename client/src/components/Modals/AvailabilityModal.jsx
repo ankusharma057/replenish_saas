@@ -23,6 +23,7 @@ const AvailabilityModal = (props) => {
     closeModal,
     handleSubmit,
     setSelectedAvailability,
+    setChanges
   } = props;
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -48,6 +49,7 @@ const AvailabilityModal = (props) => {
     }
   };
   const onLocationChange = async (selectedOption) => {
+    setChanges(true)
     // const { data } = await getLocationEmployee(selectedOption?.id);
 console.log("selectedOption",selectedOption);
 
@@ -73,6 +75,7 @@ console.log("selectedOption",selectedOption);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const handleInputChange = (e, att) => {
+    setChanges(true)
     availabilityModal[att] = moment(e).toDate();
     setScheduleData({ ...scheduleData, [att]: moment(e).format('DD-MM-YYYY') })
   };
@@ -158,7 +161,7 @@ console.log("selectedOption",selectedOption);
           <div className="flex flex-col gap-2 pl-2 pr-5 border-r-[1px] ">
             {daysOfWeek.map((day, index) => {
               return (
-                <DayShift key={index} day={day} availabilityTimings={availabilityTimings} setAvailabilityTimings={setAvailabilityTimings} />
+                <DayShift key={index} day={day} availabilityTimings={availabilityTimings} setChanges={setChanges} setAvailabilityTimings={setAvailabilityTimings} />
               )
             })}
           </div>
@@ -207,7 +210,7 @@ console.log("selectedOption",selectedOption);
                   checked={scheduleData.update_all_my_locations }
                   name="apply_for_all_locations"
                   type="checkbox"
-                  onChange={(e) => setScheduleData({ ...scheduleData, update_all_my_locations: e.target.checked })}
+                  onChange={(e) => {setChanges(true); setScheduleData({ ...scheduleData, update_all_my_locations: e.target.checked })}}
                   className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                 />
               </div>
@@ -217,7 +220,7 @@ console.log("selectedOption",selectedOption);
                   {employeeList && employeeList.map((val, index) => {
                     return (
                       <div key={index} className="flex gap-2">
-                        <input type="radio" name={val.name} checked={selectedStaff && selectedStaff.id === val.id} onChange={() => { setSelectedStaff(val); setScheduleData({ ...scheduleData, employee_id: val.id }) }} id={val.id} />
+                        <input type="radio" name={val.name} checked={selectedStaff && selectedStaff.id === val.id} onChange={() => { setSelectedStaff(val); setChanges(true); setScheduleData({ ...scheduleData, employee_id: val.id }) }} id={val.id} />
                         <label htmlFor={val.id}>{val.name}</label>
                       </div>
                     )
@@ -241,20 +244,24 @@ console.log("selectedOption",selectedOption);
 
 export default AvailabilityModal;
 
-const DayShift = ({ day, availabilityTimings, setAvailabilityTimings }) => {
+const DayShift = ({ day, availabilityTimings,setChanges, setAvailabilityTimings }) => {
   const [timings, setTimings] = useState([])
   const handleAddTimes = () => {
     setTimings([...timings, { start_time: null, end_time: null }])
+    setChanges(true)
   }
   const handleRemoveTimes = (index) => {
     const newTimeArray = [...timings]
     newTimeArray.splice(index, 1);
     setTimings([...newTimeArray])
+    setChanges(true)
   }
   const handleInputChange = (e, att, index) => {
+    setChanges(true)
     const updatedTime = [...timings]
     updatedTime[index] = { ...updatedTime[index], [att]: moment(e).toDate().toLocaleTimeString() }
     setTimings([...updatedTime])
+
   };
   useEffect(() => {
     const newValues = [...availabilityTimings]

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   createTreatment,
   deleteTreatment,
@@ -47,6 +47,7 @@ const Treatment = () => {
   const [errorForm, setErrorsForm] = useState([]);
   const [loading, setLoading] = useState(false);
 
+
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getEmployeesList(refetch);
@@ -88,11 +89,33 @@ const Treatment = () => {
     },
   ]);
 
+
+
   const [showUpdateTreatmentModal, setShowUpdateTreatmentModal] =
     useState(false);
   const [showCreateTreatmentModal, setShowCreateTreatmentModal] =
     useState(false);
+    const [changes,setChanges] = useState(false)
+    useEffect(()=>{setChanges(false)},[showUpdateTreatmentModal,showCreateTreatmentModal])
+    console.log("dnuahcfushdc", changes);
   const [sorting, setSorting] = useState([]);
+
+  const closeModel = (stage) => {
+    if(stage){
+    setShowUpdateTreatmentModal(false);
+    setShowCreateTreatmentModal(false);
+    setTreatmentForm({
+      product_id: "",
+      name: "",
+      duration: "",
+      desc: "",
+      cost: "",
+      quantity: "",
+      treatment_intake_forms_attributes: [],
+      });
+    setErrorsForm({});
+  }
+  }
 
   const getProducts = async (refetch = false) => {
     try {
@@ -160,6 +183,7 @@ const Treatment = () => {
   };
 
   const handleTreatmentChange = (e) => {
+    setChanges(true)
     setTreatmentForm((pre) => ({
       ...pre,
       [e.target.name]: e.target.value,
@@ -559,19 +583,29 @@ const Treatment = () => {
                     : "Create New Treatment"
                 }
                 onHide={() => {
-                  setShowUpdateTreatmentModal(false);
-                  setShowCreateTreatmentModal(false);
-                  setTreatmentForm({
-                    product_id: "",
-                    name: "",
-                    duration: "",
-                    desc: "",
-                    cost: "",
-                    quantity: "",
-                    treatment_intake_forms_attributes: [],
-                  });
-                  setErrorsForm({});
-                }}
+                  if(changes){
+                    confirmAlert({
+                      title: "Confirm to Close",
+                      message: `Are you Discard the Changes ?`,
+                      buttons: [
+                        {
+                          label: "Yes",
+                          onClick:  () => {
+                            closeModel(true)
+                          },
+                        },
+                        {
+                          label: "No",
+                          onClick: () => {
+                            closeModel(false)
+                          },
+                        },
+                      ],
+                    });
+                  }
+                  else{
+                    closeModel(true)
+                }}}
                 footer={
                   <div className="flex gap-2">
                     {showUpdateTreatmentModal  && (
