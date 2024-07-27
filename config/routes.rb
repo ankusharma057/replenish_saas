@@ -22,6 +22,7 @@ mount Sidekiq::Web => '/sidekiq'
       resources :employees, only: %i(index show)
 
       resources :intake_forms
+      resources :response_intake_forms, only: %i(index show)
 
       resources :schedules, only: %i(index create show destroy) do
         post :remaining_pay, on: :member
