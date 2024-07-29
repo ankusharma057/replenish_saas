@@ -3,7 +3,7 @@ class Api::ResponseIntakeFormsController < ApplicationController
   before_action :set_intake_form, only: %i[update destroy show]
 
   def index
-    @response_intake_forms = ResponseIntakeForm.all
+    @response_intake_forms = ResponseIntakeForm.get_response_intake_form(params)
     render json: @response_intake_forms
   end
 
@@ -33,7 +33,11 @@ class Api::ResponseIntakeFormsController < ApplicationController
   end
 
   def show
-    render json: @response_intake_form
+    if @response_intake_form.present?
+      render json: @response_intake_form
+    else
+      render json: {error: 'Response Intake Form does not exist'}, status: :unprocessable_entity
+    end
   end
 
   private
