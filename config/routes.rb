@@ -96,6 +96,7 @@ mount Sidekiq::Web => '/sidekiq'
 
     resources :intake_forms
     resources :response_intake_forms
+    resources :questionnaires
 
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
 

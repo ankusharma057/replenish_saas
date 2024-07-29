@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_15_121003) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_29_131824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -135,7 +135,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_15_121003) do
     t.string "valid_for"
     t.text "introduction"
     t.jsonb "form_data"
-    t.integer "appointment_type"
     t.bigint "employee_id", null: false
     t.boolean "deleted", default: false
     t.datetime "created_at", null: false
@@ -234,6 +233,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_15_121003) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "questionnaires", force: :cascade do |t|
+    t.string "name"
+    t.jsonb "template"
+    t.bigint "employee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_questionnaires_on_employee_id"
+  end
+
   create_table "response_intake_forms", force: :cascade do |t|
     t.integer "intake_form_id", null: false
     t.integer "client_id", null: false
@@ -316,6 +324,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_15_121003) do
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "intake_forms", "employees"
+  add_foreign_key "questionnaires", "employees"
   add_foreign_key "schedules", "clients"
   add_foreign_key "schedules", "employees"
   add_foreign_key "schedules", "products"

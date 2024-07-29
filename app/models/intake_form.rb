@@ -15,8 +15,6 @@ class IntakeForm < ApplicationRecord
 
   enum prompt_type: { automatic: 0, manual: 1 }
 
-  enum appointment_type: { all_appointments: 0, specific_staff: 1, specific_treatment: 2 }
-
   def self.treatment_intake_forms(params)
     if params[:treatment_id].present?
       where.not(id: TreatmentIntakeForm.where(treatment_id: params[:treatment_id]).map(&:intake_form_id).uniq)
