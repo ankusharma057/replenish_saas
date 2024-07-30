@@ -1107,7 +1107,8 @@ const Employee = () => {
                   />
                 )}
                 {currentTab === "templates" && (
-                  <div className="bg-white rounded-md">
+                  <div className="flex justify-center">
+                  <div className="bg-white rounded-md w-[65rem]">
                     {templateTabs === "templates list" && <div className=" p-4 pt-2">
                       <div className="bg-white rounded-lg">
                         <div className="flex justify-between items-center py-3">
@@ -1148,7 +1149,7 @@ const Employee = () => {
                           </div>
                         </div>
                         <div><Questionnaires /></div>
-                        <div className="flex">
+                        {/* <div className="flex">
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                             <button type="button" className="flex gap-2 items-center">
                               <PiGridNineLight />
@@ -1157,8 +1158,9 @@ const Employee = () => {
                               Add Item
                             </button>
                           </div>
-                        </div>
+                        </div> */}
                       </div>}
+                  </div>
                   </div>
                 )}
 

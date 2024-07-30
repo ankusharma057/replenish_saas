@@ -14,13 +14,18 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export const TopModel = forwardRef(({ children, onSave, isOpenModel }, ref) => {
+export const TopModel = forwardRef(({ children, onSave, footer }, ref) => {
   const subtitle = useRef(null);
   const [modalIsOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
-    setIsOpen(true);
+    setIsOpen(!modalIsOpen);
   };
+
+  const closeModal = () => {
+    setIsOpen(false)
+  };
+
 
   const afterOpenModal = () => {
     if (subtitle.current) {
@@ -32,9 +37,7 @@ export const TopModel = forwardRef(({ children, onSave, isOpenModel }, ref) => {
     openModal,
   }));
 
-  const closeModal = () => {
-    setIsOpen(false)
-  };
+
 
   return (
     <div>
@@ -46,12 +49,13 @@ export const TopModel = forwardRef(({ children, onSave, isOpenModel }, ref) => {
         contentLabel="Example Modal"
       >
         {children}
-        <div className='flex justify-end gap-2'>
-          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={closeModal}>Close</button>
-          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={onSave}>Save</button>
-        </div>
+        {footer}
       </Modal>
     </div>
   );
 });
 
+{/* <div className='flex justify-end gap-2'>
+          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={closeModal}>Close</button>
+          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={onSave}>Save</button>
+        </div> */}

@@ -1,16 +1,16 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaBook, FaUndo } from "react-icons/fa";
 import { PiGridNineLight } from "react-icons/pi";
 import { useLocation } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import SignatureCanvas from 'react-signature-canvas'
 import Select from "react-select";
-import { CiFileOn } from "react-icons/ci";
 import { DropDown } from "../components/DropDown/DropDown";
 import { Range } from 'react-range';
 import { TopModel } from "../components/TopModel";
-
-
+import { MdDelete } from "react-icons/md";
+import { IoMdAdd } from "react-icons/io";
+import { PiColumnsFill } from "react-icons/pi";
 import { BsFileEarmarkTextFill } from "react-icons/bs";
 import { TbSignature } from "react-icons/tb";
 import { FaHeading } from "react-icons/fa6";
@@ -62,7 +62,7 @@ const qutionaryInputs = {
     id: null,
     type: "textarea",
     label: "Notes",
-    value: "Notes default value",
+    value: "",
     required: false,
     read_only: false,
   },
@@ -87,6 +87,7 @@ const qutionaryInputs = {
     id: null,
     type: "checkbox",
     label: "CheckBox",
+    layout:"cloumn",
     value: [
       { label: "CheckBox 1", value: true },
       { label: "CheckBox 2", value: false },
@@ -147,25 +148,13 @@ const Questionnaires = () => {
   const [optionModel, setOptionModel] = useState(false)
   const [qutionaryFields, setQutionaryFields] = useState([])
   const [values, setValues] = useState(qutionaryInputs?.initialRange?.value.map(v => v.value));
-  const [editModel, setEditModel] = useState("")
-
-  console.log("dddd",editModel);
-
+  const [editModel, setEditModel] = useState({name:"",index:""})
+  const [selectedvalue,setSelectedvalue]= useState(null)
 
   const createQutionaryFields = (intialFieldName) => {
     setQutionaryFields((prev) => ([...prev, { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 }]))
   }
 
-  const saveSignature = () => {
-    if (sigCanvasRef.current) {
-      const base64Signature = sigCanvasRef.current.toDataURL();
-      console.log(base64Signature);
-    }
-  };
-
-  const handleSave = () => {
-    console.log('Save button clicked');
-  };
 
   const openModalFromParent = () => {
     if (topModelRef?.current) {
@@ -173,32 +162,54 @@ const Questionnaires = () => {
     }
   };
 
-  console.log(qutionaryFields);
+
+// ----------------------------------------------------
+const saveSignature = () => {
+  if (sigCanvasRef.current) {
+    const base64Signature = sigCanvasRef.current.toDataURL();
+    console.log(base64Signature);
+  }
+};
+
+const handleSave = () => {
+  console.log('Save button clicked');
+};
+// ---------------------------------------------------
+// qutionaryFields onchange
+
+
+
+const handleChange = (key, value, index) => {
+  setQutionaryFields((prev) =>([...prev,prev[index],{...prev[index], [key]: value}]));
+};
+
+console.log("dddgf",qutionaryFields);
+
 
   return (
-    <div className=" p-2">
-      <div className="bg-white">
+    <div className=" ">
+      <div className="bg-white ">
         <div className=" py-3 flex flex-col gap-4">
           {Array.isArray(qutionaryFields) && qutionaryFields.map((field, index) => (
             field?.type === "textarea" ? (
               <>
                 {/* Note */}
-                <div className="bg-white  p-[6px] flex flex-col gap-1">
+                <div className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"textarea", index:index});openModalFromParent()}}>
                   <div className="flex justify-between items-center py-1">
                     <div className="font-semibold text-[17px]">{field?.label}</div>
-                    <div className="text-[20px]"  onClick={() => {openModalFromParent()}}><BsThreeDotsVertical /></div>
+                    <div className="text-[20px] cursor-pointer"  ><BsThreeDotsVertical /></div>
                   </div>
-                  <div className="border rounded-md overflow-hidden border-black p-1 ">
+                  <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
                     <textarea className="w-full focus:outline-none" readOnly={field?.read_only} required={field?.required} value={field?.value} rows="3"></textarea>
                   </div>
                 </div></>)
               :
               field?.type === "signature" ? (<>
                 {/* Signature */}
-                <div className="bg-white p-[6px] flex flex-col gap-1">
+                <div className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"signature",index:index}); openModalFromParent()}}>
                   <div className="flex justify-between items-center">
                     <div className="font-semibold text-[17px]">{field?.label}</div>
-                    <div className="text-[20px]"  onClick={() => {openModalFromParent()}}><BsThreeDotsVertical /></div>
+                    <div className="text-[20px] cursor-pointer"  ><BsThreeDotsVertical /></div>
                   </div>
                   <div>
                     <div className='flex justify-between py-1'>
@@ -254,10 +265,10 @@ const Questionnaires = () => {
                 :
                 field?.type === "heading" ? (<>
                   {/* Heading */}
-                  <div className="bg-white p-[6px] flex flex-col gap-1">
+                  <div className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"heading", index:index}); openModalFromParent()}}>
                     <div className="flex justify-between items-center ">
                       <div className="font-semibold text-[17px]">{field?.label}</div>
-                      <div className="text-[20px]" onClick={() => {setEditModel("heading")}}><BsThreeDotsVertical /></div>
+                      <div className="text-[20px] cursor-pointer" ><BsThreeDotsVertical /></div>
                     </div>
                     <div className="text-[22px] py-2 font-medium">{field?.value}</div>
                   </div>
@@ -265,10 +276,10 @@ const Questionnaires = () => {
                   :
                   field?.type === "checkbox" ? (<>
                     {/* Check Boxes */}
-                    <div className="bg-white p-[6px] flex flex-col gap-1">
+                    <div className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"checkbox", index:index}); openModalFromParent()}}>
                       <div className="flex justify-between items-center  py-1">
                         <div className="font-semibold text-[17px]">{field?.label}</div>
-                        <div className="text-[20px]" onClick={() => {setEditModel("checkbox")}}><BsThreeDotsVertical /></div>
+                        <div className="text-[20px] cursor-pointer" ><BsThreeDotsVertical /></div>
                       </div>
                       <div className="flex flex-col gap-2">
                         {Array.isArray(field.value) && field.value.map((checkbox, i) => (
@@ -283,10 +294,10 @@ const Questionnaires = () => {
                     :
                     field?.type === "dropdown" ? (<>
                       {/* Drop down */}
-                      <div className="bg-white p-[6px] flex flex-col gap-1">
+                      <div className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"dropdown", index:index}); openModalFromParent()}}>
                         <div className="flex justify-between items-center ">
                           <div className="font-semibold text-[17px]">{field?.label}</div>
-                          <div className="text-[20px]" onClick={() => {setEditModel("dropdown")}}><BsThreeDotsVertical /></div>
+                          <div className="text-[20px] cursor-pointer" ><BsThreeDotsVertical /></div>
                         </div>
                         <div className="py-3">
                           <div className='w-[300px]'>
@@ -306,10 +317,10 @@ const Questionnaires = () => {
                       :
                       field?.type === "range" ? (<>
                         {/* Range */}
-                        <div className="bg-white p-[6px] flex flex-col gap-1 ">
+                        <div className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1 " onClick={() => {setEditModel({name:"range", index:index}); openModalFromParent()}}>
                           <div className="flex justify-between items-center ">
                             <div className="font-semibold text-[17px]">{field?.label}</div>
-                            <div className="text-[20px]" onClick={() => {setEditModel("range")}}>
+                            <div className="text-[20px] cursor-pointer" >
                               <BsThreeDotsVertical />
                             </div>
                           </div>
@@ -361,12 +372,12 @@ const Questionnaires = () => {
                         :
                         field?.type === "instruction" ? (<>
                           {/* Instructions */}
-                          <div className="bg-white p-[6px] flex flex-col gap-1">
+                          <div className=" hover:bg-gray-100  rounded-md p-[6px] flex flex-col gap-1" onClick={() => {setEditModel({name:"instruction", index:index}); openModalFromParent()}}>
                             <div className="flex justify-between items-center  py-1">
                               <div className="font-semibold text-[17px]">{field?.label}</div>
-                              <div className="text-[20px]" onClick={() => {setEditModel("instruction")}}><BsThreeDotsVertical /></div>
+                              <div className="text-[20px] cursor-pointer" ><BsThreeDotsVertical /></div>
                             </div>
-                            <div className="text-[18px] bg-slate-100  rounded-lg pl-3 font-medium py-3"><em>{field?.value}</em></div>
+                            <div className="text-[18px] bg-white  rounded-lg pl-3 font-medium py-3"><em>{field?.value}</em></div>
                           </div>
                         </>) : null
           ))}
@@ -382,9 +393,9 @@ const Questionnaires = () => {
               {optionModel && <div className="bg-gray-50 duration-200 rounded-md absolute -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
                 <div className="py-1">
                   {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, index) => (
-                    <div key={index} onClick={() => { createQutionaryFields(option?.field); setOptionModel(false) }} className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]">
-                      <div className="text-[15px]">{option?.label}</div>
-                      <div className="text-[18px]">{option?.icon}</div>
+                    <div key={index} onClick={() => { createQutionaryFields(option?.field); setOptionModel(false) }} className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px] cursor-pointer">
+                      <div className="text-[15px] cursor-pointer">{option?.label}</div>
+                      <div className="text-[18px] cursor-pointer">{option?.icon}</div>
                     </div>
                   ))}
                 </div>
@@ -429,69 +440,284 @@ const Questionnaires = () => {
         }
       </div>
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "textarea" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello textarea the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+     {editModel?.name === "textarea" && <TopModel onSave={handleSave} 
+     ref={topModelRef}
+     footer={
+        <div className='flex justify-between gap-2'>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <div className="flex gap-2">
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+          </div>
+         </div> 
+     }
+     >
+        <div className="w-[400px] flex flex-col gap-3">
+          <h3>Edit Note</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" value={selectedvalue?.label} onChange={(e)=>{handleChange( "label",e?.target?.value,editModel?.index)}}  />
+            </div>
+          </div>
+          <div className="border-[2px] overflow-hidden  rounded-md px-2">
+            <textarea className="w-full focus:outline-none max-h-[70px]" onChange={(e)=>{handleChange("value", e?.target?.value,editModel?.index)}}   rows="3"></textarea>
+          </div>
+          <div className="flex justify-between py-1">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </TopModel>}
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "signature" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello signature the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+      {editModel?.name  === "signature" && <TopModel onSave={handleSave} ref={topModelRef}
+        footer={
+          <div className='flex justify-between gap-2'>
+            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+            <div className="flex gap-2">
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+            </div>
+           </div> 
+       }
+      >
+      <div>
+      <div className="w-[400px]">
+          <h3>Edit Signature</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" value={selectedvalue?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
+            </div>
+          </div>
+          <div className="flex justify-between py-1">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </div>
+      </TopModel>}
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "checkbox" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello checkbox the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+      {editModel?.name  === "heading" && <TopModel onSave={handleSave} ref={topModelRef}
+         footer={
+          <div className='flex justify-between gap-2'>
+            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+            <div className="flex gap-2">
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+            </div>
+           </div> 
+       }
+      >
+      <div>
+      <div className="w-[400px]">
+          <h3>Edit Heading</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none"  onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
+            </div>
+          </div>
+          <div className="flex justify-between py-1">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div>
+          </div>
+          </div>
+        </div>
+      </div>
+      </TopModel>}
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "dropdown" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello dropdown the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+      {editModel?.name  === "checkbox" && <TopModel onSave={handleSave} ref={topModelRef}
+      footer={
+        <div className='flex justify-between gap-2'>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <div className="flex gap-2">
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+          </div>
+         </div> 
+     }
+      >
+       <div className="w-[400px]">
+          <h3>Edit Check Boxes</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" />
+            </div>
+          </div>
+          <div>
+            <label>Checkbox Layout</label>
+            <div className="flex gap-4">
+              <div className="flex gap-1">
+                <input type="radio" id="horizondal" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
+                <label htmlFor="horizondal">Horizondal</label>
+              </div>
+              <div className="flex gap-1">
+                <input type="radio" id="vertical" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
+                <label htmlFor="vertical">Vertical</label>
+              </div>
+              <div className="flex gap-1">
+                <input type="radio" id="column" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
+                <label htmlFor="column">Column</label>
+              </div>
+            </div>
+          </div>
+          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
+          <div className="grid grid-cols-[15%,1fr,20%] items-center py-1 bg-gray-200">
+            <div>Input</div>
+            <div className="pl-4">Value</div>
+            <div className="flex justify-center">Action</div>
+          </div>
+            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
+                <div className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px]">
+                  <div className="">
+                  <input type="checkbox" id={option?.label} checked={option?.value} className="w-[20%]" />
+                  </div>
+                  <label htmlFor={option?.label}>{option?.label}</label>
+                  <div className="flex text-[18px] justify-evenly">
+                    <div><IoMdAdd /></div>
+                    <div><MdDelete /></div>
+                    <div><PiColumnsFill /></div>
+                  </div>
+                </div>
+            ))}
+          </div>
+          <div className="flex justify-between">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </TopModel>}
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "range" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello range the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+      {editModel?.name  === "dropdown" &&<TopModel onSave={handleSave} ref={topModelRef}
+      footer={
+        <div className='flex justify-between gap-2'>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <div className="flex gap-2">
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+          </div>
+         </div> 
+     }
+      >
+        <div className="w-[400px]">
+          <h3>Edit Dropdown</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" />
+            </div>
+          </div>
+          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
+          <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
+        
+            <div className="pl-4">Options</div>
+            <div className="flex justify-center">Action</div>
+          </div>
+            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
+                <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
+                  <label htmlFor={option?.label}>{option?.label}</label>
+                  <div className="flex text-[18px] justify-evenly">
+                    <div><IoMdAdd /></div>
+                    <div><MdDelete /></div>
+                    <div><PiColumnsFill /></div>
+                  </div>
+                </div>
+            ))}
+          </div>
+          <div className="flex justify-between py-2">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </TopModel>}
 
-      <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "instruction" ? true : false} >
-        <h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello instruction the Modal!</h2>
-        <p>This is some content inside the modal.</p>
-      </TopModel>
+      {editModel?.name  === "range" && <TopModel onSave={handleSave} ref={topModelRef}
+      footer={
+        <div className='flex justify-between gap-2'>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <div className="flex gap-2">
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+          </div>
+         </div> 
+     }
+      >
+      <div className="w-[400px]">
+          <h3>Edit Range</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" />
+            </div>
+          </div>
+          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
+          <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
+        
+            <div className="pl-4">Options</div>
+            <div className="flex justify-center">Action</div>
+          </div>
+            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
+                <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
+                  <label htmlFor={option?.label}>{option?.label}</label>
+                  <div className="flex text-[18px] justify-evenly">
+                    <div><IoMdAdd /></div>
+                    <div><MdDelete /></div>
+                    <div><PiColumnsFill /></div>
+                  </div>
+                </div>
+            ))}
+          </div>
+          <div className="flex justify-between py-2">
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </TopModel>}
+
+      {editModel?.name  === "instruction" && <TopModel onSave={handleSave} ref={topModelRef}
+       footer={
+        <div className='flex justify-between gap-2'>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <div className="flex gap-2">
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+          </div>
+         </div> 
+     }
+      >
+      <div>
+      <div className="w-[400px]">
+          <h3>Edit Instructions</h3>
+          <div className="flex flex-col gap-2">
+          <div>
+            <label>Label</label>
+            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
+              <input type="text" className="w-full focus:outline-none" onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
+            </div>
+          </div>
+          <div>
+            <div>Required</div>
+            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+          </div>
+          </div>
+        </div>
+      </div>
+      </TopModel>}
     </div>
   )
 }
 
 export default Questionnaires;
-
-
-
-{/* <TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "textarea" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello textarea the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel>
-
-<TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "signature" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello signature the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel>
-
-<TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "checkbox" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello checkbox the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel>
-
-<TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "dropdown" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello dropdown the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel>
-
-<TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "range" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello range the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel>
-
-<TopModel onSave={handleSave} ref={topModelRef} isOpenModel={editModel === "instruction" ? true : false} >
-<h2 ref={subtitle => (subtitle ? (subtitle.style.color = '#00f') : null)}>Hello instruction the Modal!</h2>
-<p>This is some content inside the modal.</p>
-</TopModel> */}

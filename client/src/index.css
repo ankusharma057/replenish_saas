@@ -270,3 +270,8 @@ input:-webkit-autofill:active {
   z-index: 999;
   background-color: #f8f9fac9;
 }
+
+.ReactModal__Content{
+  transform: translate(-50%, 0%) !important;
+  top: 0px !important;
+}
