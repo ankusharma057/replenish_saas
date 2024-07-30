@@ -27,7 +27,7 @@ export default memo(function Header() {
     }
   };
 
-  const handleMenuSHow = () => {
+  const   handleMenuSHow = () => {
     setisMenuShow((pre) => !pre);
   };
 
