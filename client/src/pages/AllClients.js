@@ -31,6 +31,8 @@ import { FaUser, FaBriefcaseMedical, FaDollarSign, FaRegCalendarAlt, FaArrowRigh
 import { BiSolidPencil } from "react-icons/bi";
 import { IoCallSharp, IoMailSharp, IoHome, IoMegaphoneSharp, IoChatbubble } from "react-icons/io5";
 import { BsFillGearFill } from "react-icons/bs";
+import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
+import { useNavigate } from "react-router-dom";
 
 const AllClientRoot = () => {
     const { authUserState } = useAuthContext();
@@ -41,6 +43,7 @@ const AllClientRoot = () => {
     //   invoices: [],
     //   employee: {},
     // });
+    const navigate = useNavigate();
     const { collapse } = useAsideLayoutContext();
     const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
     const [currentTab, setCurrentTab] = useState("profile");
@@ -51,6 +54,9 @@ const AllClientRoot = () => {
     const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
     const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+
+
+console.log("sssss",selectedEmployeeData);
 
     const getEmployees = async (refetch = false) => {
         try {
@@ -403,7 +409,7 @@ const AllClientRoot = () => {
                                 className={`sm:p-6 rounded-b-lg ${currentTab === "staff" ? "" : "bg-transparent"
                                     } `}
                             >
-                                {true && (
+                                {currentTab === "profile" && (
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="grid grid-cols-2 col-span-2 gap-20 justify-between rounded-md py-6 items-center bg-white">
                                             <div className="flex items-start justify-evenly gap-6 text-center">
@@ -551,6 +557,12 @@ const AllClientRoot = () => {
                                         </div>
                                     </div>
                                 )}
+
+                                {currentTab === "Chart" && (
+                                    // navigate("/submited-intake-forms-preview")
+                                    <SubmitedClientIntakeForm clientId={selectedEmployeeData?.id}/>
+                                )}
+                                
                                 {currentTab === "inventory" && (
                                     <InventoryTab
                                         inventoryList={selectedEmployeeData}

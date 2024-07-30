@@ -265,3 +265,8 @@ input:-webkit-autofill:active {
 .fonts{
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
+
+.ReactModal__Overlay--after-open{
+  z-index: 999;
+  background-color: #f8f9fac9;
+}

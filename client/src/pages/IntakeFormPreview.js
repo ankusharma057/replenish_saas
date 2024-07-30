@@ -1,17 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { createResponseIntakeForm, getIntakeForm, getClientIntakeForm } from '../Server';
+import { createResponseIntakeForm, getIntakeForm, getClientIntakeForm, getClientResponseIntakeForm, getSubmittedResponseIntakeForm } from '../Server';
 import { toast } from 'react-toastify';
 import ModalWraper from '../components/Modals/ModalWraper';
 import SignatureCanvas from 'react-signature-canvas'
 import { FaUndo } from "react-icons/fa";
 import { DropDown } from '../components/DropDown/DropDown';
-
+import { useAuthContext } from '../context/AuthUserContext';
+// customers
 const IntakeFormPreview = () => {
+  const { authUserState } = useAuthContext();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const intake_formId = searchParams.get("intake_form_id") || searchParams.get("id");
+  const intake_formId = searchParams.get("intake_form_id");
   const isClientPage = location.pathname.includes("clients") ? true : false
+  const isClientFormPreviewPage = location.pathname.includes("submitted-intake-form-preview") ? true : false
   const client_id = searchParams.get("client_id");
   const [intakeFormFields, setIntakeFormFields] = useState()
   const [model, setModel] = useState({show: false, title: ""})
@@ -32,6 +35,7 @@ const IntakeFormPreview = () => {
     }
   })
   
+
   const [strokeHistory, setStrokeHistory] = useState([]);
   const [canUndo, setCanUndo] = useState(false);
   const [selectOption, setSelectOption] = useState()
@@ -46,6 +50,7 @@ const IntakeFormPreview = () => {
   const sigCanvasRef = useRef(null);
   const canvasRef = useRef(null);
 
+  console.log("ssss",intakeFormData );
 
   const handleChangeText = (event) => {
     setText(event.target.value);
@@ -174,9 +179,6 @@ const IntakeFormPreview = () => {
       const { data, status } = isClientPage ? await getClientIntakeForm(intake_formId) : await getIntakeForm(intake_formId);
       if (status === 200) {
         setIntakeFormFields(data)
-        setIntakeFormData((prev)=>({...prev, response_intake_form: {...prev.response_intake_form,response_form_data: {...prev.response_intake_form.response_form_data,consents:{
-          ...prev.response_intake_form.response_form_data.consents, consentForms: data.form_data.consents.consentForms
-        }}}}))
 
         if(data?.submitted){
           setModel({show: true, title: "You already submitted this intake form. You can close this tab."})
@@ -188,9 +190,39 @@ const IntakeFormPreview = () => {
     }
   };
 
+  console.log("ddddd",intakeFormFields);
+
+
+  const fetchSubmittedIntakeForm = async () => {
+    try {
+      const { data, status } = isClientPage ? await getClientResponseIntakeForm(intake_formId) : await getSubmittedResponseIntakeForm(intake_formId);
+      
+      if (status === 200) {
+        setIntakeFormData({response_intake_form:data})
+      }
+    } catch (error) {
+      console.error('Error fetching intake forms:', error);
+    }
+  };
+  
+
   useEffect(() => {
-    fetchIntakeForm();
+    if(isClientFormPreviewPage){
+      fetchSubmittedIntakeForm()
+    }
+    else{
+      fetchIntakeForm();
+    }
+   
+
   }, []);
+
+  console.log("dd",intakeFormFields?.form_data?.profile_fields );
+
+     const responseConsents = Object.values(intakeFormData?.response_intake_form?.response_form_data?.consents?.consentForms)
+
+  console.log("sdskkk",intakeFormData?.response_intake_form?.intake_form?.name);
+  console.log("xxx",isClientFormPreviewPage)
 
     const saveStrokeToHistory = () => {
       const newStroke = sigCanvasRef.current.toDataURL();
@@ -228,7 +260,7 @@ const IntakeFormPreview = () => {
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
       <div className='w-[75rem] mx-auto h-full'>
-        <div className='text-center text-[34px] font-semibold '>ReplenishMD</div>
+        <div className='text-center text-[34px] font-semibold '>{isClientFormPreviewPage? "Client Intake Form Preview" :"ReplenishMD"}</div>
         <div className='flex  justify-end  w-full h-16 items-end'>
           {/* <Link className="no-underline" to={"/intake-forms"}><div className='text-[17px] py-2'>Return to Intake Form </div></Link> */}
           </div>
@@ -240,6 +272,20 @@ const IntakeFormPreview = () => {
               <div>Online intake forms allow you to collect contact information, family and medical history, and consent from your client. The client response will become part of their profile and chart.</div>
               <div>{intakeFormFields?.employee?.name} will automatically prompt clients to fill out an intake form in any email sent prior to their first visit. After their first visit, you can send them a link to fill out the intake form from their client profile.</div>
             </div>
+            {isClientFormPreviewPage ?
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
+            {(Object.keys(intakeFormData?.response_intake_form?.response_form_data?.profile_fields)).map((field, index) => (
+              <div key={index} className={` flex flex-wrap `}>
+                <div>
+                  <label>{field} {field?.required && <span className={`text-[13px]`}>(Required)</span>}</label>
+                </div>
+                <div className="border-[1px] w-full self-start px-2 py-[6px] rounded-md border-gray-300 bg-slate-50" >
+                  <input className="focus:outline-none w-full bg-slate-50" name={field[0]} readOnly  type={text} value={intakeFormData?.response_intake_form?.response_form_data?.profile_fields[field]}  />
+                </div>
+              </div>
+            ))}
+          </div>
+            : 
             <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >
               {Array.isArray(intakeFormFields?.form_data?.profile_fields) && intakeFormFields?.form_data?.profile_fields.map((field, index) => (
                 <div key={index} className={` flex flex-wrap   ${field?.include_in_intake ? "block" : "hidden"}`}>
@@ -251,7 +297,7 @@ const IntakeFormPreview = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </div>}
           </div>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 4</span> </div>
@@ -262,10 +308,37 @@ const IntakeFormPreview = () => {
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] font-medium'>Consents - <span className='text-blue-300'>Step 4 of 4</span> </div>
             <div className='p-4 pt-0'>
-              <div className='text-[25px] font-normal py-2'><span >{intakeFormFields?.name}</span> - Consents </div>
+              <div className='text-[25px] font-normal py-2'><span >{intakeFormData?.response_intake_form?.intake_form?.name}</span> - Consents </div>
               
               <div className='flex flex-col gap-3'>
-            {Array.isArray(intakeFormFields?.form_data?.consents?.consentForms) && intakeFormFields?.form_data?.consents?.consentForms.map((consent,index)=>(
+              {isClientFormPreviewPage ? (
+                 (Array.isArray(intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms) && intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms.map((consent,index)=>(
+                  <div className={`${intakeFormFields?.form_data?.consents?.consentForms.length === index+1 && !intakeFormFields?.form_data?.consents?.signature ? "border-none" : "border-b"} p-2`} key={index}>
+                  <div className='text-[20px] font-normal'>{consent?.name}</div>
+                  <div className='py-3'>{consent?.text}</div>
+                  <div className='flex flex-col gap-1'>
+                  {(consent?.type === "must agree")   && <div className='flex items-center gap-2'>
+                      <input type="checkbox" name="agreed" checked={responseConsents[index]["agreed"]} required readOnly={true} />
+                      <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
+                    </div>}
+  
+                    { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
+                      <input type="radio" readOnly={true} required  checked={responseConsents[index]["agreed"]} />
+                      <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
+                      <input type="radio" readOnly={true} required  checked={responseConsents[index]["disAgreed"]} />
+                      <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
+                    </div>}
+  
+                    {(consent?.type === "acnowledge with initials")   && <div className='flex items-center gap-2'>
+                      <input type="input" readOnly={true} value={responseConsents[index]?.initialValue} required name="initial" className='border-b'  />
+                    </div>}
+  
+                  </div>
+                </div>
+              )))
+              ) 
+              :
+            (Array.isArray(intakeFormFields?.form_data?.consents?.consentForms) && intakeFormFields?.form_data?.consents?.consentForms.map((consent,index)=>(
                 <div className={`${intakeFormFields?.form_data?.consents?.consentForms.length === index+1 && !intakeFormFields?.form_data?.consents?.signature ? "border-none" : "border-b"} p-2`} key={index}>
                 <div className='text-[20px] font-normal'>{consent?.name}</div>
                 <div className='py-3'>{consent?.text}</div>
@@ -288,8 +361,14 @@ const IntakeFormPreview = () => {
 
                 </div>
               </div>
-            ))}
-            {intakeFormFields?.form_data?.consents?.signature &&<>
+            )))}
+
+            {isClientFormPreviewPage ? <div>
+              <div className='text-[20px] font-normal'>Sign</div>
+              <img className='h-[80px]' src={intakeFormData?.response_intake_form?.response_form_data?.consents?.signature?.sign} alt="" />
+            </div>
+            :
+            intakeFormFields?.form_data?.consents?.signature &&<>
             <div className='text-[20px] font-normal'>Sign</div>
             <div className='flex justify-between'>
               <div className='flex gap-3'>
@@ -348,11 +427,15 @@ const IntakeFormPreview = () => {
 
             </>}
               </div>
-              {isClientPage && <div className="flex items-center justify-end py-3 ">
+              {!isClientFormPreviewPage ? 
+                isClientPage ? <div className="flex items-center justify-end py-3 ">
                 <button type="submit" className="bg-[#22d3ee] text-white px-5 h-[35px] rounded-md">
                   Submit
                 </button>
-              </div>}
+                </div>
+                :
+                null
+              :null}
             </div>
           </div>
         </div>

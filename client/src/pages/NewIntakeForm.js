@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import Select from "react-select";
 import { confirmAlert } from "react-confirm-alert";
 import { useNavigate } from 'react-router-dom';
+import { FaBook } from "react-icons/fa";
+import { PiGridNineLight } from "react-icons/pi";
 
 const Tabs = [
   {
@@ -23,10 +25,10 @@ const Tabs = [
   //   tab_name: "Credit cards",
   //   value: 3
   // },
-  // {
-  //   tab_name: "Questionnaires",
-  //   value: 4
-  // },
+  {
+    tab_name: "Questionnaires",
+    value: 4
+  },
   {
     tab_name: "Consents",
     value: 5
@@ -35,7 +37,7 @@ const Tabs = [
   //   tab_name: "Form Preview",
   //   value: 6
   // }
-]
+];
 
 const profile_fields = [
   {
@@ -237,7 +239,7 @@ const profile_fields = [
 const automaticOrManual = [
   { value: 'automatic', label: 'Automatic' },
   { value: 'manual', label: 'Manual' },
-]
+];
 
 const valiadte = [
   { value: 'forever', label: 'Forever' },
@@ -266,14 +268,15 @@ const valiadte = [
   { value: '8 years', label: '8 years' },
   { value: '9 years', label: '9 years' },
   { value: '10 years', label: '10 years' }
-]
+];
 
 const consentType = [
   { value: 'must agree', label: 'Must Agree' },
   { value: 'agree or disagree', label: 'Agree or Disagree' },
   { value: 'acnowledge with initials', label: 'Acknowledge with Initials' },
-]
-const initialConsent =  { name: "", text: "",type:"must agree", declaration : "" }
+];
+
+const initialConsent =  { name: "", text: "",type:"must agree", declaration : "" };
 
 const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
@@ -283,7 +286,7 @@ const NewIntakeForm = () => {
   const [intakeFormData, setIntakeFormData] = useState({
     form_data: {
       profile_fields: profile_fields,
-      // step2:[],
+      questionnaires:[],
       consents:{
         signature:false,
         consentForms: [initialConsent]}},
@@ -512,6 +515,8 @@ const NewIntakeForm = () => {
             {/* Tab contents */}
             <form onSubmit={(e) => { (editedId) ? upadteData(e) : submitData(e) }} className=" py-2   m-0">
               <div className="h-full ">
+
+              {/* Profile fields Tab */}
                 {selectedTab === 0 && <div className="">
                   <div className="h-[50px] flex items-center">
                     <div>
@@ -634,6 +639,8 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 </div>}
+
+              {/* Profile fields Tab */}
                 {/* {selectedTab === 1 && <div className="h-full">
                   <div className="h-[50px] flex items-center">
                     <div>
@@ -676,6 +683,8 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 </div>} */}
+
+              {/* Profile fields Tab */}
                 {selectedTab === 2 && <div className="h-full">
                   <div className="h-[50px] flex items-center ">
                     <div>
@@ -726,7 +735,7 @@ const NewIntakeForm = () => {
                           </div>
                         ))}
                         <div className="flex items-center justify-end py-1 px-10 gap-2">
-                          <button type="button" onClick={() => { setSelectedTab(5) }} className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" >
+                          <button type="button" onClick={() => { setSelectedTab(4) }} className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" >
                             Next
                           </button>
                         </div>
@@ -734,6 +743,8 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 </div>}
+
+              {/* Profile fields Tab */}
                 {/* {selectedTab === 3 && <div>
                   <div className="h-[50px] flex items-center">
                     <div>
@@ -745,7 +756,9 @@ const NewIntakeForm = () => {
                     <div></div>
                   </div>
                 </div>} */}
-                {/* {selectedTab === 4 && (
+
+              {/* Questionnaires Tab */}
+                {selectedTab === 4 && (
                   <div>
                     <div className="h-[50px] flex items-center">
                       <div>
@@ -767,26 +780,39 @@ const NewIntakeForm = () => {
                         Building a questionnaire is just like building a chart template. <span className="text-[#22d3ee]">Learn How To Build A Template</span>
                       </p>
                     </div>
+
+                    <div>
+                      eidjhfijf
+                    </div>
+
                     <div className="h-[calc(100%-50px)] overflow-y-auto">
                       <div className="flex flex-col justify-end items-center h-[40vh]">
                         <div className="flex justify-center flex-col text-center">
                           <p>This intake form questionnaire is currently empty!</p>
                           <p>Build it out by adding items</p>
                         </div>
-                        <div className="flex justify-center gap-4">
-                          <button className="bg-[#e5e7eb] border-[1px] border-[#cccccc] px-4 py-2 rounded-md flex gap-2 items-center">
+                        <div className="flex  gap-4">
+                          <button type="button" className="bg-[#e5e7eb] border-[1px] border-[#cccccc] px-4 py-2 rounded-md flex gap-2 items-center">
                             <FaBook className="text-black" />
                             Template Library
                           </button>
-                          <button className="bg-[#0dcaf0] text-white px-4 py-2 rounded-md flex gap-2 items-center">
-                            <PiGridNineLight />
-                            Add Item
-                          </button>
+
+                          <div className="flex gap-3 bg-[#0dcaf0] text-white py-2 px-3 rounded-md">
+                            <button type="button" className="flex gap-2 items-center">
+                              <PiGridNineLight />
+                            </button>
+                            <button type="button" className=" flex gap-2 items-center">
+                              Add Item
+                            </button>
+                          </div>
+
                         </div>
                       </div>
                     </div>
+
                     <div className="flex justify-end py-1">
                       <button
+                        type="button"
                         className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md"
                         onClick={() => {
                           setSelectedTab(5);
@@ -796,7 +822,9 @@ const NewIntakeForm = () => {
                       </button>
                     </div>
                   </div>
-                )} */}
+                )}
+
+              {/* Consent Tab */}
                 {selectedTab === 5 && (
                   <div className="h-full overflow-y-auto">
                     <div className="p-3 w-full">
@@ -1024,6 +1052,7 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 )}
+
                 {/* {selectedTab === 6 && <div className="h-full">
                   <div className="h-[60px] flex items-center ">
                     <div className="w-full">

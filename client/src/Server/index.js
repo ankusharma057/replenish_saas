@@ -266,6 +266,39 @@ export const getIntakeFormsWithTreatment = async (id, refetch = false) =>
     },
   });
 
+  export const getClientResponseIntakeForms = async (refetch = false) =>
+    api.get(`/api/client/response_intake_forms`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+
+    export const getClientResponseIntakeForm = async (id, refetch = false) =>
+      api.get(`/api/client/response_intake_forms/${id}`, {
+        cache: {
+          ignoreCache: refetch,
+        },
+      })
+
+
+
+// ---------------------------------------------------
+export const getSubmittedResponseIntakeForms = async (currentClientId,refetch = false) =>
+  api.get(`/api/response_intake_forms?client_id=${currentClientId}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+  export const getSubmittedResponseIntakeForm = async (id, refetch = false) =>
+    api.get(`/api/response_intake_forms/${id}`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+    })
+// ---------------------------------------------------
+
+
 export const loginUser = async (data) => api.post("/api/login", data);
 export const signupClient = async (data) =>
   api.post("/api/client/sign_up", data);

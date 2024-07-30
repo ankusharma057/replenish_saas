@@ -35,7 +35,7 @@ const IntakeForm = () => {
           <div className="flex justify-between w-full">
             <h3 className="m-0 p-0">{authUserState.user?.name}</h3>
             <Link to="/new-intake-forms">
-              <Button variant="info" className="text-white">New IntakeForm</Button>
+              <Button variant="info" type="button" className="text-white">New IntakeForm</Button>
             </Link>
           </div>
         </div>

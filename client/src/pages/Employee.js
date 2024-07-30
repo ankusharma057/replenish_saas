@@ -31,6 +31,24 @@ import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 import Select from "react-select";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
+import Questionnaires from "./Questionnaires";
+import { Link, useNavigate } from "react-router-dom";
+import { PiGridNineLight } from "react-icons/pi";
+
+const intialTemplates = [
+  {
+    id:1,
+    template_name:"fever"
+  },
+  {
+    id:2,
+    template_name:"fever"
+  },
+  {
+    id:3,
+    template_name:"fever"
+  },
+]
 
 const Employee = () => {
   const { authUserState, isFillingForm, setIsFillingForm } = useAuthContext();
@@ -55,6 +73,12 @@ const Employee = () => {
   const [addedMentors, setAddedMentors] = useState([]);
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
   const [serviceLocation, setServiceLocation] = useState([]);
+
+  // Questionnaires
+  const navigate = useNavigate();
+  const [templateTabs,setTemplateTabs] = useState("templates list")
+  const [templateLists,setTemplateLists] = useState(intialTemplates)
+  //Questionnaires
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -341,6 +365,11 @@ const Employee = () => {
       addTabs.splice(0, 0, { name: "Profile", value: "profile" });
       addTabs.push({ name: "Settings", value: "settings" });
     }
+
+    addTabs.push({ 
+      name: "Templates", 
+      value: "templates"})
+
     setRadioTabs(addTabs);
   };
 
@@ -579,6 +608,9 @@ const Employee = () => {
     });
   };
 
+  //qutionary template
+
+
   return (
     <>
       <AsideLayout
@@ -652,7 +684,7 @@ const Employee = () => {
               </ButtonGroup>
               <div
                 className={`sm:p-6 rounded-b-lg ${
-                  currentTab === "staff" ? "" : "bg-white"
+                  currentTab === "staff" ? "" : currentTab === "templates"? "": "bg-white"
                 } `}
               >
                 {currentTab === "profile" && (
@@ -1074,6 +1106,62 @@ const Employee = () => {
                     onHide={() => setShowCreateUserModal(false)}
                   />
                 )}
+                {currentTab === "templates" && (
+                  <div className="bg-white rounded-md">
+                    {templateTabs === "templates list" && <div className=" p-4 pt-2">
+                      <div className="bg-white rounded-lg">
+                        <div className="flex justify-between items-center py-3">
+                          <h2 className="text-gray-500">Template List</h2>
+                          <div><div onClick={() => {setTemplateTabs("create new template")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
+                        </div>
+                        <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
+                          {Array.isArray(templateLists) && templateLists.map((template, i) => (
+                            <div key={i} className={`grid grid-cols-[auto,1fr,160px] gap-4  p-[8px] ${templateLists.length !== i + 1 ? "border-b" : "border-none"} `}>
+                              <div className="self-start pt-1">
+                                <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                  {i + 1}
+                                </div>
+                              </div>
+                              <div className="flex items-center">
+                                <div>
+                                  <div className="text-[21px]">{template?.template_name}</div>
+                                </div>
+                              </div>
+                              <div className="self-center grid grid-cols-[1fr,50px] gap-1 pt-1 text-[15px]">
+                                <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Duplicate</button></Link>
+                                <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => { }}>Edit</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>}
+                    {templateTabs === "create new template" &&
+                      <div className="p-3 flex flex-col gap-2">
+                        <div className="text-gray-500 flex justify-between">
+                          <h2>New Chart Template</h2>
+                          <div className="flex items-center">
+                            <div className="flex gap-2">
+                              <div onClick={() => {setTemplateTabs("templates list")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Duplicate</div>
+                              <div onClick={() => {setTemplateTabs("templates list")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Cancel</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div><Questionnaires /></div>
+                        <div className="flex">
+                          <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
+                            <button type="button" className="flex gap-2 items-center">
+                              <PiGridNineLight />
+                            </button>
+                            <button type="button" className=" flex gap-2 items-center">
+                              Add Item
+                            </button>
+                          </div>
+                        </div>
+                      </div>}
+                  </div>
+                )}
+
               </div>
               <CustomModal
                 show={showInvoiceModal}

@@ -1,7 +1,7 @@
 class Questionnaire < ApplicationRecord
   belongs_to :employee
 
-  validates :name, presence: { message: "Name can't be blank"  }, uniqueness: { message: "Form name already exists" }
+  # validates :name, presence: { message: "Name can't be blank"  }, uniqueness: { message: "Form name already exists" }
   validates :template, presence: { message: "Template can't be blank"  }
   
   def self.employee_questionnaires(params)

@@ -47,9 +47,7 @@ const Treatment = lazy(() => import("./pages/Treatment"));
 const IntakeForm = lazy(() => import("./pages/IntakeForm"));
 const NewIntakeForm = lazy(() => import("./pages/NewIntakeForm"));
 const IntakeFormPreview = lazy(() => import("./pages/IntakeFormPreview"));
-
-// import { IntakeFormPreview } from "./pages/IntakeFormPreview";
-
+const SubmitedClientIntakeForm = lazy(() => import("./pages/SubmitedClientIntakeForm"));
 
 function App() {
   const navigate = useNavigate();
@@ -145,7 +143,7 @@ function App() {
   ]);
 
   return (
-    <div className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"h-screen"} `}>
+    <div id="top-model" className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"h-screen"} `}>
       <Suspense fallback={<SuspenseLoading />}>
         {authUserState.client ? (
           <ClientHeader />
@@ -165,6 +163,8 @@ function App() {
           <Route path="/clients/location" element={<ClientLocation />} />
           <Route path="/clients/intake-form/:id?" element={<IntakeFormPreview />} />
           <Route path="/intake-form-preview/:id?" element={<IntakeFormPreview />} />
+          <Route path="/clients/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
+          <Route path="/clients/submited-intake-forms-preview" element={<SubmitedClientIntakeForm />} />
           <Route
             path="/clients/payment/success"
             element={<ClientPaymentSuccess />}
@@ -212,6 +212,8 @@ function App() {
                     <Route path="/schedule" element={<Schedule />} />
                     <Route path="/intake-forms" element={<IntakeForm />} />
                     <Route path="/new-intake-form" element={<NewIntakeForm />} />
+                    <Route path="/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
+
                   </>
                 )}
 
