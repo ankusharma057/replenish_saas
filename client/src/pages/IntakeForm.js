@@ -12,8 +12,6 @@ const IntakeForm = () => {
   const[editIntakeForm,setEditIntakeForm]=useState()
   const navigate = useNavigate();
 
-  console.log(editIntakeForm);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,9 +60,11 @@ const IntakeForm = () => {
                     </div>
                   </div>
                   <div className="self-start grid grid-cols-[1fr,1fr,50px] gap-1 pt-1 text-[15px]">
-                    <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Duplicate</button></Link>
+                    <button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?duplicate-intake-form-id=${form.id}`)}}>Duplicate</button>
                     <Link  target="_blank" className="text-black" to={`/intake-form-preview/?intake_form_id=${form?.id}`}><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Preview</button></Link>
-                    <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?intake-form-id=${form.id}`)}}>Edit</button>
+                    {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === form?.employee?.id)) && (
+                      <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?intake-form-id=${form.id}`)}}>Edit</button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -237,6 +237,7 @@ function App() {
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
                   <Route path="/intake-forms" element={<IntakeForm />} />
+                  <Route path="/new-intake-forms" element={<NewIntakeForm />} />
 
                 </>
               )}

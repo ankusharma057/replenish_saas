@@ -304,12 +304,23 @@ const NewIntakeForm = () => {
     }}
   });
   const [editedId, setEditedId] = useState();
+  const [duplicateId, setDuplicateId] = useState();
 
   const handleOnChange = (fieldName, index, value) => {
     setChanges(true);
     const copyProfileFields = [...intakeFormData?.form_data?.profile_fields];
     copyProfileFields[index][fieldName] = value;
     setIntakeFormData((prev) => ({ ...prev, form_data: { ...prev?.form_data, profile_fields: copyProfileFields } }));
+  };
+
+  const duplicate_employee_intake_form = () => {
+    setIntakeFormData((prev) => {
+      const { id, employee, ...rest } = prev;
+      return {
+        ...rest,
+        employee_id: authUserState?.user?.id,
+      };
+    });
   };
 
   const addConsent = () => {
@@ -455,9 +466,30 @@ const NewIntakeForm = () => {
     setEditedId(urlParams.get('intake-form-id'))
   }, [])
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window?.location?.search);
+    setDuplicateId(urlParams.get('duplicate-intake-form-id'))
+  }, [])
+
   const editData = async () => {
     try {
       const response = await getIntakeForm(editedId);
+      if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
+        if (response.status === 200) {
+          setIntakeFormData(response.data);
+        } else {
+        }
+      }else{
+        navigate('/intake-forms')
+        toast.error("You don't have permission to edit this intake form");
+      }
+    } catch (err) {
+    }
+  };
+
+  const duplicateIntakeForm = async () => {
+    try {
+      const response = await getIntakeForm(duplicateId);
       if (response.status === 200) {
         setIntakeFormData(response.data);
       } else {
@@ -471,6 +503,12 @@ const NewIntakeForm = () => {
       editData();
     }
   }, [editedId]);
+
+  useEffect(() => {
+    if (duplicateId) {
+      duplicateIntakeForm();
+    }
+  }, [duplicateId]);
 
   const returnToIntakeForm = () => {
     confirmAlert({
@@ -499,7 +537,7 @@ const NewIntakeForm = () => {
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
-          {editedId ? <h2>Update Intake Form</h2> : <h2>New Intake Form</h2>}
+          {editedId ? <h2>Update Intake Form</h2> : duplicateId ? <h2>Duplicate Intake Form</h2> : <h2>New Intake Form</h2>}
           {/* <Link className="no-underline" to={"/intake-forms"}> */}
             <div onClick={()=>{(changes) ?returnToIntakeForm() : navigate('/intake-forms');}} className="border-[2px]  text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Intake Form</div>
           {/* </Link> */}
@@ -632,7 +670,7 @@ const NewIntakeForm = () => {
                         <div className="h-[60px] flex items-center bg-slate-200 px-3 text-[18px] text-[#49c1c7]">View Formatting Instructions</div>
                       </div>
                       <div className=" flex items-center justify-end py-1">
-                        <button className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" onClick={() => { setSelectedTab(2) }}>
+                        <button className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" onClick={() => { setSelectedTab(2); }}>
                           Next
                         </button>
                       </div>
@@ -1046,7 +1084,7 @@ const NewIntakeForm = () => {
                             Add Consent
                           </div>
                     </div>
-                      <button type="submit" className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md">
+                      <button type="submit" className="bg-[#22d3ee] text-white px-3 h-[35px] rounded-md" onClick={() => { if (duplicateId) duplicate_employee_intake_form(); }}>
                       {editedId ? "Update" : "Submit"}
                       </button>
                     </div>
