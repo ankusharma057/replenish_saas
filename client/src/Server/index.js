@@ -1,5 +1,6 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-adapter";
+import { template } from "lodash";
 
 // Create `axios-cache-adapter` instance
 const cache = setupCache({
@@ -42,33 +43,47 @@ export const getClients = async (employee_id, refetch) =>
     },
   });
 
-  export const getIntakeForms = async (refetch) =>
+export const getIntakeForms = async (refetch) =>
   api.get("/api/intake_forms", {
     cache: {
       ignoreCache: refetch,
     }
   });
 
-  export const getIntakeForm = async (id, refetch) =>
-    api.get(`/api/intake_forms/${id}`, {
-      cache: {
-        ignoreCache: refetch,
-      }
-    });
+export const getIntakeForm = async (id, refetch) =>
+  api.get(`/api/intake_forms/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
 
-    export const getClientIntakeForm = async (id, refetch) =>
-      api.get(`/api/client/intake_forms/${id}`, {
-        cache: {
-          ignoreCache: refetch,
-        }
-      });
+export const getClientIntakeForm = async (id, refetch) =>
+  api.get(`/api/client/intake_forms/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
 
-    export const getResponseIntakeForm = async (id, refetch) =>
-      api.get(`/api/response_intake_forms/${id}`, {
-        cache: {
-          ignoreCache: refetch,
-        }
-      });
+export const getResponseIntakeForm = async (id, refetch) =>
+  api.get(`/api/response_intake_forms/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
+
+export const getQuestionnaire = async (id, refetch) =>
+  api.get(`/api/questionnaires/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
+
+export const getQuestionnaires = async (refetch) =>
+  api.get("/api/questionnaires", {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
 
 export const getInventoryList = async (refetch) =>
   api.get("/api/inventories", {
@@ -77,12 +92,12 @@ export const getInventoryList = async (refetch) =>
     },
   });
 
-  export const getTreatmentIntakeForms = async (treatment_id, refetch) =>
-    api.get(`/api/intake_forms?treatment_id=${treatment_id}`, {
-      cache: {
-        ignoreCache: refetch,
-      }
-    });
+export const getTreatmentIntakeForms = async (treatment_id, refetch) =>
+  api.get(`/api/intake_forms?treatment_id=${treatment_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    }
+  });
 
 export const getInvoiceList = async (refetch) =>
   api.get("/api/invoices", {
@@ -372,6 +387,16 @@ export const createClientSchedule = async (data) =>
 export const createIntakeForm = async (data) =>
   api.post(`/api/intake_forms`, {
     intake_form: data,
+  });
+
+export const createQuestionnaire = async (data) =>
+  api.post(`/api/questionnaires`, {
+    questionnaire: data,
+  });
+
+export const updateQuestionnaire = async (id, data) =>
+  api.patch(`/api/questionnaires/${id}`, {
+    questionnaire: data,
   });
 
 export const createResponseIntakeForm = async (data) =>

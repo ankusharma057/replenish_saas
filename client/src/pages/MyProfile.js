@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import CustomModal from "../components/Modals/CustomModal";
 import Table from "react-bootstrap/Table";
@@ -8,6 +8,7 @@ import { confirmAlert } from "react-confirm-alert"; // Import
 import ModalWraper from "../components/Modals/ModalWraper";
 import { useAuthContext } from "../context/AuthUserContext";
 import DataFilterService from "../services/DataFilterService";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
   RotateCw,
@@ -32,6 +33,7 @@ import {
   rejectInventory,
   requestInventory,
   updateVendore,
+  getQuestionnaires,
 } from "../Server";
 import { LOGIN } from "../Constants/AuthConstants";
 import AsideLayout from "../components/Layouts/AsideLayout";
@@ -41,6 +43,9 @@ import Select from "react-select";
 import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 import MySchedule from "./MySchedule";
+import Questionnaires from "./Questionnaires";
+import { RiQuestionnaireLine } from "react-icons/ri";
+
 
 const MyProfile = () => {
   const { authUserState, authUserDispatch } = useAuthContext();
@@ -68,6 +73,11 @@ const MyProfile = () => {
   );
   const [showRequestInvetory, setshowRequestInvetory] = useState(false);
   const [filteredInventoryList, setFilteredInventoryList] = useState([]);
+  const [templateTabs,setTemplateTabs] = useState("templates list")
+  const[questionnaireForms, setQuestionnaireForms]=useState()
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
+  const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
+
   // added
   const getInventory = async (refetch = false) => {
     try {
@@ -96,6 +106,20 @@ const MyProfile = () => {
       // handle error
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getQuestionnaires();
+        if (response.status === 200) {
+          setQuestionnaireForms(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching intake forms:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   console.log("asdasddddddddddsaaaaaaaa", authUserState);
   // added
@@ -435,7 +459,7 @@ const MyProfile = () => {
               <FileText /> Invoices
             </div>
 
-            {/* <div
+            <div
               role="button"
               onClick={() => {
                 currentTab !== "mySchedule" && setCurrentTab("mySchedule");
@@ -447,8 +471,8 @@ const MyProfile = () => {
                 currentTab === "mySchedule" && "pointer-events-none bg-gray-200"
               } `}
             >
-              <CalendarCheck /> My Schedule
-            </div> */}
+              <RiQuestionnaireLine className="text-[24px]" /> Templates
+            </div>
 
             <div
               role="button"
@@ -947,7 +971,64 @@ const MyProfile = () => {
               <InviteClientsTab employee={authUserState.user} />
             </div>
           )}
-          {currentTab === "mySchedule" && <MySchedule />}
+          {currentTab === "mySchedule" && (
+            <div className="flex justify-center">
+            <div className="bg-white rounded-md w-[65rem]">
+              {templateTabs === "templates list" && <div className=" p-4 pt-2">
+                <div className="bg-white rounded-lg">
+                  <div className="flex justify-between items-center py-3">
+                    <h2 className="text-gray-500">Template List</h2>
+                    <div><div onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(); setDuplicateQuestionnaire();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
+                  </div>
+                  <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
+                    {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
+                      <div key={i} className={`grid grid-cols-[auto,1fr,160px] gap-4  p-[8px] border-b `}>
+                        <div className="self-start pt-1">
+                          <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                            {i + 1}
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <div>
+                            <div className="text-[21px]">{template?.name}</div>
+                          </div>
+                        </div>
+                        <div className="self-center grid grid-cols-[1fr,50px] gap-1 pt-1 text-[15px]">
+                          <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setTemplateTabs("create new template"); setDuplicateQuestionnaire(template?.id); setSelectedQuestionnaire();}}>Duplicate</button></Link>
+                          {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
+                          <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(template?.id); setDuplicateQuestionnaire();}}>Edit</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>}
+              {templateTabs === "create new template" &&
+                <div className="p-3 flex flex-col gap-2">
+                  <div className="text-gray-500 flex justify-between">
+                    {selectedQuestionnaire ? <h2>Update Chart Template</h2> : duplicateQuestionnaire ? <h2>Duplicate Chart Template</h2> : <h2>New Chart Template</h2>}
+                    <div className="flex items-center">
+                      <div className="flex gap-2">
+                        <div onClick={() => {setTemplateTabs("templates list")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Questionnaire</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div><Questionnaires selectedEmployee={authUserState.user} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} /></div>
+                  {/* <div className="flex">
+                    <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
+                      <button type="button" className="flex gap-2 items-center">
+                        <PiGridNineLight />
+                      </button>
+                      <button type="button" className=" flex gap-2 items-center">
+                        Add Item
+                      </button>
+                    </div>
+                  </div> */}
+                </div>}
+            </div>
+            </div>
+          )}
 
           {currentTab === "treatment" && (
             <>
