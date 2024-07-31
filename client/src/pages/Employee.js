@@ -34,6 +34,7 @@ import { FaPlus } from "react-icons/fa";
 import Questionnaires from "./Questionnaires";
 import { Link, useNavigate } from "react-router-dom";
 import { PiGridNineLight } from "react-icons/pi";
+import { FaRegEdit } from "react-icons/fa";
 
 const intialTemplates = [
   {
@@ -73,6 +74,8 @@ const Employee = () => {
   const [addedMentors, setAddedMentors] = useState([]);
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
   const [serviceLocation, setServiceLocation] = useState([]);
+  const [edittitle, setEditTitle] = useState(false)
+  const [title, setTitle] = useState("gsshgu")
 
   // Questionnaires
   const navigate = useNavigate();
@@ -1140,7 +1143,16 @@ const Employee = () => {
                     {templateTabs === "create new template" &&
                       <div className="p-3 flex flex-col gap-2">
                         <div className="text-gray-500 flex justify-between">
-                          <h2>New Chart Template</h2>
+                          <div>
+                            <div className={`flex gap-3 items-center ${edittitle ? "hidden": "block"}`}>
+                              <h2>{title}</h2>
+                              <div onClick={()=>{setEditTitle(true)}}><FaRegEdit /></div>
+                            </div>
+                            <div  className={`flex gap-3 items-center ${!edittitle ? "hidden": "block"}`}>
+                              <input type="text" value={title} onBlur={()=>{setEditTitle(false)}} onChange={(e)=>{setTitle(e?.target?.value)}} placeholder="Title " className="text-[30px] focus:outline-none border-b" />
+                            </div>
+
+                          </div>
                           <div className="flex items-center">
                             <div className="flex gap-2">
                               <div onClick={() => {setTemplateTabs("templates list")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Duplicate</div>
@@ -1148,7 +1160,7 @@ const Employee = () => {
                             </div>
                           </div>
                         </div>
-                        <div><Questionnaires /></div>
+                        <div><Questionnaires title={title} /></div>
                         {/* <div className="flex">
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                             <button type="button" className="flex gap-2 items-center">

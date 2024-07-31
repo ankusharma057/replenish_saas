@@ -18,6 +18,9 @@ import { TbCheckbox } from "react-icons/tb";
 import { RxDropdownMenu } from "react-icons/rx";
 import { BsSliders2 } from "react-icons/bs";
 import { PiWarningCircleBold } from "react-icons/pi";
+import Switch from '@mui/material/Switch';
+import { confirmAlert } from "react-confirm-alert";
+
 
 const qutionaryInputOption = [
   {
@@ -87,7 +90,7 @@ const qutionaryInputs = {
     id: null,
     type: "checkbox",
     label: "CheckBox",
-    layout:"cloumn",
+    layout:"horizontal",
     value: [
       { label: "CheckBox 1", value: true },
       { label: "CheckBox 2", value: false },
@@ -140,7 +143,7 @@ const fonts = [
   { label: "text", class: "herr-von-muellerhoff-regular" },
 ];
 
-const Questionnaires = () => {
+const Questionnaires = ({title}) => {
   const location = useLocation();
   const topModelRef = useRef(null);
   const sigCanvasRef = useRef(null);
@@ -150,18 +153,8 @@ const Questionnaires = () => {
   const [values, setValues] = useState(qutionaryInputs?.initialRange?.value.map(v => v.value));
   const [editModel, setEditModel] = useState({name:"",index:""})
   const [selectedvalue,setSelectedvalue]= useState(null)
-
-  const createQutionaryFields = (intialFieldName) => {
-    setQutionaryFields((prev) => ([...prev, { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 }]))
-  }
-
-
-  const openModalFromParent = () => {
-    if (topModelRef?.current) {
-      topModelRef?.current?.openModal();
-    }
-  };
-
+  const [inputHover,setInputHover]= useState(null)
+  const [changes,setChanges] = useState(false)
 
 // ----------------------------------------------------
 const saveSignature = () => {
@@ -171,20 +164,140 @@ const saveSignature = () => {
   }
 };
 
+console.log("titletitle",title);
+
 const handleSave = () => {
   console.log('Save button clicked');
 };
 // ---------------------------------------------------
 // qutionaryFields onchange
 
-
-
-const handleChange = (key, value, index) => {
-  setQutionaryFields((prev) =>([...prev,prev[index],{...prev[index], [key]: value}]));
+const openModalFromParent = () => {
+  console.log(topModelRef?.current);
+  if (topModelRef?.current) {
+    topModelRef?.current?.openModal();
+  }
+  setChanges(false)
 };
 
-console.log("dddgf",qutionaryFields);
+const closeModel = () =>{
+  if (topModelRef?.current) {
+    topModelRef?.current?.closeModal();
+  }
+}
 
+const closeModalFromParent = () => {
+  if(changes){
+    confirmAlert({
+      title: "Discard Changes",
+      message: `Are you sure Delete ?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            closeModel()
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+        
+          }
+        },
+      ],
+    });
+  }
+  else{
+    closeModel()
+  }
+ 
+};
+
+const createQutionaryFields = (intialFieldName) => {
+  setQutionaryFields((prev) => ([...prev, { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 }]))
+}
+
+const handleDeleteField = (index) => {
+
+  if(changes){
+    confirmAlert({
+      title: "Discard Changes",
+      message: `Are you sure Delete ?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            setQutionaryFields((prev)=>{
+              const updatedFields = [...qutionaryFields]
+              updatedFields.splice(index,1)
+              return updatedFields
+              })
+              closeModel()
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {
+        
+          }
+        },
+      ],
+    });
+  }
+  else{
+    setQutionaryFields((prev)=>{
+      const updatedFields = [...qutionaryFields]
+      updatedFields.splice(index,1)
+      return updatedFields
+      })
+    closeModel()
+  }
+} 
+
+const handleChange = (key, value, index) => {
+  setQutionaryFields((prev) => {
+    const updatedFields = [...prev];
+    updatedFields[index] = { ...updatedFields[index], [key]: value };
+    return updatedFields;
+  });
+  setChanges(true)
+};
+
+const addOption = (input, objIndex, optionIndex) => {
+  setQutionaryFields((prev) => {
+    const updatedFields = [...prev];
+    const copyValue = [...updatedFields[objIndex]?.value];
+    copyValue.splice(optionIndex, 0, { label: `new ${input}`, value: false });
+    updatedFields[objIndex] = {
+      ...updatedFields[objIndex],
+      value: copyValue,
+    };
+    return updatedFields;
+  });
+};
+
+const handleOptionsChange = (objIndex,optionIndex,key,value) => {
+    setQutionaryFields((prev)=>{
+      console.log(objIndex,optionIndex,key, value);
+      const updatedFields = [...prev]
+        const copyObj = [...updatedFields[objIndex]?.value]
+         copyObj[optionIndex] = {...copyObj[optionIndex],[key]:value}
+         updatedFields[objIndex] = {...updatedFields[objIndex],value:copyObj}
+         return updatedFields
+    })
+    setChanges(true)
+}
+
+const deleteOption = (objIndex, optionIndex) => {
+  console.log(objIndex, optionIndex);
+  setQutionaryFields((prev) => {
+    const updatedFields = [...prev];
+    const copyValue = [...updatedFields[objIndex].value];
+    copyValue.splice(optionIndex, 1);
+    updatedFields[objIndex] = { ...updatedFields[objIndex], value: copyValue }; 
+    return updatedFields; 
+  });
+};
 
   return (
     <div className=" ">
@@ -281,10 +394,10 @@ console.log("dddgf",qutionaryFields);
                         <div className="font-semibold text-[17px]">{field?.label}</div>
                         <div className="text-[20px] cursor-pointer" ><BsThreeDotsVertical /></div>
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className={`${field?.layout === "horizontal" ? "flex gap-x-5 flex-wrap gap-y-2" :field?.layout === "vertical" ? "grid grid-cols-1":"grid grid-cols-3"}`}>
                         {Array.isArray(field.value) && field.value.map((checkbox, i) => (
-                          <div key={i} className="flex gap-3 items-center">
-                            <input id={checkbox?.label} readOnly={field?.read_only} required={field?.required} checked={checkbox?.value} type="checkbox" />
+                          <div key={i} className="flex gap-2  items-center">
+                            <input id={checkbox?.label} readOnly={field?.read_only} required={field?.required} checked={checkbox?.value}  type="checkbox" />
                             <label htmlFor={checkbox?.label} >{checkbox?.label}</label>
                           </div>
                         ))}
@@ -444,10 +557,10 @@ console.log("dddgf",qutionaryFields);
      ref={topModelRef}
      footer={
         <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
      }
@@ -458,15 +571,16 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={selectedvalue?.label} onChange={(e)=>{handleChange( "label",e?.target?.value,editModel?.index)}}  />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange( "label",e?.target?.value,editModel?.index)}}  />
             </div>
           </div>
           <div className="border-[2px] overflow-hidden  rounded-md px-2">
-            <textarea className="w-full focus:outline-none max-h-[70px]" onChange={(e)=>{handleChange("value", e?.target?.value,editModel?.index)}}   rows="3"></textarea>
+            <textarea className="w-full focus:outline-none max-h-[70px]" value={qutionaryFields[editModel?.index]?.value} onChange={(e)=>{handleChange("value", e?.target?.value,editModel?.index)}}   rows="3"></textarea>
           </div>
           <div className="flex justify-between py-1">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -475,10 +589,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "signature" && <TopModel onSave={handleSave} ref={topModelRef}
         footer={
           <div className='flex justify-between gap-2'>
-            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
             <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
             </div>
            </div> 
        }
@@ -495,7 +609,8 @@ console.log("dddgf",qutionaryFields);
           </div>
           <div className="flex justify-between py-1">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -505,10 +620,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "heading" && <TopModel onSave={handleSave} ref={topModelRef}
          footer={
           <div className='flex justify-between gap-2'>
-            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
             <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
             </div>
            </div> 
        }
@@ -520,12 +635,13 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none"  onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.value}  onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div className="flex justify-between py-1">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -535,10 +651,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "checkbox" && <TopModel onSave={handleSave} ref={topModelRef}
       footer={
         <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
      }
@@ -549,22 +665,22 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div>
             <label>Checkbox Layout</label>
             <div className="flex gap-4">
               <div className="flex gap-1">
-                <input type="radio" id="horizondal" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
-                <label htmlFor="horizondal">Horizondal</label>
+                <input type="radio" id="horizontal" name="Layout" checked={qutionaryFields[editModel?.index]?.layout === "horizontal"} onChange={(e)=>{handleChange("layout", "horizontal", editModel?.index)}}/>
+                <label htmlFor="horizontal">Horizondal</label>
               </div>
               <div className="flex gap-1">
-                <input type="radio" id="vertical" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
+                <input type="radio" id="vertical" name="Layout"  checked={qutionaryFields[editModel?.index]?.layout === "vertical"} onChange={(e)=>{handleChange("layout", "vertical", editModel?.index)}}/>
                 <label htmlFor="vertical">Vertical</label>
               </div>
               <div className="flex gap-1">
-                <input type="radio" id="column" name="Layout" onChange={(e)=>{handleChange("layout", e?.target?.checked, editModel?.index)}}/>
+                <input type="radio" id="column" name="Layout"  checked={qutionaryFields[editModel?.index]?.layout === "column"} onChange={(e)=>{handleChange("layout", "column", editModel?.index)}}/>
                 <label htmlFor="column">Column</label>
               </div>
             </div>
@@ -575,23 +691,31 @@ console.log("dddgf",qutionaryFields);
             <div className="pl-4">Value</div>
             <div className="flex justify-center">Action</div>
           </div>
-            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
-                <div className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px]">
+            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
+                <div key={i} className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px] group">
                   <div className="">
-                  <input type="checkbox" id={option?.label} checked={option?.value} className="w-[20%]" />
+                  <input type="checkbox" id={option?.label} checked={option?.value} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"value" ,e.target.checked)}} className="w-[20%]" />
                   </div>
-                  <label htmlFor={option?.label}>{option?.label}</label>
-                  <div className="flex text-[18px] justify-evenly">
-                    <div><IoMdAdd /></div>
-                    <div><MdDelete /></div>
-                    <div><PiColumnsFill /></div>
+
+                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
+                  {inputHover === i ?
+                  <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
+                  :
+                  <div htmlFor={option?.label}>{option?.label}</div>}
+                  </div>
+                
+                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex ">
+                    <div className="cursor-pointer" onClick={()=>{addOption("checkbox",editModel?.index,i+1)}}><IoMdAdd /></div>
+                    <div className="cursor-pointer" onClick={()=>{deleteOption(editModel?.index,i)}}><MdDelete /></div>
+                    <div className="cursor-pointer" ><PiColumnsFill /></div>
                   </div>
                 </div>
             ))}
           </div>
           <div className="flex justify-between">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -600,10 +724,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "dropdown" &&<TopModel onSave={handleSave} ref={topModelRef}
       footer={
         <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
      }
@@ -614,7 +738,7 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
@@ -623,20 +747,28 @@ console.log("dddgf",qutionaryFields);
             <div className="pl-4">Options</div>
             <div className="flex justify-center">Action</div>
           </div>
-            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
-                <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
-                  <label htmlFor={option?.label}>{option?.label}</label>
-                  <div className="flex text-[18px] justify-evenly">
-                    <div><IoMdAdd /></div>
-                    <div><MdDelete /></div>
-                    <div><PiColumnsFill /></div>
+            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
+                <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group" >
+
+                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
+                    {inputHover === i ?
+                    <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
+                    :
+                    <div htmlFor={option?.label}>{option?.label}</div>}
+                  </div>
+
+                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
+                    <div className="cursor-pointer" onClick={()=>{addOption("dropdown",editModel?.index,i+1)}}><IoMdAdd /></div>
+                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i+1)}}/></div>
+                    <div className="cursor-pointer"><PiColumnsFill /></div>
                   </div>
                 </div>
             ))}
           </div>
           <div className="flex justify-between py-2">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -645,10 +777,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "range" && <TopModel onSave={handleSave} ref={topModelRef}
       footer={
         <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
      }
@@ -659,7 +791,7 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
@@ -668,20 +800,28 @@ console.log("dddgf",qutionaryFields);
             <div className="pl-4">Options</div>
             <div className="flex justify-center">Action</div>
           </div>
-            {Array.isArray(qutionaryFields) && qutionaryFields.find((data)=>(data.id ===  editModel?.index))?.value.map((option, i)=>(
-                <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
-                  <label htmlFor={option?.label}>{option?.label}</label>
-                  <div className="flex text-[18px] justify-evenly">
-                    <div><IoMdAdd /></div>
-                    <div><MdDelete /></div>
-                    <div><PiColumnsFill /></div>
+            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index].value.map((option, i)=>(
+                <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group">
+                  
+                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
+                    {inputHover === i ?
+                    <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
+                    :
+                    <div htmlFor={option?.label}>{option?.label}</div>}
+                  </div>
+                  
+                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
+                    <div className="cursor-pointer" onClick={()=>{addOption("range",editModel?.index,i+1)}}><IoMdAdd /></div>
+                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i+1)}}/></div>
+                    <div className="cursor-pointer"><PiColumnsFill /></div>
                   </div>
                 </div>
             ))}
           </div>
           <div className="flex justify-between py-2">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>
@@ -690,10 +830,10 @@ console.log("dddgf",qutionaryFields);
       {editModel?.name  === "instruction" && <TopModel onSave={handleSave} ref={topModelRef}
        footer={
         <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'  ><MdDelete /></button>
+          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={openModalFromParent} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' >Save</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
      }
@@ -705,12 +845,13 @@ console.log("dddgf",qutionaryFields);
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.value} onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
-          <div>
+          <div className="flex justify-between">
             <div>Required</div>
-            <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div>
+            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
           </div>
           </div>
         </div>

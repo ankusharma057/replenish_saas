@@ -14,7 +14,7 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export const TopModel = forwardRef(({ children, onSave, footer }, ref) => {
+export const TopModel = forwardRef(({ children, footer }, ref) => {
   const subtitle = useRef(null);
   const [modalIsOpen, setIsOpen] = useState(false);
 
@@ -33,9 +33,7 @@ export const TopModel = forwardRef(({ children, onSave, footer }, ref) => {
     }
   };
 
-  useImperativeHandle(ref, () => ({
-    openModal,
-  }));
+  useImperativeHandle(ref, () => ((modalIsOpen)?{closeModal}:{openModal}));
 
 
 
