@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
-import { createIntakeForm, getIntakeForm, updateIntakeForm } from "../Server";
+import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
 import { confirmAlert } from "react-confirm-alert";
 import { useNavigate } from 'react-router-dom';
 import { FaBook } from "react-icons/fa";
 import { PiGridNineLight } from "react-icons/pi";
+import { TopModel } from "../components/TopModel";
+import { IoDocumentText } from "react-icons/io5";
+import { template } from "lodash";
+import { BsFileEarmarkTextFill } from "react-icons/bs";
+import { TbSignature } from "react-icons/tb";
+import { FaHeading } from "react-icons/fa6";
+import { TbCheckbox } from "react-icons/tb";
+import { RxDropdownMenu } from "react-icons/rx";
+import { BsSliders2 } from "react-icons/bs";
+import { PiWarningCircleBold } from "react-icons/pi";
 
 const Tabs = [
   {
@@ -37,6 +47,55 @@ const Tabs = [
   //   tab_name: "Form Preview",
   //   value: 6
   // }
+];
+
+const questionnaireTabs = [
+  {
+    tab_name: "Items",
+    value: 0
+  },
+  {
+    tab_name: "Templates",
+    value: 1
+  }
+];
+
+const qutionaryInputOption = [
+  {
+    label: "Note",
+    icon: <BsFileEarmarkTextFill />,
+    description: "A Plain Text Area To Types Notes",
+  },
+  {
+    label: "Signature",
+    icon: <TbSignature />,
+    description: "Add A Signature By Drawing Or Typing",
+  },
+  {
+    label: "Heading",
+    icon: <FaHeading />,
+    description: "A Simple Heading",
+  },
+  {
+    label: "Check Boxes",
+    icon: <TbCheckbox />,
+    description: "Select One or More CheckBoxes And Correctly And Operationally Add A Note To Each",
+  },
+  {
+    label: "Drop Down",
+    icon: <RxDropdownMenu />,
+    description: "Select One Option From List Of Options In A Drop Down Menu",
+  },
+  {
+    label: "Range/Scale",
+    icon: <BsSliders2 />,
+    description: "A Customizable Range/Scale Slicer Allows You To Choose From A Range Of Values"
+  },
+  {
+    label: "Instruction",
+    icon: <PiWarningCircleBold />,
+    description: "Add Instructions To Your Template That Will Noe Be Visible When Exploring Or Printing The Chart",
+  },
 ];
 
 const profile_fields = [
@@ -281,8 +340,11 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
 const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
   const navigate = useNavigate();  
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(4);
+  const [templateTabs, setTemplateTabs] = useState(0);
   const [changes, setChanges] = useState(false)
+  const topModelRef = useRef(null);
+  const [questionnaireForms, setQuestionnaireForms]=useState()
   const [intakeFormData, setIntakeFormData] = useState({
     form_data: {
       profile_fields: profile_fields,
@@ -498,6 +560,19 @@ const NewIntakeForm = () => {
     }
   };
 
+  const openModalFromParent = () => {
+    console.log(topModelRef?.current);
+    if (topModelRef?.current) {
+      topModelRef?.current?.openModal();
+    }
+  };
+  
+  const closeModel = () =>{
+    if (topModelRef?.current) {
+      topModelRef?.current?.closeModal();
+    }
+  }
+
   useEffect(() => {
     if (editedId) {
       editData();
@@ -509,6 +584,20 @@ const NewIntakeForm = () => {
       duplicateIntakeForm();
     }
   }, [duplicateId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getQuestionnaires();
+        if (response.status === 200) {
+          setQuestionnaireForms(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching intake forms:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const returnToIntakeForm = () => {
     confirmAlert({
@@ -531,7 +620,7 @@ const NewIntakeForm = () => {
     });
   }
 
-  console.log("dsdsds",changes);
+  console.log("dsdsds",questionnaireForms);
 
   return (
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
@@ -836,9 +925,75 @@ const NewIntakeForm = () => {
                           </button>
 
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-2 px-3 rounded-md">
-                            <button type="button" className="flex gap-2 items-center">
+                            <button type="button" className="flex gap-2 items-center" onClick={() => {
+                              openModalFromParent();
+                            }}>
                               <PiGridNineLight />
                             </button>
+                            <TopModel ref={topModelRef}>
+                              <div className="w-[700px] flex flex-col">
+                                <div className="pb-2 border-b">
+                                  <h4>Add Form Template Library</h4>
+                                </div>
+                                <div>
+                                  <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
+                                    <div className="flex w-full absolute bottom-[-2px]">
+                                      {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabs === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabs(tab.value) }}><span>{tab.tab_name}</span></div>))}
+                                    </div>
+                                  </div>
+                                  {templateTabs === 0 &&
+                                    <>
+                                      <div className="h-[calc(100%-55px)] pb-3 border-b">
+                                        <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                                        {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, i) => (
+                                            <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
+                                              <div className="self-start pt-1">
+                                                <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                                  {option?.icon}
+                                                </div>
+                                              </div>
+                                              <div className="flex items-start">
+                                                <div>
+                                                  <div className="text-[15px] text-gray-500 font-semibold pb-1">{option?.label}</div>
+                                                  <div className="text-[11px] text-gray-400 pb-1 font-medium">{option?.description}</div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <div className="flex w-full justify-end py-2">
+                                        <button type="button" className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md" >
+                                          Close
+                                        </button>
+                                      </div>
+                                    </>
+                                  }
+                                  {templateTabs === 1 &&
+                                    <div className="h-[calc(100%-55px)]">
+                                      <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                                        {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
+                                          <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
+                                            <div className="self-start pt-1">
+                                              <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                              <IoDocumentText />
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center">
+                                              <div>
+                                                <div className="text-[15px] text-gray-500 font-semibold pb-1">{template?.name}</div>
+                                                <div className="text-[13px] text-gray-400 pb-1 font-medium">Chart Template</div>
+                                                <div className="text-[12px] text-gray-400 pb-1 font-medium">{template?.employee?.name}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                            </TopModel>
                             <button type="button" className=" flex gap-2 items-center">
                               Add Item
                             </button>

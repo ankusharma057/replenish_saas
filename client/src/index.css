@@ -273,5 +273,5 @@ input:-webkit-autofill:active {
 
 .ReactModal__Content{
   transform: translate(-50%, 0%) !important;
-  top: 0px !important;
+  top: 8% !important;
 }
