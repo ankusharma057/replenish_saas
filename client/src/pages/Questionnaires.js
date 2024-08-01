@@ -210,7 +210,6 @@ const Questionnaires = ({
       { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 },
     ]);
   };
-   
 
   useEffect(()=>{
     if(location.pathname === "/new-intake-forms"){
@@ -349,7 +348,7 @@ const Questionnaires = ({
   const editData = async (templateId) => {
     console.log();
     try {
-      const response = await getQuestionnaire(editedId || templateId);
+      const response = await getQuestionnaire(editedId || templateId, true);    
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
       if (response.status === 200) {
         // setQutionaryFields(response?.data?.template?.qutionaryFields);
@@ -372,7 +371,7 @@ const Questionnaires = ({
 
   const duplicateIntakeForm = async () => {
     try {
-      const response = await getQuestionnaire(duplicateId);
+      const response = await getQuestionnaire(duplicateId, true);
       if (response.status === 200) {
         setQutionaryFields(response?.data?.template?.qutionaryFields);
       } else {
@@ -381,9 +380,9 @@ const Questionnaires = ({
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (refetch = true) => {
       try {
-        const response = await getQuestionnaires();
+        const response = await getQuestionnaires( refetch );
         if (response.status === 200) {
           setQuestionnaireForms(response.data);
         }
@@ -516,6 +515,17 @@ const Questionnaires = ({
     });
   };
 
+  const handleItemClick = (name, index) => {
+    setEditModel({ name, index });
+    openModalFromParent(); // Call this function immediately after updating the state
+  };
+
+  useEffect(() => {
+    if (editModel.name) {
+      openModalFromParent(); // Ensure the modal opens when editModel changes
+    }
+  }, [editModel]);
+
   return (
     <div className=" ">
       <div className="bg-white ">
@@ -528,8 +538,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "initialNote", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialNote", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialNote', index)
                     }}
                   >
                     <div className="flex justify-between items-center py-1">
@@ -560,8 +571,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "initialSignature", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialSignature", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialSignature', index)
                     }}
                   >
                     <div className="flex justify-between items-center">
@@ -683,8 +695,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "initialHeading", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialHeading", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialHeading', index)
                     }}
                   >
                     <div className="flex justify-between items-center ">
@@ -706,8 +719,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "initialCheckBox", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialCheckBox", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialCheckBox', index)
                     }}
                   >
                     <div className="flex flex-col ">
@@ -762,8 +776,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "initialDropdown", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialDropdown", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialDropdown', index)
                     }}
                   >
                     <div className="flex justify-between items-center ">
@@ -796,8 +811,9 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
                     onClick={() => {
-                      setEditModel({ name: "initialRange", index: index });
-                      openModalFromParent();
+                      // setEditModel({ name: "initialRange", index: index });
+                      // openModalFromParent();
+                      handleItemClick('initialRange', index)
                     }}
                   >
                     <div className="flex justify-between items-center ">
@@ -902,8 +918,9 @@ const Questionnaires = ({
                     type="button"
                     className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]"
                     onClick={() => {
-                      openModalFromParent();
-                      setEditModel({ name: "gridModel", index: null });
+                      // openModalFromParent();
+                      // setEditModel({ name: "gridModel", index: null });
+                      handleItemClick('gridModel', null)
                     }}
                   >
                     <PiGridNineLight />

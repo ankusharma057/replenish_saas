@@ -77,6 +77,7 @@ const MyProfile = () => {
   const[questionnaireForms, setQuestionnaireForms]=useState()
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
+  const [formChanges,setFormChanges] = useState(false)
 
   // added
   const getInventory = async (refetch = false) => {
@@ -108,9 +109,9 @@ const MyProfile = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (refetch = true) => {
       try {
-        const response = await getQuestionnaires();
+        const response = await getQuestionnaires( refetch );
         if (response.status === 200) {
           setQuestionnaireForms(response.data)
         }
@@ -119,9 +120,8 @@ const MyProfile = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [templateTabs]);
 
-  console.log("asdasddddddddddsaaaaaaaa", authUserState);
   // added
   const getEmployees = async () => {
     try {
@@ -386,6 +386,14 @@ const MyProfile = () => {
       ],
     });
   };
+
+  const handleSetTemplateTabs = () => {
+    setTemplateTabs("templates list");
+  };
+
+  const handleFormChanges = () =>{
+    setFormChanges(true)
+  }
 
   return (
     <div>
@@ -978,7 +986,7 @@ const MyProfile = () => {
                 <div className="bg-white rounded-lg">
                   <div className="flex justify-between items-center py-3">
                     <h2 className="text-gray-500">Template List</h2>
-                    <div><div onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(); setDuplicateQuestionnaire();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
+                    <div><div onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(); setDuplicateQuestionnaire(); setFormChanges(false);}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
                   </div>
                   <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
                     {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
@@ -994,9 +1002,9 @@ const MyProfile = () => {
                           </div>
                         </div>
                         <div className="self-center grid grid-cols-[1fr,50px] gap-1 pt-1 text-[15px]">
-                          <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setTemplateTabs("create new template"); setDuplicateQuestionnaire(template?.id); setSelectedQuestionnaire();}}>Duplicate</button></Link>
+                          <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setTemplateTabs("create new template"); setDuplicateQuestionnaire(template?.id); setSelectedQuestionnaire(); setFormChanges(false)}}>Duplicate</button></Link>
                           {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
-                          <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(template?.id); setDuplicateQuestionnaire();}}>Edit</button>
+                          <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(template?.id); setDuplicateQuestionnaire(); setFormChanges(false)}}>Edit</button>
                           )}
                         </div>
                       </div>
@@ -1014,7 +1022,7 @@ const MyProfile = () => {
                       </div>
                     </div>
                   </div>
-                  <div><Questionnaires selectedEmployee={authUserState.user} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} /></div>
+                  <div><Questionnaires selectedEmployee={authUserState.user} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges}/></div>
                   {/* <div className="flex">
                     <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                       <button type="button" className="flex gap-2 items-center">

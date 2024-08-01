@@ -198,9 +198,9 @@ const Employee = () => {
   }, [selectedEmployeeData]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (refetch = true) => {
       try {
-        const response = await getQuestionnaires();
+        const response = await getQuestionnaires( refetch );
         if (response.status === 200) {
           setQuestionnaireForms(response.data)
         }
