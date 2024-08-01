@@ -180,7 +180,6 @@ const Questionnaires = ({
   setTemplateTabs,
   title,
   FormChanges,
-  formChanged,
   setQuestionnaireWithIntake
 }) => {
   const { authUserState } = useAuthContext();
@@ -220,6 +219,7 @@ const Questionnaires = ({
       ...prev,
       { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 },
     ]);
+    handleChange(null, null, qutionaryFields.length);
   };
 
   useEffect(()=>{
@@ -280,20 +280,23 @@ const Questionnaires = ({
   // ---------------------------------------------------
   // qutionaryFields onchange
 
-  // topModel Open
   const openModalFromParent = () => {
-    console.log(topModelRef?.current);
-    if (topModelRef?.current) {
-      topModelRef?.current?.openModal();
+    if (topModelRef.current && typeof topModelRef.current.openModal === 'function') {
+      topModelRef.current.openModal();
+    } else {
+      console.error('openModal is not a function or topModelRef.current is not set');
     }
     setChanges(false);
   };
-  // topModel Open
+  
   const closeModel = () => {
-    if (topModelRef?.current) {
-      topModelRef?.current?.closeModal();
+    if (topModelRef.current && typeof topModelRef.current.closeModal === 'function') {
+      topModelRef.current.closeModal();
+    } else {
+      console.error('closeModal is not a function or topModelRef.current is not set');
     }
   };
+  
   // const handleChange = (key, value, index) => {
   //   setQutionaryFields((prev) => [
   //     ...prev,
@@ -472,15 +475,18 @@ const Questionnaires = ({
   };
 
   // Change input Field Data Changes
-  const handleChange = (key, value, index) => {
+  const handleChange = (key, value, index, isEditMode = false) => {
     setQutionaryFields((prev) => {
       const updatedFields = [...prev];
       updatedFields[index] = { ...updatedFields[index], [key]: value };
       return updatedFields;
     });
     setChanges(true);
-    FormChanges();
+    if (!isEditMode) {
+      FormChanges();
+    }
   };
+
 
   // Add options for Dropdown, range, Checkboxes
   const addOption = (input, objIndex, optionIndex) => {
