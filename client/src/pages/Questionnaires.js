@@ -21,7 +21,7 @@ import { BsSliders2 } from "react-icons/bs";
 import { PiWarningCircleBold } from "react-icons/pi";
 import Switch from '@mui/material/Switch';
 import { confirmAlert } from "react-confirm-alert";
-import { template } from "lodash";
+import { drop, template } from "lodash";
 import { toast } from "react-toastify";
 import { createQuestionnaire, getQuestionnaire, updateQuestionnaire } from "../Server";
 
@@ -110,6 +110,7 @@ const qutionaryInputs = {
     id: null,
     type: "dropdown",
     label: "Dropdown",
+    drop_down_value: "",
     value: [
       { label: "Dropdown 1", value: "value 1" },
       { label: "Dropdown 2", value: "value 2" },
@@ -125,6 +126,7 @@ const qutionaryInputs = {
     id: null,
     type: "range",
     label: "Range",
+    range_value: "",
     value: [{ label: "Range 1", value: 10 }],
     required: false,
     read_only: false,
@@ -145,7 +147,7 @@ const fonts = [
   { label: "text", class: "herr-von-muellerhoff-regular" },
 ];
 
-const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnaireId,setTemplateTabs, title}) => {
+const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnaireId,setTemplateTabs, title, FormChanges,fetchData}) => {
   const { authUserState } = useAuthContext();
   const location = useLocation();
   const topModelRef = useRef(null);
@@ -155,12 +157,12 @@ const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnai
   const [changes,setChanges] = useState(false)
   const [optionModel, setOptionModel] = useState(false);
   const [qutionaryFields, setQutionaryFields] = useState([]);
+  const [drawSignarure,setDrawSignarure] =useState()
   const [values, setValues] = useState(
     qutionaryInputs?.initialRange?.value.map((v) => v.value)
   );
   const [editModel, setEditModel] = useState({ name: "", index: "" });
   const [selectedvalue, setSelectedvalue] = useState(null);
-
 
   const [editedId, setEditedId] = useState();
   const [duplicateId, setDuplicateId] = useState();
@@ -171,13 +173,18 @@ const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnai
       { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 },
     ]);
   };
-
+  
   const [questionnaireFormData, setQuestionnaireFormData] = useState({
     template: {
       qutionaryFields: null
       },
-    employee_id: selectedEmployee?.id
+    employee_id: selectedEmployee?.id,
+    name:""
   });
+
+  useEffect(()=>{
+    setQuestionnaireFormData((prev)=>({...prev,["name"]:title}))
+  },[title])
 
 useEffect(()=>{
   setQuestionnaireFormData((prev)=>({...prev,template:{...prev.template,["qutionaryFields"]:qutionaryFields}}))
@@ -198,6 +205,7 @@ const duplicate_employee_questionaires = () => {
   const saveSignature = () => {
     if (sigCanvasRef.current) {
       const base64Signature = sigCanvasRef.current.toDataURL();
+      setDrawSignarure(base64Signature)
       console.log(base64Signature);
     }
   };
@@ -208,6 +216,7 @@ const duplicate_employee_questionaires = () => {
   // ---------------------------------------------------
   // qutionaryFields onchange
 
+// topModel Open
 const openModalFromParent = () => {
   console.log(topModelRef?.current);
   if (topModelRef?.current) {
@@ -215,7 +224,7 @@ const openModalFromParent = () => {
   }
   setChanges(false)
 };
-
+// topModel Open
 const closeModel = () =>{
   if (topModelRef?.current) {
     topModelRef?.current?.closeModal();
@@ -266,7 +275,7 @@ const closeModel = () =>{
   // }
   };
 
-  console.log("questionnaireFormDataaaaaaaaaaaaaaaaaaaaa", questionnaireFormData);
+  console.log("questionnaireFormDat", questionnaireFormData);
 
 
   useEffect(() => {
@@ -324,8 +333,8 @@ const closeModel = () =>{
 
 
 
-
-const closeModalFromParent = () => {
+// close Model in Buttons
+const closeModalFromParent = (input) => {
   if(changes){
     confirmAlert({
       title: "Discard Changes",
@@ -334,6 +343,11 @@ const closeModalFromParent = () => {
         {
           label: "Yes",
           onClick: () => {
+            setQutionaryFields((prev)=>{
+              const updatedData = [...prev]
+              updatedData[editModel?.index] = qutionaryInputs[input]
+              return updatedData
+            })
             closeModel()
           },
         },
@@ -352,12 +366,11 @@ const closeModalFromParent = () => {
  
 };
 
+// delete input field
 const handleDeleteField = (index) => {
-
-  if(changes){
     confirmAlert({
-      title: "Discard Changes",
-      message: `Are you sure Delete ?`,
+      title: "Delete Field",
+      message: `Are you sure Delete this Field ?`,
       buttons: [
         {
           label: "Yes",
@@ -378,17 +391,9 @@ const handleDeleteField = (index) => {
         },
       ],
     });
-  }
-  else{
-    setQutionaryFields((prev)=>{
-      const updatedFields = [...qutionaryFields]
-      updatedFields.splice(index,1)
-      return updatedFields
-      })
-    closeModel()
-  }
 } 
 
+// Change input Field Data Changes
 const handleChange = (key, value, index) => {
   setQutionaryFields((prev) => {
     const updatedFields = [...prev];
@@ -396,8 +401,10 @@ const handleChange = (key, value, index) => {
     return updatedFields;
   });
   setChanges(true)
+  FormChanges()
 };
 
+// Add options for Dropdown, range, Checkboxes
 const addOption = (input, objIndex, optionIndex) => {
   setQutionaryFields((prev) => {
     const updatedFields = [...prev];
@@ -411,6 +418,7 @@ const addOption = (input, objIndex, optionIndex) => {
   });
 };
 
+// Option Values Changes for DropDown, Range, CheckBox  
 const handleOptionsChange = (objIndex,optionIndex,key,value) => {
     setQutionaryFields((prev)=>{
       console.log(objIndex,optionIndex,key, value);
@@ -421,8 +429,10 @@ const handleOptionsChange = (objIndex,optionIndex,key,value) => {
          return updatedFields
     })
     setChanges(true)
+    FormChanges()
 }
 
+// Delete options for Dropdown, range, CheckBox
 const deleteOption = (objIndex, optionIndex) => {
   console.log(objIndex, optionIndex);
   setQutionaryFields((prev) => {
@@ -433,6 +443,8 @@ const deleteOption = (objIndex, optionIndex) => {
     return updatedFields; 
   });
 };
+
+
 
   return (
     <div className=" ">
@@ -463,7 +475,9 @@ const deleteOption = (objIndex, optionIndex) => {
                         className="w-full focus:outline-none"
                         readOnly={field?.read_only}
                         required={field?.required}
-                        value={field?.value}
+                        // value={field?.value}
+                        value={qutionaryFields[index]?.value} 
+                        onChange={(e)=>{handleChange("value", e?.target?.value,index)}}
                         rows="3"
                       ></textarea>
                     </div>
@@ -535,6 +549,8 @@ const deleteOption = (objIndex, optionIndex) => {
                                 maxWidth={2.2}
                                 onEnd={() => {
                                   saveSignature();
+                                  handleChange("sign", drawSignarure, index)
+
                                 }}
                                 ref={sigCanvasRef}
                                 canvasProps={{
@@ -624,20 +640,25 @@ const deleteOption = (objIndex, optionIndex) => {
                       openModalFromParent();
                     }}
                   >
-                    <div className="flex justify-between items-center  py-1">
+                   
+                    <div className="flex flex-col ">
+                    <div className="flex justify-between items-center py-1">
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className={`${field?.layout === "horizontal" ? "flex gap-x-5 flex-wrap gap-y-2" :field?.layout === "vertical" ? "grid grid-cols-1":"grid grid-cols-3"}`}>
-                        {Array.isArray(field.value) && field.value.map((checkbox, i) => (
-                          <div key={i} className="flex gap-2  items-center">
-                            <input id={checkbox?.label} readOnly={field?.read_only} required={field?.required} checked={checkbox?.value}  type="checkbox" />
-                            <label htmlFor={checkbox?.label} >{checkbox?.label}</label>
-                          </div>
-                        ))}
                       <div className="text-[20px] cursor-pointer">
                         <BsThreeDotsVertical />
                       </div>
+                    </div>
+                      
+                      <div className={`${field?.layout === "horizontal" ? "grid grid-cols-5" :field?.layout === "vertical" ? "grid grid-cols-1":"grid grid-cols-3"}`}>
+                        {Array.isArray(field.value) && field.value.map((checkbox, i) => (
+                          <div key={i} className="flex gap-2  items-center">
+                            <input id={checkbox?.label} readOnly={field?.read_only} required={field?.required} checked={checkbox?.value} onChange={(e)=>{handleOptionsChange(index, i ,"value" ,e.target.checked)}}  type="checkbox" />
+                            <label htmlFor={checkbox?.label} >{checkbox?.label}</label>
+                          </div>
+                        ))}
+                      
                     </div>
                     {/* <div className="flex flex-col gap-2">
                       {Array.isArray(field.value) &&
@@ -682,9 +703,9 @@ const deleteOption = (objIndex, optionIndex) => {
                         <Select
                           inputId="availableEmployee"
                           isClearable
-                          options={fonts}
+                          options={field?.value}
                           // value={fonts.find(option => option.value === fontStyle)}
-                          onChange={(e) => {}}
+                          onChange={(e)=>{handleChange("drop_down_value" ,e?.value,index,)}}
                           readOnly={field?.read_only}
                           required={field?.required}
                         />
@@ -696,7 +717,7 @@ const deleteOption = (objIndex, optionIndex) => {
                 <>
                   {/* Range */}
                   <div
-                    className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1 "
+                    className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
                     onClick={() => {
                       setEditModel({ name: "range", index: index });
                       openModalFromParent();
@@ -710,14 +731,14 @@ const deleteOption = (objIndex, optionIndex) => {
                         <BsThreeDotsVertical />
                       </div>
                     </div>
-                    <div className="py-4 pr-3">
+                    {/* <div className="py-4 pr-3">
                       <Range
                         step={1}
                         min={0}
                         max={100}
                         values={values}
                         onChange={(newValues) => {
-                          console.log("New Values:", newValues); // Debugging log
+                          console.log("New Values:", newValues); 
                           setValues(newValues);
                         }}
                         renderTrack={({ props, children }) => (
@@ -759,6 +780,18 @@ const deleteOption = (objIndex, optionIndex) => {
                           </div>
                         )}
                       />
+                    </div> */}
+                    <div className="relative">
+                      <input type="range" min={0} max={field.value.length} className="w-full"  onChange={(e)=>{handleChange( "range_value" ,field.value[e.target.value],index,)}} />
+                      <div className=" grid grid-flow-col ">
+                          {Array.isArray(field.value) && field?.value.map((option, i)=>(
+                            <div className="justify-self-end " key={i}>
+                              <div className="flex justify-end">|</div>
+                              <div className="relative"><div className="absolute -top-[3px] -right-[2px]"> {option?.label}</div></div>
+                              
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -846,7 +879,7 @@ const deleteOption = (objIndex, optionIndex) => {
           </div>
         ) : (
           <div className="flex">
-            <form onSubmit={(e) => { (editedId) ? upadteData(e) : submitData(e) }} className=" py-2 m-0 w-full">
+            <form onSubmit={(e) => { (editedId) ? upadteData(e) : submitData(e); fetchData() }} className=" py-2 m-0 w-full">
               <div className="relative w-full">
                 {optionModel && (
                   <div className="bg-gray-100 duration-200 rounded-md absolute z-10 -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
@@ -904,7 +937,7 @@ const deleteOption = (objIndex, optionIndex) => {
         )}
       </div>
 
-      {editModel?.name === "textarea" && (
+      {/* {editModel?.name === "textarea" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1501,9 +1534,8 @@ const deleteOption = (objIndex, optionIndex) => {
               </div>
             </div>
           </div>
-      {/* </div> */}
       </TopModel>
-      )}
+      )} */}
 
      { editModel?.name === "textarea" && <TopModel onSave={handleSave} 
      ref={topModelRef}
@@ -1511,7 +1543,7 @@ const deleteOption = (objIndex, optionIndex) => {
         <div className='flex justify-between gap-2'>
           <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent("initialNote");}} >Close</button>
            <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
@@ -1543,7 +1575,7 @@ const deleteOption = (objIndex, optionIndex) => {
           <div className='flex justify-between gap-2'>
             <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
             <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialSignature')}} >Close</button>
              <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
             </div>
            </div> 
@@ -1556,7 +1588,7 @@ const deleteOption = (objIndex, optionIndex) => {
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={selectedvalue?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div className="flex justify-between py-1">
@@ -1574,7 +1606,7 @@ const deleteOption = (objIndex, optionIndex) => {
           <div className='flex justify-between gap-2'>
             <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
             <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialHeading')}} >Close</button>
              <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
             </div>
            </div> 
@@ -1587,7 +1619,7 @@ const deleteOption = (objIndex, optionIndex) => {
           <div>
             <label>Label</label>
             <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.value}  onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
+              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label}  onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
             </div>
           </div>
           <div className="flex justify-between py-1">
@@ -1605,7 +1637,7 @@ const deleteOption = (objIndex, optionIndex) => {
         <div className='flex justify-between gap-2'>
           <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialCheckBox')}} >Close</button>
            <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
@@ -1643,6 +1675,7 @@ const deleteOption = (objIndex, optionIndex) => {
             <div className="pl-4">Value</div>
             <div className="flex justify-center">Action</div>
           </div>
+          <div className="top-model-table">
             {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
                 <div key={i} className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px] group">
                   <div className="">
@@ -1663,6 +1696,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   </div>
                 </div>
             ))}
+            </div>
           </div>
           <div className="flex justify-between">
             <div>Required</div>
@@ -1678,7 +1712,7 @@ const deleteOption = (objIndex, optionIndex) => {
         <div className='flex justify-between gap-2'>
           <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialDropdown')}} >Close</button>
            <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
@@ -1699,6 +1733,7 @@ const deleteOption = (objIndex, optionIndex) => {
             <div className="pl-4">Options</div>
             <div className="flex justify-center">Action</div>
           </div>
+          <div className="top-model-table">
             {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
                 <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group" >
 
@@ -1711,11 +1746,12 @@ const deleteOption = (objIndex, optionIndex) => {
 
                   <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
                     <div className="cursor-pointer" onClick={()=>{addOption("dropdown",editModel?.index,i+1)}}><IoMdAdd /></div>
-                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i+1)}}/></div>
+                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i)}}/></div>
                     <div className="cursor-pointer"><PiColumnsFill /></div>
                   </div>
                 </div>
             ))}
+            </div>
           </div>
           <div className="flex justify-between py-2">
             <div>Required</div>
@@ -1731,7 +1767,7 @@ const deleteOption = (objIndex, optionIndex) => {
         <div className='flex justify-between gap-2'>
           <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialRange')}} >Close</button>
            <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 
@@ -1752,6 +1788,7 @@ const deleteOption = (objIndex, optionIndex) => {
             <div className="pl-4">Options</div>
             <div className="flex justify-center">Action</div>
           </div>
+          <div className="top-model-table">
             {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index].value.map((option, i)=>(
                 <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group">
                   
@@ -1764,11 +1801,12 @@ const deleteOption = (objIndex, optionIndex) => {
                   
                   <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
                     <div className="cursor-pointer" onClick={()=>{addOption("range",editModel?.index,i+1)}}><IoMdAdd /></div>
-                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i+1)}}/></div>
+                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i)}}/></div>
                     <div className="cursor-pointer"><PiColumnsFill /></div>
                   </div>
                 </div>
             ))}
+            </div>
           </div>
           <div className="flex justify-between py-2">
             <div>Required</div>
@@ -1784,7 +1822,7 @@ const deleteOption = (objIndex, optionIndex) => {
         <div className='flex justify-between gap-2'>
           <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
           <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={closeModalFromParent} >Close</button>
+           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialInstruction')}} >Close</button>
            <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModel()}}>Save</button>
           </div>
          </div> 

@@ -1,5 +1,6 @@
-import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import Modal from 'react-modal';
+
 
 const customStyles = {
   content: {
@@ -26,7 +27,6 @@ export const TopModel = forwardRef(({ children, footer }, ref) => {
     setIsOpen(false)
   };
 
-
   const afterOpenModal = () => {
     if (subtitle.current) {
       subtitle.current.style.color = '#f00';
@@ -35,25 +35,20 @@ export const TopModel = forwardRef(({ children, footer }, ref) => {
 
   useImperativeHandle(ref, () => ((modalIsOpen)?{closeModal}:{openModal}));
 
-
-
   return (
-    <div>
+    <div >
       <Modal
         isOpen={modalIsOpen}
         onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
         style={customStyles}
         contentLabel="Example Modal"
       >
-        {children}
+        <div className='top-model-children'>
+          {children}
+        </div>
         {footer}
       </Modal>
     </div>
   );
 });
 
-{/* <div className='flex justify-end gap-2'>
-          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={closeModal}>Close</button>
-          <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[15px] rounded-md text-white' onClick={onSave}>Save</button>
-        </div> */}

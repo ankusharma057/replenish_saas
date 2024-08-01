@@ -275,3 +275,8 @@ input:-webkit-autofill:active {
   transform: translate(-50%, 0%) !important;
   top: 8% !important;
 }
+
+.top-model-table{
+  max-height: 500px;
+  overflow-y:auto;
+}

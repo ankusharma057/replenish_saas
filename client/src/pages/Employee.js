@@ -76,10 +76,11 @@ const Employee = () => {
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
   const [serviceLocation, setServiceLocation] = useState([]);
   const [edittitle, setEditTitle] = useState(false)
-  const [title, setTitle] = useState("gsshgu")
+  const [title, setTitle] = useState("Questionnaries Form")
   const [questionnaireForms, setQuestionnaireForms]=useState()
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
+  const [formChanges,setFormChanges] = useState(false)
 
 
   // Questionnaires
@@ -208,8 +209,18 @@ const Employee = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [templateTabs]);
 
+  const fetchData = async () => {
+    try {
+      const response = await getQuestionnaires();
+      if (response.status === 200) {
+        setQuestionnaireForms(response.data)
+      }
+    } catch (error) {
+      console.error('Error fetching intake forms:', error);
+    }
+  };
 
   useEffect(() => {
     if (isFillingForm) {
@@ -636,6 +647,33 @@ const Employee = () => {
   const handleSetTemplateTabs = () => {
     setTemplateTabs("templates list");
   };
+
+  const handleFormChanges = () =>{
+    setFormChanges(true)
+  }
+
+  const confirmToDiscard = () => {
+    if(formChanges){
+      confirmAlert({
+        title: "Discard Changes",
+        message: `Are you sure Delete ?`,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              setTemplateTabs("templates list");
+            },
+          },
+          {
+            label: "No",
+          },
+        ],
+      });
+    }
+    else{
+      setTemplateTabs("templates list");
+    }
+  }
 
   return (
     <>
@@ -1139,7 +1177,7 @@ const Employee = () => {
                       <div className="bg-white rounded-lg">
                         <div className="flex justify-between items-center py-3">
                           <h2 className="text-gray-500">Template List</h2>
-                          <div><div onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(); setDuplicateQuestionnaire();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
+                          <div><div onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(); setDuplicateQuestionnaire();setFormChanges(false)}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Template</div></div>
                         </div>
                         <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
                           {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
@@ -1155,9 +1193,9 @@ const Employee = () => {
                                 </div>
                               </div>
                               <div className="self-center grid grid-cols-[1fr,50px] gap-1 pt-1 text-[15px]">
-                                <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setTemplateTabs("create new template"); setDuplicateQuestionnaire(template?.id); setSelectedQuestionnaire();}}>Duplicate</button></Link>
+                                <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setTemplateTabs("create new template"); setDuplicateQuestionnaire(template?.id); setSelectedQuestionnaire();setFormChanges(false)}}>Duplicate</button></Link>
                                 {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
-                                <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(template?.id); setDuplicateQuestionnaire();}}>Edit</button>
+                                <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setTemplateTabs("create new template"); setSelectedQuestionnaire(template?.id); setDuplicateQuestionnaire();setFormChanges(false)}}>Edit</button>
                                 )}
                               </div>
                             </div>
@@ -1178,14 +1216,13 @@ const Employee = () => {
                             </div>
 
                           </div>
-                          {selectedQuestionnaire ? <h2>Update Chart Template</h2> : duplicateQuestionnaire ? <h2>Duplicate Chart Template</h2> : <h2>New Chart Template</h2>}
                           <div className="flex items-center">
                             <div className="flex gap-2">
-                              <div onClick={() => {setTemplateTabs("templates list")}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Questionnaire</div>
+                              <div onClick={() => {confirmToDiscard(); fetchData();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Questionnaires</div>
                             </div>
                           </div>
                         </div>
-                        <div><Questionnaires  title={title} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} /></div>
+                        <div><Questionnaires  title={title} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges} fetchData={fetchData} /></div>
                         {/* <div className="flex">
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                             <button type="button" className="flex gap-2 items-center">
