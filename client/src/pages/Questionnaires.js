@@ -19,23 +19,27 @@ import { TbCheckbox } from "react-icons/tb";
 import { RxDropdownMenu } from "react-icons/rx";
 import { BsSliders2 } from "react-icons/bs";
 import { PiWarningCircleBold } from "react-icons/pi";
-import Switch from '@mui/material/Switch';
+import Switch from "@mui/material/Switch";
 import { confirmAlert } from "react-confirm-alert";
 import { drop, template } from "lodash";
 import { toast } from "react-toastify";
-import { createQuestionnaire, getQuestionnaire, updateQuestionnaire, getQuestionnaires   } from "../Server";
+import {
+  createQuestionnaire,
+  getQuestionnaire,
+  updateQuestionnaire,
+  getQuestionnaires,
+} from "../Server";
 import { IoDocumentText } from "react-icons/io5";
-
 
 const questionnaireTabs = [
   {
     tab_name: "Items",
-    value: 0
+    value: 0,
   },
   {
     tab_name: "Templates",
-    value: 1
-  }
+    value: 1,
+  },
 ];
 
 const qutionaryInputOption = [
@@ -61,7 +65,8 @@ const qutionaryInputOption = [
     label: "Check Boxes",
     icon: <TbCheckbox />,
     field: "initialCheckBox",
-    description: "Select One or More CheckBoxes And Correctly And Operationally Add A Note To Each",
+    description:
+      "Select One or More CheckBoxes And Correctly And Operationally Add A Note To Each",
   },
   {
     label: "Drop Down",
@@ -73,13 +78,15 @@ const qutionaryInputOption = [
     label: "Range/Scale",
     icon: <BsSliders2 />,
     field: "initialRange",
-    description: "A Customizable Range/Scale Slicer Allows You To Choose From A Range Of Values"
+    description:
+      "A Customizable Range/Scale Slicer Allows You To Choose From A Range Of Values",
   },
   {
     label: "Instruction",
     icon: <PiWarningCircleBold />,
     field: "initialInstruction",
-    description: "Add Instructions To Your Template That Will Noe Be Visible When Exploring Or Printing The Chart",
+    description:
+      "Add Instructions To Your Template That Will Noe Be Visible When Exploring Or Printing The Chart",
   },
 ];
 
@@ -113,7 +120,7 @@ const qutionaryInputs = {
     id: null,
     type: "checkbox",
     label: "CheckBox",
-    layout:"horizontal",
+    layout: "horizontal",
     value: [
       { label: "CheckBox 1", value: true },
       { label: "CheckBox 2", value: false },
@@ -166,19 +173,27 @@ const fonts = [
   { label: "text", class: "herr-von-muellerhoff-regular" },
 ];
 
-const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnaireId,setTemplateTabs, title, FormChanges,fetchData}) => {
+const Questionnaires = ({
+  selectedEmployee,
+  questionnaireId,
+  duplicateQuestionnaireId,
+  setTemplateTabs,
+  title,
+  FormChanges,
+  fetchData,
+}) => {
   const { authUserState } = useAuthContext();
   const [templateTabsPopup, setTemplateTabsPopup] = useState(0);
-  const [questionnaireForms, setQuestionnaireForms]=useState()
+  const [questionnaireForms, setQuestionnaireForms] = useState();
   const location = useLocation();
   const topModelRef = useRef(null);
   const sigCanvasRef = useRef(null);
   const canvasRef = useRef(null);
-  const [inputHover,setInputHover]= useState(null)
-  const [changes,setChanges] = useState(false)
+  const [inputHover, setInputHover] = useState(null);
+  const [changes, setChanges] = useState(false);
   const [optionModel, setOptionModel] = useState(false);
   const [qutionaryFields, setQutionaryFields] = useState([]);
-  const [drawSignarure,setDrawSignarure] =useState()
+  const [drawSignarure, setDrawSignarure] = useState();
   const [values, setValues] = useState(
     qutionaryInputs?.initialRange?.value.map((v) => v.value)
   );
@@ -194,39 +209,43 @@ const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnai
       { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 },
     ]);
   };
-  
+
+  console.log("editModel", editModel);
+
   const [questionnaireFormData, setQuestionnaireFormData] = useState({
     template: {
-      qutionaryFields: null
-      },
+      qutionaryFields: null,
+    },
     employee_id: selectedEmployee?.id,
-    name:""
+    name: "",
   });
 
-  useEffect(()=>{
-    setQuestionnaireFormData((prev)=>({...prev,["name"]:title}))
-  },[title])
+  useEffect(() => {
+    setQuestionnaireFormData((prev) => ({ ...prev, ["name"]: title }));
+  }, [title]);
 
-useEffect(()=>{
-  setQuestionnaireFormData((prev)=>({...prev,template:{...prev.template,["qutionaryFields"]:qutionaryFields}}))
-},[qutionaryFields])
+  useEffect(() => {
+    setQuestionnaireFormData((prev) => ({
+      ...prev,
+      template: { ...prev.template, ["qutionaryFields"]: qutionaryFields },
+    }));
+  }, [qutionaryFields]);
 
-
-const duplicate_employee_questionaires = () => {
-  setQuestionnaireFormData((prev) => {
-    const { employee_id, ...rest } = prev;
-    return {
-      ...rest,
-      employee_id: authUserState?.user?.id,
-    };
-  });
-};
+  const duplicate_employee_questionaires = () => {
+    setQuestionnaireFormData((prev) => {
+      const { employee_id, ...rest } = prev;
+      return {
+        ...rest,
+        employee_id: authUserState?.user?.id,
+      };
+    });
+  };
 
   // ----------------------------------------------------
   const saveSignature = () => {
     if (sigCanvasRef.current) {
       const base64Signature = sigCanvasRef.current.toDataURL();
-      setDrawSignarure(base64Signature)
+      setDrawSignarure(base64Signature);
       console.log(base64Signature);
     }
   };
@@ -237,20 +256,20 @@ const duplicate_employee_questionaires = () => {
   // ---------------------------------------------------
   // qutionaryFields onchange
 
-// topModel Open
-const openModalFromParent = () => {
-  console.log(topModelRef?.current);
-  if (topModelRef?.current) {
-    topModelRef?.current?.openModal();
-  }
-  setChanges(false)
-};
-// topModel Open
-const closeModel = () =>{
-  if (topModelRef?.current) {
-    topModelRef?.current?.closeModal();
-  }
-}
+  // topModel Open
+  const openModalFromParent = () => {
+    console.log(topModelRef?.current);
+    if (topModelRef?.current) {
+      topModelRef?.current?.openModal();
+    }
+    setChanges(false);
+  };
+  // topModel Open
+  const closeModel = () => {
+    if (topModelRef?.current) {
+      topModelRef?.current?.closeModal();
+    }
+  };
   // const handleChange = (key, value, index) => {
   //   setQutionaryFields((prev) => [
   //     ...prev,
@@ -260,13 +279,13 @@ const closeModel = () =>{
   // };
 
   const submitData = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       const response = await createQuestionnaire(questionnaireFormData);
       if (response.status === 201) {
         toast.success("Questionnaire Template successfully created");
         setTimeout(() => {
-          setTemplateTabs()
+          setTemplateTabs();
         }, 1500);
       }
     } catch (error) {
@@ -277,15 +296,18 @@ const closeModel = () =>{
   };
 
   const upadteData = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // if(formValidation()){
     try {
-      const response = await updateQuestionnaire(questionnaireId, questionnaireFormData);
+      const response = await updateQuestionnaire(
+        questionnaireId,
+        questionnaireFormData
+      );
       if (response?.status === 200) {
-        setQutionaryFields(response?.data?.template?.qutionaryFields)
+        setQutionaryFields(response?.data?.template?.qutionaryFields);
         toast.success("Intake form successfully updated");
         setTimeout(() => {
-          setTemplateTabs()
+          setTemplateTabs();
         }, 1500);
       }
     } catch (error) {
@@ -293,45 +315,45 @@ const closeModel = () =>{
       console.log("err", error?.response?.data?.error);
       // setIntakeFormError((prev)=>({...prev,...error?.response?.data?.error}))
     }
-  // }
+    // }
   };
 
   console.log("questionnaireFormDat", questionnaireFormData);
 
-
   useEffect(() => {
     // const urlParams = new URLSearchParams(window?.location?.search);
     // setEditedId(urlParams.get('intake-form-id'))
-    setEditedId(questionnaireId)
-  }, [])
+    setEditedId(questionnaireId);
+  }, []);
 
   useEffect(() => {
     // const urlParams = new URLSearchParams(window?.location?.search);
     // setDuplicateId(urlParams.get('duplicate-intake-form-id'))
-    setDuplicateId(duplicateQuestionnaireId)
-  }, [])
+    setDuplicateId(duplicateQuestionnaireId);
+  }, []);
 
   const editData = async (templateId) => {
     console.log();
     try {
       const response = await getQuestionnaire(editedId || templateId);
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
-        if (response.status === 200) {
-          // setQutionaryFields(response?.data?.template?.qutionaryFields);
-          setQutionaryFields((prev)=>{
-            const updatedData =  [...prev,...response?.data?.template?.qutionaryFields]
-           
-            return updatedData
-          })
-          setEditedId(null);
-        } else {
-        }
+      if (response.status === 200) {
+        // setQutionaryFields(response?.data?.template?.qutionaryFields);
+        setQutionaryFields((prev) => {
+          const updatedData = [
+            ...prev,
+            ...response?.data?.template?.qutionaryFields,
+          ];
+          return updatedData;
+        });
+        setEditedId(null);
+      } else {
+      }
       // }else{
       //   navigate('/intake-forms')
       //   toast.error("You don't have permission to edit this intake form");
       // }
-    } catch (err) {
-    }
+    } catch (err) {}
   };
 
   const duplicateIntakeForm = async () => {
@@ -341,8 +363,7 @@ const closeModel = () =>{
         setQutionaryFields(response?.data?.template?.qutionaryFields);
       } else {
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -350,10 +371,10 @@ const closeModel = () =>{
       try {
         const response = await getQuestionnaires();
         if (response.status === 200) {
-          setQuestionnaireForms(response.data)
+          setQuestionnaireForms(response.data);
         }
       } catch (error) {
-        console.error('Error fetching intake forms:', error);
+        console.error("Error fetching intake forms:", error);
       }
     };
     fetchData();
@@ -371,45 +392,39 @@ const closeModel = () =>{
     if (duplicateId) {
       duplicateIntakeForm();
     }
-  }, [duplicateId])
+  }, [duplicateId]);
 
-
-
-// close Model in Buttons
-const closeModalFromParent = (input) => {
-  if(changes){
-    confirmAlert({
-      title: "Discard Changes",
-      message: `Are you sure Delete ?`,
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            setQutionaryFields((prev)=>{
-              const updatedData = [...prev]
-              updatedData[editModel?.index] = qutionaryInputs[input]
-              return updatedData
-            })
-            closeModel()
+  // close Model in Buttons
+  const closeModalFromParent = (input) => {
+    if (changes) {
+      confirmAlert({
+        title: "Discard Changes",
+        message: `Are you sure Delete ?`,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              setQutionaryFields((prev) => {
+                const updatedData = [...prev];
+                updatedData[editModel?.index] = qutionaryInputs[input];
+                return updatedData;
+              });
+              closeModel();
+            },
           },
-        },
-        {
-          label: "No",
-          onClick: () => {
-        
-          }
-        },
-      ],
-    });
-  }
-  else{
-    closeModel()
-  }
- 
-};
+          {
+            label: "No",
+            onClick: () => {},
+          },
+        ],
+      });
+    } else {
+      closeModel();
+    }
+  };
 
-// delete input field
-const handleDeleteField = (index) => {
+  // delete input field
+  const handleDeleteField = (index) => {
     confirmAlert({
       title: "Delete Field",
       message: `Are you sure Delete this Field ?`,
@@ -417,76 +432,75 @@ const handleDeleteField = (index) => {
         {
           label: "Yes",
           onClick: () => {
-            setQutionaryFields((prev)=>{
-              const updatedFields = [...qutionaryFields]
-              updatedFields.splice(index,1)
-              return updatedFields
-              })
-              closeModel()
+            setQutionaryFields((prev) => {
+              const updatedFields = [...qutionaryFields];
+              updatedFields.splice(index, 1);
+              return updatedFields;
+            });
+            closeModel();
           },
         },
         {
           label: "No",
-          onClick: () => {
-        
-          }
+          onClick: () => {},
         },
       ],
     });
-} 
+  };
 
-// Change input Field Data Changes
-const handleChange = (key, value, index) => {
-  setQutionaryFields((prev) => {
-    const updatedFields = [...prev];
-    updatedFields[index] = { ...updatedFields[index], [key]: value };
-    return updatedFields;
-  });
-  setChanges(true)
-  FormChanges()
-};
+  // Change input Field Data Changes
+  const handleChange = (key, value, index) => {
+    setQutionaryFields((prev) => {
+      const updatedFields = [...prev];
+      updatedFields[index] = { ...updatedFields[index], [key]: value };
+      return updatedFields;
+    });
+    setChanges(true);
+    FormChanges();
+  };
 
-// Add options for Dropdown, range, Checkboxes
-const addOption = (input, objIndex, optionIndex) => {
-  setQutionaryFields((prev) => {
-    const updatedFields = [...prev];
-    const copyValue = [...updatedFields[objIndex]?.value];
-    copyValue.splice(optionIndex, 0, { label: `new ${input}`, value: false });
-    updatedFields[objIndex] = {
-      ...updatedFields[objIndex],
-      value: copyValue,
-    };
-    return updatedFields;
-  });
-};
+  // Add options for Dropdown, range, Checkboxes
+  const addOption = (input, objIndex, optionIndex) => {
+    setQutionaryFields((prev) => {
+      const updatedFields = [...prev];
+      const copyValue = [...updatedFields[objIndex]?.value];
+      copyValue.splice(optionIndex, 0, { label: `new ${input}`, value: false });
+      updatedFields[objIndex] = {
+        ...updatedFields[objIndex],
+        value: copyValue,
+      };
+      return updatedFields;
+    });
+  };
 
-// Option Values Changes for DropDown, Range, CheckBox  
-const handleOptionsChange = (objIndex,optionIndex,key,value) => {
-    setQutionaryFields((prev)=>{
-      console.log(objIndex,optionIndex,key, value);
-      const updatedFields = [...prev]
-        const copyObj = [...updatedFields[objIndex]?.value]
-         copyObj[optionIndex] = {...copyObj[optionIndex],[key]:value}
-         updatedFields[objIndex] = {...updatedFields[objIndex],value:copyObj}
-         return updatedFields
-    })
-    setChanges(true)
-    FormChanges()
-}
+  // Option Values Changes for DropDown, Range, CheckBox
+  const handleOptionsChange = (objIndex, optionIndex, key, value) => {
+    setQutionaryFields((prev) => {
+      console.log(objIndex, optionIndex, key, value);
+      const updatedFields = [...prev];
+      const copyObj = [...updatedFields[objIndex]?.value];
+      copyObj[optionIndex] = { ...copyObj[optionIndex], [key]: value };
+      updatedFields[objIndex] = { ...updatedFields[objIndex], value: copyObj };
+      return updatedFields;
+    });
+    setChanges(true);
+    FormChanges();
+  };
 
-// Delete options for Dropdown, range, CheckBox
-const deleteOption = (objIndex, optionIndex) => {
-  console.log(objIndex, optionIndex);
-  setQutionaryFields((prev) => {
-    const updatedFields = [...prev];
-    const copyValue = [...updatedFields[objIndex].value];
-    copyValue.splice(optionIndex, 1);
-    updatedFields[objIndex] = { ...updatedFields[objIndex], value: copyValue }; 
-    return updatedFields; 
-  });
-};
-
-
+  // Delete options for Dropdown, range, CheckBox
+  const deleteOption = (objIndex, optionIndex) => {
+    console.log(objIndex, optionIndex);
+    setQutionaryFields((prev) => {
+      const updatedFields = [...prev];
+      const copyValue = [...updatedFields[objIndex].value];
+      copyValue.splice(optionIndex, 1);
+      updatedFields[objIndex] = {
+        ...updatedFields[objIndex],
+        value: copyValue,
+      };
+      return updatedFields;
+    });
+  };
 
   return (
     <div className=" ">
@@ -500,7 +514,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "textarea", index: index });
+                      setEditModel({ name: "initialNote", index: index });
                       openModalFromParent();
                     }}
                   >
@@ -517,9 +531,10 @@ const deleteOption = (objIndex, optionIndex) => {
                         className="w-full focus:outline-none"
                         readOnly={field?.read_only}
                         required={field?.required}
-                        // value={field?.value}
-                        value={qutionaryFields[index]?.value} 
-                        onChange={(e)=>{handleChange("value", e?.target?.value,index)}}
+                        value={qutionaryFields[index]?.value}
+                        onChange={(e) => {
+                          handleChange("value", e?.target?.value, index);
+                        }}
                         rows="3"
                       ></textarea>
                     </div>
@@ -531,7 +546,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "signature", index: index });
+                      setEditModel({ name: "initialSignature", index: index });
                       openModalFromParent();
                     }}
                   >
@@ -591,8 +606,7 @@ const deleteOption = (objIndex, optionIndex) => {
                                 maxWidth={2.2}
                                 onEnd={() => {
                                   saveSignature();
-                                  handleChange("sign", drawSignarure, index)
-
+                                  handleChange("sign", drawSignarure, index);
                                 }}
                                 ref={sigCanvasRef}
                                 canvasProps={{
@@ -655,7 +669,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "heading", index: index });
+                      setEditModel({ name: "initialHeading", index: index });
                       openModalFromParent();
                     }}
                   >
@@ -678,49 +692,55 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "checkbox", index: index });
+                      setEditModel({ name: "initialCheckBox", index: index });
                       openModalFromParent();
                     }}
                   >
-                   
                     <div className="flex flex-col ">
-                    <div className="flex justify-between items-center py-1">
-                      <div className="font-semibold text-[17px]">
-                        {field?.label}
+                      <div className="flex justify-between items-center py-1">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div>
                       </div>
-                      <div className="text-[20px] cursor-pointer">
-                        <BsThreeDotsVertical />
+
+                      <div
+                        className={`${
+                          field?.layout === "horizontal"
+                            ? "grid grid-cols-5"
+                            : field?.layout === "vertical"
+                            ? "grid grid-cols-1"
+                            : "grid grid-cols-3"
+                        }`}
+                      >
+                        {Array.isArray(field.value) &&
+                          field.value.map((checkbox, i) => (
+                            <div key={i} className="flex gap-2  items-center">
+                              <input
+                                id={checkbox?.label}
+                                readOnly={field?.read_only}
+                                required={field?.required}
+                                checked={checkbox?.value}
+                                onChange={(e) => {
+                                  handleOptionsChange(
+                                    index,
+                                    i,
+                                    "value",
+                                    e.target.checked
+                                  );
+                                }}
+                                type="checkbox"
+                              />
+                              <label htmlFor={checkbox?.label}>
+                                {checkbox?.label}
+                              </label>
+                            </div>
+                          ))}
                       </div>
                     </div>
-                      
-                      <div className={`${field?.layout === "horizontal" ? "grid grid-cols-5" :field?.layout === "vertical" ? "grid grid-cols-1":"grid grid-cols-3"}`}>
-                        {Array.isArray(field.value) && field.value.map((checkbox, i) => (
-                          <div key={i} className="flex gap-2  items-center">
-                            <input id={checkbox?.label} readOnly={field?.read_only} required={field?.required} checked={checkbox?.value} onChange={(e)=>{handleOptionsChange(index, i ,"value" ,e.target.checked)}}  type="checkbox" />
-                            <label htmlFor={checkbox?.label} >{checkbox?.label}</label>
-                          </div>
-                        ))}
-                      
-                    </div>
-                    {/* <div className="flex flex-col gap-2">
-                      {Array.isArray(field.value) &&
-                        field.value.map((checkbox, i) => (
-                          <div key={i} className="flex gap-3 items-center">
-                            <input
-                              id={checkbox?.label}
-                              readOnly={field?.read_only}
-                              required={field?.required}
-                              checked={checkbox?.value}
-                              type="checkbox"
-                            />
-                            <label htmlFor={checkbox?.label}>
-                              {checkbox?.label}
-                            </label>
-                          </div>
-                        ))}
-                    </div> */}
                   </div>
-                </div>
                 </>
               ) : field?.type === "dropdown" ? (
                 <>
@@ -728,7 +748,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "dropdown", index: index });
+                      setEditModel({ name: "initialDropdown", index: index });
                       openModalFromParent();
                     }}
                   >
@@ -746,8 +766,9 @@ const deleteOption = (objIndex, optionIndex) => {
                           inputId="availableEmployee"
                           isClearable
                           options={field?.value}
-                          // value={fonts.find(option => option.value === fontStyle)}
-                          onChange={(e)=>{handleChange("drop_down_value" ,e?.value,index,)}}
+                          onChange={(e) => {
+                            handleChange("drop_down_value", e?.value, index);
+                          }}
                           readOnly={field?.read_only}
                           required={field?.required}
                         />
@@ -761,7 +782,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
                     onClick={() => {
-                      setEditModel({ name: "range", index: index });
+                      setEditModel({ name: "initialRange", index: index });
                       openModalFromParent();
                     }}
                   >
@@ -773,64 +794,31 @@ const deleteOption = (objIndex, optionIndex) => {
                         <BsThreeDotsVertical />
                       </div>
                     </div>
-                    {/* <div className="py-4 pr-3">
-                      <Range
-                        step={1}
-                        min={0}
-                        max={100}
-                        values={values}
-                        onChange={(newValues) => {
-                          console.log("New Values:", newValues); 
-                          setValues(newValues);
-                        }}
-                        renderTrack={({ props, children }) => (
-                          <div
-                            {...props}
-                            style={{
-                              ...props.style,
-                              height: "6px",
-                              width: "100%",
-                              backgroundColor: "#ccc",
-                            }}
-                          >
-                            {children}
-                          </div>
-                        )}
-                        renderThumb={({ props, isDragged }) => (
-                          <div
-                            {...props}
-                            style={{
-                              ...props.style,
-                              height: "20px",
-                              width: "20px",
-                              backgroundColor: isDragged ? "#548BF4" : "#999",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              borderRadius: "50%",
-                              boxShadow: "0px 2px 6px #AAA",
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: "8px",
-                                width: "8px",
-                                borderRadius: "50%",
-                                backgroundColor: "#FFF",
-                              }}
-                            />
-                          </div>
-                        )}
-                      />
-                    </div> */}
                     <div className="relative">
-                      <input type="range" min={0} max={field.value.length} className="w-full"  onChange={(e)=>{handleChange( "range_value" ,field.value[e.target.value],index,)}} />
+                      <input
+                        type="range"
+                        min={0}
+                        max={field.value.length}
+                        className="w-full"
+                        onChange={(e) => {
+                          handleChange(
+                            "range_value",
+                            field.value[e.target.value],
+                            index
+                          );
+                        }}
+                      />
                       <div className=" grid grid-flow-col ">
-                          {Array.isArray(field.value) && field?.value.map((option, i)=>(
+                        {Array.isArray(field.value) &&
+                          field?.value.map((option, i) => (
                             <div className="justify-self-end " key={i}>
                               <div className="flex justify-end">|</div>
-                              <div className="relative"><div className="absolute -top-[3px] -right-[2px]"> {option?.label}</div></div>
-                              
+                              <div className="relative">
+                                <div className="absolute -top-[3px] -right-[2px]">
+                                  {" "}
+                                  {option?.label}
+                                </div>
+                              </div>
                             </div>
                           ))}
                       </div>
@@ -843,7 +831,10 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div
                     className=" hover:bg-gray-100  rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      setEditModel({ name: "instruction", index: index });
+                      setEditModel({
+                        name: "initialInstruction",
+                        index: index,
+                      });
                       openModalFromParent();
                     }}
                   >
@@ -863,224 +854,47 @@ const deleteOption = (objIndex, optionIndex) => {
               ) : null
             )}
         </div>
-        {Array.isArray(qutionaryFields) && qutionaryFields.length === 0 ? (
-          <div className="flex justify-center">
-            <div className={`flex flex-col gap-2 py-14`}>
-              <div className="text-center">
-                <div>Some text are in here</div>
-                <div>Some text are in here</div>
-                <div>Some text</div>
-              </div>
-              <div className="relative">
-                {optionModel && (
-                  <div className="bg-gray-50 duration-200 rounded-md absolute -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
-                    <div className="py-1">
-                      {Array.isArray(qutionaryInputOption) &&
-                        qutionaryInputOption.map((option, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              createQutionaryFields(option?.field);
-                              setOptionModel(false);
-                            }}
-                            className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px] cursor-pointer"
-                          >
-                            <div className="text-[15px] cursor-pointer">
-                              {option?.label}
-                            </div>
-                            <div className="text-[18px] cursor-pointer">
-                              {option?.icon}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-                <div className="flex w-[135px] bg-[#0dcaf0] text-white   rounded-md">
-                  <button
-                    type="button"
-                    className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]" onClick={() => {
-                      openModalFromParent();
-                    }}>
-                    <PiGridNineLight />
-                  </button>
-                  <TopModel ref={topModelRef}>
-                    <div className="w-[700px] flex flex-col">
-                      <div className="pb-2 border-b">
-                        <h4>Add Form Template Library</h4>
-                      </div>
-                      <div>
-                        <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
-                          <div className="flex w-full absolute bottom-[-2px]">
-                            {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabsPopup === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabsPopup(tab.value) }}><span>{tab.tab_name}</span></div>))}
-                          </div>
+        <div className="flex">
+          <form
+            onSubmit={(e) => {
+              editedId ? upadteData(e) : submitData(e);
+              fetchData();
+            }}
+            className=" py-2 m-0 w-full"
+          >
+            <div className="relative w-full">
+              {optionModel && (
+                <div className="bg-gray-100 duration-200 rounded-md absolute z-10 -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
+                  <div className="py-1">
+                    {Array.isArray(qutionaryInputOption) &&
+                      qutionaryInputOption.map((option, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            createQutionaryFields(option?.field);
+                            setOptionModel(false);
+                          }}
+                          className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]"
+                        >
+                          <div className="text-[15px]">{option?.label}</div>
+                          <div className="text-[18px]">{option?.icon}</div>
                         </div>
-                        {templateTabsPopup === 0 &&
-                          <>
-                            <div className="h-[calc(100%-55px)] pb-3 border-b">
-                              <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                              {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, i) => (
-                                  <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
-                                    <div className="self-start pt-1">
-                                      <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                        {option?.icon}
-                                      </div>
-                                    </div>
-                                    <div className="flex items-start">
-                                      <div>
-                                        <div className="text-[15px] text-gray-500 font-semibold pb-1">{option?.label}</div>
-                                        <div className="text-[11px] text-gray-400 pb-1 font-medium">{option?.description}</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex w-full justify-end py-2">
-                              <button type="button" className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md" onClick={() => { closeModel(); }}>
-                                Close
-                              </button>
-                            </div>
-                          </>
-                        }
-                        {templateTabsPopup === 1 &&
-                          <div className="h-[calc(100%-55px)]">
-                            <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                              {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
-                                <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`} onClick={() => { editData(template?.id); }}>
-                                  <div className="self-start pt-1">
-                                    <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                    <IoDocumentText />
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <div>
-                                      <div className="text-[15px] text-gray-500 font-semibold pb-1">{template?.name}</div>
-                                      <div className="text-[13px] text-gray-400 pb-1 font-medium">Chart Template</div>
-                                      <div className="text-[12px] text-gray-400 pb-1 font-medium">{template?.employee?.name}</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </TopModel>
+                      ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-between items-center w-full">
+                <div className="flex  w-[135px] bg-[#0dcaf0] text-white rounded-md">
                   <button
                     type="button"
-                    className=" flex gap-2 justify-center items-center py-[6px] w-[74%]"
+                    className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]"
                     onClick={() => {
-                      setOptionModel(!optionModel);
+                      openModalFromParent();
+                      setEditModel({ name: "gridModel", index: null });
                     }}
                   >
-                    Add Item
-                  </button>
-                </div>
-              </div>
-              <div className="text-center">
-                <div>Some text </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex">
-            <form onSubmit={(e) => { (editedId) ? upadteData(e) : submitData(e); fetchData() }} className=" py-2 m-0 w-full">
-              <div className="relative w-full">
-                {optionModel && (
-                  <div className="bg-gray-100 duration-200 rounded-md absolute z-10 -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
-                    <div className="py-1">
-                      {Array.isArray(qutionaryInputOption) &&
-                        qutionaryInputOption.map((option, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              createQutionaryFields(option?.field);
-                              setOptionModel(false);
-                            }}
-                            className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]"
-                          >
-                            <div className="text-[15px]">{option?.label}</div>
-                            <div className="text-[18px]">{option?.icon}</div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex  w-[135px] bg-[#0dcaf0] text-white rounded-md">
-                  <button
-                    type="button"
-                    className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]" onClick={() => {
-                      openModalFromParent();
-                    }}>
                     <PiGridNineLight />
                   </button>
-                  <TopModel ref={topModelRef}>
-                    <div className="w-[700px] flex flex-col">
-                      <div className="pb-2 border-b">
-                        <h4>Add Form Template Library</h4>
-                      </div>
-                      <div>
-                        <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
-                          <div className="flex w-full absolute bottom-[-2px]">
-                            {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabsPopup === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabsPopup(tab.value) }}><span>{tab.tab_name}</span></div>))}
-                          </div>
-                        </div>
-                        {templateTabsPopup === 0 &&
-                          <>
-                            <div className="h-[calc(100%-55px)] pb-3 border-b">
-                              <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                              {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, i) => (
-                                  <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
-                                    <div className="self-start pt-1">
-                                      <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                        {option?.icon}
-                                      </div>
-                                    </div>
-                                    <div className="flex items-start">
-                                      <div>
-                                        <div className="text-[15px] text-gray-500 font-semibold pb-1">{option?.label}</div>
-                                        <div className="text-[11px] text-gray-400 pb-1 font-medium">{option?.description}</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex w-full justify-end py-2">
-                              <button type="button" className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md" onClick={() => { closeModel() }} >
-                                Close
-                              </button>
-                            </div>
-                          </>
-                        }
-                        {templateTabsPopup === 1 &&
-                          <div className="h-[calc(100%-55px)]">
-                            <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                              {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
-                                <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`} onClick={() => { editData(template?.id); closeModel()}}>
-                                  <div className="self-start pt-1">
-                                    <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                    <IoDocumentText />
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <div>
-                                      <div className="text-[15px] text-gray-500 font-semibold pb-1">{template?.name}</div>
-                                      <div className="text-[13px] text-gray-400 pb-1 font-medium">Chart Template</div>
-                                      <div className="text-[12px] text-gray-400 pb-1 font-medium">{template?.employee?.name}</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </TopModel>
                   <button
                     type="button"
                     className="whitespace-nowrap flex gap-2 justify-center items-center py-[6px] w-[74%]"
@@ -1090,26 +904,25 @@ const deleteOption = (objIndex, optionIndex) => {
                   >
                     Add Item
                   </button>
-                  </div>
-                  <div className="bg-[#0dcaf0] text-white px-6 py-2 rounded-md">
+                </div>
+                <div className="bg-[#0dcaf0] text-white px-6 py-2 rounded-md">
                   <button
-                      type="submit"
-                      className="whitespace-nowrap flex justify-center items-center rounded-md"
-                      onClick={() => {
-                        if (duplicateId) duplicate_employee_questionaires();
-                      }}
-                    >
-                      {editedId ? "Update" : "Submit"}
-                    </button>
-                  </div>
+                    type="submit"
+                    className="whitespace-nowrap flex justify-center items-center rounded-md"
+                    onClick={() => {
+                      if (duplicateId) duplicate_employee_questionaires();
+                    }}
+                  >
+                    {editedId ? "Update" : "Submit"}
+                  </button>
                 </div>
               </div>
-            </form>
-          </div>
-        )}
+            </div>
+          </form>
+        </div>
+        {/* )} */}
       </div>
-
-      {/* {editModel?.name === "textarea" && (
+      {editModel?.name === "initialNote" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1118,6 +931,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1125,13 +941,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialNote");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1148,7 +969,7 @@ const deleteOption = (objIndex, optionIndex) => {
                   <input
                     type="text"
                     className="w-full focus:outline-none"
-                    value={selectedvalue?.label}
+                    value={qutionaryFields[editModel?.index]?.label}
                     onChange={(e) => {
                       handleChange("label", e?.target?.value, editModel?.index);
                     }}
@@ -1158,6 +979,7 @@ const deleteOption = (objIndex, optionIndex) => {
               <div className="border-[2px] overflow-hidden  rounded-md px-2">
                 <textarea
                   className="w-full focus:outline-none max-h-[70px]"
+                  value={qutionaryFields[editModel?.index]?.value}
                   onChange={(e) => {
                     handleChange("value", e?.target?.value, editModel?.index);
                   }}
@@ -1166,25 +988,25 @@ const deleteOption = (objIndex, optionIndex) => {
               </div>
               <div className="flex justify-between py-1">
                 <div>Required</div>
-                <div>
-                  <input
-                    type="radio"
-                    onChange={(e) => {
-                      handleChange(
-                        "required",
-                        e?.target?.checked,
-                        editModel?.index
-                      );
-                    }}
-                  />
-                </div>
+                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                <Switch
+                  checked={qutionaryFields[editModel?.index]?.required}
+                  onChange={(e) => {
+                    handleChange(
+                      "required",
+                      e?.target?.checked,
+                      editModel?.index
+                    );
+                  }}
+                  defaultChecked
+                />
               </div>
             </div>
           </div>
         </TopModel>
       )}
 
-      {editModel?.name === "signature" && (
+      {editModel?.name === "initialSignature" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1193,6 +1015,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1200,13 +1025,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialSignature");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1224,7 +1054,7 @@ const deleteOption = (objIndex, optionIndex) => {
                     <input
                       type="text"
                       className="w-full focus:outline-none"
-                      value={selectedvalue?.label}
+                      value={qutionaryFields[editModel?.index]?.label}
                       onChange={(e) => {
                         handleChange(
                           "label",
@@ -1237,18 +1067,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 </div>
                 <div className="flex justify-between py-1">
                   <div>Required</div>
-                  <div>
-                    <input
-                      type="radio"
-                      onChange={(e) => {
-                        handleChange(
-                          "required",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
-                      }}
-                    />
-                  </div>
+                  {/* <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                  <Switch
+                    checked={qutionaryFields[editModel?.index]?.required}
+                    onChange={(e) => {
+                      handleChange(
+                        "required",
+                        e?.target?.checked,
+                        editModel?.index
+                      );
+                    }}
+                    defaultChecked
+                  />
                 </div>
               </div>
             </div>
@@ -1256,7 +1086,7 @@ const deleteOption = (objIndex, optionIndex) => {
         </TopModel>
       )}
 
-      {editModel?.name === "heading" && (
+      {editModel?.name === "initialHeading" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1265,6 +1095,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1272,13 +1105,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialHeading");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1296,9 +1134,10 @@ const deleteOption = (objIndex, optionIndex) => {
                     <input
                       type="text"
                       className="w-full focus:outline-none"
+                      value={qutionaryFields[editModel?.index]?.label}
                       onChange={(e) => {
                         handleChange(
-                          "value",
+                          "label",
                           e?.target?.value,
                           editModel?.index
                         );
@@ -1308,18 +1147,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 </div>
                 <div className="flex justify-between py-1">
                   <div>Required</div>
-                  <div>
-                    <input
-                      type="radio"
-                      onChange={(e) => {
-                        handleChange(
-                          "required",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
-                      }}
-                    />
-                  </div>
+                  {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div> */}
+                  <Switch
+                    checked={qutionaryFields[editModel?.index]?.required}
+                    onChange={(e) => {
+                      handleChange(
+                        "required",
+                        e?.target?.checked,
+                        editModel?.index
+                      );
+                    }}
+                    defaultChecked
+                  />
                 </div>
               </div>
             </div>
@@ -1327,7 +1166,7 @@ const deleteOption = (objIndex, optionIndex) => {
         </TopModel>
       )}
 
-      {editModel?.name === "checkbox" && (
+      {editModel?.name === "initialCheckBox" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1336,6 +1175,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1343,13 +1185,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialCheckBox");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1363,7 +1210,14 @@ const deleteOption = (objIndex, optionIndex) => {
               <div>
                 <label>Label</label>
                 <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                  <input type="text" className="w-full focus:outline-none" />
+                  <input
+                    type="text"
+                    className="w-full focus:outline-none"
+                    value={qutionaryFields[editModel?.index]?.label}
+                    onChange={(e) => {
+                      handleChange("label", e?.target?.value, editModel?.index);
+                    }}
+                  />
                 </div>
               </div>
               <div>
@@ -1372,29 +1226,28 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div className="flex gap-1">
                     <input
                       type="radio"
-                      id="horizondal"
+                      id="horizontal"
                       name="Layout"
+                      checked={
+                        qutionaryFields[editModel?.index]?.layout ===
+                        "horizontal"
+                      }
                       onChange={(e) => {
-                        handleChange(
-                          "layout",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
+                        handleChange("layout", "horizontal", editModel?.index);
                       }}
                     />
-                    <label htmlFor="horizondal">Horizondal</label>
+                    <label htmlFor="horizontal">Horizondal</label>
                   </div>
                   <div className="flex gap-1">
                     <input
                       type="radio"
                       id="vertical"
                       name="Layout"
+                      checked={
+                        qutionaryFields[editModel?.index]?.layout === "vertical"
+                      }
                       onChange={(e) => {
-                        handleChange(
-                          "layout",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
+                        handleChange("layout", "vertical", editModel?.index);
                       }}
                     />
                     <label htmlFor="vertical">Vertical</label>
@@ -1404,12 +1257,11 @@ const deleteOption = (objIndex, optionIndex) => {
                       type="radio"
                       id="column"
                       name="Layout"
+                      checked={
+                        qutionaryFields[editModel?.index]?.layout === "column"
+                      }
                       onChange={(e) => {
-                        handleChange(
-                          "layout",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
+                        handleChange("layout", "column", editModel?.index);
                       }}
                     />
                     <label htmlFor="column">Column</label>
@@ -1422,55 +1274,108 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div className="pl-4">Value</div>
                   <div className="flex justify-center">Action</div>
                 </div>
-                {Array.isArray(qutionaryFields) &&
-                  qutionaryFields
-                    .find((data) => data.id === editModel?.index)
-                    ?.value.map((option, i) => (
-                      <div className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px]">
-                        <div className="">
-                          <input
-                            type="checkbox"
-                            id={option?.label}
-                            checked={option?.value}
-                            className="w-[20%]"
-                          />
+                <div className="top-model-table">
+                  {Array.isArray(qutionaryFields) &&
+                    qutionaryFields[editModel?.index]?.value.map(
+                      (option, i) => (
+                        <div
+                          key={i}
+                          className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px] group"
+                        >
+                          <div className="">
+                            <input
+                              type="checkbox"
+                              id={option?.label}
+                              checked={option?.value}
+                              onChange={(e) => {
+                                handleOptionsChange(
+                                  editModel?.index,
+                                  i,
+                                  "value",
+                                  e.target.checked
+                                );
+                              }}
+                              className="w-[20%]"
+                            />
+                          </div>
+
+                          <div
+                            onMouseEnter={() => {
+                              setInputHover(i);
+                            }}
+                            className=" py-[2px]  flex items-center"
+                            onMouseLeave={() => {
+                              setInputHover("");
+                            }}
+                          >
+                            {inputHover === i ? (
+                              <div className="flex items-center ">
+                                <input
+                                  className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
+                                  type="text"
+                                  value={option?.label}
+                                  onChange={(e) => {
+                                    handleOptionsChange(
+                                      editModel?.index,
+                                      i,
+                                      "label",
+                                      e.target.value
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div htmlFor={option?.label}>{option?.label}</div>
+                            )}
+                          </div>
+
+                          <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex ">
+                            <div
+                              className="cursor-pointer"
+                              onClick={() => {
+                                addOption("checkbox", editModel?.index, i + 1);
+                              }}
+                            >
+                              <IoMdAdd />
+                            </div>
+                            <div
+                              className="cursor-pointer"
+                              onClick={() => {
+                                deleteOption(editModel?.index, i);
+                              }}
+                            >
+                              <MdDelete />
+                            </div>
+                            <div className="cursor-pointer">
+                              <PiColumnsFill />
+                            </div>
+                          </div>
                         </div>
-                        <label htmlFor={option?.label}>{option?.label}</label>
-                        <div className="flex text-[18px] justify-evenly">
-                          <div>
-                            <IoMdAdd />
-                          </div>
-                          <div>
-                            <MdDelete />
-                          </div>
-                          <div>
-                            <PiColumnsFill />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
+                </div>
               </div>
               <div className="flex justify-between">
                 <div>Required</div>
-                <div>
-                  <input
-                    type="radio"
-                    onChange={(e) => {
-                      handleChange(
-                        "required",
-                        e?.target?.checked,
-                        editModel?.index
-                      );
-                    }}
-                  />
-                </div>
+                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                <Switch
+                  checked={qutionaryFields[editModel?.index]?.required}
+                  onChange={(e) => {
+                    handleChange(
+                      "required",
+                      e?.target?.checked,
+                      editModel?.index
+                    );
+                  }}
+                  defaultChecked
+                />
               </div>
             </div>
           </div>
         </TopModel>
       )}
 
-      {editModel?.name === "dropdown" && (
+      {editModel?.name === "initialDropdown" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1479,6 +1384,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1486,13 +1394,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialDropdown");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1506,7 +1419,14 @@ const deleteOption = (objIndex, optionIndex) => {
               <div>
                 <label>Label</label>
                 <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                  <input type="text" className="w-full focus:outline-none" />
+                  <input
+                    type="text"
+                    className="w-full focus:outline-none"
+                    value={qutionaryFields[editModel?.index]?.label}
+                    onChange={(e) => {
+                      handleChange("label", e?.target?.value, editModel?.index);
+                    }}
+                  />
                 </div>
               </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
@@ -1514,47 +1434,90 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div className="pl-4">Options</div>
                   <div className="flex justify-center">Action</div>
                 </div>
-                {Array.isArray(qutionaryFields) &&
-                  qutionaryFields
-                    .find((data) => data.id === editModel?.index)
-                    ?.value.map((option, i) => (
-                      <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
-                        <label htmlFor={option?.label}>{option?.label}</label>
-                        <div className="flex text-[18px] justify-evenly">
-                          <div>
-                            <IoMdAdd />
+                <div className="top-model-table">
+                  {Array.isArray(qutionaryFields) &&
+                    qutionaryFields[editModel?.index]?.value.map(
+                      (option, i) => (
+                        <div
+                          key={i}
+                          className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"
+                        >
+                          <div
+                            onMouseEnter={() => {
+                              setInputHover(i);
+                            }}
+                            className=" py-[2px]  flex items-center"
+                            onMouseLeave={() => {
+                              setInputHover("");
+                            }}
+                          >
+                            {inputHover === i ? (
+                              <div className="flex items-center ">
+                                <input
+                                  className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
+                                  type="text"
+                                  value={option?.label}
+                                  onChange={(e) => {
+                                    handleOptionsChange(
+                                      editModel?.index,
+                                      i,
+                                      "label",
+                                      e.target.value
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div htmlFor={option?.label}>{option?.label}</div>
+                            )}
                           </div>
-                          <div>
-                            <MdDelete />
-                          </div>
-                          <div>
-                            <PiColumnsFill />
+
+                          <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
+                            <div
+                              className="cursor-pointer"
+                              onClick={() => {
+                                addOption("dropdown", editModel?.index, i + 1);
+                              }}
+                            >
+                              <IoMdAdd />
+                            </div>
+                            <div className="cursor-pointer">
+                              <MdDelete
+                                onClick={() => {
+                                  deleteOption(editModel?.index, i);
+                                }}
+                              />
+                            </div>
+                            <div className="cursor-pointer">
+                              <PiColumnsFill />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
+                </div>
               </div>
               <div className="flex justify-between py-2">
                 <div>Required</div>
-                <div>
-                  <input
-                    type="radio"
-                    onChange={(e) => {
-                      handleChange(
-                        "required",
-                        e?.target?.checked,
-                        editModel?.index
-                      );
-                    }}
-                  />
-                </div>
+                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                <Switch
+                  checked={qutionaryFields[editModel?.index]?.required}
+                  onChange={(e) => {
+                    handleChange(
+                      "required",
+                      e?.target?.checked,
+                      editModel?.index
+                    );
+                  }}
+                  defaultChecked
+                />
               </div>
             </div>
           </div>
         </TopModel>
       )}
 
-      {editModel?.name === "range" && (
+      {editModel?.name === "initialRange" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1563,6 +1526,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1570,13 +1536,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialRange");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1590,7 +1561,14 @@ const deleteOption = (objIndex, optionIndex) => {
               <div>
                 <label>Label</label>
                 <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                  <input type="text" className="w-full focus:outline-none" />
+                  <input
+                    type="text"
+                    className="w-full focus:outline-none"
+                    value={qutionaryFields[editModel?.index]?.label}
+                    onChange={(e) => {
+                      handleChange("label", e?.target?.value, editModel?.index);
+                    }}
+                  />
                 </div>
               </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
@@ -1598,47 +1576,88 @@ const deleteOption = (objIndex, optionIndex) => {
                   <div className="pl-4">Options</div>
                   <div className="flex justify-center">Action</div>
                 </div>
-                {Array.isArray(qutionaryFields) &&
-                  qutionaryFields
-                    .find((data) => data.id === editModel?.index)
-                    ?.value.map((option, i) => (
-                      <div className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px]">
-                        <label htmlFor={option?.label}>{option?.label}</label>
-                        <div className="flex text-[18px] justify-evenly">
-                          <div>
+                <div className="top-model-table">
+                  {Array.isArray(qutionaryFields) &&
+                    qutionaryFields[editModel?.index].value.map((option, i) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"
+                      >
+                        <div
+                          onMouseEnter={() => {
+                            setInputHover(i);
+                          }}
+                          className=" py-[2px]  flex items-center"
+                          onMouseLeave={() => {
+                            setInputHover("");
+                          }}
+                        >
+                          {inputHover === i ? (
+                            <div className="flex items-center ">
+                              <input
+                                className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
+                                type="text"
+                                value={option?.label}
+                                onChange={(e) => {
+                                  handleOptionsChange(
+                                    editModel?.index,
+                                    i,
+                                    "label",
+                                    e.target.value
+                                  );
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div htmlFor={option?.label}>{option?.label}</div>
+                          )}
+                        </div>
+
+                        <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
+                          <div
+                            className="cursor-pointer"
+                            onClick={() => {
+                              addOption("range", editModel?.index, i + 1);
+                            }}
+                          >
                             <IoMdAdd />
                           </div>
-                          <div>
-                            <MdDelete />
+                          <div className="cursor-pointer">
+                            <MdDelete
+                              onClick={() => {
+                                deleteOption(editModel?.index, i);
+                              }}
+                            />
                           </div>
-                          <div>
+                          <div className="cursor-pointer">
                             <PiColumnsFill />
                           </div>
                         </div>
                       </div>
                     ))}
+                </div>
               </div>
               <div className="flex justify-between py-2">
                 <div>Required</div>
-                <div>
-                  <input
-                    type="radio"
-                    onChange={(e) => {
-                      handleChange(
-                        "required",
-                        e?.target?.checked,
-                        editModel?.index
-                      );
-                    }}
-                  />
-                </div>
+                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                <Switch
+                  checked={qutionaryFields[editModel?.index]?.required}
+                  onChange={(e) => {
+                    handleChange(
+                      "required",
+                      e?.target?.checked,
+                      editModel?.index
+                    );
+                  }}
+                  defaultChecked
+                />
               </div>
             </div>
           </div>
         </TopModel>
       )}
 
-      {editModel?.name === "instruction" && (
+      {editModel?.name === "initialInstruction" && (
         <TopModel
           onSave={handleSave}
           ref={topModelRef}
@@ -1647,6 +1666,9 @@ const deleteOption = (objIndex, optionIndex) => {
               <button
                 type="button"
                 className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
+                onClick={() => {
+                  handleDeleteField(editModel?.index);
+                }}
               >
                 <MdDelete />
               </button>
@@ -1654,13 +1676,18 @@ const deleteOption = (objIndex, optionIndex) => {
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                  onClick={openModalFromParent}
+                  onClick={() => {
+                    closeModalFromParent("initialInstruction");
+                  }}
                 >
                   Close
                 </button>
                 <button
                   type="button"
                   className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
+                  onClick={() => {
+                    closeModel();
+                  }}
                 >
                   Save
                 </button>
@@ -1678,6 +1705,7 @@ const deleteOption = (objIndex, optionIndex) => {
                     <input
                       type="text"
                       className="w-full focus:outline-none"
+                      value={qutionaryFields[editModel?.index]?.value}
                       onChange={(e) => {
                         handleChange(
                           "value",
@@ -1688,337 +1716,145 @@ const deleteOption = (objIndex, optionIndex) => {
                     />
                   </div>
                 </div>
-                <div>
+                <div className="flex justify-between">
                   <div>Required</div>
-                  <div>
-                    <input
-                      type="radio"
-                      onChange={(e) => {
-                        handleChange(
-                          "required",
-                          e?.target?.checked,
-                          editModel?.index
-                        );
+                  {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
+                  <Switch
+                    checked={qutionaryFields[editModel?.index]?.required}
+                    onChange={(e) => {
+                      handleChange(
+                        "required",
+                        e?.target?.checked,
+                        editModel?.index
+                      );
+                    }}
+                    defaultChecked
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </TopModel>
+      )}
+
+      {editModel?.name === "gridModel" && (
+        <TopModel ref={topModelRef}>
+          <div className="w-[700px] flex flex-col">
+            <div className="pb-2 border-b">
+              <h4>Add Form Template Library</h4>
+            </div>
+            <div>
+              <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
+                <div className="flex w-full absolute bottom-[-2px]">
+                  {questionnaireTabs.map((tab, index) => (
+                    <div
+                      key={index}
+                      className={` tabs cursor-pointer ${
+                        templateTabsPopup === tab.value
+                          ? "selected-tab "
+                          : "border-0"
+                      }`}
+                      onClick={() => {
+                        setTemplateTabsPopup(tab.value);
                       }}
-                    />
-                  </div>
+                    >
+                      <span>{tab.tab_name}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          </div>
-      </TopModel>
-      )} */}
-
-     { editModel?.name === "textarea" && <TopModel onSave={handleSave} 
-     ref={topModelRef}
-     footer={
-        <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
-          <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent("initialNote");}} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-          </div>
-         </div> 
-     }
-     >
-        <div className="w-[400px] flex flex-col gap-3">
-          <h3>Edit Note</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange( "label",e?.target?.value,editModel?.index)}}  />
-            </div>
-          </div>
-          <div className="border-[2px] overflow-hidden  rounded-md px-2">
-            <textarea className="w-full focus:outline-none max-h-[70px]" value={qutionaryFields[editModel?.index]?.value} onChange={(e)=>{handleChange("value", e?.target?.value,editModel?.index)}}   rows="3"></textarea>
-          </div>
-          <div className="flex justify-between py-1">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </TopModel>}
-
-      {editModel?.name  === "signature" && <TopModel onSave={handleSave} ref={topModelRef}
-        footer={
-          <div className='flex justify-between gap-2'>
-            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
-            <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialSignature')}} >Close</button>
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-            </div>
-           </div> 
-       }
-      >
-      <div>
-      <div className="w-[400px]">
-          <h3>Edit Signature</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div className="flex justify-between py-1">
-            <div>Required</div>
-            {/* <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </div>
-      </TopModel>}
-
-      {editModel?.name  === "heading" && <TopModel onSave={handleSave} ref={topModelRef}
-         footer={
-          <div className='flex justify-between gap-2'>
-            <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white'onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
-            <div className="flex gap-2">
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialHeading')}} >Close</button>
-             <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-            </div>
-           </div> 
-       }
-      >
-      <div>
-      <div className="w-[400px]">
-          <h3>Edit Heading</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label}  onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div className="flex justify-between py-1">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </div>
-      </TopModel>}
-
-      {editModel?.name  === "checkbox" && <TopModel onSave={handleSave} ref={topModelRef}
-      footer={
-        <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
-          <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModalFromParent('initialCheckBox')}} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-          </div>
-         </div> 
-     }
-      >
-       <div className="w-[400px]">
-          <h3>Edit Check Boxes</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div>
-            <label>Checkbox Layout</label>
-            <div className="flex gap-4">
-              <div className="flex gap-1">
-                <input type="radio" id="horizontal" name="Layout" checked={qutionaryFields[editModel?.index]?.layout === "horizontal"} onChange={(e)=>{handleChange("layout", "horizontal", editModel?.index)}}/>
-                <label htmlFor="horizontal">Horizondal</label>
-              </div>
-              <div className="flex gap-1">
-                <input type="radio" id="vertical" name="Layout"  checked={qutionaryFields[editModel?.index]?.layout === "vertical"} onChange={(e)=>{handleChange("layout", "vertical", editModel?.index)}}/>
-                <label htmlFor="vertical">Vertical</label>
-              </div>
-              <div className="flex gap-1">
-                <input type="radio" id="column" name="Layout"  checked={qutionaryFields[editModel?.index]?.layout === "column"} onChange={(e)=>{handleChange("layout", "column", editModel?.index)}}/>
-                <label htmlFor="column">Column</label>
-              </div>
-            </div>
-          </div>
-          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-          <div className="grid grid-cols-[15%,1fr,20%] items-center py-1 bg-gray-200">
-            <div>Input</div>
-            <div className="pl-4">Value</div>
-            <div className="flex justify-center">Action</div>
-          </div>
-          <div className="top-model-table">
-            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
-                <div key={i} className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px] group">
-                  <div className="">
-                  <input type="checkbox" id={option?.label} checked={option?.value} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"value" ,e.target.checked)}} className="w-[20%]" />
+              {templateTabsPopup === 0 && (
+                <>
+                  <div className="h-[calc(100%-55px)] pb-3 border-b">
+                    <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                      {Array.isArray(qutionaryInputOption) &&
+                        qutionaryInputOption.map((option, i) => (
+                          <div
+                            key={i}
+                            className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
+                            onClick={() => {
+                              createQutionaryFields(option?.field);
+                              setEditModel({
+                                name: template?.field,
+                                index: null,
+                              });
+                            }}
+                          >
+                            <div className="self-start pt-1">
+                              <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                {option?.icon}
+                              </div>
+                            </div>
+                            <div className="flex items-start">
+                              <div>
+                                <div className="text-[15px] text-gray-500 font-semibold pb-1">
+                                  {option?.label}
+                                </div>
+                                <div className="text-[11px] text-gray-400 pb-1 font-medium">
+                                  {option?.description}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-
-                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
-                  {inputHover === i ?
-                  <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
-                  :
-                  <div htmlFor={option?.label}>{option?.label}</div>}
+                  <div className="flex w-full justify-end py-2">
+                    <button
+                      type="button"
+                      className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md"
+                      onClick={() => {
+                        closeModel();
+                      }}
+                    >
+                      Close
+                    </button>
                   </div>
-                
-                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex ">
-                    <div className="cursor-pointer" onClick={()=>{addOption("checkbox",editModel?.index,i+1)}}><IoMdAdd /></div>
-                    <div className="cursor-pointer" onClick={()=>{deleteOption(editModel?.index,i)}}><MdDelete /></div>
-                    <div className="cursor-pointer" ><PiColumnsFill /></div>
+                </>
+              )}
+              {templateTabsPopup === 1 && (
+                <div className="h-[calc(100%-55px)]">
+                  <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                    {Array.isArray(questionnaireForms) &&
+                      questionnaireForms.map((template, i) => (
+                        <div
+                          key={i}
+                          className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
+                          onClick={() => {
+                            editData(template?.id);
+                            setEditModel({
+                              name: template?.field,
+                              index: null,
+                            });
+                          }}
+                        >
+                          <div className="self-start pt-1">
+                            <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                              <IoDocumentText />
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <div>
+                              <div className="text-[15px] text-gray-500 font-semibold pb-1">
+                                {template?.name}
+                              </div>
+                              <div className="text-[13px] text-gray-400 pb-1 font-medium">
+                                Chart Template
+                              </div>
+                              <div className="text-[12px] text-gray-400 pb-1 font-medium">
+                                {template?.employee?.name}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
-            ))}
+              )}
             </div>
           </div>
-          <div className="flex justify-between">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </TopModel>}
-
-      {editModel?.name  === "dropdown" &&<TopModel onSave={handleSave} ref={topModelRef}
-      footer={
-        <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}}  ><MdDelete /></button>
-          <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialDropdown')}} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-          </div>
-         </div> 
-     }
-      >
-        <div className="w-[400px]">
-          <h3>Edit Dropdown</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-          <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
-        
-            <div className="pl-4">Options</div>
-            <div className="flex justify-center">Action</div>
-          </div>
-          <div className="top-model-table">
-            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index]?.value.map((option, i)=>(
-                <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group" >
-
-                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
-                    {inputHover === i ?
-                    <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
-                    :
-                    <div htmlFor={option?.label}>{option?.label}</div>}
-                  </div>
-
-                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
-                    <div className="cursor-pointer" onClick={()=>{addOption("dropdown",editModel?.index,i+1)}}><IoMdAdd /></div>
-                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i)}}/></div>
-                    <div className="cursor-pointer"><PiColumnsFill /></div>
-                  </div>
-                </div>
-            ))}
-            </div>
-          </div>
-          <div className="flex justify-between py-2">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </TopModel>}
-
-      {editModel?.name  === "range" && <TopModel onSave={handleSave} ref={topModelRef}
-      footer={
-        <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
-          <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialRange')}} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModel()}}>Save</button>
-          </div>
-         </div> 
-     }
-      >
-      <div className="w-[400px]">
-          <h3>Edit Range</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.label} onChange={(e)=>{handleChange("label", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-          <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
-        
-            <div className="pl-4">Options</div>
-            <div className="flex justify-center">Action</div>
-          </div>
-          <div className="top-model-table">
-            {Array.isArray(qutionaryFields) && qutionaryFields[editModel?.index].value.map((option, i)=>(
-                <div key={i} className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group">
-                  
-                  <div onMouseEnter={()=>{setInputHover(i)}} className=" py-[2px]  flex items-center" onMouseLeave={()=>{setInputHover("")}}>
-                    {inputHover === i ?
-                    <div className="flex items-center "><input className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100" type="text" value={option?.label} onChange={(e)=>{handleOptionsChange(editModel?.index, i ,"label" ,e.target.value)}} /></div>
-                    :
-                    <div htmlFor={option?.label}>{option?.label}</div>}
-                  </div>
-                  
-                  <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
-                    <div className="cursor-pointer" onClick={()=>{addOption("range",editModel?.index,i+1)}}><IoMdAdd /></div>
-                    <div className="cursor-pointer"><MdDelete onClick={()=>{deleteOption(editModel?.index,i)}}/></div>
-                    <div className="cursor-pointer"><PiColumnsFill /></div>
-                  </div>
-                </div>
-            ))}
-            </div>
-          </div>
-          <div className="flex justify-between py-2">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </TopModel>}
-
-      {editModel?.name  === "instruction" && <TopModel onSave={handleSave} ref={topModelRef}
-       footer={
-        <div className='flex justify-between gap-2'>
-          <button type='button' className='bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white' onClick={()=>{handleDeleteField(editModel?.index)}} ><MdDelete /></button>
-          <div className="flex gap-2">
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white'  onClick={()=>{closeModalFromParent('initialInstruction')}} >Close</button>
-           <button type='button' className='bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white' onClick={()=>{closeModel()}}>Save</button>
-          </div>
-         </div> 
-     }
-      >
-      <div>
-      <div className="w-[400px]">
-          <h3>Edit Instructions</h3>
-          <div className="flex flex-col gap-2">
-          <div>
-            <label>Label</label>
-            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-              <input type="text" className="w-full focus:outline-none" value={qutionaryFields[editModel?.index]?.value} onChange={(e)=>{handleChange("value", e?.target?.value, editModel?.index)}} />
-            </div>
-          </div>
-          <div className="flex justify-between">
-            <div>Required</div>
-            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-            <Switch checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} defaultChecked />
-          </div>
-          </div>
-        </div>
-      </div>
-      </TopModel>}
+        </TopModel>
+      )}
     </div>
   );
 };
