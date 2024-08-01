@@ -203,6 +203,17 @@ const Questionnaires = ({
 
   const [editedId, setEditedId] = useState();
   const [duplicateId, setDuplicateId] = useState();
+  const [page,setPage] = useState()
+
+  useEffect(()=>{
+    const path = location.pathname 
+    if(path === "/new-intake-forms"){
+      setPage("Intake Form Page")
+    }
+    else{
+      setPage("Employee Page")
+    }
+  },[])
 
   const createQutionaryFields = (intialFieldName) => {
     setQutionaryFields((prev) => [
@@ -212,22 +223,22 @@ const Questionnaires = ({
   };
 
   useEffect(()=>{
-    if(location.pathname === "/new-intake-forms"){
+    if(page === "Intake Form Page"){
       setQuestionnaireWithIntake(qutionaryFields)
     }
     
   },[qutionaryFields])
   
-  useEffect(()=>{
-    setQutionaryFields([])
+  // useEffect(()=>{
+  //   setQutionaryFields([])
 
-  },[formChanged])
+  // },[formChanged])
 
-  console.log("editModel", editModel);
+
 
   const [questionnaireFormData, setQuestionnaireFormData] = useState({
     template: {
-      qutionaryFields: null,
+      qutionaryFields: [...qutionaryFields],
     },
     employee_id: selectedEmployee?.id,
     name: "",
@@ -331,7 +342,6 @@ const Questionnaires = ({
     // }
   };
 
-  console.log("questionnaireFormDat", questionnaireFormData);
 
   useEffect(() => {
     // const urlParams = new URLSearchParams(window?.location?.search);
@@ -884,6 +894,68 @@ const Questionnaires = ({
               ) : null
             )}
         </div>
+        { page === "Intake Form Page" && (
+          <div className="h-[calc(100%-50px)] overflow-y-auto">
+            <div className="flex flex-col justify-end items-center h-[40vh]">
+              <div className="flex justify-center flex-col text-center">
+                <p>This intake form questionnaire is currently empty!</p>
+                <p>Build it out by adding items</p>
+              </div>
+              <div className="flex justify-between gap-4">
+                <button type="button" className="bg-[#e5e7eb] border-[1px] border-[#cccccc] px-4 py-2 rounded-md flex gap-2 items-center">
+                  <FaBook className="text-black" />
+                  Template Library
+                </button>
+                <div className="relative">
+              {optionModel && (
+                <div className="bg-gray-100 duration-200 rounded-md absolute z-10 -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
+                  <div className="py-1">
+                    {Array.isArray(qutionaryInputOption) &&
+                      qutionaryInputOption.map((option, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            createQutionaryFields(option?.field);
+                            setOptionModel(false);
+                          }}
+                          className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]"
+                        >
+                          <div className="text-[15px]">{option?.label}</div>
+                          <div className="text-[18px]">{option?.icon}</div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-between items-center w-full">
+                <div className="flex bg-[#0dcaf0] text-white rounded-md">
+                  <button
+                    type="button"
+                    className="flex gap-2 justify-end items-center pl-3 pr-2 py-[8.5px] rounded-md"
+                    onClick={() => {
+                      openModalFromParent();
+                      setEditModel({ name: "gridModel", index: null });
+                    }}
+                  >
+                    <PiGridNineLight />
+                  </button>
+                  <button
+                    type="button"
+                    className="whitespace-nowrap flex gap-2 justify-center items-center pl-2 pr-6 py-[8.5px] rounded-md"
+                    onClick={() => {
+                      setOptionModel(!optionModel);
+                    }}
+                  >
+                    Add Item
+                  </button>
+                </div>
+              </div>
+            </div>
+              </div>
+            </div>
+          </div> 
+        )}
+        { page === "Employee Page" &&(
         <div className="flex">
           <form
             onSubmit={(e) => {
@@ -950,7 +1022,7 @@ const Questionnaires = ({
             </div>
           </form>
         </div>
-        {/* )} */}
+        )}
       </div>
       {editModel?.name === "initialNote" && (
         <TopModel

@@ -372,7 +372,6 @@ const NewIntakeForm = () => {
   const [formChanges,setFormChanges] = useState(false)
   const [formChanged,setFormChanged] = useState(false)
 
-  
   const setQuestionnaireWithIntake = (questionnaireData) => {
     setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data,questionnaires:[...questionnaireData]}}))
   }
@@ -976,105 +975,12 @@ const NewIntakeForm = () => {
                         Building a questionnaire is just like building a chart template. <span className="text-[#22d3ee]">Learn How To Build A Template</span>
                       </p>
                     </div>
-
                     <div>
                       <div className="flex justify-end">
                         <div onClick={() => {confirmToDiscard()}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Reset Questionnaires</div>
                       </div>
                       <Questionnaires FormChanges={handleFormChanges} formChanged ={formChanged} setQuestionnaireWithIntake={setQuestionnaireWithIntake}/>
                     </div>
-
-                    <div className="h-[calc(100%-50px)] overflow-y-auto">
-                      <div className="flex flex-col justify-end items-center h-[40vh]">
-                        <div className="flex justify-center flex-col text-center">
-                          <p>This intake form questionnaire is currently empty!</p>
-                          <p>Build it out by adding items</p>
-                        </div>
-                        <div className="flex  gap-4">
-                          <button type="button" className="bg-[#e5e7eb] border-[1px] border-[#cccccc] px-4 py-2 rounded-md flex gap-2 items-center">
-                            <FaBook className="text-black" />
-                            Template Library
-                          </button>
-
-                          <div className="flex gap-3 bg-[#0dcaf0] text-white py-2 px-3 rounded-md">
-                            <button type="button" className="flex gap-2 items-center" onClick={() => {
-                              openModalFromParent();
-                            }}>
-                              <PiGridNineLight />
-                            </button>
-                            <TopModel ref={topModelRef}>
-                              <div className="w-[700px] flex flex-col">
-                                <div className="pb-2 border-b">
-                                  <h4>Add Form Template Library</h4>
-                                </div>
-                                <div>
-                                  <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
-                                    <div className="flex w-full absolute bottom-[-2px]">
-                                      {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabsPopup === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabsPopup(tab.value) }}><span>{tab.tab_name}</span></div>))}
-                                    </div>
-                                  </div>
-                                  {templateTabsPopup === 0 &&
-                                    <>
-                                      <div className="h-[calc(100%-55px)] pb-3 border-b">
-                                        <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                                        {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, i) => (
-                                            <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
-                                              <div className="self-start pt-1">
-                                                <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                                  {option?.icon}
-                                                </div>
-                                              </div>
-                                              <div className="flex items-start">
-                                                <div>
-                                                  <div className="text-[15px] text-gray-500 font-semibold pb-1">{option?.label}</div>
-                                                  <div className="text-[11px] text-gray-400 pb-1 font-medium">{option?.description}</div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                      <div className="flex w-full justify-end py-2">
-                                        <button type="button" className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md" >
-                                          Close
-                                        </button>
-                                      </div>
-                                    </>
-                                  }
-                                  {templateTabsPopup === 1 &&
-                                    <div className="h-[calc(100%-55px)]">
-                                      <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                                        {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
-                                          <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`} onClick={() => { getQuestionnaireTemplate(template?.id); }}>
-                                            <div className="self-start pt-1">
-                                              <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                              <IoDocumentText />
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center">
-                                              <div>
-                                                <div className="text-[15px] text-gray-500 font-semibold pb-1">{template?.name}</div>
-                                                <div className="text-[13px] text-gray-400 pb-1 font-medium">Chart Template</div>
-                                                <div className="text-[12px] text-gray-400 pb-1 font-medium">{template?.employee?.name}</div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  }
-                                </div>
-                              </div>
-                            </TopModel>
-                            <button type="button" className=" flex gap-2 items-center">
-                              Add Item
-                            </button>
-                          </div>
-
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="flex justify-end py-1">
                       <button
                         type="button"
@@ -1088,7 +994,6 @@ const NewIntakeForm = () => {
                     </div>
                   </div>
                 )}
-
               {/* Consent Tab */}
                 {selectedTab === 5 && (
                   <div className="h-full overflow-y-auto">
