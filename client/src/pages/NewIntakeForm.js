@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
-import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires } from "../Server";
+import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
 import { toast } from "react-toastify";
 import Select from "react-select";
 import { confirmAlert } from "react-confirm-alert";
@@ -341,7 +341,7 @@ const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
   const navigate = useNavigate();  
   const [selectedTab, setSelectedTab] = useState(4);
-  const [templateTabs, setTemplateTabs] = useState(0);
+  const [templateTabsPopup, setTemplateTabsPopup] = useState(0);
   const [changes, setChanges] = useState(false)
   const topModelRef = useRef(null);
   const [questionnaireForms, setQuestionnaireForms]=useState()
@@ -560,6 +560,36 @@ const NewIntakeForm = () => {
     }
   };
 
+  const getQuestionnaireTemplate = async (templateId) => {
+    try {
+      const response = await getQuestionnaire(templateId);
+      // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
+        if (response.status === 200) {
+          console.log("response.data?.qutionaryFields", response.data?.template?.qutionaryFields);
+          toast.success("Questionnaire Template successfully fetched");
+          setIntakeFormData((prev) => {
+            return {
+              ...prev,
+              form_data: {
+                ...prev?.form_data,
+                questionnaires: response.data?.template?.qutionaryFields
+              }
+            };
+
+          })
+          // setQutionaryFields(response?.data?.template?.qutionaryFields);
+        } else {
+        }
+      // }else{
+      //   navigate('/intake-forms')
+      //   toast.error("You don't have permission to edit this intake form");
+      // }
+    } catch (err) {
+    }
+  };
+
+  console.log("intakeFormData", intakeFormData);
+
   const openModalFromParent = () => {
     console.log(topModelRef?.current);
     if (topModelRef?.current) {
@@ -620,7 +650,6 @@ const NewIntakeForm = () => {
     });
   }
 
-  console.log("dsdsds",questionnaireForms);
 
   return (
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
@@ -938,10 +967,10 @@ const NewIntakeForm = () => {
                                 <div>
                                   <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
                                     <div className="flex w-full absolute bottom-[-2px]">
-                                      {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabs === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabs(tab.value) }}><span>{tab.tab_name}</span></div>))}
+                                      {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabsPopup === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabsPopup(tab.value) }}><span>{tab.tab_name}</span></div>))}
                                     </div>
                                   </div>
-                                  {templateTabs === 0 &&
+                                  {templateTabsPopup === 0 &&
                                     <>
                                       <div className="h-[calc(100%-55px)] pb-3 border-b">
                                         <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
@@ -969,11 +998,11 @@ const NewIntakeForm = () => {
                                       </div>
                                     </>
                                   }
-                                  {templateTabs === 1 &&
+                                  {templateTabsPopup === 1 &&
                                     <div className="h-[calc(100%-55px)]">
                                       <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
                                         {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
-                                          <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
+                                          <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`} onClick={() => { getQuestionnaireTemplate(template?.id); }}>
                                             <div className="self-start pt-1">
                                               <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
                                               <IoDocumentText />

@@ -23,8 +23,20 @@ import Switch from '@mui/material/Switch';
 import { confirmAlert } from "react-confirm-alert";
 import { drop, template } from "lodash";
 import { toast } from "react-toastify";
-import { createQuestionnaire, getQuestionnaire, updateQuestionnaire } from "../Server";
+import { createQuestionnaire, getQuestionnaire, updateQuestionnaire, getQuestionnaires   } from "../Server";
+import { IoDocumentText } from "react-icons/io5";
 
+
+const questionnaireTabs = [
+  {
+    tab_name: "Items",
+    value: 0
+  },
+  {
+    tab_name: "Templates",
+    value: 1
+  }
+];
 
 const qutionaryInputOption = [
   {
@@ -149,6 +161,8 @@ const fonts = [
 
 const Questionnaires = ({selectedEmployee, questionnaireId, duplicateQuestionnaireId,setTemplateTabs, title, FormChanges,fetchData}) => {
   const { authUserState } = useAuthContext();
+  const [templateTabsPopup, setTemplateTabsPopup] = useState(0);
+  const [questionnaireForms, setQuestionnaireForms]=useState()
   const location = useLocation();
   const topModelRef = useRef(null);
   const sigCanvasRef = useRef(null);
@@ -290,9 +304,10 @@ const closeModel = () =>{
     setDuplicateId(duplicateQuestionnaireId)
   }, [])
 
-  const editData = async () => {
+  const editData = async (templateId) => {
+    console.log();
     try {
-      const response = await getQuestionnaire(editedId);
+      const response = await getQuestionnaire(editedId || templateId);
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
         if (response.status === 200) {
           setQutionaryFields(response?.data?.template?.qutionaryFields);
@@ -316,6 +331,20 @@ const closeModel = () =>{
     } catch (err) {
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getQuestionnaires();
+        if (response.status === 200) {
+          setQuestionnaireForms(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching intake forms:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (editedId) {
@@ -857,10 +886,75 @@ const deleteOption = (objIndex, optionIndex) => {
                 <div className="flex w-[135px] bg-[#0dcaf0] text-white   rounded-md">
                   <button
                     type="button"
-                    className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]"
-                  >
+                    className="flex gap-2 justify-end pr-1 items-center py-[6px] w-[26%]" onClick={() => {
+                      openModalFromParent();
+                    }}>
                     <PiGridNineLight />
                   </button>
+                  <TopModel ref={topModelRef}>
+                    <div className="w-[700px] flex flex-col">
+                      <div className="pb-2 border-b">
+                        <h4>Add Form Template Library</h4>
+                      </div>
+                      <div>
+                        <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
+                          <div className="flex w-full absolute bottom-[-2px]">
+                            {questionnaireTabs.map((tab, index) => (<div key={index} className={` tabs cursor-pointer ${templateTabsPopup === tab.value ? "selected-tab " : "border-0"}`} onClick={() => { setTemplateTabsPopup(tab.value) }}><span>{tab.tab_name}</span></div>))}
+                          </div>
+                        </div>
+                        {templateTabsPopup === 0 &&
+                          <>
+                            <div className="h-[calc(100%-55px)] pb-3 border-b">
+                              <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                              {Array.isArray(qutionaryInputOption) && qutionaryInputOption.map((option, i) => (
+                                  <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}>
+                                    <div className="self-start pt-1">
+                                      <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                        {option?.icon}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                      <div>
+                                        <div className="text-[15px] text-gray-500 font-semibold pb-1">{option?.label}</div>
+                                        <div className="text-[11px] text-gray-400 pb-1 font-medium">{option?.description}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex w-full justify-end py-2">
+                              <button type="button" className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md" >
+                                Close
+                              </button>
+                            </div>
+                          </>
+                        }
+                        {templateTabsPopup === 1 &&
+                          <div className="h-[calc(100%-55px)]">
+                            <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                              {Array.isArray(questionnaireForms) && questionnaireForms.map((template, i) => (
+                                <div key={i} className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`} onClick={() => { editData(template?.id); }}>
+                                  <div className="self-start pt-1">
+                                    <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
+                                    <IoDocumentText />
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div>
+                                      <div className="text-[15px] text-gray-500 font-semibold pb-1">{template?.name}</div>
+                                      <div className="text-[13px] text-gray-400 pb-1 font-medium">Chart Template</div>
+                                      <div className="text-[12px] text-gray-400 pb-1 font-medium">{template?.employee?.name}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </TopModel>
                   <button
                     type="button"
                     className=" flex gap-2 justify-center items-center py-[6px] w-[74%]"
