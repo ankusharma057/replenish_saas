@@ -17,6 +17,7 @@ import { TbCheckbox } from "react-icons/tb";
 import { RxDropdownMenu } from "react-icons/rx";
 import { BsSliders2 } from "react-icons/bs";
 import { PiWarningCircleBold } from "react-icons/pi";
+import Questionnaires from "./Questionnaires";
 
 const Tabs = [
   {
@@ -368,6 +369,16 @@ const NewIntakeForm = () => {
   const [editedId, setEditedId] = useState();
   const [duplicateId, setDuplicateId] = useState();
 
+  const [formChanges,setFormChanges] = useState(false)
+  const [formChanged,setFormChanged] = useState(false)
+
+  
+  const setQuestionnaireWithIntake = (questionnaireData) => {
+    setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data,questionnaires:[...questionnaireData]}}))
+  }
+
+  console.log("intakeFormDataintakeFormData",intakeFormData);
+
   const handleOnChange = (fieldName, index, value) => {
     setChanges(true);
     const copyProfileFields = [...intakeFormData?.form_data?.profile_fields];
@@ -649,6 +660,35 @@ const NewIntakeForm = () => {
       ],
     });
   }
+
+
+  const handleFormChanges = () =>{
+    setFormChanges(true)
+  }
+
+  const confirmToDiscard = () => {
+    if(formChanges){
+      confirmAlert({
+        title: "Discard Changes",
+        message: `Are you sure Delete ?`,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              setFormChanged(true);
+            },
+          },
+          {
+            label: "No",
+          },
+        ],
+      });
+    }
+    else{
+      // setTemplateTabs("templates list");
+    }
+  }
+
 
 
   return (
@@ -938,7 +978,10 @@ const NewIntakeForm = () => {
                     </div>
 
                     <div>
-                      eidjhfijf
+                      <div className="flex justify-end">
+                        <div onClick={() => {confirmToDiscard()}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Reset Questionnaires</div>
+                      </div>
+                      <Questionnaires FormChanges={handleFormChanges} formChanged ={formChanged} setQuestionnaireWithIntake={setQuestionnaireWithIntake}/>
                     </div>
 
                     <div className="h-[calc(100%-50px)] overflow-y-auto">

@@ -211,17 +211,6 @@ const Employee = () => {
     fetchData();
   }, [templateTabs]);
 
-  const fetchData = async () => {
-    try {
-      const response = await getQuestionnaires();
-      if (response.status === 200) {
-        setQuestionnaireForms(response.data)
-      }
-    } catch (error) {
-      console.error('Error fetching intake forms:', error);
-    }
-  };
-
   useEffect(() => {
     if (isFillingForm) {
       const handleOnBeforeUnload = (event) => {
@@ -1218,11 +1207,11 @@ const Employee = () => {
                           </div>
                           <div className="flex items-center">
                             <div className="flex gap-2">
-                              <div onClick={() => {confirmToDiscard(); fetchData();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Questionnaires</div>
+                              <div onClick={() => {confirmToDiscard();}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Return to Questionnaires</div>
                             </div>
                           </div>
                         </div>
-                        <div><Questionnaires  title={title} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges} fetchData={fetchData} /></div>
+                        <div><Questionnaires  title={title} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges} /></div>
                         {/* <div className="flex">
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                             <button type="button" className="flex gap-2 items-center">

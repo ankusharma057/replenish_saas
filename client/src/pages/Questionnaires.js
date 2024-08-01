@@ -180,7 +180,8 @@ const Questionnaires = ({
   setTemplateTabs,
   title,
   FormChanges,
-  fetchData,
+  formChanged,
+  setQuestionnaireWithIntake
 }) => {
   const { authUserState } = useAuthContext();
   const [templateTabsPopup, setTemplateTabsPopup] = useState(0);
@@ -209,6 +210,19 @@ const Questionnaires = ({
       { ...qutionaryInputs[intialFieldName], id: qutionaryFields.length + 1 },
     ]);
   };
+   
+
+  useEffect(()=>{
+    if(location.pathname === "/new-intake-forms"){
+      setQuestionnaireWithIntake(qutionaryFields)
+    }
+    
+  },[qutionaryFields])
+  
+  useEffect(()=>{
+    setQutionaryFields([])
+
+  },[formChanged])
 
   console.log("editModel", editModel);
 
@@ -346,7 +360,7 @@ const Questionnaires = ({
           ];
           return updatedData;
         });
-        setEditedId(null);
+        // setEditedId(null);
       } else {
       }
       // }else{
@@ -567,7 +581,7 @@ const Questionnaires = ({
                               name="sign"
                               checked={field?.sign_type === "draw"}
                               id="draw"
-                              onChange={(e) => {}}
+                              onChange={(e) => {handleChange("sign_type","draw",index)}}
                             />
                             <label htmlFor="draw" className="flex items-center">
                               Draw
@@ -579,7 +593,7 @@ const Questionnaires = ({
                               name="sign"
                               checked={field?.sign_type === "type"}
                               id="type"
-                              onChange={(e) => {}}
+                              onChange={(e) => {handleChange("sign_type","type",index)}}
                             />
                             <label htmlFor="type" className="flex items-center">
                               Type
@@ -858,7 +872,6 @@ const Questionnaires = ({
           <form
             onSubmit={(e) => {
               editedId ? upadteData(e) : submitData(e);
-              fetchData();
             }}
             className=" py-2 m-0 w-full"
           >
@@ -1814,7 +1827,7 @@ const Questionnaires = ({
               )}
               {templateTabsPopup === 1 && (
                 <div className="h-[calc(100%-55px)]">
-                  <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
+                  <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2 top-model-table">
                     {Array.isArray(questionnaireForms) &&
                       questionnaireForms.map((template, i) => (
                         <div
