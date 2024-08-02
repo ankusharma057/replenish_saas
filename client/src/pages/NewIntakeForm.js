@@ -493,7 +493,7 @@ const fonts = [
 const NewIntakeForm = () => {
   const { authUserState } = useAuthContext();
   const navigate = useNavigate();  
-  const [selectedTab, setSelectedTab] = useState(4);
+  const [selectedTab, setSelectedTab] = useState(0);
   const [templateTabsPopup, setTemplateTabsPopup] = useState(0);
   const [changes, setChanges] = useState(false)
   const topModelRef = useRef(null);
@@ -509,6 +509,7 @@ const NewIntakeForm = () => {
     prompt_type: "automatic",
     valid_for: "forever"
   });
+
   const [intakeFormError, setIntakeFormError] = useState({
     name:"",
     prompt_type:"",
@@ -539,8 +540,6 @@ const NewIntakeForm = () => {
   useEffect(() => {
     setIntakeFormData((prev)=>({...prev,form_data:{...prev.form_data,questionnaires:[...qutionaryFields]}}))
   },[qutionaryFields])
-
-  console.log("intakeFormDataintakeFormData",intakeFormData);
 
   const handleOnChange = (fieldName, index, value) => {
     setChanges(true);
@@ -709,10 +708,11 @@ const NewIntakeForm = () => {
 
   const editData = async () => {
     try {
-      const response = await getIntakeForm(editedId);
+      const response = await getIntakeForm(editedId, true);
       if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
         if (response.status === 200) {
           setIntakeFormData(response.data);
+          setQutionaryFields(response.data.form_data?.questionnaires)
         } else {
         }
       }else{
@@ -735,21 +735,22 @@ const NewIntakeForm = () => {
   };
 
 
-
-  console.log("intakeFormData", intakeFormData);
-
   const openModalFromParent = () => {
-    console.log(topModelRef?.current);
-    if (topModelRef?.current) {
-      topModelRef?.current?.openModal();
+    if (topModelRef.current && typeof topModelRef.current.openModal === 'function') {
+      topModelRef.current.openModal();
+    } else {
+      console.error('openModal is not a function or topModelRef.current is not set');
     }
+    setChanges(false);
   };
   
-  const closeModel = () =>{
-    if (topModelRef?.current) {
-      topModelRef?.current?.closeModal();
+  const closeModel = () => {
+    if (topModelRef.current && typeof topModelRef.current.closeModal === 'function') {
+      topModelRef.current.closeModal();
+    } else {
+      console.error('closeModal is not a function or topModelRef.current is not set');
     }
-  }
+  };
 
   useEffect(() => {
     if (editedId) {
@@ -839,7 +840,6 @@ const NewIntakeForm = () => {
     if (sigCanvasRef.current) {
       const base64Signature = sigCanvasRef.current.toDataURL();
       setDrawSignarure(base64Signature);
-      console.log(base64Signature);
     }
   };
 
@@ -867,12 +867,10 @@ const NewIntakeForm = () => {
 
 
   const templateData = async (templateId) => {
-    console.log();
     try {
       const response = await getQuestionnaire(templateId, true);    
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
         if (response.status === 200) {
-          console.log("response.data?.qutionaryFields", response.data?.template?.qutionaryFields);
           toast.success("Questionnaire Template successfully fetched");
           setIntakeFormData((prev) => {
             return {
@@ -916,9 +914,6 @@ const NewIntakeForm = () => {
     };
     fetchData();
   }, []);
-
-  console.log("qutionaryFields", qutionaryFields);
-
 
   // close Model in Buttons
   const closeModalFromParent = (input) => {
@@ -1001,7 +996,6 @@ const NewIntakeForm = () => {
   // Option Values Changes for DropDown, Range, CheckBox
   const handleOptionsChange = (objIndex, optionIndex, key, value) => {
     setQutionaryFields((prev) => {
-      console.log(objIndex, optionIndex, key, value);
       const updatedFields = [...prev];
       const copyObj = [...updatedFields[objIndex]?.value];
       copyObj[optionIndex] = { ...copyObj[optionIndex], [key]: value };
@@ -1013,7 +1007,6 @@ const NewIntakeForm = () => {
 
   // Delete options for Dropdown, range, CheckBox
   const deleteOption = (objIndex, optionIndex) => {
-    console.log(objIndex, optionIndex);
     setQutionaryFields((prev) => {
       const updatedFields = [...prev];
       const copyValue = [...updatedFields[objIndex].value];
@@ -1344,7 +1337,7 @@ const NewIntakeForm = () => {
                   >
                     <div className="flex justify-between items-center py-1">
                       <div className="font-semibold text-[17px]">
-                        {field?.label}
+                        {field?.label}intakeFormData
                       </div>
                       <div className="text-[20px] cursor-pointer">
                         <BsThreeDotsVertical />
@@ -2256,7 +2249,7 @@ const NewIntakeForm = () => {
                   <div className="flex justify-center">Action</div>
                 </div>
                 <div className="top-model-table">
-                  {Array.isArray(qutionaryFields) &&
+                  {Array.isArray(qutionaryFields)||[] &&
                     qutionaryFields[editModel?.index]?.value.map(
                       (option, i) => (
                         <div

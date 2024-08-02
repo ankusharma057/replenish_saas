@@ -152,8 +152,19 @@ const qutionaryInputs = {
     id: null,
     type: "range",
     label: "Range",
-    range_value: "",
-    value: [{ label: "Range 1", value: 10 }],
+    range_value: 5,
+    value: [
+      { label: 1, value: 10 },
+      { label: 2, value: 10 },
+      { label: 3, value: 10 },
+      { label: 4, value: 10 },
+      { label: 5, value: 10 },
+      { label: 6, value: 10 },
+      { label: 7, value: 10 },
+      { label: 8, value: 10 },
+      { label: 9, value: 10 },
+      { label: 10, value:10 }
+    ],
     required: false,
     read_only: false,
   },
@@ -270,7 +281,6 @@ const Questionnaires = ({
     if (sigCanvasRef.current) {
       const base64Signature = sigCanvasRef.current.toDataURL();
       setDrawSignarure(base64Signature);
-      console.log(base64Signature);
     }
   };
 
@@ -359,7 +369,6 @@ const Questionnaires = ({
   }, []);
 
   const editData = async (templateId) => {
-    console.log();
     try {
       const response = await getQuestionnaire(editedId || templateId, true);    
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
@@ -411,8 +420,6 @@ const Questionnaires = ({
       editData();
     }
   }, [editedId]);
-
-  console.log("editedId", editedId);
 
   useEffect(() => {
     if (duplicateId) {
@@ -505,7 +512,6 @@ const Questionnaires = ({
   // Option Values Changes for DropDown, Range, CheckBox
   const handleOptionsChange = (objIndex, optionIndex, key, value) => {
     setQutionaryFields((prev) => {
-      console.log(objIndex, optionIndex, key, value);
       const updatedFields = [...prev];
       const copyObj = [...updatedFields[objIndex]?.value];
       copyObj[optionIndex] = { ...copyObj[optionIndex], [key]: value };
@@ -518,7 +524,6 @@ const Questionnaires = ({
 
   // Delete options for Dropdown, range, CheckBox
   const deleteOption = (objIndex, optionIndex) => {
-    console.log(objIndex, optionIndex);
     setQutionaryFields((prev) => {
       const updatedFields = [...prev];
       const copyValue = [...updatedFields[objIndex].value];

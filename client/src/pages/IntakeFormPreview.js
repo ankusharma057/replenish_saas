@@ -7,6 +7,9 @@ import SignatureCanvas from 'react-signature-canvas'
 import { FaUndo } from "react-icons/fa";
 import { DropDown } from '../components/DropDown/DropDown';
 import { useAuthContext } from '../context/AuthUserContext';
+import { BsThreeDotsVertical } from 'react-icons/bs';
+import Select from "react-select";
+
 // customers
 const IntakeFormPreview = () => {
   const { authUserState } = useAuthContext();
@@ -24,7 +27,7 @@ const IntakeFormPreview = () => {
       client_id: client_id,
       response_form_data: {
         profile_fields: {},
-        step2: {},
+        questionnaires: [],
         consents: {
           signature:{
             sign_type:"draw"
@@ -35,6 +38,7 @@ const IntakeFormPreview = () => {
     }
   })
   
+
 
   const [strokeHistory, setStrokeHistory] = useState([]);
   const [canUndo, setCanUndo] = useState(false);
@@ -49,8 +53,6 @@ const IntakeFormPreview = () => {
 
   const sigCanvasRef = useRef(null);
   const canvasRef = useRef(null);
-
-  console.log("ssss",intakeFormData );
 
   const handleChangeText = (event) => {
     setText(event.target.value);
@@ -176,9 +178,10 @@ const IntakeFormPreview = () => {
 
   const fetchIntakeForm = async () => {
     try {
-      const { data, status } = isClientPage ? await getClientIntakeForm(intake_formId) : await getIntakeForm(intake_formId);
+      const { data, status } = isClientPage ? await getClientIntakeForm(intake_formId) : await getIntakeForm(intake_formId, true);
       if (status === 200) {
         setIntakeFormFields(data)
+        setIntakeFormData((prev)=>({...prev, response_intake_form:{...prev?.response_intake_form, response_form_data:{...prev.response_intake_form.response_form_data, ["questionnaires"]:data?.form_data?.questionnaires}}}))
 
         if(data?.submitted){
           setModel({show: true, title: "You already submitted this intake form. You can close this tab."})
@@ -189,9 +192,6 @@ const IntakeFormPreview = () => {
       console.error('Error fetching intake forms:', error);
     }
   };
-
-  console.log("ddddd",intakeFormFields);
-
 
   const fetchSubmittedIntakeForm = async () => {
     try {
@@ -213,23 +213,19 @@ const IntakeFormPreview = () => {
     else{
       fetchIntakeForm();
     }
-   
 
   }, []);
 
-  console.log("dd",intakeFormFields?.form_data?.profile_fields );
 
-     const responseConsents = Object.values(intakeFormData?.response_intake_form?.response_form_data?.consents?.consentForms)
+  const responseConsents = Object.values(intakeFormData?.response_intake_form?.response_form_data?.consents?.consentForms)
 
-  console.log("sdskkk",intakeFormData?.response_intake_form?.intake_form?.name);
-  console.log("xxx",isClientFormPreviewPage)
 
     const saveStrokeToHistory = () => {
       const newStroke = sigCanvasRef.current.toDataURL();
       setStrokeHistory(prevHistory => [...prevHistory, newStroke]);
       setCanUndo(true);
     };
-   
+
     const undoLastStroke = () => {
       if (strokeHistory.length > 0) {
         const updatedHistory = [...strokeHistory];
@@ -255,6 +251,76 @@ const IntakeFormPreview = () => {
       saveSignature();
       saveStrokeToHistory();
     };
+
+  
+
+    const handleChangeQutionnaries = (index,field,value) =>{
+      const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
+      updatedValue[index] = {...updatedValue[index],[field]:value}
+      setIntakeFormData((prev)=>({...prev, response_intake_form:{
+        ...prev.response_intake_form,response_form_data:{
+          ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
+        }}}))
+    }
+
+    const handleOptionValueChange = (objIndex, index, key, value) => {
+      const updatedQuestionnaires = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires];
+      const updatedOptions = [...updatedQuestionnaires[objIndex].value];
+      updatedOptions[index] = { ...updatedOptions[index], [key]: value };
+      updatedQuestionnaires[objIndex].value = updatedOptions;      
+      setIntakeFormData((prev) => ({
+          ...prev,
+          response_intake_form: {
+              ...prev.response_intake_form,
+              response_form_data: {
+                  ...prev.response_intake_form.response_form_data,
+                  questionnaires: updatedQuestionnaires
+              }
+          }
+      }));
+  };
+  
+  const saveQutionnariesSignature = (index) => {
+    if (sigCanvasRef.current) {
+      const base64Signature = sigCanvasRef.current.toDataURL();
+      const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
+      updatedValue[index] = {...updatedValue[index],["sign"]:base64Signature}
+      setIntakeFormData((prev)=>({...prev, response_intake_form:{
+        ...prev.response_intake_form,response_form_data:{
+          ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
+        }}}))     
+    }
+  };
+
+  const handleTypeBase64Image = (selectedOption,index) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const tempElement = document.createElement('div');
+    tempElement.className = selectedOption?.class;
+    document.body.appendChild(tempElement);
+    const style = window.getComputedStyle(tempElement).font;
+    document.body.removeChild(tempElement);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = style;
+    ctx.fillText(text, 10, 50);
+    const base64Image = canvas.toDataURL(); 
+    const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
+    updatedValue[index] = {...updatedValue[index],["sign"]:base64Image}
+    setIntakeFormData((prev)=>({...prev, response_intake_form:{
+      ...prev.response_intake_form,response_form_data:{
+        ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
+      }}}))  
+  };
+
+  const handleTypeFontChange = (selectedOption,index) => {
+    setSelectOption(selectedOption)
+    handleTypeBase64Image(selectedOption,index)
+  };
+
+  const handleQutionnariesDrawEnd = () => {
+    saveQutionnariesSignature();
+    saveStrokeToHistory();
+  };
 
   return (
     <>
@@ -303,16 +369,370 @@ const IntakeFormPreview = () => {
             <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 4</span> </div>
           </div>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] font-medium'>Profile Information - <span className='text-blue-300'>Step 3 of 4</span> </div>
+            <div className='text-center text-[28px] font-medium'>Questionnaries - <span className='text-blue-300'>Step 3 of 4</span> </div>
+            <div className=" py-3 px-4 flex flex-col gap-4">
+              {Array.isArray(intakeFormData?.response_intake_form?.response_form_data?.questionnaires) &&
+              intakeFormData?.response_intake_form?.response_form_data?.questionnaires.map((field, index) =>
+                field?.type === "textarea" ? (
+                  <>
+                    {/* Note */}
+                    <div
+                      className=" rounded-md  p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({ name: "initialNote", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialNote', index)
+                      }}>
+                      <div className="flex justify-between items-center py-1">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
+                        <textarea
+                          className="w-full focus:outline-none"
+                          readOnly={field?.read_only}
+                          required={field?.required}
+                          value={field?.value}
+                          onChange={(e) => {
+                            // handleChange("value", e?.target?.value, index);
+                            handleChangeQutionnaries(index,"value",e?.target?.value)
+                          }}
+                          rows="3"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "signature" ? (
+                  <>
+                    {/* Signature */}
+                    <div
+                      className=" rounded-md  p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({ name: "initialSignature", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialSignature', index)
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div>
+                        <div className="flex justify-between py-1">
+                          <div className="flex gap-3">
+                            <div className="flex gap-2">
+                              <input
+                                type="radio"
+                                name="sign"
+                                checked={field?.sign_type === "draw"}
+                                id="draw"
+                                onChange={(e) => {
+                                  // handleChange("sign_type","draw",index)
+                                    handleChangeQutionnaries(index,"sign_type","draw")
+                                }}
+                              />
+                              <label htmlFor="draw" className="flex items-center">
+                                Draw
+                              </label>
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                              className={`${selectOption?.class}`}
+                                type="radio"
+                                name="sign"
+                                checked={field?.sign_type === "type"}
+                                id="type"
+                                onChange={(e) => {
+                                  // handleChange("sign_type","type",index)
+                                  handleChangeQutionnaries(index,"sign_type","type")
+                                }}
+                              />
+                              <label htmlFor="type" className="flex items-center">
+                                Type
+                              </label>
+                            </div>
+                          </div>
+                          {field?.sign_type === "type" && (
+                            <div className="w-[300px]">
+                              <DropDown
+                                placeholder={"Select Font Style"}
+                                options={fonts}
+                                onChange={(value)=>{handleTypeFontChange(value,index);}}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="">
+                          {field?.sign_type === "draw" ? (
+                            <div className="flex gap-3 ">
+                              <div className="border-b-[2px]">
+                                <SignatureCanvas
+                                  penColor="black"
+                                  throttle={10}
+                                  maxWidth={2.2}
+                                  onEnd={() => {
+                                    // saveSignature();
+                                    // handleChange("sign", drawSignarure, index);
+                                    // handleChangeQutionnaries(index,"sign","value")
+                                    saveQutionnariesSignature(index)
+                                    handleQutionnariesDrawEnd()
+                                    
+                                  }}
+                                  ref={sigCanvasRef}
+                                  canvasProps={{
+                                    width: 400,
+                                    height: 70,
+                                    className: "sigCanvas",
+                                  }}
+                                />
+                              </div>
+                              <div className="flex items-end">
+                                <div className="flex gap-2 items-center text-[14px] text-[#0dcaf0]">
+                                  <div
+                                    className="cursor-pointer"
+                                    onClick={()=>{undoLastStroke(); saveSignature();}}
+                                    disabled={false}
+                                  >
+                                    <FaUndo />
+                                  </div>
+                                  <div className="text-gray-400">|</div>
+                                  <div
+                                    className="cursor-pointer"
+                                    onClick={()=>{sigCanvasRef.current.clear(); saveSignature();}}
+                                  >
+                                    Clear
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex h-[70px]  gap-4">
+                                <div className="flex items-end ">
+                                  <div className="border-b-[2px] w-[300px]">
+                                    <input
+                                      type="text"
+                                      placeholder="Enter your Signature"
+                                      className={`${selectOption?.class} p-2 focus:outline-none w-full  px-2 h-[50px]`}
+                                      onChange={(e) => {setText(e.target.value)}}
+                                    />
+                                  </div>
+                                </div>
+                                <canvas
+                                  ref={canvasRef}
+                                  width="500"
+                                  height="100"
+                                  style={{ display: "none" }}
+                                ></canvas>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "heading" ? (
+                  <>
+                    {/* Heading */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({ name: "initialHeading", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialHeading', index)
+                      }}
+                    >
+                      <div className="flex justify-between items-center ">
+                        {/* <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div> */}
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div className="text-[22px] py-2 font-medium">
+                        {field?.value}
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "checkbox" ? (
+                  <>
+                    {/* Check Boxes */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({ name: "initialCheckBox", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialCheckBox', index)
+                      }}
+                    >
+                      <div className="flex flex-col ">
+                        <div className="flex justify-between items-center py-1">
+                          <div className="font-semibold text-[17px]">
+                            {field?.label}
+                          </div>
+                          {/* <div className="text-[20px] cursor-pointer">
+                            <BsThreeDotsVertical />
+                          </div> */}
+                        </div>
+                        <div
+                          className={`${
+                            field?.layout === "horizontal"
+                              ? "grid grid-cols-5"
+                              : field?.layout === "vertical"
+                              ? "grid grid-cols-1"
+                              : "grid grid-cols-3"
+                          }`}
+                        >
+                          {Array.isArray(field.value) &&
+                            field.value.map((checkbox, i) => (
+                              <div key={i} className="flex gap-2  items-center">
+                                <input
+                                  id={checkbox?.label}
+                                  readOnly={field?.read_only}
+                                  required={field?.required}
+                                  checked={checkbox?.value}
+                                  onChange={(e) => {
+                                    handleOptionValueChange(index,i,"value",e.target.checked)
+                                  }}
+                                  type="checkbox"
+                                />
+                                <label htmlFor={checkbox?.label}>
+                                  {checkbox?.label}
+                                </label>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "dropdown" ? (
+                  <>
+                    {/* Drop down */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({ name: "initialDropdown", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialDropdown', index)
+                      }}
+                    >
+                      <div className="flex justify-between items-center ">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div className="py-3">
+                        <div className="w-[300px]">
+                          <Select
+                            inputId="availableEmployee"
+                            isClearable
+                            options={field?.value}
+                            onChange={(e) => {
+                              handleChangeQutionnaries(index,"drop_down_value",e?.value)
+                            }}
+                            readOnly={field?.read_only}
+                            required={field?.required}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "range" ? (
+                  <>
+                    {/* Range */}
+                    <div
+                      className=" rounded-md p-[6px] pb-6 flex flex-col gap-1 "
+                      onClick={() => {
+                        // setEditModel({ name: "initialRange", index: index });
+                        // openModalFromParent();
+                        // handleItemClick('initialRange', index)
+                      }}
+                    >
+                      <div className="flex justify-between items-center ">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min={0}
+                          max={field.value.length}
+                          className="w-full"
+                          onChange={(e) => {
+                            handleChangeQutionnaries(index,"range_value",e.target.value)
+                          }}
+                        />
+                        <div className=" grid grid-flow-col ">
+                          {Array.isArray(field.value) &&
+                            field?.value.map((option, i) => (
+                              <div className="justify-self-end " key={i}>
+                                <div className="flex justify-end">|</div>
+                                <div className="relative">
+                                  <div className="absolute -top-[3px] -right-[2px]">
+                                    {" "}
+                                    {option?.label}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "instruction" ? (
+                  <>
+                    {/* Instructions */}
+                    <div
+                      className="   rounded-md p-[6px] flex flex-col gap-1"
+                      onClick={() => {
+                        // setEditModel({
+                        //   name: "initialInstruction",
+                        //   index: index,
+                        // });
+                        // openModalFromParent();
+                      }}
+                    >
+                      <div className="flex justify-between items-center  py-1">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                        {/* <div className="text-[20px] cursor-pointer">
+                          <BsThreeDotsVertical />
+                        </div> */}
+                      </div>
+                      <div className="text-[18px] bg-white  rounded-lg pl-3 font-medium py-3">
+                        <em>{field?.value}</em>
+                      </div>
+                    </div>
+                  </>
+                ) : null
+              )}
+          </div>
           </div>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] font-medium'>Consents - <span className='text-blue-300'>Step 4 of 4</span> </div>
             <div className='p-4 pt-0'>
-              <div className='text-[25px] font-normal py-2'><span >{intakeFormData?.response_intake_form?.intake_form?.name}</span> - Consents </div>
+              <div className='text-[25px] font-normal py-2'><span >{intakeFormFields?.name}</span> - Consents </div>
               
               <div className='flex flex-col gap-3'>
               {isClientFormPreviewPage ? (
-                 (Array.isArray(intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms) && intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms.map((consent,index)=>(
+                (Array.isArray(intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms) && intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms.map((consent,index)=>(
                   <div className={`${intakeFormFields?.form_data?.consents?.consentForms.length === index+1 && !intakeFormFields?.form_data?.consents?.signature ? "border-none" : "border-b"} p-2`} key={index}>
                   <div className='text-[20px] font-normal'>{consent?.name}</div>
                   <div className='py-3'>{consent?.text}</div>
@@ -349,9 +769,9 @@ const IntakeFormPreview = () => {
                   </div>}
 
                   { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
-                    <input type="radio" required name="isAgreed" value="agreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
+                    <input type="radio" required name={`isAgreed${index}`} value="agreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
                     <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
-                    <input type="radio" required name="isAgreed" value="disAgreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
+                    <input type="radio" required name={`isAgreed${index}`} value="disAgreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
                     <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
                   </div>}
 
