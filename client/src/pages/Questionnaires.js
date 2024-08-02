@@ -233,6 +233,7 @@ const Questionnaires = ({
     handleChange(null, null, qutionaryFields.length);
   };
 
+  console.log("qutionaryFields", qutionaryFields);
   useEffect(()=>{
     if(page === "Intake Form Page"){
       setQuestionnaireWithIntake(qutionaryFields)
