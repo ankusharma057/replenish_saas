@@ -86,7 +86,7 @@ const IntakeFormPreview = () => {
 
   const saveSignature = () => {
     if (sigCanvasRef.current) {
-      const base64Signature = sigCanvasRef.current.toDataURL();
+      const base64Signature = sigCanvasRef.current?.toDataURL();
       setIntakeFormData((prev)=>({...prev,response_intake_form:{...prev.response_intake_form,response_form_data:{...prev.response_intake_form.response_form_data,consents:{
         ...prev.response_intake_form.response_form_data.consents,signature:{...prev.response_intake_form.response_form_data.consents.signature,["sign"]:base64Signature}
       }}}}))
@@ -235,18 +235,18 @@ const IntakeFormPreview = () => {
         setCanUndo(updatedHistory.length > 0);
       }
     };
-   
+
     const redrawSignature = (history) => {
-      sigCanvasRef.current.clear();
+      sigCanvasRef.current?.clear();
       history.forEach(stroke => {
         const img = new Image();
         img.src = stroke;
         img.onload = () => {
-          sigCanvasRef.current.getCanvas().getContext("2d").drawImage(img, 0, 0);
+          sigCanvasRef.current?.getCanvas().getContext("2d").drawImage(img, 0, 0);
         };
       });
     };
-   
+
     const handleDrawEnd = () => {
       saveSignature();
       saveStrokeToHistory();
@@ -282,7 +282,7 @@ const IntakeFormPreview = () => {
   
   const saveQutionnariesSignature = (index) => {
     if (sigCanvasRef.current) {
-      const base64Signature = sigCanvasRef.current.toDataURL();
+      const base64Signature = sigCanvasRef.current?.toDataURL();
       const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
       updatedValue[index] = {...updatedValue[index],["sign"]:base64Signature}
       setIntakeFormData((prev)=>({...prev, response_intake_form:{
@@ -484,6 +484,7 @@ const IntakeFormPreview = () => {
                                     // handleChangeQutionnaries(index,"sign","value")
                                     saveQutionnariesSignature(index)
                                     handleQutionnariesDrawEnd()
+                                  
                                     
                                   }}
                                   ref={sigCanvasRef}
@@ -506,7 +507,7 @@ const IntakeFormPreview = () => {
                                   <div className="text-gray-400">|</div>
                                   <div
                                     className="cursor-pointer"
-                                    onClick={()=>{sigCanvasRef.current.clear(); saveSignature();}}
+                                    onClick={()=>{sigCanvasRef.current?.clear(); saveSignature();}}
                                   >
                                     Clear
                                   </div>
@@ -816,7 +817,7 @@ const IntakeFormPreview = () => {
                 <div className='flex gap-2 items-center text-[14px] text-[#0dcaf0]'>
                 <div className='cursor-pointer' onClick={()=>{undoLastStroke(); saveSignature();}} disabled={!canUndo}><FaUndo /></div>
                   <div className='text-gray-400'>|</div>
-                  <div className='cursor-pointer' onClick={()=>{sigCanvasRef.current.clear(); saveSignature();}}>Clear</div>
+                  <div className='cursor-pointer' onClick={()=>{sigCanvasRef.current?.clear(); saveSignature();}}>Clear</div>
                 </div>
               </div>
             </div>}

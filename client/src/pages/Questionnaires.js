@@ -1691,8 +1691,8 @@ const Questionnaires = ({
                   <div className="flex justify-center">Action</div>
                 </div>
                 <div className="top-model-table">
-                  {Array.isArray(qutionaryFields) &&
-                    qutionaryFields[editModel?.index].value.map((option, i) => (
+                  {(Array.isArray(qutionaryFields) || []) &&
+                    qutionaryFields[editModel?.index]?.value.map((option, i) => (
                       <div
                         key={i}
                         className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"

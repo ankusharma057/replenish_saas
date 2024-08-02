@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
   deleteEmployeeRoute,
@@ -81,8 +81,6 @@ const Employee = () => {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
   const [formChanges,setFormChanges] = useState(false)
-  const [alertShown, setAlertShown] = useState(false);
-  const formBorder = useRef(null)
 
 
   // Questionnaires
@@ -90,22 +88,7 @@ const Employee = () => {
   const [templateTabs,setTemplateTabs] = useState("templates list")
   const [templateLists,setTemplateLists] = useState(intialTemplates)
   //Questionnaires
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (formBorder.current && !formBorder.current.contains(event.target)) {
-        if (!alertShown) {
-          confirmToDiscard();
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [alertShown]);
-
+  
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getEmployeesList(refetch);
@@ -654,32 +637,31 @@ const Employee = () => {
     setTemplateTabs("templates list");
   };
 
-  const confirmToDiscard = () => {
-    setAlertShown(true);
-    confirmAlert({
-      title: "Discard Changes",
-      message: "Are you sure you want to discard changes?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            setTemplateTabs("templates list");
-            setFormChanges(false); // Reset form changes state
-            setAlertShown(false); // Reset alert shown state
-          },
-        },
-        {
-          label: "No",
-          onClick: () => {
-            setAlertShown(false); // Allow the alert to be shown again on next click
-          },
-        },
-      ],
-    });
-  };
+  const handleFormChanges = () =>{
+    setFormChanges(true)
+  }
 
-  const handleFormChanges = () => {
-    setFormChanges(true);
+  const confirmToDiscard = () => {
+    if(formChanges){
+      confirmAlert({
+        title: "Discard Changes",
+        message: `Are you sure Delete ?`,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              setTemplateTabs("templates list");
+            },
+          },
+          {
+            label: "No",
+          },
+        ],
+      });
+    }
+    else{
+      setTemplateTabs("templates list");
+    }
   }
 
   return (
@@ -1211,7 +1193,7 @@ const Employee = () => {
                       </div>
                     </div>}
                     {templateTabs === "create new template" &&
-                      <div ref={formBorder} className="p-3 flex flex-col gap-2" onChange={handleFormChanges}>
+                      <div className="p-3 flex flex-col gap-2">
                         <div className="text-gray-500 flex justify-between">
                           <div>
                             <div className={`flex gap-3 items-center ${edittitle ? "hidden": "block"}`}>
