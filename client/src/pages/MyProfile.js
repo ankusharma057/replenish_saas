@@ -731,9 +731,7 @@ const MyProfile = () => {
               </h2>
             ))}
           {currentTab === "assignedInventory" &&
-            (authUserState.user?.inventory_prompts?.filter(
-              (prompt) => !prompt.is_accepted === true
-            )?.length > 0 ? (
+            (authUserState.user?.employees_inventories?.length > 0 ? (
               <div className="sm:container">
                 <h2 className="text-4xl font-bold text-center text-cyan-400">
                   Inventory Assigned
@@ -749,7 +747,7 @@ const MyProfile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {authUserState.user?.inventory_prompts?.map((data) => {
+                    {authUserState.user?.employees_inventories?.map((data) => {
                       return (
                         <React.Fragment key={data.id}>
                           {!data?.is_accepted && (

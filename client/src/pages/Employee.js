@@ -376,7 +376,7 @@ const Employee = () => {
         // data: getRequestInventoryData,
       },
     ];
-    if (emp.is_admin || emp.is_inv_manager) {
+    if (emp) {
       addTabs.splice(0, 0, {
         name: "Inventories",
         value: "inventory",

@@ -73,6 +73,7 @@ function Schedule() {
   const [employeeSearch, setEmployeeSearch] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
   const [allEmployeeList, setAllEmployeeList] = useState([]);
+  const [employeesData, setEmployeesData] = useState([]);
   const { collapse } = useAsideLayoutContext();
   const [serviceLocation, setServiceLocation] = useState([]);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
@@ -119,6 +120,24 @@ function Schedule() {
         setEmployeeList(data);
         setAllEmployeeList(a);
         handleSelectEmployee(data[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllEmployees = async (refetch = true) => {
+    try {
+      const { data } = await getEmployeesList(refetch);
+      console.log("dataaaaaaaaa", data);
+
+      if (data?.length > 0) {
+        const a = data?.map((emp) => ({
+          ...emp,
+          label: emp?.name,
+          value: emp?.id,
+        }));
+        setEmployeesData(a);
       }
     } catch (error) {
       console.log(error);
@@ -713,7 +732,9 @@ function Schedule() {
                   {authUserState.user?.is_admin && (
                     <Button
                       onClick={() =>
-                        setAddLocationModal((pre) => ({ ...pre, show: true }))
+                        {setAddLocationModal((pre) => ({ ...pre, show: true }));
+                          getAllEmployees();
+                        }
                       }
                       variant="info"
                       className="text-white flex w-full sm:w-fit"
@@ -745,7 +766,7 @@ function Schedule() {
               // onSelectSlot={handleAddAppointmentSelect}
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
-                const backgroundColor = ( "available" in event && event.available ) ? "#EAF6FF" :"#299db9";                      
+                const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
                 return { style: { backgroundColor } };
               }}
             />
@@ -907,7 +928,6 @@ function Schedule() {
                       placeholder="Select a Treatment"
                       required
                     />
-                   
                   </>
                 )}
               </div>
@@ -1195,7 +1215,7 @@ function Schedule() {
                 employees: emp,
               }));
             }}
-            options={allEmployeeList}
+            options={employeesData}
             placeholder="Select Available Employees"
             required
           />

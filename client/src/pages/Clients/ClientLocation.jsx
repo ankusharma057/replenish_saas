@@ -314,14 +314,25 @@ const ClientLocation = () => {
         return true;
       }
     });
-    if(e.available){
-      console.log("")
-      setAppointmentModal({...formateData, isEdit:true });
-    }
-    else{
+  
+    if (e.available) {
+      setAppointmentModal({ ...formateData, isEdit: true });
+    } else {
       setAppointmentModal(formateData);
     }
+  };
 
+  const handleSelectSlot = (slotInfo) => {
+    const isValidSlot = selectedEmpSchedules.some(schedule => {
+      return schedule.available &&
+        moment(slotInfo.start).isSameOrAfter(schedule.start_time) &&
+        moment(slotInfo.end).isSameOrBefore(schedule.end_time);
+    });
+
+    if (!isValidSlot) {
+      toast.error("Please select an available slot.");
+      return;
+    }
   };
 
   const addAppointMentSubmit = async (e) => {
@@ -470,10 +481,10 @@ const ClientLocation = () => {
                 <ClientScheduleCalender
                   onSelectEvent={(e) => handleAddAppointmentSelect(e)}
                   events={selectedEmpSchedules || []}
-                  // onSelectSlot={handleAddAppointmentSelect}
+                  onSelectSlot={handleSelectSlot}
                   onRangeChange={onCalenderRangeChange}
                   eventPropGetter={(event) => {
-                    const backgroundColor = ( "available" in event && event.available ) ? "#EAF6FF" :"#000";                      
+                    const backgroundColor = ( "available" in event && event.available ) ? "#22d3ee" :"#000";                      
                     return { style: { backgroundColor } };
                   }}
                 />

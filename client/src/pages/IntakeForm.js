@@ -39,10 +39,10 @@ const IntakeForm = () => {
         </div>
         <div className=" h-[calc(100%-100px)] overflow-y-auto  ">
           <div className="  h-full ">
-            <div className="h-[90px] ">
-            <div className='flex flex-col items-center text-[14px] gap-1 py-3'>
-              <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has Lorem Ipsum is simply dummy </div>
-              <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy</div>
+            <div className=" ">
+            <div className='flex flex-col items-center justify-center text-center w-[90%] mx-auto text-[14px] gap-1 py-3'>
+              <div>Online intake forms allow you to collect contact information, family and medical history, and consent from your client. The client response will become part of their profile and chart.</div>
+              <div>Employee will automatically prompt clients to fill out an intake form in any email sent prior to their first visit. After their first visit, you can send them a link to fill out the intake form from their client profile.</div>
             </div>
             </div>
             <div className="h-[calc(100%-90px)] flex flex-col gap-2 border p-3 rounded-lg">
