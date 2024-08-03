@@ -13,4 +13,13 @@ class Api::AvailabilitiesController < ApplicationController
   def create
     create_or_update_availability
   end
+
+  def destroy
+    @availabilitie = Availabilities.find_by(id: params[:id])
+    if @availabilitie&.destroy
+      render json: @availabilitie
+    else
+      render json: { error: 'Availability does not exist' }, status: :unprocessable_entity
+    end
+  end
 end

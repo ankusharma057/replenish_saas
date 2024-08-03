@@ -22,6 +22,7 @@ import {
   remainingBalancePaidToEmployee,
   updateAvailability,
   getEmployeeLocations,
+  deleteEmployeeAvailability
 } from "../Server";
 import * as dates from "react-big-calendar/lib/utils/dates";
 
@@ -88,6 +89,8 @@ function Schedule() {
     ...initialAvailabilityModal,
   });
 
+  console.log("availabilityModal", availabilityModal);
+  
   const [changes, setChanges] = useState(false)
   console.log(changes,"fgregfegeg");
   useEffect(()=>{setChanges(false)},[availabilityModal?.show,addLocationModal?.show,appointmentModal?.show])
@@ -144,7 +147,7 @@ function Schedule() {
     }
   };
 
-  const getEmployeeSchedule = async (emp, refetch = false) => {
+  const getEmployeeSchedule = async (emp, refetch = true) => {
     try {
       const { data } = await getSchedule(
         {
@@ -225,7 +228,9 @@ function Schedule() {
       const newAvailData = availabilityData.filter(
         (item) => !item.every_week && !item.available
       );
-      const transformedData = newAvailData.flatMap(item => Object.values(item));
+      const transformedData = availabilityData.flatMap(item => Object.values(item));
+      console.log("gfdddddddddddd",availabilityData);
+      
       const arr = newData.concat(transformedData);
       const arr1 = arr.concat(unavailabilityNewData);
       setEmployeeScheduleEventsData((pre) => {
@@ -234,7 +239,10 @@ function Schedule() {
           [emp.id]: arr1,
         };
       });
-    } catch (error) { }
+    } catch (error) {
+      console.log("dfgddddddddddddddddddddddd", error);
+      
+     }
   };
 
   const getClientName = async (employee_id, refetch = false) => {
@@ -338,6 +346,50 @@ function Schedule() {
   const [removeAvailabilityData, setRemoveAvailabilityData] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // delete schedule api
+  const deleteSchedule = async (id, refetch = true) => {
+    try {
+      await deleteEmployeeAvailability(id, refetch);
+      getEmployeeSchedule({
+        id: selectedEmployeeData.id,
+        start_date: calenderCurrentRange.start_date,
+        end_date: calenderCurrentRange.end_date,
+        location_id: selectedLocation?.id
+      });
+      toast.success("Availability Deleted Successfully");
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("error", error.error);
+      
+    }
+  }
+
+  const showConfirmationModal = (event, readOnly) => {
+    console.log("eventttttttttttttttttt", event);
+    
+    confirmAlert({
+      title: "Confirm to do this action",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Create Appointment",
+          className: "btn btn-primary create-btn text-[16px] font-semibold px-3 py-2",
+          onClick: () => {
+            handleAddAppointmentSelect(event, readOnly);
+          },
+        },
+        {
+          label: "Delete Availability",
+          className: "btn btn-primary del-btn",
+          onClick: () => {
+            setShowConfirm(false);
+            deleteSchedule(event.id);
+          },
+        },
+      ],
+    })
+  };
+
 
   const handleAddAppointmentSelect = ({ start, end, ...rest }, readOnly) => {
     let formateData = {
@@ -376,6 +428,9 @@ function Schedule() {
       setAppointmentModal(formateData);
     }
   };
+
+  console.log("removeAvailabilityData", removeAvailabilityData);
+  
 
   const handleSubmitRemoveAvailability = async () => {
     if (removeAvailabilityData.remove_every_week) {
@@ -760,7 +815,7 @@ function Schedule() {
             <ScheduleCalender
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
               onSelectEvent={(event) => {
-                handleAddAppointmentSelect(event, true);
+                showConfirmationModal(event, true);
         
               }}
               // onSelectSlot={handleAddAppointmentSelect}
@@ -836,7 +891,7 @@ function Schedule() {
         title={
           appointmentModal?.readOnly
             ? `Appointment Details`
-            : "New  Appointment"
+            : "New Appointment"
         }
         footer={
           <div className="flex gap-2">

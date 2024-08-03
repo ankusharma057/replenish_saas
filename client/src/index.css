@@ -280,3 +280,17 @@ input:-webkit-autofill:active {
   max-height: 500px;
   overflow-y:auto;
 }
+
+.create-btn{
+  background-color: #22d3ee !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0.5rem !important;
+
+}
+.del-btn{
+  background-color: #f44336 !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0.5rem !important;
+}

@@ -459,6 +459,13 @@ export const fetchAvailability = async (data, refetch) =>
     },
   });
 
+export const deleteEmployeeAvailability = async (id, refetch) =>
+  api.delete(`/api/availabilities/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const postAvailability = async (data) =>
   api.post(`/api/availabilities`, data);
 
