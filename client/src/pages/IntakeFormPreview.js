@@ -308,7 +308,6 @@ const IntakeFormPreview = () => {
   };
 
 
-
   return (
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
@@ -322,8 +321,7 @@ const IntakeFormPreview = () => {
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 1 of 3</span> </div>
             <div className='flex flex-col items-center text-[14px] gap-1 py-3 text-center'>
-              <div>Online intake forms allow you to collect contact information, family and medical history, and consent from your client. The client response will become part of their profile and chart.</div>
-              <div>{intakeFormFields?.employee?.name} will automatically prompt clients to fill out an intake form in any email sent prior to their first visit. After their first visit, you can send them a link to fill out the intake form from their client profile.</div>
+              <div>Please take a moment to fill out our online intake form before your visit. All information is kept completely confidential.</div>
             </div>
             {isClientFormPreviewPage ?
             <div className="grid grid-cols-2 gap-x-4 gap-y-5 w-full bg-white p-4 px-4   rounded-lg" >

@@ -802,8 +802,11 @@ const NewIntakeForm = () => {
     setFormChanges(true)
   }
 
+  console.log("qutionaryFields",qutionaryFields);
+  
+
   const confirmToDiscard = () => {
-    if(formChanges){
+    if(qutionaryFields.length > 0){
       confirmAlert({
         title: "Discard Changes",
         message: `Are you sure Delete ?`,
@@ -811,7 +814,7 @@ const NewIntakeForm = () => {
           {
             label: "Yes",
             onClick: () => {
-              setFormChanged(true);
+              setQutionaryFields([]);
             },
           },
           {
@@ -820,10 +823,45 @@ const NewIntakeForm = () => {
         ],
       });
     }
-    else{
-      // setTemplateTabs("templates list");
-    }
   }
+
+  const confirmToAddTemplate = (templateId) => {
+    confirmAlert({
+      className: "custom-alert custom-alert-success",
+      title: "This Template Cotains O inadmissible item",
+      message: `Are you sure Delete ?`,
+      buttons: [
+        {
+          label: "Yes",
+          className: "btn-success",
+          onClick: () => {
+            templateData(templateId);
+          },
+        },
+        {
+          label: "No",
+        },
+      ],
+    });
+    // customUI: ({ onClose }) => {
+    //   return (
+    //     <div className='custom-ui'>
+    //       <h1>Are you sure?</h1>
+    //       <p>You want to delete this file?</p>
+    //       <button onClick={onClose}>No</button>
+    //       <button
+    //         onClick={() => {
+    //           this.handleClickDelete();
+    //           onClose();
+    //         }}
+    //       >
+    //         Yes, Delete it!
+    //       </button>
+    //     </div>
+    //   );
+    // }
+  }
+
 
   const createQutionaryFields = (intialFieldName) => {
     setQutionaryFields((prev) => [
@@ -909,8 +947,6 @@ const NewIntakeForm = () => {
       // }
     } catch (err) {}
   };
-
-
 
   useEffect(() => {
     const fetchData = async (refetch = true) => {
@@ -2415,7 +2451,7 @@ const NewIntakeForm = () => {
                   inputId="availableEmployee"
                   isClearable
                   options={qutionaryFields[editModel?.index]?.value}
-                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
                   onChange={(e) => {
                     handleChange("values", {value:e?.label}, editModel?.index);
                   }}
@@ -2430,7 +2466,7 @@ const NewIntakeForm = () => {
                 </div>
                 <div className="top-model-table">
                   {Array.isArray(qutionaryFields) &&
-                    qutionaryFields[editModel?.index].value.map((option, i) => (
+                    qutionaryFields[editModel?.index]?.value.map((option, i) => (
                       <div
                         key={i}
                         className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"
@@ -2673,11 +2709,12 @@ const NewIntakeForm = () => {
                           key={i}
                           className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
                           onClick={() => {
-                            templateData(template?.id);
+                            // templateData(template?.id);
                             setEditModel({
                               name: template?.field,
                               index: null,
                             });
+                            confirmToAddTemplate(template?.id);
                           }}
                         >
                           <div className="self-start pt-1">
