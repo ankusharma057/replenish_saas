@@ -816,7 +816,7 @@ const Questionnaires = ({
                           inputId="availableEmployee"
                           isClearable
                           options={field?.value}
-                          value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                          value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
                           // onChange={(e) => {
                           //   handleChange("values", e?.value, index);
                           // }}
@@ -1550,7 +1550,7 @@ const Questionnaires = ({
                   inputId="availableEmployee"
                   isClearable
                   options={qutionaryFields[editModel?.index]?.value}
-                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
                   onChange={(e) => {
                     handleChange("values", {value:e?.label}, editModel?.index);
                   }}
@@ -1707,7 +1707,7 @@ const Questionnaires = ({
                   inputId="availableEmployee"
                   isClearable
                   options={qutionaryFields[editModel?.index]?.value}
-                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
                   onChange={(e) => {
                     handleChange("values", {value:e?.label}, editModel?.index);
                   }}
