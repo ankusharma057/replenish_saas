@@ -2,7 +2,7 @@
 
 class SendNotificationPdfToAdminsMailer < ApplicationMailer
   def send_mail
-    admin_emails = Employee.admins.map(&:email)
+    admin_emails = "info@replenishmd.com"
     @invoice_group = params[:group]
     @invoices = params[:invoices]
 
