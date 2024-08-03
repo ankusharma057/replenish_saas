@@ -39,6 +39,7 @@ const IntakeFormPreview = () => {
   })
   
 
+  console.log("ssss",intakeFormData);
 
   const [strokeHistory, setStrokeHistory] = useState([]);
   const [canUndo, setCanUndo] = useState(false);
@@ -129,6 +130,7 @@ const IntakeFormPreview = () => {
       }}}}))
   }
   
+
   const handleAgreeOrDisagreeChange = (radioTag, index) =>{
     setIntakeFormData((prev)=>({...prev, response_intake_form:{
       ...prev.response_intake_form,response_form_data:{
@@ -279,18 +281,6 @@ const IntakeFormPreview = () => {
           }
       }));
   };
-  
-  const saveQutionnariesSignature = (index) => {
-    if (sigCanvasRef.current) {
-      const base64Signature = sigCanvasRef.current?.toDataURL();
-      const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
-      updatedValue[index] = {...updatedValue[index],["sign"]:base64Signature}
-      setIntakeFormData((prev)=>({...prev, response_intake_form:{
-        ...prev.response_intake_form,response_form_data:{
-          ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
-        }}}))     
-    }
-  };
 
   const handleTypeBase64Image = (selectedOption,index) => {
     const canvas = canvasRef.current;
@@ -317,10 +307,7 @@ const IntakeFormPreview = () => {
     handleTypeBase64Image(selectedOption,index)
   };
 
-  const handleQutionnariesDrawEnd = () => {
-    saveQutionnariesSignature();
-    saveStrokeToHistory();
-  };
+
 
   return (
     <>
@@ -333,7 +320,7 @@ const IntakeFormPreview = () => {
           <form className="w-full " onSubmit={(e) => { handleSubmit(e) }}>
         <div className='flex flex-col gap-6 font-light'>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 1 of 4</span> </div>
+            <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 1 of 3</span> </div>
             <div className='flex flex-col items-center text-[14px] gap-1 py-3 text-center'>
               <div>Online intake forms allow you to collect contact information, family and medical history, and consent from your client. The client response will become part of their profile and chart.</div>
               <div>{intakeFormFields?.employee?.name} will automatically prompt clients to fill out an intake form in any email sent prior to their first visit. After their first visit, you can send them a link to fill out the intake form from their client profile.</div>
@@ -365,15 +352,285 @@ const IntakeFormPreview = () => {
               ))}
             </div>}
           </div>
+
+          {/* <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
+            <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 3</span> </div>
+          </div> */}
+
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 4</span> </div>
-          </div>
-          <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] font-medium'>Questionnaries - <span className='text-blue-300'>Step 3 of 4</span> </div>
+            <div className='text-center text-[28px] font-medium'>Questionnaires - <span className='text-blue-300'>Step 2 of 3</span> </div>
             <div className=" py-3 px-4 flex flex-col gap-4">
-              {Array.isArray(intakeFormData?.response_intake_form?.response_form_data?.questionnaires) &&
+              {isClientFormPreviewPage ? 
+              (Array.isArray(intakeFormData?.response_intake_form?.response_form_data?.questionnaires) &&
               intakeFormData?.response_intake_form?.response_form_data?.questionnaires.map((field, index) =>
-                field?.type === "textarea" ? (
+                    field?.type === "textarea" ? (
+                  <>
+                    {/* Note */}
+                    <div
+                      className=" rounded-md  p-[6px] flex flex-col gap-1"
+                      >
+                      <div className="flex justify-between items-center py-1">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                      </div>
+                      <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
+                        <textarea
+                          className="w-full focus:outline-none"
+                          readOnly={true}
+                          required={field?.required}
+                          value={field?.value}
+                          onChange={(e) => {
+                            handleChangeQutionnaries(index,"value",e?.target?.value)
+                          }}
+                          rows="3"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "signature" ? (
+                  <>
+                    {/* Signature */}
+                    <div
+                      className=" rounded-md  p-[6px] flex flex-col gap-1"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between py-1">
+                          {/* <div className="flex gap-3">
+                            <div className="flex gap-2">
+                              <input
+                                type="radio"
+                                name="sign"
+                                checked={field?.sign_type === "draw"}
+                                id="draw"
+                                readOnly={true}
+                                onChange={(e) => {
+                                    handleChangeQutionnaries(index,"sign_type","draw")
+                                }}
+                              />
+                              <label htmlFor="draw" className="flex items-center">
+                                Draw
+                              </label>
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                              className={`${selectOption?.class}`}
+                                type="radio"
+                                name="sign"
+                                checked={field?.sign_type === "type"}
+                                readOnly={true}
+                                id="type"
+                                onChange={(e) => {
+                                  handleChangeQutionnaries(index,"sign_type","type")
+                                }}
+                              />
+                              <label htmlFor="type" className="flex items-center">
+                                Type
+                              </label>
+                            </div>
+                          </div> */}
+                          {/* {field?.sign_type === "type" && (
+                            <div className="w-[300px]">
+                              <DropDown
+                                placeholder={"Select Font Style"}
+                                options={fonts}
+                                readonly={true}
+                                onChange={(value)=>{handleTypeFontChange(value,index);}}
+                              />
+                            </div>
+                          )} */}
+                        </div>
+                        <div className="">
+                          <div className="flex gap-3 ">
+                              <div className="border-b-[2px]">
+                              <img className='h-[80px]' src={field?.sign} alt="" />
+                                {/* <SignatureCanvas
+                                  penColor="black"
+                                  throttle={10}
+                                  readOnly={}
+                                  maxWidth={2.2}
+                                  onEnd={() => {
+                                    saveQutionnariesSignature(index)
+                                    handleQutionnariesDrawEnd()
+                                  
+                                    
+                                  }}
+                                  ref={sigCanvasRef}
+                                  canvasProps={{
+                                    width: 400,
+                                    height: 70,
+                                    className: "sigCanvas",
+                                  }}
+                                /> */}
+                              </div>
+                              {/* <div className="flex items-end">
+                                <div className="flex gap-2 items-center text-[14px] text-[#0dcaf0]">
+                                  <div
+                                    className="cursor-pointer"
+                                    onClick={()=>{undoLastStroke(); saveSignature();}}
+                                    disabled={false}
+                                  >
+                                    <FaUndo />
+                                  </div>
+                                  <div className="text-gray-400">|</div>
+                                  <div
+                                    className="cursor-pointer"
+                                    onClick={()=>{sigCanvasRef.current?.clear(); saveSignature();}}
+                                  >
+                                    Clear
+                                  </div>
+                                </div>
+                              </div> */}
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "heading" ? (
+                  <>
+                    {/* Heading */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                    >
+                      <div className="flex justify-between items-center ">
+                      </div>
+                      <div className="text-[22px] py-2 font-medium">
+                        {field?.value}
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "checkbox" ? (
+                  <>
+                    {/* Check Boxes */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                    >
+                      <div className="flex flex-col ">
+                        <div className="flex justify-between items-center py-1">
+                          <div className="font-semibold text-[17px]">
+                            {field?.label}
+                          </div>
+                        </div>
+                        <div
+                          className={`${
+                            field?.layout === "horizontal"
+                              ? "grid grid-cols-5"
+                              : field?.layout === "vertical"
+                              ? "grid grid-cols-1"
+                              : "grid grid-cols-3"
+                          }`}
+                        >
+                          {Array.isArray(field.value) &&
+                            field.value.map((checkbox, i) => (
+                              <div key={i} className="flex gap-2  items-center">
+                                <input
+                                  id={checkbox?.label}
+                                  readOnly={true}
+                                  required={field?.required}
+                                  checked={checkbox?.value}
+                                  onChange={(e) => {
+                                    handleOptionValueChange(index,i,"value",e.target.checked)
+                                  }}
+                                  type="checkbox"
+                                />
+                                <label htmlFor={checkbox?.label}>
+                                  {checkbox?.label}
+                                </label>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "dropdown" ? (
+                  <>
+                    {/* Drop down */}
+                    <div
+                      className=" rounded-md p-[6px] flex flex-col gap-1"
+                    >
+                      <div className="flex justify-between items-center ">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                      </div>
+                      <div className="py-3">
+                        <div className="w-[300px]">
+                        <Select
+                          inputId="availableEmployee"
+                          isClearable
+                          options={field?.value } // Ensure options is always an array
+                          isDisabled={false} // Use isDisabled for read-only behavior
+                          value={field?.value?.find(option => option?.label === field?.values?.value)}
+                          required={field?.required}
+                        />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "range" ? (
+                  <>
+                    {/* Range */}
+                    <div
+                      className=" rounded-md p-[6px] pb-6 flex flex-col gap-1 "
+                    >
+                      <div className="flex justify-between items-center ">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min={0}
+                          max={field.value.length}
+                          value={field?.values?.index}
+                          className="w-full"
+                          readOnly={true}
+                        />
+                        <div className=" grid grid-flow-col ">
+                          {Array.isArray(field.value) &&
+                            field?.value.map((option, i) => (
+                              <div className="justify-self-end " key={i}>
+                                <div className="flex justify-end">|</div>
+                                <div className="relative">
+                                  <div className="absolute -top-[3px] -right-[2px]">
+                                    {" "}
+                                    {option?.label}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : field?.type === "instruction" ? (
+                  <>
+                    {/* Instructions */}
+                    <div
+                      className="   rounded-md p-[6px] flex flex-col gap-1"
+                    >
+                      <div className="flex justify-between items-center  py-1">
+                        <div className="font-semibold text-[17px]">
+                          {field?.label}
+                        </div>
+                      </div>
+                      <div className="text-[18px] bg-white  rounded-lg pl-3 font-medium py-3">
+                        <em>{field?.value}</em>
+                      </div>
+                    </div>
+                  </>
+                ) : null
+              ))
+              :
+              (Array.isArray(intakeFormData?.response_intake_form?.response_form_data?.questionnaires) &&
+              intakeFormData?.response_intake_form?.response_form_data?.questionnaires.map((field, index) =>
+                    field?.type === "textarea" ? (
                   <>
                     {/* Note */}
                     <div
@@ -396,7 +653,7 @@ const IntakeFormPreview = () => {
                           className="w-full focus:outline-none"
                           readOnly={field?.read_only}
                           required={field?.required}
-                          value={field?.value}
+                          value={field?.drop_down_value}
                           onChange={(e) => {
                             // handleChange("value", e?.target?.value, index);
                             handleChangeQutionnaries(index,"value",e?.target?.value)
@@ -479,13 +736,7 @@ const IntakeFormPreview = () => {
                                   throttle={10}
                                   maxWidth={2.2}
                                   onEnd={() => {
-                                    // saveSignature();
-                                    // handleChange("sign", drawSignarure, index);
-                                    // handleChangeQutionnaries(index,"sign","value")
-                                    saveQutionnariesSignature(index)
-                                    handleQutionnariesDrawEnd()
-                                  
-                                    
+                              
                                   }}
                                   ref={sigCanvasRef}
                                   canvasProps={{
@@ -640,8 +891,9 @@ const IntakeFormPreview = () => {
                             inputId="availableEmployee"
                             isClearable
                             options={field?.value}
+                            value={field?.value?.find(option => option?.label === field?.values?.value) }
                             onChange={(e) => {
-                              handleChangeQutionnaries(index,"drop_down_value",e?.value)
+                              handleChangeQutionnaries(index,"values",{value:e?.label})
                             }}
                             readOnly={field?.read_only}
                             required={field?.required}
@@ -673,10 +925,13 @@ const IntakeFormPreview = () => {
                         <input
                           type="range"
                           min={0}
-                          max={field.value.length}
+                          max={field?.value?.length}
+                          value={field?.values?.value}
                           className="w-full"
                           onChange={(e) => {
-                            handleChangeQutionnaries(index,"range_value",e.target.value)
+                            const newValueIndex = Number(e.target.value);
+                            const selectedLabel = field?.value[(Number(e.target.value))-1]?.label;
+                            handleChangeQutionnaries(index, "values", {value:selectedLabel,index:newValueIndex});
                           }}
                         />
                         <div className=" grid grid-flow-col ">
@@ -723,11 +978,11 @@ const IntakeFormPreview = () => {
                     </div>
                   </>
                 ) : null
-              )}
+              ))}
           </div>
           </div>
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] font-medium'>Consents - <span className='text-blue-300'>Step 4 of 4</span> </div>
+            <div className='text-center text-[28px] font-medium'>Consents - <span className='text-blue-300'>Step 3 of 3</span> </div>
             <div className='p-4 pt-0'>
               <div className='text-[25px] font-normal py-2'><span >{intakeFormFields?.name}</span> - Consents </div>
               
@@ -784,7 +1039,7 @@ const IntakeFormPreview = () => {
               </div>
             )))}
 
-            {isClientFormPreviewPage ? <div>
+            {isClientFormPreviewPage && responseFormData?.consents?.signature?.sign ? <div>
               <div className='text-[20px] font-normal'>Sign</div>
               <img className='h-[80px]' src={intakeFormData?.response_intake_form?.response_form_data?.consents?.signature?.sign} alt="" />
             </div>

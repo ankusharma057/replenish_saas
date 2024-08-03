@@ -152,7 +152,6 @@ const qutionaryInputs = {
     id: null,
     type: "range",
     label: "Range",
-    range_value: 5,
     value: [
       { label: 1, value: 10 },
       { label: 2, value: 10 },
@@ -167,6 +166,7 @@ const qutionaryInputs = {
     ],
     required: false,
     read_only: false,
+    values:{value:5}
   },
   initialInstruction: {
     id: null,
@@ -190,6 +190,7 @@ const Questionnaires = ({
   duplicateQuestionnaireId,
   setTemplateTabs,
   title,
+  addTitle,
   FormChanges,
   setQuestionnaireWithIntake
 }) => {
@@ -209,8 +210,6 @@ const Questionnaires = ({
     qutionaryInputs?.initialRange?.value.map((v) => v.value)
   );
   const [editModel, setEditModel] = useState({ name: "", index: "" });
-  const [selectedvalue, setSelectedvalue] = useState(null);
-
   const [editedId, setEditedId] = useState();
   const [duplicateId, setDuplicateId] = useState();
   const [page,setPage] = useState()
@@ -374,7 +373,6 @@ const Questionnaires = ({
       const response = await getQuestionnaire(editedId || templateId, true);    
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
       if (response.status === 200) {
-        // setQutionaryFields(response?.data?.template?.qutionaryFields);
         setQutionaryFields((prev) => {
           const updatedData = [
             ...prev,
@@ -382,7 +380,8 @@ const Questionnaires = ({
           ];
           return updatedData;
         });
-        // setEditedId(null);
+        addTitle(response?.data?.name)
+
       } else {
       }
       // }else{
@@ -501,7 +500,7 @@ const Questionnaires = ({
     setQutionaryFields((prev) => {
       const updatedFields = [...prev];
       const copyValue = [...updatedFields[objIndex]?.value];
-      copyValue.splice(optionIndex, 0, { label: `new ${input}`, value: false });
+      copyValue.splice(optionIndex, 0, { label: ` ${input}`, value: false });
       updatedFields[objIndex] = {
         ...updatedFields[objIndex],
         value: copyValue,
@@ -817,9 +816,10 @@ const Questionnaires = ({
                           inputId="availableEmployee"
                           isClearable
                           options={field?.value}
-                          onChange={(e) => {
-                            handleChange("drop_down_value", e?.value, index);
-                          }}
+                          value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                          // onChange={(e) => {
+                          //   handleChange("values", e?.value, index);
+                          // }}
                           readOnly={field?.read_only}
                           required={field?.required}
                         />
@@ -851,14 +851,15 @@ const Questionnaires = ({
                         type="range"
                         min={0}
                         max={field.value.length}
+                        value={field?.values?.value}
                         className="w-full"
-                        onChange={(e) => {
-                          handleChange(
-                            "range_value",
-                            field.value[e.target.value],
-                            index
-                          );
-                        }}
+                        // onChange={(e) => {
+                        //   handleChange(
+                        //     "range_value",
+                        //     field.value[e.target.value],
+                        //     index
+                        //   );
+                        // }}
                       />
                       <div className=" grid grid-flow-col ">
                         {Array.isArray(field.value) &&
@@ -1543,6 +1544,20 @@ const Questionnaires = ({
                   />
                 </div>
               </div>
+              <div>
+                <label>Default Value</label>
+                <Select
+                  inputId="availableEmployee"
+                  isClearable
+                  options={qutionaryFields[editModel?.index]?.value}
+                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  onChange={(e) => {
+                    handleChange("values", {value:e?.label}, editModel?.index);
+                  }}
+                  readOnly={qutionaryFields[editModel?.index]?.read_only}
+                  required={qutionaryFields[editModel?.index]?.required}
+                />
+              </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
                 <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
                   <div className="pl-4">Options</div>
@@ -1571,6 +1586,7 @@ const Questionnaires = ({
                                   className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
                                   type="text"
                                   value={option?.label}
+                                  placeholder="Enter the option"
                                   onChange={(e) => {
                                     handleOptionsChange(
                                       editModel?.index,
@@ -1590,7 +1606,7 @@ const Questionnaires = ({
                             <div
                               className="cursor-pointer"
                               onClick={() => {
-                                addOption("dropdown", editModel?.index, i + 1);
+                                addOption("new option", editModel?.index, i + 1);
                               }}
                             >
                               <IoMdAdd />
@@ -1685,6 +1701,20 @@ const Questionnaires = ({
                   />
                 </div>
               </div>
+              <div>
+                <label>Default Value</label>
+                <Select
+                  inputId="availableEmployee"
+                  isClearable
+                  options={qutionaryFields[editModel?.index]?.value}
+                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  onChange={(e) => {
+                    handleChange("values", {value:e?.label}, editModel?.index);
+                  }}
+                  readOnly={qutionaryFields[editModel?.index]?.read_only}
+                  required={qutionaryFields[editModel?.index]?.required}
+                />
+              </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
                 <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
                   <div className="pl-4">Options</div>
@@ -1710,8 +1740,9 @@ const Questionnaires = ({
                             <div className="flex items-center ">
                               <input
                                 className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
-                                type="text"
+                                type="number"
                                 value={option?.label}
+                                placeholder="Enter the range"
                                 onChange={(e) => {
                                   handleOptionsChange(
                                     editModel?.index,
@@ -1731,7 +1762,7 @@ const Questionnaires = ({
                           <div
                             className="cursor-pointer"
                             onClick={() => {
-                              addOption("range", editModel?.index, i + 1);
+                              addOption("new range", editModel?.index, i + 1);
                             }}
                           >
                             <IoMdAdd />

@@ -664,6 +664,10 @@ const Employee = () => {
     }
   }
 
+  const addTitle = (title) =>{
+setTitle(title)
+  }
+
   return (
     <>
       <AsideLayout
@@ -1211,7 +1215,7 @@ const Employee = () => {
                             </div>
                           </div>
                         </div>
-                        <div><Questionnaires  title={title} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges} /></div>
+                        <div><Questionnaires  title={title} addTitle={addTitle} selectedEmployee={selectedEmployeeData} questionnaireId={selectedQuestionnaire} duplicateQuestionnaireId={duplicateQuestionnaire} setTemplateTabs={handleSetTemplateTabs} FormChanges={handleFormChanges} /></div>
                         {/* <div className="flex">
                           <div className="flex gap-3 bg-[#0dcaf0] text-white py-[6px] px-3 rounded-md">
                             <button type="button" className="flex gap-2 items-center">

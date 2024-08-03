@@ -453,7 +453,6 @@ const qutionaryInputs = {
     id: null,
     type: "dropdown",
     label: "Dropdown",
-    drop_down_value: "",
     value: [
       { label: "Dropdown 1", value: "value 1" },
       { label: "Dropdown 2", value: "value 2" },
@@ -470,9 +469,21 @@ const qutionaryInputs = {
     type: "range",
     label: "Range",
     range_value: "",
-    value: [{ label: "Range 1", value: 10 }],
+    value: [
+      { label: 1, value: 10 },
+      { label: 2, value: 10 },
+      { label: 3, value: 10 },
+      { label: 4, value: 10 },
+      { label: 5, value: 10 },
+      { label: 6, value: 10 },
+      { label: 7, value: 10 },
+      { label: 8, value: 10 },
+      { label: 9, value: 10 },
+      { label: 10, value:10 }
+    ],
     required: false,
     read_only: false,
+    values:{value:5}
   },
   initialInstruction: {
     id: null,
@@ -1539,8 +1550,10 @@ const NewIntakeForm = () => {
                           field.value.map((checkbox, i) => (
                             <div key={i} className="flex gap-2  items-center">
                               <input
+                                readOnly={true}
                                 id={checkbox?.label}
-                                readOnly={field?.read_only}
+                           
+                                // readOnly={field?.read_only}
                                 required={field?.required}
                                 checked={checkbox?.value}
                                 onChange={(e) => {
@@ -1568,8 +1581,6 @@ const NewIntakeForm = () => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      // setEditModel({ name: "initialDropdown", index: index });
-                      // openModalFromParent();
                       handleItemClick('initialDropdown', index)
                     }}
                   >
@@ -1587,10 +1598,12 @@ const NewIntakeForm = () => {
                           inputId="availableEmployee"
                           isClearable
                           options={field?.value}
-                          onChange={(e) => {
-                            handleChange("drop_down_value", e?.value, index);
-                          }}
-                          readOnly={field?.read_only}
+                          value={field?.value.find((option)=>option?.label === field?.values?.value )}
+                          // onChange={(e) => {
+                          //   handleChange("values",{value: e?.label}, index);
+                          // }}
+                          // readOnly={field?.read_only}
+                          readOnly={true}
                           required={field?.required}
                         />
                       </div>
@@ -1603,8 +1616,6 @@ const NewIntakeForm = () => {
                   <div
                     className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
                     onClick={() => {
-                      // setEditModel({ name: "initialRange", index: index });
-                      // openModalFromParent();
                       handleItemClick('initialRange', index)
                     }}
                   >
@@ -1622,13 +1633,12 @@ const NewIntakeForm = () => {
                         min={0}
                         max={field.value.length}
                         className="w-full"
-                        onChange={(e) => {
-                          handleChange(
-                            "range_value",
-                            field.value[e.target.value],
-                            index
-                          );
-                        }}
+                        value={field?.values?.value }
+                        readOnly={true}
+                        // onChange={(e) => {
+                        //   handleChange("values", {value: field?.value[e.target.value]}, index
+                        //   );
+                        // }}
                       />
                       <div className=" grid grid-flow-col ">
                         {Array.isArray(field.value) &&
@@ -2243,6 +2253,20 @@ const NewIntakeForm = () => {
                   />
                 </div>
               </div>
+              <div>
+                <label>Default Value</label>
+                  <Select
+                    inputId="availableEmployee"
+                    isClearable
+                    options={qutionaryFields[editModel?.index]?.value}
+                    value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                    onChange={(e) => {
+                      handleChange("values", {value:e?.label}, editModel?.index);
+                    }}
+                    readOnly={qutionaryFields[editModel?.index]?.read_only}
+                    required={qutionaryFields[editModel?.index]?.required}
+                  />
+              </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
                 <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
                   <div className="pl-4">Options</div>
@@ -2384,6 +2408,20 @@ const NewIntakeForm = () => {
                     }}
                   />
                 </div>
+              </div>
+              <div>
+                <label>Default Value</label>
+                <Select
+                  inputId="availableEmployee"
+                  isClearable
+                  options={qutionaryFields[editModel?.index]?.value}
+                  value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                  onChange={(e) => {
+                    handleChange("values", {value:e?.label}, editModel?.index);
+                  }}
+                  readOnly={qutionaryFields[editModel?.index]?.read_only}
+                  required={qutionaryFields[editModel?.index]?.required}
+                />
               </div>
               <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
                 <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
