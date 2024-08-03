@@ -547,6 +547,30 @@ const Questionnaires = ({
     }
   }, [editModel]);
 
+  const confirmToAddTemplate = (templateId) => {
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (
+          <div className='custom-ui p-4 shadow-lg'>
+            <h3>This Template Cotains O inadmissible item</h3>
+            <p>Are you sure you want to add this template</p>
+            <div className="flex gap-4 justify-end">
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary"
+                onClick={() => {
+                  editData(templateId);
+                  onClose();
+                }}
+              >
+                Admissible 
+              </button>
+            </div>
+          </div>
+        );
+      }
+    });
+  }
+
   return (
     <div className=" ">
       <div className="bg-white ">
@@ -1966,11 +1990,12 @@ const Questionnaires = ({
                           key={i}
                           className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
                           onClick={() => {
-                            editData(template?.id);
+                            // editData(template?.id);
                             setEditModel({
                               name: template?.field,
                               index: null,
                             });
+                            confirmToAddTemplate(template?.id);
                           }}
                         >
                           <div className="self-start pt-1">

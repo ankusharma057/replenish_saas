@@ -809,7 +809,7 @@ const NewIntakeForm = () => {
     if(qutionaryFields.length > 0){
       confirmAlert({
         title: "Discard Changes",
-        message: `Are you sure Delete ?`,
+        message: `Are you sure reset all your changes ?`,
         buttons: [
           {
             label: "Yes",
@@ -827,39 +827,26 @@ const NewIntakeForm = () => {
 
   const confirmToAddTemplate = (templateId) => {
     confirmAlert({
-      className: "custom-alert custom-alert-success",
-      title: "This Template Cotains O inadmissible item",
-      message: `Are you sure Delete ?`,
-      buttons: [
-        {
-          label: "Yes",
-          className: "btn-success",
-          onClick: () => {
-            templateData(templateId);
-          },
-        },
-        {
-          label: "No",
-        },
-      ],
+      customUI: ({ onClose }) => {
+        return (
+          <div className='custom-ui p-4 shadow-lg'>
+            <h3>This Template Cotains O inadmissible item</h3>
+            <p>Are you sure you want to add this template</p>
+            <div className="flex gap-4 justify-end">
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary"
+                onClick={() => {
+                  templateData(templateId);
+                  onClose();
+                }}
+              >
+                Admissible 
+              </button>
+            </div>
+          </div>
+        );
+      }
     });
-    // customUI: ({ onClose }) => {
-    //   return (
-    //     <div className='custom-ui'>
-    //       <h1>Are you sure?</h1>
-    //       <p>You want to delete this file?</p>
-    //       <button onClick={onClose}>No</button>
-    //       <button
-    //         onClick={() => {
-    //           this.handleClickDelete();
-    //           onClose();
-    //         }}
-    //       >
-    //         Yes, Delete it!
-    //       </button>
-    //     </div>
-    //   );
-    // }
   }
 
 
@@ -920,7 +907,6 @@ const NewIntakeForm = () => {
       const response = await getQuestionnaire(templateId, true);    
       // if (authUserState?.user?.is_admin ||(authUserState?.user?.id === response?.data?.employee?.id)) {
         if (response.status === 200) {
-          toast.success("Questionnaire Template successfully fetched");
           setIntakeFormData((prev) => {
             return {
               ...prev,
@@ -2709,7 +2695,6 @@ const NewIntakeForm = () => {
                           key={i}
                           className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
                           onClick={() => {
-                            // templateData(template?.id);
                             setEditModel({
                               name: template?.field,
                               index: null,
