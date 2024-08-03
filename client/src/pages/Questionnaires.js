@@ -30,6 +30,9 @@ import {
   getQuestionnaires,
 } from "../Server";
 import { IoDocumentText } from "react-icons/io5";
+import { FaLongArrowAltDown } from "react-icons/fa";
+import { FaLongArrowAltUp } from "react-icons/fa";
+
 
 const questionnaireTabs = [
   {
@@ -232,7 +235,7 @@ const Questionnaires = ({
     handleChange(null, null, qutionaryFields.length);
   };
 
-  console.log("qutionaryFields", qutionaryFields);
+  // console.log("qutionaryFields", qutionaryFields);
   useEffect(()=>{
     if(page === "Intake Form Page"){
       setQuestionnaireWithIntake(qutionaryFields)
@@ -583,8 +586,6 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      // setEditModel({ name: "initialNote", index: index });
-                      // openModalFromParent();
                       handleItemClick('initialNote', index)
                     }}
                   >
@@ -592,7 +593,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group">
+                        {/* <div className="bg-white flex gap-[25px] text-[16px] py-[7px] hidden px-[14px] rounded-[14px] group-hover:inline-flex">
+                          <div onClick={handleUpField}><FaLongArrowAltUp /></div>
+                          <div onClick={handleDownField}><FaLongArrowAltDown /></div>
+                          <div onClick={handleEditField}><IoMdAdd /></div>
+                          <div onClick={handleRemoveField}><MdDelete /></div>
+                        </div> */}
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -840,7 +847,7 @@ const Questionnaires = ({
                           inputId="availableEmployee"
                           isClearable
                           options={field?.value}
-                          value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
+                          value={field?.values?.value && field?.value.find(a => a.label === field?.values?.value)}
                           // onChange={(e) => {
                           //   handleChange("values", e?.value, index);
                           // }}

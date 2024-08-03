@@ -2295,7 +2295,7 @@ const NewIntakeForm = () => {
                   <div className="flex justify-center">Action</div>
                 </div>
                 <div className="top-model-table">
-                  {Array.isArray(qutionaryFields)||[] &&
+                  {Array.isArray(qutionaryFields) &&
                     qutionaryFields[editModel?.index]?.value.map(
                       (option, i) => (
                         <div
@@ -2331,7 +2331,6 @@ const NewIntakeForm = () => {
                               <div htmlFor={option?.label}>{option?.label}</div>
                             )}
                           </div>
-
                           <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
                             <div
                               className="cursor-pointer"
