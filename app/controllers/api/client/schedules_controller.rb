@@ -5,7 +5,7 @@ class Api::Client::SchedulesController < ClientApplicationController
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
     schedules = schedules.where(client_id: params[:client_id]) if params[:client_id].present?
-    schedules = schedules.where("DATE(date) BETWEEN  ?  AND ?" , params[:start_date], (params[:end_date] || Date.today)) if params[:start_date]
+    schedules = schedules.where("DATE(date) BETWEEN  ?  AND ?", params[:start_date], (params[:end_date] || Date.today)) if params[:start_date]
 
     render json: schedules, status: :ok
   end
@@ -21,9 +21,9 @@ class Api::Client::SchedulesController < ClientApplicationController
   end
 
   def employee_unavailability
-    employee  = Employee.find_by(id: params[:employee_id])
+    employee = Employee.find_by(id: params[:employee_id])
     unavails = employee.unavailabilities
-    
+
     render json: unavails
   end
 
@@ -32,7 +32,8 @@ class Api::Client::SchedulesController < ClientApplicationController
     if schedule.save
       response_data = Stripe::Payment.create(schedule)
       record_payment_from_session(response_data, schedule, 50)
-      puts response_data
+      send_payment_notifications(schedule, 50)
+
       render json: {schedule: ScheduleSerializer.new(schedule)}.merge!({redirect_url: response_data['url']}), status: :created
     else
       render json: {error: schedule.errors}, status: :unprocessable_entity
@@ -57,7 +58,8 @@ class Api::Client::SchedulesController < ClientApplicationController
       amount = schedule.remaining_amt.to_i
       response_data = Stripe::Payment.create(schedule, amount)
       record_payment_from_session(response_data, schedule, amount)
-      puts response_data
+      send_payment_notifications(schedule, amount)
+
       render json: {schedule: schedule}.merge!({redirect_url: response_data['url']})
     else
       render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
@@ -74,6 +76,7 @@ class Api::Client::SchedulesController < ClientApplicationController
   end
 
   private
+
   def schedule_param
     params.require(:schedule).permit(:product_type, :start_time, :end_time, :date, :employee_id, :product_id, :treatment_id, :location_id)
   end
@@ -85,5 +88,12 @@ class Api::Client::SchedulesController < ClientApplicationController
       amount: amount,
       session_id: session.id
     )
+  end
+
+  def send_payment_notifications(schedule, amount)
+    client = schedule.client
+    employee = schedule.employee
+    ScheduleMailer.client_notification(schedule, client, amount).deliver_now
+    ScheduleMailer.employee_notification(schedule, employee, client, amount).deliver_now
   end
 end

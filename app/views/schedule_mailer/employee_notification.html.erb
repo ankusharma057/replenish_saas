@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Notification</title>
+</head>
+<body>
+  <p>Dear <%= @employee.name %>,</p>
+  <p>A payment of <%= @amount %> has been processed for the schedule on <%= @schedule.date %> by <%= @client.name %>.</p>
+  <p>Thank you!</p>
+</body>
+</html>
