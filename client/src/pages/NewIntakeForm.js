@@ -17,7 +17,7 @@ import { RxDropdownMenu } from "react-icons/rx";
 import { BsSliders2 } from "react-icons/bs";
 import { PiWarningCircleBold } from "react-icons/pi";
 import Questionnaires from "./Questionnaires";
-import { FaBook, FaUndo } from "react-icons/fa";
+import { FaBook, FaLongArrowAltDown, FaLongArrowAltUp, FaUndo } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import SignatureCanvas from "react-signature-canvas";
@@ -27,6 +27,7 @@ import { MdDelete } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { PiColumnsFill } from "react-icons/pi";
 import Switch from "@mui/material/Switch";
+import { FaRegEdit } from "react-icons/fa";
 
 
 const Tabs = [
@@ -1063,6 +1064,34 @@ const NewIntakeForm = () => {
     }
   }, [editModel]);
 
+  const handleEditField = (index) => {
+    handleItemClick('initialNote', index)
+  };
+  
+  const handleRemoveField = (index) => {
+    handleDeleteField(index);
+  };
+  
+  const handleDownField = (index,length) => {
+    if(index < length-1){
+      const upadtedValue = [...qutionaryFields];
+      const temp = upadtedValue[index]
+      upadtedValue[index] = upadtedValue[index+1]
+      upadtedValue[index+1]=temp
+      setQutionaryFields(upadtedValue)
+    }
+  };
+
+  const handleUpField = (index) => {
+    if (index > 0) {
+      const updatedValue = [...qutionaryFields];
+      const temp = updatedValue[index];
+      updatedValue[index] = updatedValue[index - 1];
+      updatedValue[index - 1] = temp;
+      setQutionaryFields(updatedValue);
+    }
+  };
+
   return (
     <div className={`bg-gray-200   p-3 px-4 ${selectedTab === 2 ? "" : ""}`}>
       <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1">
@@ -1372,7 +1401,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}intakeFormData
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -1405,7 +1440,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -1529,7 +1570,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -1554,9 +1601,15 @@ const NewIntakeForm = () => {
                         <div className="font-semibold text-[17px]">
                           {field?.label}
                         </div>
-                        <div className="text-[20px] cursor-pointer">
-                          <BsThreeDotsVertical />
+                        <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
                         </div>
+                        <BsThreeDotsVertical />
+                      </div>
                       </div>
 
                       <div
@@ -1610,7 +1663,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -1645,7 +1704,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -1696,7 +1761,13 @@ const NewIntakeForm = () => {
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>

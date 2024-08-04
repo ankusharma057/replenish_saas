@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuthContext } from "../context/AuthUserContext";
-import { FaBook, FaUndo } from "react-icons/fa";
+import { FaBook, FaRegEdit, FaUndo } from "react-icons/fa";
 import { PiGridNineLight } from "react-icons/pi";
 import { useLocation } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -574,6 +574,36 @@ const Questionnaires = ({
     });
   }
 
+  const handleEditField = (index) => {
+    handleItemClick('initialNote', index)
+  };
+  
+  const handleRemoveField = (index) => {
+    handleDeleteField(index);
+  };
+  
+  const handleDownField = (index,length) => {
+    if(index < length-1){
+      const upadtedValue = [...qutionaryFields];
+      const temp = upadtedValue[index]
+      upadtedValue[index] = upadtedValue[index+1]
+      upadtedValue[index+1]=temp
+      setQutionaryFields(upadtedValue)
+    }
+  };
+
+  const handleUpField = (index) => {
+    if (index > 0) {
+      const updatedValue = [...qutionaryFields];
+      const temp = updatedValue[index];
+      updatedValue[index] = updatedValue[index - 1];
+      updatedValue[index - 1] = temp;
+      setQutionaryFields(updatedValue);
+    }
+  };
+  
+
+
   return (
     <div className=" ">
       <div className="bg-white ">
@@ -593,13 +623,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group">
-                        {/* <div className="bg-white flex gap-[25px] text-[16px] py-[7px] hidden px-[14px] rounded-[14px] group-hover:inline-flex">
-                          <div onClick={handleUpField}><FaLongArrowAltUp /></div>
-                          <div onClick={handleDownField}><FaLongArrowAltDown /></div>
-                          <div onClick={handleEditField}><IoMdAdd /></div>
-                          <div onClick={handleRemoveField}><MdDelete /></div>
-                        </div> */}
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                        <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -632,7 +662,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -756,7 +792,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -781,7 +823,13 @@ const Questionnaires = ({
                         <div className="font-semibold text-[17px]">
                           {field?.label}
                         </div>
-                        <div className="text-[20px] cursor-pointer">
+                        <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                        <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                           <BsThreeDotsVertical />
                         </div>
                       </div>
@@ -837,7 +885,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -873,7 +927,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>
@@ -926,7 +986,13 @@ const Questionnaires = ({
                       <div className="font-semibold text-[17px]">
                         {field?.label}
                       </div>
-                      <div className="text-[20px] cursor-pointer">
+                      <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
+                      <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
+                        </div>
                         <BsThreeDotsVertical />
                       </div>
                     </div>

@@ -9,6 +9,7 @@ import { DropDown } from '../components/DropDown/DropDown';
 import { useAuthContext } from '../context/AuthUserContext';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import Select from "react-select";
+import { MdSurroundSound } from 'react-icons/md';
 
 // customers
 const IntakeFormPreview = () => {
@@ -37,9 +38,8 @@ const IntakeFormPreview = () => {
       }
     }
   })
-  
-
-  console.log("ssss",intakeFormData);
+  const canvasRefs = useRef([]);
+  const[questionnairesSignature,setQuestionnairesSignature] = useState({})
 
   const [strokeHistory, setStrokeHistory] = useState([]);
   const [canUndo, setCanUndo] = useState(false);
@@ -282,32 +282,109 @@ const IntakeFormPreview = () => {
       }));
   };
 
-  const handleTypeBase64Image = (selectedOption,index) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const tempElement = document.createElement('div');
-    tempElement.className = selectedOption?.class;
-    document.body.appendChild(tempElement);
-    const style = window.getComputedStyle(tempElement).font;
-    document.body.removeChild(tempElement);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = style;
-    ctx.fillText(text, 10, 50);
-    const base64Image = canvas.toDataURL(); 
-    const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
-    updatedValue[index] = {...updatedValue[index],["sign"]:base64Image}
-    setIntakeFormData((prev)=>({...prev, response_intake_form:{
-      ...prev.response_intake_form,response_form_data:{
-        ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
-      }}}))  
+  // const handleTypeBase64Image = (selectedOption,index) => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas.getContext('2d');
+  //   const tempElement = document.createElement('div');
+  //   tempElement.className = selectedOption?.class;
+  //   document.body.appendChild(tempElement);
+  //   const style = window.getComputedStyle(tempElement).font;
+  //   document.body.removeChild(tempElement);
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   ctx.font = style;
+  //   ctx.fillText(text, 10, 50);
+  //   const base64Image = canvas.toDataURL(); 
+  //   const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
+  //   updatedValue[index] = {...updatedValue[index],["sign"]:base64Image}
+  //   setIntakeFormData((prev)=>({...prev, response_intake_form:{
+  //     ...prev.response_intake_form,response_form_data:{
+  //       ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
+  //     }}}))  
+  // };
+
+  // const handleTypeFontChange = (selectedOption,index) => {
+  //   setSelectOption(selectedOption)
+  //   handleTypeBase64Image(selectedOption,index)
+  // };
+
+  const handleConvertToBase64 = (index) => {
+    const canvas = canvasRefs.current[index];
+    if (canvas) {
+      const base64Signature = canvas.getTrimmedCanvas().toDataURL();
+      console.log(`Base64 Signature ${index}:`, base64Signature);
+
+      setQuestionnairesSignature((prevSignatures) => {
+        const updatedSignatures = { ...prevSignatures };
+        if (!updatedSignatures[`signature${index}`]) {
+          updatedSignatures[`signature${index}`] = [];
+        }
+        updatedSignatures[`signature${index}`].push(base64Signature);
+
+        const finalSignature = updatedSignatures[`signature${index}`][updatedSignatures[`signature${index}`].length - 1];
+        handleChangeQutionnaries(index,"sign",finalSignature)
+
+        return updatedSignatures;
+      });
+    } else {
+      console.error(`Canvas at index ${index} is not available`);
+    }
   };
 
-  const handleTypeFontChange = (selectedOption,index) => {
-    setSelectOption(selectedOption)
-    handleTypeBase64Image(selectedOption,index)
+  const applyBase64Signature = (index, base64Signature) => {
+    const canvas = canvasRefs.current[index];
+    if (canvas) {
+      // Get original dimensions
+      const width = 400; // Original width
+      const height = 70; // Original height
+  
+      // Reset canvas size explicitly
+      const canvasElement = canvas.getCanvas();
+      canvasElement.width = width;
+      canvasElement.height = height;
+  
+      // Clear the canvas
+      canvas.clear();
+  
+      if (base64Signature) {
+        // Apply the base64 data URL after clearing
+        setTimeout(() => {
+          canvas.fromDataURL(base64Signature);
+        }, 0);
+      }
+    } else {
+      console.error(`Canvas at index ${index} is not available`);
+    }
   };
 
+  const undoSignature = (index) => {
+    setQuestionnairesSignature((prev) => {
+      const updatedValue = { ...prev };
+      if (updatedValue[`signature${index}`]) {
+        updatedValue[`signature${index}`].pop();
+        const lastSignature = updatedValue[`signature${index}`].slice(-1)[0] || '';
+        console.log("Updated Signatures After Undo:", updatedValue);
+        applyBase64Signature(index, lastSignature);
+      }
+      return updatedValue;
+    });
+  };
+  
+  const clearSignature = (index) => {
+    setQuestionnairesSignature((prev) => {
+      const updatedValue = { ...prev };
+      if (updatedValue[`signature${index}`]) {
+        updatedValue[`signature${index}`] = [];
+        console.log("Updated Signatures After Clear:", updatedValue);
+        applyBase64Signature(index, ''); // Apply empty base64 to clear
+      }
+      return updatedValue;
+    });
+  };
+  
 
+
+
+  console.log("cc",intakeFormData);
   return (
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
@@ -667,49 +744,41 @@ const IntakeFormPreview = () => {
                     <div
                       className=" rounded-md  p-[6px] flex flex-col gap-1"
                       onClick={() => {
-                        // setEditModel({ name: "initialSignature", index: index });
-                        // openModalFromParent();
-                        // handleItemClick('initialSignature', index)
                       }}
                     >
                       <div className="flex justify-between items-center">
                         <div className="font-semibold text-[17px]">
                           {field?.label}
                         </div>
-                        {/* <div className="text-[20px] cursor-pointer">
-                          <BsThreeDotsVertical />
-                        </div> */}
                       </div>
                       <div>
                         <div className="flex justify-between py-1">
                           <div className="flex gap-3">
                             <div className="flex gap-2">
-                              <input
-                                type="radio"
-                                name="sign"
-                                checked={field?.sign_type === "draw"}
-                                id="draw"
-                                onChange={(e) => {
-                                  // handleChange("sign_type","draw",index)
-                                    handleChangeQutionnaries(index,"sign_type","draw")
-                                }}
-                              />
+                            <input
+                              type="radio"
+                              name={`sign_${index}`}
+                              checked={intakeFormData?.response_intake_form?.response_form_data?.questionnaires[index]?.sign_type === "draw" ? true : false}
+                              id="draw"
+                              onChange={(e) => {
+                                handleChangeQutionnaries(index, "sign_type", "draw");
+                              }}
+                            />
                               <label htmlFor="draw" className="flex items-center">
                                 Draw
                               </label>
                             </div>
                             <div className="flex gap-2">
-                              <input
-                              className={`${selectOption?.class}`}
-                                type="radio"
-                                name="sign"
-                                checked={field?.sign_type === "type"}
-                                id="type"
-                                onChange={(e) => {
-                                  // handleChange("sign_type","type",index)
-                                  handleChangeQutionnaries(index,"sign_type","type")
-                                }}
-                              />
+                            <input
+                              className={selectOption?.class || ""}
+                              type="radio"
+                              name={`sign_${index}`}
+                              checked={intakeFormData?.response_intake_form?.response_form_data?.questionnaires[index]?.sign_type === "type"? true : false}
+                              id="type"
+                              onChange={(e) => {
+                                handleChangeQutionnaries(index, "sign_type", "type");
+                              }}
+                            />
                               <label htmlFor="type" className="flex items-center">
                                 Type
                               </label>
@@ -720,7 +789,7 @@ const IntakeFormPreview = () => {
                               <DropDown
                                 placeholder={"Select Font Style"}
                                 options={fonts}
-                                onChange={(value)=>{handleTypeFontChange(value,index);}}
+                                onChange={(value) => { handleChangeQutionnaries(index,"class",value.class)}}
                               />
                             </div>
                           )}
@@ -729,26 +798,24 @@ const IntakeFormPreview = () => {
                           {field?.sign_type === "draw" ? (
                             <div className="flex gap-3 ">
                               <div className="border-b-[2px]">
-                                <SignatureCanvas
-                                  penColor="black"
-                                  throttle={10}
-                                  maxWidth={2.2}
-                                  onEnd={() => {
-                              
-                                  }}
-                                  ref={sigCanvasRef}
-                                  canvasProps={{
-                                    width: 400,
-                                    height: 70,
-                                    className: "sigCanvas",
-                                  }}
-                                />
+                              <SignatureCanvas
+                                ref={(ref) => (canvasRefs.current[index] = ref)}
+                                penColor="black"
+                                throttle={10}
+                                maxWidth={2.2}
+                                onEnd={() => handleConvertToBase64(index)}
+                                canvasProps={{
+                                  width: 400,
+                                  height: 70,
+                                  className: "sigCanvas",
+                                }}
+                              />
                               </div>
                               <div className="flex items-end">
                                 <div className="flex gap-2 items-center text-[14px] text-[#0dcaf0]">
                                   <div
                                     className="cursor-pointer"
-                                    onClick={()=>{undoLastStroke(); saveSignature();}}
+                                    onClick={() => undoSignature(index)}
                                     disabled={false}
                                   >
                                     <FaUndo />
@@ -756,7 +823,7 @@ const IntakeFormPreview = () => {
                                   <div className="text-gray-400">|</div>
                                   <div
                                     className="cursor-pointer"
-                                    onClick={()=>{sigCanvasRef.current?.clear(); saveSignature();}}
+                                    onClick={() => clearSignature(index)}
                                   >
                                     Clear
                                   </div>
@@ -771,13 +838,12 @@ const IntakeFormPreview = () => {
                                     <input
                                       type="text"
                                       placeholder="Enter your Signature"
-                                      className={`${selectOption?.class} p-2 focus:outline-none w-full  px-2 h-[50px]`}
-                                      onChange={(e) => {setText(e.target.value)}}
+                                      className={`${field?.class} p-2 focus:outline-none w-full  px-2 h-[50px]`}
+                                      onChange={(e) => { handleChangeQutionnaries(index,"sign",e?.target?.value)}}
                                     />
                                   </div>
                                 </div>
                                 <canvas
-                                  ref={canvasRef}
                                   width="500"
                                   height="100"
                                   style={{ display: "none" }}
