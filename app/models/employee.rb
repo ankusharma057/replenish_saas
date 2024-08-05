@@ -121,7 +121,7 @@ class Employee < ApplicationRecord
     ROLES.each do |role|
       if self.send("is_#{role}")
         add_roles << role
-      else
+      elsif self.send("is_#{role}") == false
         remove_roles << role
       end
     end

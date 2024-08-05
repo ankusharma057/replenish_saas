@@ -164,7 +164,6 @@ function Schedule() {
       console.log(error);
     }
   };
-  console.log("selectedEmployeeData", selectedEmployeeData);
   
   const updateEmployee = async (e) => {
     e.preventDefault();
@@ -176,8 +175,10 @@ function Schedule() {
       );
 
       toast.success("Employee has been updated successfully.");
-      await getEmployees(true);
-      setSelectedEmployeeData(data);
+
+      handleSelectEmployee(data);
+
+      setManageLocationModal((pre) => ({...pre, show: false}))
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -818,9 +819,9 @@ function Schedule() {
               );
 
               toast.success("Location removed successfully.");
-              await getEmployees(true);
+
               // setUpdateInvoiceInput(data);
-              setSelectedEmployeeData(data);
+              handleSelectEmployee(data);
             } catch (error) {
               toast.error(
                 error?.response?.data?.exception ||
@@ -879,8 +880,8 @@ function Schedule() {
             {authUserState.user?.is_admin && (
               <Button
                 onClick={() =>
-                  {setManageLocationModal((pre) => ({ ...pre, show: true }));
-                    
+                  {
+                    setManageLocationModal((pre) => ({ ...pre, show: true }));
                   }
                 }
                 variant="info"
@@ -1427,17 +1428,29 @@ function Schedule() {
           }
         }}
         title={"Manage Locations"}
-        footer={
-          <Loadingbutton
-            type="submit"
-            title="Add"
-            isLoading={manageLocationModal.isLoading}
-            loadingText="Adding..."
-            form="addLocation"
-          />
-        }
       >
       <form onSubmit={updateEmployee}>
+        <div className="flex flex-1 relative mt-2">
+          <Select
+            className="flex-fill flex-grow-1"
+            inputId="EmployeeId"
+            onChange={(event) => {
+              console.log(event, "Employee Values");
+              const transformedLocations = event.map(
+                ({ id }) => ({ location_id: id })
+              );
+              setUpdateEmployeeInput((pre) => ({
+                ...pre,
+                employee_locations_attributes: [
+                  ...transformedLocations,
+                ],
+              }));
+            }}
+            options={employeesData}
+            required
+            placeholder="Select Employee"
+          />
+        </div>
         <div className="flex flex-1 relative mt-2">
           <Select
             className="flex-fill flex-grow-1"
