@@ -470,6 +470,7 @@ const Employee = () => {
       await getEmployees(true);
       // setUpdateInvoiceInput(data);
       setSelectedEmployeeData(data);
+      handleSelect(data)
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
