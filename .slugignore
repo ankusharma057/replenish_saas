@@ -5,3 +5,29 @@ tmp/*
 spec/*
 test/*
 node_modules/*
+# Ignore logs
+log/*
+!log/.keep
+
+# Ignore temporary files
+tmp/*
+!tmp/.keep
+
+# Ignore test files
+test/*
+spec/*
+
+# Ignore local development files
+.git
+node_modules/*
+coverage/*
+.env
+*.swp
+*.bak
+*.tmp
+*.log
+
+# Ignore precompiled assets if you are precompiling locally
+public/assets/*
+public/packs/*
+public/packs-test/*
