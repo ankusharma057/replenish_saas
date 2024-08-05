@@ -82,20 +82,6 @@ export default memo(function Header() {
                     Invoice List
                   </a>
                 </button>
-                {(authUserState.user?.is_inv_manager === true ||
-                  authUserState.user?.is_admin) === true && (
-                    <button
-                      onClick={handleMenuSHow}
-                      className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
-                    >
-                      <a
-                        className={`no-underline text-white py-[1rem] inline-block `}
-                        href="/schedule"
-                      >
-                        Schedule
-                      </a>
-                    </button>
-                  )}
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
@@ -254,17 +240,6 @@ export default memo(function Header() {
                     href="/products"
                   >
                     Product List
-                  </a>
-                </button>
-                <button
-                  onClick={handleMenuSHow}
-                  className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
-                >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/schedule"
-                  >
-                    Schedule
                   </a>
                 </button>
                 <button
