@@ -955,8 +955,8 @@ const MyProfile = () => {
                 </h4>
               </div>
               <div>
-                <div className="flex gap-4 m-1 items-center">
-                  <div>Charge client down payment of $50</div>
+                <div className="flex gap-4 m-1 items-center pb-3">
+                  <div >Charge client down payment of $50</div>
                   <input
                     checked={userProfileData.pay_50}
                     name="pay_50"
