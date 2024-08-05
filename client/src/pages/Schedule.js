@@ -1,8 +1,9 @@
 import { momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FixedSizeList as List } from "react-window";
+import { RxCross2 } from "react-icons/rx";
 import AsideLayout from "../components/Layouts/AsideLayout";
 import {
   createLocation,
@@ -22,7 +23,8 @@ import {
   remainingBalancePaidToEmployee,
   updateAvailability,
   getEmployeeLocations,
-  deleteEmployeeAvailability
+  deleteEmployeeAvailability,
+  updateVendore
 } from "../Server";
 import * as dates from "react-big-calendar/lib/utils/dates";
 
@@ -69,6 +71,13 @@ const initialAddLocationModal = {
   isLoading: false,
 };
 
+const initialManageLocationModal = {
+  show: false,
+  location: null,
+  employees: [],
+  isLoading: false,
+};
+
 function Schedule() {
   const { authUserState } = useAuthContext();
   const [employeeSearch, setEmployeeSearch] = useState("");
@@ -77,6 +86,7 @@ function Schedule() {
   const [employeesData, setEmployeesData] = useState([]);
   const { collapse } = useAsideLayoutContext();
   const [serviceLocation, setServiceLocation] = useState([]);
+  const [employeeLocations, setEmployeeLocations] = useState([]);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [appointmentModal, setAppointmentModal] = useState(
     initialAppointmentModal
@@ -85,6 +95,14 @@ function Schedule() {
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
+
+  const [manageLocationModal, setManageLocationModal] = useState(
+    initialManageLocationModal
+  )
+
+  const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
+  const [loading, setLoading] = useState(false);
+
   const [availabilityModal, setAvailabilityModal] = useState({
     ...initialAvailabilityModal,
   });
@@ -144,6 +162,31 @@ function Schedule() {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+  console.log("selectedEmployeeData", selectedEmployeeData);
+  
+  const updateEmployee = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const { data } = await updateVendore(
+        selectedEmployeeData.id,
+        updateEmployeeInput
+      );
+
+      toast.success("Employee has been updated successfully.");
+      await getEmployees(true);
+      setSelectedEmployeeData(data);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.exception ||
+          error?.response?.statusText ||
+          error.message ||
+          "Failed to update Employee"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -242,7 +285,7 @@ function Schedule() {
     } catch (error) {
       console.log("dfgddddddddddddddddddddddd", error);
       
-     }
+    }
   };
 
   const getClientName = async (employee_id, refetch = false) => {
@@ -284,6 +327,23 @@ function Schedule() {
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const getAllEmployeeLocation = async (employeeId, refetch = false) => {
+    const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
+
+    if (data?.length > 0) {
+      setEmployeeLocations(
+        data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
+      );
+    }
+  };
+
+
+  useEffect(() => {
+    if (selectedEmployeeData?.id) {
+      getAllEmployeeLocation(selectedEmployeeData.id);
+    }
+  }, [selectedEmployeeData]);
 
   const handleSelectEmployee = async (emp) => {
     if (emp) {
@@ -735,6 +795,53 @@ function Schedule() {
       });
   };
 
+  const removeLocation = async (locationDetails) => {
+    confirmAlert({
+      title: "Remove Location",
+      message: `Are you sure, you want to remove ${String(
+        locationDetails.location.name
+      )} from your list`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setLoading(true);
+              const deleteLocationDetails = {
+                employee_locations_attributes: [
+                  { id: locationDetails.id, _destroy: 1 },
+                ],
+              };
+              const { data } = await updateVendore(
+                selectedEmployeeData.id,
+                deleteLocationDetails
+              );
+
+              toast.success("Location removed successfully.");
+              await getEmployees(true);
+              // setUpdateInvoiceInput(data);
+              setSelectedEmployeeData(data);
+            } catch (error) {
+              toast.error(
+                error?.response?.data?.exception ||
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to update Employee"
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+
+
   return (
     <>
       <AsideLayout
@@ -768,6 +875,21 @@ function Schedule() {
                 )}
               </div>
             </div>
+            <div>
+            {authUserState.user?.is_admin && (
+              <Button
+                onClick={() =>
+                  {setManageLocationModal((pre) => ({ ...pre, show: true }));
+                    
+                  }
+                }
+                variant="info"
+                className="btn btn-primary text-white flex w-full"
+              >
+                Manage Locations
+              </Button>
+            )}
+            </div>
           </>
         }
       >
@@ -800,7 +922,7 @@ function Schedule() {
                 </div>
               )}
 
-              {authUserState.user?.is_admin && (
+              {authUserState.user && (
                 <Button
                   onClick={handleAvailabilityButtonClick}
                   variant={"info"}
@@ -1276,8 +1398,141 @@ function Schedule() {
           />
         </form>
       </ModalWraper>
+
+      {/* Manage Locations */}
+      <ModalWraper
+        show={manageLocationModal.show}
+        onHide={() => {
+          if(changes){
+            confirmAlert({
+              title: "Confirm to Close",
+              message: `Are you Discard the Changes ?`,
+              buttons: [
+                {
+                  label: "Yes",
+                  onClick:  () => {
+                    setManageLocationModal(initialManageLocationModal)
+                  },
+                },
+                {
+                  label: "No",
+                  onClick: () => {
+                  },
+                },
+              ],
+            });
+          }
+          else{
+            setManageLocationModal(initialManageLocationModal)
+          }
+        }}
+        title={"Manage Locations"}
+        footer={
+          <Loadingbutton
+            type="submit"
+            title="Add"
+            isLoading={manageLocationModal.isLoading}
+            loadingText="Adding..."
+            form="addLocation"
+          />
+        }
+      >
+      <form onSubmit={updateEmployee}>
+        <div className="flex flex-1 relative mt-2">
+          <Select
+            className="flex-fill flex-grow-1"
+            inputId="product_type"
+            isMulti
+            onChange={(event) => {
+              console.log(event, "location values");
+              const transformedLocations = event.map(
+                ({ id }) => ({ location_id: id })
+              );
+              setUpdateEmployeeInput((pre) => ({
+                ...pre,
+                employee_locations_attributes: [
+                  ...transformedLocations,
+                ],
+              }));
+            }}
+            options={employeeLocations}
+            required
+            placeholder="Select Locations"
+          />
+        </div>
+        <div
+          className={`${
+            selectedEmployeeData?.employee_locations?.length ===
+              0 && "hidden"
+          } relative overflow-x-auto shadow-md sm:rounded-lg mt-4`}
+        >
+          <div className="font-bold p-4">Active Locations:</div>
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+              <tr>
+                <th scope="col" className="px-6 py-3">
+                  Location
+                </th>
+                <th scope="col" className="px-6 py-3 text-center">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedEmployeeData?.employee_locations.map(
+                (val, index) => {
+                  return (
+                    <React.Fragment key={index}>
+                      <EmployeeLocationTableRows
+                        removeLocation={removeLocation}
+                        val={val}
+                      />
+                    </React.Fragment>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+        {Object.keys(updateEmployeeInput).length > 0 && (
+          <div className=" w-full mt-4 flex justify-end">
+            <Loadingbutton
+              isLoading={loading}
+              title="Update"
+              loadingText={"Updating Employee..."}
+              type="submit"
+            />
+          </div>
+        )}
+      </form>
+      </ModalWraper>
+
     </>
   );
 }
 
 export default Schedule;
+
+const EmployeeLocationTableRows = ({ val, removeLocation }) => {
+  return (
+    <tr className="odd:bg-white even:bg-gray-50 border-b ">
+      <th
+        scope="row"
+        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap capitalize "
+      >
+        {val.location.name}
+      </th>
+      <td className="px-6 py-4 w-14">
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => removeLocation(val)}
+            className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+          >
+            <RxCross2 className="w-6 h-6" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};

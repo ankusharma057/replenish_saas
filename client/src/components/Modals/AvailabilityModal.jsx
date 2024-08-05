@@ -53,15 +53,23 @@ const AvailabilityModal = (props) => {
     // const { data } = await getLocationEmployee(selectedOption?.id);
 console.log("selectedOption",selectedOption);
 
-    if (authUserState.user.is_admin) {
+    if (authUserState?.user) {
       const { data } = await getLocationEmployee(selectedOption?.id);
-      console.log("ghghghghhgh");
+      console.log("ghghghghhghsssssssssssssss", data);
       if (data?.length > 0) {
-        setEmployeeList(data);
+        if (authUserState?.user?.is_admin) {
+          setEmployeeList(data);  
+        }else{
+          setEmployeeList(data.filter((emp) => emp.id === authUserState?.user?.id));
+        }
+        
         setScheduleData({ ...scheduleData, location_id: selectedOption.id })
       }
     } else {
       const data = [...authUserState?.user]
+
+      console.log("ghghghghhghhhhhhhhhhhhh",data);
+      
 
       if (data?.length > 0) {
         setEmployeeList(data);
