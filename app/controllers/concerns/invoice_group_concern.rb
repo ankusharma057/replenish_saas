@@ -84,7 +84,7 @@ module InvoiceGroupConcern
     mentor_percentage = employee_mentor.mentor_percentage.to_f
     client_cash = invoice_param['paid_by_client_cash'].to_f
     client_credit = invoice_param['paid_by_client_credit'].to_f
-    mentor_price = (client_cash + (client_credit - (client_credit * 0.031))) * (mentor_percentage/100)
+    mentor_price = (client_cash + (client_credit - (client_credit * 0.031)) - invoice_param[:total_consumable_cost]) * (mentor_percentage/100)
     mentor_price.round(2)
   end
 
