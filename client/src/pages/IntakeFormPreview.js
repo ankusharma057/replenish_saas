@@ -39,6 +39,7 @@ const IntakeFormPreview = () => {
     }
   })
   const canvasRefs = useRef([]);
+  const typeCanvas = useRef([]);
   const[questionnairesSignature,setQuestionnairesSignature] = useState({})
 
   const [strokeHistory, setStrokeHistory] = useState([]);
@@ -47,9 +48,9 @@ const IntakeFormPreview = () => {
 
   const [text, setText] = useState('');
   const fonts = [
-    { label: text, class: "pinyon-script-regular" },
-    { label: text, class: "great-vibes-regular" },
-    { label: text, class: "herr-von-muellerhoff-regular" },
+    { label: "text1", class: "pinyon-script-regular" },
+    { label: "text2", class: "great-vibes-regular" },
+    { label: "text3", class: "herr-von-muellerhoff-regular" },
   ];
 
   const sigCanvasRef = useRef(null);
@@ -256,14 +257,43 @@ const IntakeFormPreview = () => {
 
   
 
-    const handleChangeQutionnaries = (index,field,value) =>{
-      const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
-      updatedValue[index] = {...updatedValue[index],[field]:value}
-      setIntakeFormData((prev)=>({...prev, response_intake_form:{
-        ...prev.response_intake_form,response_form_data:{
-          ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
-        }}}))
-    }
+    const handleChangeQutionnaries = (index, field, value) => {
+      setIntakeFormData(prevState => {
+        try {
+          // Ensure the questionnaires array is properly initialized
+          const currentQuestionnaires = prevState?.response_intake_form?.response_form_data?.questionnaires ?? [];
+    
+          // Make sure the index is valid
+          if (index < 0 || index >= currentQuestionnaires.length) {
+            console.error(`Index ${index} is out of bounds.`);
+            return prevState; // Return previous state if index is invalid
+          }
+    
+          // Create a copy of the questionnaires array and update the specific item
+          const updatedQuestionnaires = [...currentQuestionnaires];
+          updatedQuestionnaires[index] = {
+            ...updatedQuestionnaires[index],
+            [field]: value
+          };
+    
+          // Return the new state object
+          return {
+            ...prevState,
+            response_intake_form: {
+              ...prevState.response_intake_form,
+              response_form_data: {
+                ...prevState.response_intake_form.response_form_data,
+                questionnaires: updatedQuestionnaires
+              }
+            }
+          };
+        } catch (error) {
+          console.error("Error updating questionnaires:", error);
+          return prevState; // Return previous state in case of an error
+        }
+      });
+    };
+    
 
     const handleOptionValueChange = (objIndex, index, key, value) => {
       const updatedQuestionnaires = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires];
@@ -282,53 +312,32 @@ const IntakeFormPreview = () => {
       }));
   };
 
-  // const handleTypeBase64Image = (selectedOption,index) => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext('2d');
-  //   const tempElement = document.createElement('div');
-  //   tempElement.className = selectedOption?.class;
-  //   document.body.appendChild(tempElement);
-  //   const style = window.getComputedStyle(tempElement).font;
-  //   document.body.removeChild(tempElement);
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //   ctx.font = style;
-  //   ctx.fillText(text, 10, 50);
-  //   const base64Image = canvas.toDataURL(); 
-  //   const updatedValue = [...intakeFormData?.response_intake_form?.response_form_data?.questionnaires]
-  //   updatedValue[index] = {...updatedValue[index],["sign"]:base64Image}
-  //   setIntakeFormData((prev)=>({...prev, response_intake_form:{
-  //     ...prev.response_intake_form,response_form_data:{
-  //       ...prev.response_intake_form.response_form_data,questionnaires:updatedValue
-  //     }}}))  
-  // };
-
-  // const handleTypeFontChange = (selectedOption,index) => {
-  //   setSelectOption(selectedOption)
-  //   handleTypeBase64Image(selectedOption,index)
-  // };
-
   const handleConvertToBase64 = (index) => {
     const canvas = canvasRefs.current[index];
     if (canvas) {
-      const base64Signature = canvas.getTrimmedCanvas().toDataURL();
-      console.log(`Base64 Signature ${index}:`, base64Signature);
-
+      const base64Signature = canvas.toDataURL();
+  
       setQuestionnairesSignature((prevSignatures) => {
         const updatedSignatures = { ...prevSignatures };
         if (!updatedSignatures[`signature${index}`]) {
           updatedSignatures[`signature${index}`] = [];
         }
-        updatedSignatures[`signature${index}`].push(base64Signature);
-
+  
+        // Avoid adding the same signature multiple times
+        if (!updatedSignatures[`signature${index}`].includes(base64Signature)) {
+          updatedSignatures[`signature${index}`].push(base64Signature);
+        }
+  
         const finalSignature = updatedSignatures[`signature${index}`][updatedSignatures[`signature${index}`].length - 1];
-        handleChangeQutionnaries(index,"sign",finalSignature)
-
+        handleChangeQutionnaries(index, "sign", finalSignature);
+  
         return updatedSignatures;
       });
     } else {
       console.error(`Canvas at index ${index} is not available`);
     }
   };
+  
 
   const applyBase64Signature = (index, base64Signature) => {
     const canvas = canvasRefs.current[index];
@@ -362,29 +371,102 @@ const IntakeFormPreview = () => {
       if (updatedValue[`signature${index}`]) {
         updatedValue[`signature${index}`].pop();
         const lastSignature = updatedValue[`signature${index}`].slice(-1)[0] || '';
-        console.log("Updated Signatures After Undo:", updatedValue);
         applyBase64Signature(index, lastSignature);
       }
       return updatedValue;
     });
   };
+
   
   const clearSignature = (index) => {
     setQuestionnairesSignature((prev) => {
       const updatedValue = { ...prev };
       if (updatedValue[`signature${index}`]) {
         updatedValue[`signature${index}`] = [];
-        console.log("Updated Signatures After Clear:", updatedValue);
         applyBase64Signature(index, ''); // Apply empty base64 to clear
       }
       return updatedValue;
     });
   };
+
+
+  const handleTypeBase64Image = (index) => {
+    setIntakeFormData(prevState => {
+      try {
+        // Ensure the questionnaires array is properly initialized
+        const currentQuestionnaires = prevState?.response_intake_form?.response_form_data?.questionnaires ?? [];
+  
+        // Make sure the index is valid
+        if (index < 0 || index >= currentQuestionnaires.length) {
+          console.error(`Index ${index} is out of bounds.`);
+          return prevState; // Return previous state if index is invalid
+        }
+        const canvas = typeCanvas?.current[index];
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const selectedOption = prevState?.response_intake_form?.response_form_data?.questionnaires[index]?.class;
+          const text = prevState?.response_intake_form?.response_form_data?.questionnaires[index]?.text;
+      
+          console.log("asdasd",selectedOption);
+    
+          // Create a temporary element to get the computed style
+          const tempElement = document.createElement('div');
+          tempElement.className = selectedOption;
+          document.body.appendChild(tempElement);
+          const style = window.getComputedStyle(tempElement).font;
+          document.body.removeChild(tempElement);
+      
+          // Clear the canvas and draw the text with the computed style
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.font = style;
+          ctx.fillText(text, 10, 50);
+      
+          // Convert canvas content to base64 image
+          const base64Image = canvas.toDataURL();
+          const updatedQuestionnaires = [...currentQuestionnaires];
+          updatedQuestionnaires[index] = {
+            ...updatedQuestionnaires[index],
+            ["sign"]: base64Image
+          };
+    
+          // Return the new state object
+          return {
+            ...prevState,
+            response_intake_form: {
+              ...prevState.response_intake_form,
+              response_form_data: {
+                ...prevState.response_intake_form.response_form_data,
+                questionnaires: updatedQuestionnaires
+              }
+            }
+          };
+        }
+      } catch (error) {
+        console.error("Error updating questionnaires:", error);
+        return prevState; // Return previous state in case of an error
+      }
+    });
+  };
   
 
+  console.log("ss",intakeFormData?.response_intake_form?.response_form_data?.questionnaires[2]?.class);
+console.log(intakeFormData);
 
+const handleCombinedInputChange = (e, index) => {
+  handleTypeBase64Image(index);
+  handleChangeQutionnaries(index, "text", e.target.value);
+};
 
-  console.log("cc",intakeFormData);
+const handleCombinedDropdownChange = async (value, index) =>  {
+  setTimeout(async () => {
+    handleChangeQutionnaries(index, "class", value.class);  
+    }, 1000);
+    setTimeout(async () => {
+      handleTypeBase64Image(index);
+      }, 2000);
+
+};
+
   return (
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
@@ -427,10 +509,6 @@ const IntakeFormPreview = () => {
               ))}
             </div>}
           </div>
-
-          {/* <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
-            <div className='text-center text-[28px] py-2 font-medium'>Profile Information - <span className='text-blue-300'>Step 2 of 3</span> </div>
-          </div> */}
 
           <div className='w-[50rem] p-3 mx-auto bg-white gap-2 rounded-xl'>
             <div className='text-center text-[28px] font-medium'>Questionnaires - <span className='text-blue-300'>Step 2 of 3</span> </div>
@@ -789,7 +867,9 @@ const IntakeFormPreview = () => {
                               <DropDown
                                 placeholder={"Select Font Style"}
                                 options={fonts}
-                                onChange={(value) => { handleChangeQutionnaries(index,"class",value.class)}}
+                                onChange={(value) => {
+                                  handleCombinedDropdownChange(value, index);
+                                }}
                               />
                             </div>
                           )}
@@ -837,13 +917,18 @@ const IntakeFormPreview = () => {
                                   <div className="border-b-[2px] w-[300px]">
                                     <input
                                       type="text"
+                                      ref={typeCanvas[index]}
                                       placeholder="Enter your Signature"
                                       className={`${field?.class} p-2 focus:outline-none w-full  px-2 h-[50px]`}
-                                      onChange={(e) => { handleChangeQutionnaries(index,"sign",e?.target?.value)}}
+                                      onChange={(e) => {
+                                        handleCombinedInputChange(e, index);
+                                      }}
                                     />
                                   </div>
                                 </div>
                                 <canvas
+                                  key={index}
+                                  ref={(el) => (typeCanvas.current[index] = el)}
                                   width="500"
                                   height="100"
                                   style={{ display: "none" }}
@@ -954,10 +1039,9 @@ const IntakeFormPreview = () => {
                           <Select
                             inputId="availableEmployee"
                             isClearable
-                            options={field?.value}
-                            value={field?.value?.find(option => option?.label === field?.values?.value) }
+                            options={fonts}
                             onChange={(e) => {
-                              handleChangeQutionnaries(index,"values",{value:e?.label})
+                              handleChangeQutionnaries(index,"values",{value:e?.value})
                             }}
                             readOnly={field?.read_only}
                             required={field?.required}
@@ -1049,7 +1133,6 @@ const IntakeFormPreview = () => {
             <div className='text-center text-[28px] font-medium'>Consents - <span className='text-blue-300'>Step 3 of 3</span> </div>
             <div className='p-4 pt-0'>
               <div className='text-[25px] font-normal py-2'><span >{intakeFormFields?.name}</span> - Consents </div>
-              
               <div className='flex flex-col gap-3'>
               {isClientFormPreviewPage ? (
                 (Array.isArray(intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms) && intakeFormData?.response_intake_form?.intake_form?.form_data?.consents?.consentForms.map((consent,index)=>(
@@ -1061,18 +1144,15 @@ const IntakeFormPreview = () => {
                       <input type="checkbox" name="agreed" checked={responseConsents[index]["agreed"]} required readOnly={true} />
                       <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
                     </div>}
-  
                     { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
                       <input type="radio" readOnly={true} required  checked={responseConsents[index]["agreed"]} />
                       <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
                       <input type="radio" readOnly={true} required  checked={responseConsents[index]["disAgreed"]} />
                       <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
                     </div>}
-  
                     {(consent?.type === "acnowledge with initials")   && <div className='flex items-center gap-2'>
                       <input type="input" readOnly={true} value={responseConsents[index]?.initialValue} required name="initial" className='border-b'  />
                     </div>}
-  
                   </div>
                 </div>
               )))
@@ -1087,22 +1167,18 @@ const IntakeFormPreview = () => {
                     <input type="checkbox" name="agreed" required onChange={(e)=>{handleAgreedChange(e.target, index)}} />
                     <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
                   </div>}
-
                   { consent?.type === "agree or disagree"  && <div className='flex items-center gap-2'>
                     <input type="radio" required name={`isAgreed${index}`} value="agreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
                     <div className='flex gap-2'><span> {consent?.declaration}</span><span><em> Require</em></span></div>
                     <input type="radio" required name={`isAgreed${index}`} value="disAgreed" onChange={(e)=>{handleAgreeOrDisagreeChange(e.target, index)}}/>
                     <div className='flex gap-2'><span> {consent?.disagreeOption}</span><span><em> Require</em></span></div>
                   </div>}
-
                   {(consent?.type === "acnowledge with initials")   && <div className='flex items-center gap-2'>
                     <input type="input" required name="initial" className='border-b' onChange={(e)=>{handleInitialChange(e.target, index)}} />
                   </div>}
-
                 </div>
               </div>
             )))}
-
             {isClientFormPreviewPage && responseFormData?.consents?.signature?.sign ? <div>
               <div className='text-[20px] font-normal'>Sign</div>
               <img className='h-[80px]' src={intakeFormData?.response_intake_form?.response_form_data?.consents?.signature?.sign} alt="" />

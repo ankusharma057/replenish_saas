@@ -242,13 +242,6 @@ const Questionnaires = ({
     }
     
   },[qutionaryFields])
-  
-  // useEffect(()=>{
-  //   setQutionaryFields([])
-
-  // },[formChanged])
-
-
 
   const [questionnaireFormData, setQuestionnaireFormData] = useState({
     template: {
@@ -309,14 +302,6 @@ const Questionnaires = ({
       console.error('closeModal is not a function or topModelRef.current is not set');
     }
   };
-  
-  // const handleChange = (key, value, index) => {
-  //   setQutionaryFields((prev) => [
-  //     ...prev,
-  //     prev[index],
-  //     { ...prev[index], [key]: value },
-  //   ]);
-  // };
 
   const submitData = async (e) => {
     e.preventDefault();
@@ -574,8 +559,8 @@ const Questionnaires = ({
     });
   }
 
-  const handleEditField = (index) => {
-    handleItemClick('initialNote', index)
+  const handleEditField = (field,index) => {
+    handleItemClick(field, index)
   };
   
   const handleRemoveField = (index) => {
@@ -624,10 +609,10 @@ const Questionnaires = ({
                         {field?.label}
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                        <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialNote',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=> {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
                         </div>
                         <BsThreeDotsVertical />
@@ -653,8 +638,6 @@ const Questionnaires = ({
                   <div
                     className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
                     onClick={() => {
-                      // setEditModel({ name: "initialSignature", index: index });
-                      // openModalFromParent();
                       handleItemClick('initialSignature', index)
                     }}
                   >
@@ -664,7 +647,7 @@ const Questionnaires = ({
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialSignature',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -794,7 +777,7 @@ const Questionnaires = ({
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialHeading',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -825,7 +808,7 @@ const Questionnaires = ({
                         </div>
                         <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                         <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialCheckBox',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -887,7 +870,7 @@ const Questionnaires = ({
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialDropdown',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -929,7 +912,7 @@ const Questionnaires = ({
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialRange',index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -988,7 +971,7 @@ const Questionnaires = ({
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
+                          <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField("initialInstruction",index)}}><FaRegEdit /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
                           <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
@@ -1818,7 +1801,7 @@ const Questionnaires = ({
                   <div className="flex justify-center">Action</div>
                 </div>
                 <div className="top-model-table">
-                  {(Array.isArray(qutionaryFields) || []) &&
+                  {(Array.isArray(qutionaryFields[editModel?.index]?.value)) &&
                     qutionaryFields[editModel?.index]?.value.map((option, i) => (
                       <div
                         key={i}
