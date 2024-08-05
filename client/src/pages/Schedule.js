@@ -173,6 +173,7 @@ function Schedule() {
       );
       toast.success("Employee has been updated successfully.");
       setSelectedEmployeeData(selectedEmployeeData);
+      handleSelectEmployee(data);
       setManageLocationModal((pre) => ({...pre, show: false}))
     } catch (error) {
       toast.error(
@@ -1449,6 +1450,27 @@ function Schedule() {
             placeholder="Select Employee"
           />
         </div>
+        </div>
+        <div className="flex flex-1 relative mt-2">
+          <Select
+            className="flex-fill flex-grow-1"
+            inputId="EmployeeId"
+            onChange={(event) => {
+              console.log(event, "Employee Values");
+              const transformedLocations = event.map(
+                ({ id }) => ({ location_id: id })
+              );
+              setUpdateEmployeeInput((pre) => ({
+                ...pre,
+                employee_locations_attributes: [
+                  ...transformedLocations,
+                ],
+              }));
+            }}
+            options={employeesData}
+            required
+            placeholder="Select Employee"
+          />
         </div>
         <div className="flex flex-1 relative mt-2">
           <Select
