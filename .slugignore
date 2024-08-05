@@ -1,0 +1,7 @@
+app/*
+client/*
+log/*
+tmp/*
+spec/*
+test/*
+node_modules/*
