@@ -251,6 +251,8 @@ function CustomModal({
       </div>
     );
   };
+  console.log("fdgdfgfgg", invoiceData?.employee?.is_mentor);
+  
 
   return (
     <>
@@ -269,8 +271,15 @@ function CustomModal({
                 </div>
               }
             </div>
+            { !invoiceData?.employee?.is_mentor && (
+              <>
             <hr />
-            Total: {charge}
+            
+            <div>
+              Total: {charge}
+            </div>
+            </>)
+            }
           </>
         }
         size={"lg"}
@@ -329,6 +338,8 @@ function CustomModal({
         }
       >
         <div className="max-w-4xl mx-auto bg-white md:p-4 rounded-md">
+        { !invoiceData?.employee?.is_mentor && (
+          <>
           <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
             <div className="flex flex-col">
               <span className="text-gray-700">Provider:</span>
@@ -345,6 +356,7 @@ function CustomModal({
               <span>{dateOfService}</span>
             </div>
           </div>
+          
 
           {invoiceData?.products_hash?.products?.length > 0 && (
             <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
@@ -409,6 +421,8 @@ function CustomModal({
                 </table>
               </div>
             </div>
+          )}
+          </>
           )}
 
           <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
