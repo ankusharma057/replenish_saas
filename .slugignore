@@ -1,10 +1,11 @@
 app/*
-client/*
+public/assets/*
+public/packs/*
+public/packs-test/*
 log/*
 tmp/*
 spec/*
 test/*
-node_modules/*
 # Ignore logs
 log/*
 !log/.keep
@@ -19,7 +20,6 @@ spec/*
 
 # Ignore local development files
 .git
-node_modules/*
 coverage/*
 .env
 *.swp
@@ -28,6 +28,3 @@ coverage/*
 *.log
 
 # Ignore precompiled assets if you are precompiling locally
-public/assets/*
-public/packs/*
-public/packs-test/*
