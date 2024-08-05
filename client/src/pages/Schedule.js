@@ -103,14 +103,13 @@ function Schedule() {
   const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const [currentEmployee, setCurrentEmployee] = useState();
+
   const [availabilityModal, setAvailabilityModal] = useState({
     ...initialAvailabilityModal,
   });
 
-  console.log("availabilityModal", availabilityModal);
-  
   const [changes, setChanges] = useState(false)
-  console.log(changes,"fgregfegeg");
   useEffect(()=>{setChanges(false)},[availabilityModal?.show,addLocationModal?.show,appointmentModal?.show])
 
   const [selectedAvailability, setSelectedAvailability] = useState();
@@ -130,7 +129,7 @@ function Schedule() {
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
   const getEmployees = async (refetch = false) => {
     try {
-      const { data } = await getLocationEmployee(1);
+      const { data } = await getLocationEmployee(authUserState?.user?.id);
 
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
@@ -150,7 +149,6 @@ function Schedule() {
   const getAllEmployees = async (refetch = true) => {
     try {
       const { data } = await getEmployeesList(refetch);
-      console.log("dataaaaaaaaa", data);
 
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
@@ -170,14 +168,11 @@ function Schedule() {
     try {
       setLoading(true);
       const { data } = await updateVendore(
-        selectedEmployeeData.id,
+        (Array.isArray(currentEmployee) && currentEmployee[0]?.id),
         updateEmployeeInput
       );
-
       toast.success("Employee has been updated successfully.");
-
-      handleSelectEmployee(data);
-
+      setSelectedEmployeeData(selectedEmployeeData);
       setManageLocationModal((pre) => ({...pre, show: false}))
     } catch (error) {
       toast.error(
@@ -226,7 +221,6 @@ function Schedule() {
         from_date: firstDayOfMonth,
         location_id: emp?.location_id || selectedLocation?.id
       };
-      console.log("availabilityPayload", availabilityPayload)
       const resp = await fetchAvailability(availabilityPayload, refetch);
 
       function convertToDate(dateString, timeString) {
@@ -273,8 +267,6 @@ function Schedule() {
         (item) => !item.every_week && !item.available
       );
       const transformedData = availabilityData.flatMap(item => Object.values(item));
-      console.log("gfdddddddddddd",availabilityData);
-      
       const arr = newData.concat(transformedData);
       const arr1 = arr.concat(unavailabilityNewData);
       setEmployeeScheduleEventsData((pre) => {
@@ -343,8 +335,15 @@ function Schedule() {
   useEffect(() => {
     if (selectedEmployeeData?.id) {
       getAllEmployeeLocation(selectedEmployeeData.id);
+      setCurrentEmployee([selectedEmployeeData]);
     }
   }, [selectedEmployeeData]);
+
+  useEffect(() => {
+    if (currentEmployee) {
+      getAllEmployeeLocation((Array.isArray(currentEmployee) && currentEmployee[0]?.id));
+    }
+  }, [currentEmployee]);
 
   const handleSelectEmployee = async (emp) => {
     if (emp) {
@@ -426,8 +425,6 @@ function Schedule() {
   }
 
   const showConfirmationModal = (event, readOnly) => {
-    console.log("eventttttttttttttttttt", event);
-    
     confirmAlert({
       title: "Confirm to do this action",
       message: "Are you sure to do this.",
@@ -489,9 +486,6 @@ function Schedule() {
       setAppointmentModal(formateData);
     }
   };
-
-  console.log("removeAvailabilityData", removeAvailabilityData);
-  
 
   const handleSubmitRemoveAvailability = async () => {
     if (removeAvailabilityData.remove_every_week) {
@@ -882,6 +876,7 @@ function Schedule() {
                 onClick={() =>
                   {
                     setManageLocationModal((pre) => ({ ...pre, show: true }));
+                    getAllEmployees();
                   }
                 }
                 variant="info"
@@ -1431,25 +1426,29 @@ function Schedule() {
       >
       <form onSubmit={updateEmployee}>
         <div className="flex flex-1 relative mt-2">
+        <div className="flex flex-1 relative mt-2">
           <Select
             className="flex-fill flex-grow-1"
             inputId="EmployeeId"
-            onChange={(event) => {
-              console.log(event, "Employee Values");
-              const transformedLocations = event.map(
+            onChange={(selectedOption) => {
+              const transformedLocations = Array.isArray(selectedOption) ? selectedOption.map(
                 ({ id }) => ({ location_id: id })
-              );
+              ) : [];
               setUpdateEmployeeInput((pre) => ({
                 ...pre,
                 employee_locations_attributes: [
                   ...transformedLocations,
                 ],
               }));
+              setCurrentEmployee([selectedOption]);
+              
             }}
+            value={Array.isArray(currentEmployee) && currentEmployee.map((emp) => ({label: emp.name, value: emp.id}))}
             options={employeesData}
             required
             placeholder="Select Employee"
           />
+        </div>
         </div>
         <div className="flex flex-1 relative mt-2">
           <Select
@@ -1457,8 +1456,7 @@ function Schedule() {
             inputId="product_type"
             isMulti
             onChange={(event) => {
-              console.log(event, "location values");
-              const transformedLocations = event.map(
+              const transformedLocations = Array.isArray(event) && event.map(
                 ({ id }) => ({ location_id: id })
               );
               setUpdateEmployeeInput((pre) => ({
@@ -1492,7 +1490,7 @@ function Schedule() {
               </tr>
             </thead>
             <tbody>
-              {selectedEmployeeData?.employee_locations.map(
+              {Array.isArray(currentEmployee) && currentEmployee[0]?.employee_locations.map(
                 (val, index) => {
                   return (
                     <React.Fragment key={index}>
