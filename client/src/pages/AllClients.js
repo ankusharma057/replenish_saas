@@ -411,148 +411,23 @@ console.log("sssss",selectedEmployeeData);
                             >
                                 {currentTab === "profile" && (
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div className="grid grid-cols-2 col-span-2 gap-20 justify-between rounded-md py-6 items-center bg-white">
-                                            <div className="flex items-start justify-evenly gap-6 text-center">
-                                                <div className="flex flex-col max-w-[105px] justify-center items-center">
-                                                    <div className="text-6xl">0</div>
-                                                    <div>Total Bookings</div>
-                                                </div>
-                                                <div className="flex flex-col max-w-[105px] justify-center items-center">
-                                                    <div className="text-6xl">0</div>
-                                                    <div>Upcoming Appointment</div>
-                                                </div>
-                                                <div className="flex flex-col max-w-[105px] justify-center items-center">
-                                                    <div className="text-6xl">0</div>
-                                                    <div>No Shows</div>
-                                                </div>
+                                        <div className="flex flex-col bg-white p-4">
+                                            <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div>
+                                            <div className="flex items-center gap-6 mb-4 text-lg">
+                                                <FaUser className="w-6 h-6" />
+                                                <div>{selectedEmployeeData?.name}</div>
                                             </div>
-                                            <div className="flex items-start justify-evenly gap-6 text-center">
-                                                <div className="flex flex-col max-w-[125px] justify-center items-center">
-                                                    <div className="text-6xl"><span className="text-base align-text-top">$</span>0<span className="text-2xl">.</span><span className="text-xl align-text-top">00</span></div>
-                                                    <div>Private Outstanding</div>
-                                                </div>
-                                                <div className="flex flex-col max-w-[125px] justify-center items-center">
-                                                    <div className="text-6xl"><span className="text-base align-text-top">$</span>0<span className="text-2xl">.</span><span className="text-xl align-text-top">00</span></div>
-                                                    <div>Credit</div>
-                                                </div>
-                                                <div className="flex flex-col max-w-[125px] justify-center items-center">
-                                                    <div className="text-6xl"><span className="text-base align-text-top">$</span>0<span className="text-2xl">.</span><span className="text-xl align-text-top">00</span></div>
-                                                    <div>Private Balance</div>
-                                                </div>
+                                            <div className="flex items-center gap-6 mb-4 text-lg">
+                                                <IoCallSharp className="w-6 h-6" />
+                                                <div>No phone number</div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col mt-4 ">
-                                            <div className="flex flex-col bg-white p-4">
-                                                <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaUser className="w-6 h-6" />
-                                                    <div>{selectedEmployeeData?.name}</div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <IoCallSharp className="w-6 h-6" />
-                                                    <div>No phone number</div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <IoMailSharp className="w-6 h-6" />
-                                                    <div>{selectedEmployeeData?.email}</div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <IoHome className="w-6 h-6" />
-                                                    <div>No address found</div>
-                                                </div>
+                                            <div className="flex items-center gap-6 mb-4 text-lg">
+                                                <IoMailSharp className="w-6 h-6" />
+                                                <div>{selectedEmployeeData?.email}</div>
                                             </div>
-                                            <div className="flex flex-col bg-white p-4 my-2">
-                                                <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaBriefcaseMedical className="w-6 h-6" />
-                                                    <div>No medical info</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div>
-                                                <div className="flex items-start gap-6 mb-4 text-lg">
-                                                    <FaBell className="w-6 h-6" />
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm mb-2">Reminders</div>
-                                                        <div className="text-base flex items-center gap-2 mb-2"><FaQuestionCircle /> Email 2 days before appoitment <span className="bg-amber-600">Not a valid email address</span></div>
-                                                        <div className="text-base flex items-center gap-2 mb-2"><FaQuestionCircle />Text Message (SMS) 24 hours before appointment <span className="bg-amber-600">Not a valid phone number</span></div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <IoMegaphoneSharp className="w-6 h-6" />
-                                                    <div className="flex flex-col">
-                                                        <div className="text-base">Marketing Emails</div>
-                                                        <div>Opted Out</div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <BsFillGearFill className="w-6 h-6" />
-                                                    <div className="flex flex-col">
-                                                        <div className="text-base">All Email Settings</div>
-                                                        <div>Emails Allowed</div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaThumbsUp className="w-6 h-6" />
-                                                    <div className="flex flex-col">
-                                                        <div className="text-base">Wow were you reffered to?</div>
-                                                        <div>ReplenishMD</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col mt-4 ">
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                {/* <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div> */}
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaDollarSign className="w-6 h-6" />
-                                                    <div className="text-sm">Billing Notices</div>
-                                                    <div>No billing notices</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                {/* <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div> */}
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaRegCalendarAlt className="w-6 h-6" />
-                                                    <div>test has no upcoming appointments. <span className="text-cyan-400 font-medium">Add a Return Visit Reminder</span></div>
-                                                </div>
-                                                <div className="flex">
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><FaArrowRight /> View All</Button>
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><IoMailSharp /> No Email Available</Button>
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><FaPrint /> Print</Button>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                {/* <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div> */}
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaRegCalendarAlt className="w-6 h-6" />
-                                                    <div className="text-base">Username/Logins</div>
-                                                    <div>No username or social logins</div>
-                                                </div>
-                                                <div className="flex">
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><IoMailSharp /> No Email Available</Button>
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><IoMailSharp /> No Email Available</Button>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                {/* <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div> */}
-                                                <div className="flex items-center gap-6 mb-4 text-lg">
-                                                    <FaFileAlt className="w-6 h-6" />
-                                                    <div>Online Intake Forms</div>
-                                                </div>
-                                                <div className="flex">
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><BiSolidPencil /> Fill Out</Button>
-                                                    <Button className="w-full !flex items-center justify-center gap-2 bg-white border rounded-none text-black"><IoMailSharp /> No Email Available</Button>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col bg-white p-4 mb-2">
-                                                {/* <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div> */}
-                                                <div className="flex items-start gap-6 mb-4 text-lg">
-                                                    <IoChatbubble className="w-6 h-6" />
-                                                    <div className="flex w-full">
-                                                        <textarea type="text" placeholder="Add Notes..." className="w-full !flex items-center justify-center gap-2 p-2 bg-white border rounded-none text-black"></textarea>
-                                                    </div>
-                                                </div>
+                                            <div className="flex items-center gap-6 mb-4 text-lg">
+                                                <IoHome className="w-6 h-6" />
+                                                <div>No address found</div>
                                             </div>
                                         </div>
                                     </div>
