@@ -41,6 +41,8 @@ const IntakeFormPreview = () => {
   const canvasRefs = useRef([]);
   const typeCanvas = useRef([]);
   const[questionnairesSignature,setQuestionnairesSignature] = useState({})
+  const [checkBox,setCheckBox] = useState({}) 
+  const [error,setError]=useState(false)
 
   const [strokeHistory, setStrokeHistory] = useState([]);
   const [canUndo, setCanUndo] = useState(false);
@@ -164,20 +166,23 @@ const IntakeFormPreview = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = await createResponseIntakeForm(intakeFormData)
-      if (response.status === 201) {
-        toast.success("Form submitted successfully")
-        setModel({show: true, title: "Form submitted successfully. You can close this tab."})
+      if (error) {
+        toast.error("At least choose one Check Box");
+      } else {
+        const response = await createResponseIntakeForm(intakeFormData);
+        if (response.status === 201) {
+          toast.success("Form submitted successfully");
+          setModel({ show: true, title: "Form submitted successfully. You can close this tab." });
+        } else {
+          toast.error("Something went wrong");
+        }
       }
-      else {
-        toast.error("Something went wrong")
-      }
+    } catch (error) {
+      toast.error("An error occurred while submitting the form");
     }
-    catch {
-    }
-  }
+  };
 
   const fetchIntakeForm = async () => {
     try {
@@ -467,6 +472,16 @@ const handleCombinedDropdownChange = async (value, index) =>  {
 
 };
 
+const checkBoxRequired = (checked, i) => {
+  setCheckBox((prev) => {
+    const newCheckBoxState = {...prev, [`checkbox${i}`]: checked};
+    const ErrorState = Object.values(newCheckBoxState);
+    setError(!ErrorState.includes(true));
+    return newCheckBoxState;
+  });
+};
+
+
   return (
     <>
     <div className={`bg-gray-100 min-h-screen pb-20`}>
@@ -680,14 +695,14 @@ const handleCombinedDropdownChange = async (value, index) =>  {
                         >
                           {Array.isArray(field.value) &&
                             field.value.map((checkbox, i) => (
-                              <div key={i} className="flex gap-2  items-center">
+                              <div key={i} className="flex gap-2 items-center">
                                 <input
                                   id={checkbox?.label}
                                   readOnly={true}
-                                  required={field?.required}
+                                  // required={i === 0 && field?.required ? true : false}
                                   checked={checkbox?.value}
                                   onChange={(e) => {
-                                    handleOptionValueChange(index,i,"value",e.target.checked)
+                                    handleOptionValueChange(index, i, "value", e.target.checked);
                                   }}
                                   type="checkbox"
                                 />
@@ -999,10 +1014,11 @@ const handleCombinedDropdownChange = async (value, index) =>  {
                                 <input
                                   id={checkbox?.label}
                                   readOnly={field?.read_only}
-                                  required={field?.required}
+                                  // required={i === 0 && field?.required ? true : false}
                                   checked={checkbox?.value}
                                   onChange={(e) => {
-                                    handleOptionValueChange(index,i,"value",e.target.checked)
+                                    checkBoxRequired(e.target.checked, index);
+                                    handleOptionValueChange(index, i, "value", e.target.checked);
                                   }}
                                   type="checkbox"
                                 />
