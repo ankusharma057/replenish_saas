@@ -305,6 +305,10 @@ const Questionnaires = ({
 
   const submitData = async (e) => {
     e.preventDefault();
+    if (questionnaireFormData?.template?.qutionaryFields?.length === 0) {
+      toast.error("Please add atleast one field");
+      return;
+    }
     try {
       const response = await createQuestionnaire(questionnaireFormData);
       if (response.status === 201) {
