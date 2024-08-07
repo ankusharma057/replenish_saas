@@ -69,5 +69,9 @@
   "devDependencies": {
     "lodash": "^4.17.21",
     "tailwindcss": "^3.3.5"
+  },
+  "engines": {
+    "node": "v16.7.1",
+    "npm": "8.15.0"
   }
 }

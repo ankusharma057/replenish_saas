@@ -24,6 +24,6 @@ coverage/*
 .env
 *.swp
 *.bak
-*.tmp
+*.tmpcd c
 *.log
 # Ignore precompiled assets if you are precompiling locally
