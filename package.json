@@ -2,7 +2,7 @@
   "name": "heroku-deploy",
   "description": "Build scripts for Heroku",
   "engines": {
-    "node": "v16.7.1",
+    "node": "v16.17.1",
     "npm": "8.15.0"
   },
   "scripts": {
