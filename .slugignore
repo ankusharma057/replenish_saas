@@ -26,7 +26,4 @@ coverage/*
 *.bak
 *.tmp
 *.log
-node_modules
-client/node_modules
-**node_modules
 # Ignore precompiled assets if you are precompiling locally
