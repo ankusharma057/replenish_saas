@@ -2,7 +2,7 @@ app/*
 public/assets/*
 public/packs/*
 public/packs-test/*
-./log
+./log/
 tmp/*
 spec/*
 test/*
