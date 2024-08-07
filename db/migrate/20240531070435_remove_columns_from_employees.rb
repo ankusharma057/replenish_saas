@@ -1,4 +1,4 @@
-# class RemoveColumnsFromEmployees < ActiveRecord::Migration[7.0]
+class RemoveColumnsFromEmployees < ActiveRecord::Migration[7.0]
 #   def up
 #     Employee.find_each do |employee|
 #       employee.add_role(:admin) if employee.attributes["is_admin"]
@@ -20,4 +20,4 @@
 #       employee.update(employee_param)
 #     end
 #   end
-# end
+end
