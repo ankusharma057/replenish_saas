@@ -59,7 +59,8 @@ end
 
 gem 'active_model_serializers', '~> 0.10.13'
 gem 'wicked_pdf'
-gem 'wkhtmltopdf-binary'
+gem 'wkhtmltopdf-binary', group: [:development, :test]
+gem 'wkhtmltopdf-heroku', group: :production
 gem 'faker'
 # To use the messaging services:
 gem 'twilio-ruby'
