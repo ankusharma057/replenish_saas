@@ -34,7 +34,7 @@ export default memo(function Header() {
   const adminHeader = (
     <nav className="bg-cyan-400 relative z-20">
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
-        <div className="flex items-center justify-start xl:justify-center h-26">
+        <div className="flex items-center justify-start  h-26">
           <div className=" xl:hidden flex-shrink-0 p-2">
             <a href="/addInvoice">
               <Image
@@ -45,7 +45,7 @@ export default memo(function Header() {
               />
             </a>
           </div>
-          <div className=" w-full pr-6 flex justify-end xl:w-auto">
+          <div className=" w-full pr-6 flex justify-end xl:w-full">
             <div className="xl:hidden">
               <button
                 onClick={handleMenuSHow}
@@ -56,7 +56,7 @@ export default memo(function Header() {
             </div>
             <div
               className={` ${isMenuShow ? "translate-x-full" : ""
-                } xl:flex xl:justify-between pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-full gap-y-2 items-center xl:w-full xl:min-w-[1825px] xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-center space-x-4 transition-all xl:translate-x-0  `}
+                } xl:flex xl:justify-between pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-full gap-y-2 items-center xl:w-full xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-center space-x-4 transition-all xl:translate-x-0  `}
             >
               <div className="flex flex-col xl:flex-row">
 
@@ -194,7 +194,7 @@ export default memo(function Header() {
   const employeeHeader = (
     <nav className="bg-cyan-400 relative z-20">
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
-        <div className="flex items-center justify-start xl:justify-center h-26">
+        <div className="flex items-center justify-start h-26">
           <div className=" xl:hidden flex-shrink-0 p-2">
             <a href="/addInvoice">
               <Image
@@ -205,7 +205,7 @@ export default memo(function Header() {
               />
             </a>
           </div>
-          <div className=" w-full pr-6 flex justify-end xl:w-auto">
+          <div className=" w-full pr-6 flex justify-end xl:w-full">
             <div className="xl:hidden">
               <button
                 onClick={handleMenuSHow}

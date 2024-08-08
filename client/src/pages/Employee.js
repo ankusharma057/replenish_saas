@@ -83,6 +83,8 @@ const Employee = () => {
   const [formChanges,setFormChanges] = useState(false)
 
 
+  console.log("datatatta",selectedEmployeeData?.is_admin);
+
   // Questionnaires
   const navigate = useNavigate();
   const [templateTabs,setTemplateTabs] = useState("templates list")
@@ -370,14 +372,16 @@ const Employee = () => {
     setUpdateEmployeeInput({});
     setCurrentTab(emp.is_admin ? "invoice" : "profile");
     let addTabs = [
+      { name: "Profile", value: "profile" },
       {
         name: "Invoices",
         value: "invoice",
         // data: getRequestInventoryData,
       },
+     
     ];
     if (emp) {
-      addTabs.splice(0, 0, {
+      addTabs.splice(1, 0, {
         name: "Inventories",
         value: "inventory",
         data: getEmployees,
@@ -385,7 +389,6 @@ const Employee = () => {
     }
 
     if (!emp.is_admin) {
-      addTabs.splice(0, 0, { name: "Profile", value: "profile" });
       addTabs.push({ name: "Settings", value: "settings" });
     }
 
@@ -749,7 +752,7 @@ setTitle(title)
                   <form onSubmit={updateEmployee}>
                     <table>
                       <tbody>
-                        <tr>
+                       { !selectedEmployeeData?.is_admin && <tr>
                           <th className="px-4">Name:</th>
                           <td>
                             <LineInput
@@ -762,8 +765,8 @@ setTitle(title)
                               placeholder="Enter Name"
                             />
                           </td>
-                        </tr>
-                        {authUserState.user?.is_admin && (
+                        </tr>}
+                        {!selectedEmployeeData?.is_admin && (
                           <tr>
                             <th className="px-4">Vendor Name:</th>
                             <td>
@@ -779,7 +782,7 @@ setTitle(title)
                           </tr>
                         )}
 
-                        <tr>
+                        {!selectedEmployeeData?.is_admin &&   <tr>
                           <th className="px-4">Email:</th>
                           <td>
                             <LineInput
@@ -791,9 +794,9 @@ setTitle(title)
                               readOnly
                             />
                           </td>
-                        </tr>
+                        </tr>}
 
-                        <tr>
+                        {!selectedEmployeeData?.is_admin && <tr>
                           <th className="px-4">GFE:</th>
                           <td>
                             <div className="flex items-center">
@@ -806,9 +809,9 @@ setTitle(title)
                               />
                             </div>
                           </td>
-                        </tr>
+                        </tr>}
 
-                        <tr>
+                         <tr>
                           <th className="px-4">Mentor:</th>
                           <td>
                             <div className="flex items-center">
@@ -823,7 +826,7 @@ setTitle(title)
                           </td>
                         </tr>
 
-                        <tr>
+                        {!selectedEmployeeData?.is_admin &&  <tr>
                           <th className="px-4">Service Percentage:</th>
                           <td>
                             {/* CreateStaffCard{" "} */}
@@ -838,9 +841,9 @@ setTitle(title)
                               />
                             </div>
                           </td>
-                        </tr>
+                        </tr>}
 
-                        <tr>
+                        {!selectedEmployeeData?.is_admin && <tr>
                           <th className="px-4">Retail Percentage</th>
                           <td>
                             <div className="flex items-center">
@@ -854,9 +857,9 @@ setTitle(title)
                               />
                             </div>
                           </td>
-                        </tr>
+                        </tr>}
 
-                        <tr>
+                        {!selectedEmployeeData?.is_admin && <tr>
                           <th className="px-4">Mentors</th>
                           <td>
                             <div className="flex items-center">
@@ -907,7 +910,7 @@ setTitle(title)
                               </div>
                             </div>
                           </td>
-                        </tr>
+                        </tr>}
 
                         {/* <tr className="flex flex-col px-4">
                           {addedMentors.map((val, index) => {

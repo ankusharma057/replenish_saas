@@ -40,7 +40,7 @@ export default memo(function ClientHeader() {
           <div className="flex-shrink-0 p-2">
             Welcome back, {authUserState.client?.name}!
           </div>
-          <div className=" w-full pr-6 flex justify-end xl:w-auto">
+          <div className=" w-full pr-6 flex justify-end xl:w-full">
             <div className="md:hidden">
               <button
                 onClick={handleMenuSHow}
