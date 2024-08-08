@@ -271,15 +271,15 @@ function CustomModal({
                 </div>
               }
             </div>
-            { !invoiceData?.employee?.is_mentor && (
+            {/* { !invoiceData?.employee?.is_mentor && ( */}
               <>
             <hr />
             
             <div>
               Total: {charge}
             </div>
-            </>)
-            }
+            </>
+            {/* // )} */}
           </>
         }
         size={"lg"}
@@ -484,7 +484,7 @@ function CustomModal({
               <span>{overheadFeeValue}</span>
             </div>
           </div>
-          <div className="border rounded-sm p-2 mb-4 flex align-items-center flex-column">
+          {/* <div className="border rounded-sm p-2 mb-4 flex align-items-center flex-column">
             <div className="flex flex-row justify-content-between w-100 m-2">
               <div>
                 <h3>Attached Media</h3>
@@ -511,7 +511,7 @@ function CustomModal({
               renderImages("Before Images", beforeImages)}
             {afterImages?.length > 0 &&
               renderImages("After Images", afterImages)}
-          </div>
+          </div> */}
         </div>
       </ModalWraper>
       <div className="flex gap-4 mt-2 md:mt-0">
