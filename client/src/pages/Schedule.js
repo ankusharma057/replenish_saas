@@ -437,7 +437,7 @@ function Schedule() {
       message: "Are you sure to do this.",
       buttons: [
         {
-          label: "Create Appointment",
+          label: `${ !event?.client ? "Create Appointment" : 'Show Appointment' }`,
           className: "btn btn-primary create-btn text-[16px] font-semibold px-3 py-2",
           onClick: () => {
             handleAddAppointmentSelect(event, readOnly);
@@ -456,12 +456,12 @@ function Schedule() {
   };
 
 
-  const handleAddAppointmentSelect = ({ start, end, ...rest }, readOnly) => {
+  const handleAddAppointmentSelect = ({ start_time, end_time, ...rest }, readOnly) => {
     let formateData = {
       show: true,
-      start_time: start,
-      end_time: end,
-      date: moment(start).format("DD/MM/YYYY"),
+      start_time: start_time,
+      end_time: end_time,
+      date: moment(start_time).format("DD/MM/YYYY"),
     };
 
     if (readOnly) {
