@@ -230,7 +230,7 @@ export default memo(function Header() {
             </div>
             <div
               className={` ${isMenuShow ? "translate-x-full" : ""
-                } xl:flex xl:justify-between pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-full gap-y-2 items-center xl:w-full xl:min-w-[1825px] xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-center space-x-4 transition-all xl:translate-x-0  `}
+                } xl:flex xl:justify-between pt-20 xl:pt-0 z-20 fixed top-0  h-screen bg-cyan-400 right-0 w-1/2 md:w-full gap-y-2 items-center xl:w-full xl:static flex-col xl:flex-row xl:h-auto ml-10 flex xl:items-center space-x-4 transition-all xl:translate-x-0  `}
             >
               <div className="flex flex-col xl:flex-row">
 

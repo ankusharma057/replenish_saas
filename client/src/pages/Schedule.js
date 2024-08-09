@@ -350,11 +350,14 @@ function Schedule() {
     if (emp) {
       getClientName(emp.id);
       const { data } = await getTreatmentList(false, emp.id);
+
+      console.log("dataaa", data);
       
       const treatmentOption = (data || []).map((inv) => {
         return {
           label: inv.name,
-          value: inv.id,
+          value: inv?.id,
+          product_id:inv?.product?.id,
           product_type: inv.product.product_type,
           quantity: inv.quantity,
           duration: inv.duration,
@@ -364,6 +367,9 @@ function Schedule() {
       getAllLocationsByEmployee(emp.id)
     }
   };
+
+  console.log("ssfddfsddfsdf",selectedEmployeeData);
+
   const getAllLocationsByEmployee = async (id) =>{
     const {data} = await getEmployeeLocations(id)
     const locationOption = (data || []).map((inv) => {
@@ -527,15 +533,21 @@ function Schedule() {
       return;
     }
 
+
     const copyAppointMent = {
       ...appointmentModal,
       employee_id: selectedEmployeeData.id,
       start_time: appointmentModal.selectedTimeSlot.start,
       end_time: appointmentModal.selectedTimeSlot.end,
     };
+
+
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
     delete copyAppointMent.selectedTimeSlot;
+
+
+    console.log("asasas",copyAppointMent);
 
     const { data } = await createSchedule(copyAppointMent);
     let newCopyAppointMent = {
@@ -1064,6 +1076,9 @@ function Schedule() {
                       inputId="treatment"
                       isClearable
                       onChange={(selectedOption) => {
+
+                        console.log("selectedOption", selectedEmployeeData.treatmentOption);
+
                         setChanges(true);
                         var timeSlots = getTimeSlots(
                           selectedOption?.duration,
@@ -1093,7 +1108,7 @@ function Schedule() {
                           treatment_id: selectedOption?.value,
                           treatment: selectedOption?.label,
                           product_type: selectedOption?.product_type,
-                          product_id: selectedOption?.value,
+                          product_id: selectedOption?.product_id,
                           timeSlots: timeSlots,
                         }));
                       }}
