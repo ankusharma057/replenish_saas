@@ -967,7 +967,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you sure you want to discard the changes? ?`,
+              message: `Are you sure you want to discard the changes? `,
               buttons: [
                 {
                   label: "Yes",
@@ -998,7 +998,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you sure you want to discard the changes? ?`,
+              message: `Are you sure you want to discard the changes? `,
               buttons: [
                 {
                   label: "Yes",
@@ -1340,7 +1340,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you sure you want to discard the changes? ?`,
+              message: `Are you sure you want to discard the changes? `,
               buttons: [
                 {
                   label: "Yes",
@@ -1417,7 +1417,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you sure you want to discard the changes? ?`,
+              message: `Are you sure you want to discard the changes? `,
               buttons: [
                 {
                   label: "Yes",
