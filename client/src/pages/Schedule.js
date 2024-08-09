@@ -837,7 +837,6 @@ function Schedule() {
     });
   };
 
-
   return (
     <>
       <AsideLayout
@@ -956,7 +955,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you Discard the Changes ?`,
+              message: `Are you sure you want to discard the changes? ?`,
               buttons: [
                 {
                   label: "Yes",
@@ -987,7 +986,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you Discard the Changes ?`,
+              message: `Are you sure you want to discard the changes? ?`,
               buttons: [
                 {
                   label: "Yes",
@@ -1326,7 +1325,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you Discard the Changes ?`,
+              message: `Are you sure you want to discard the changes? ?`,
               buttons: [
                 {
                   label: "Yes",
@@ -1403,7 +1402,7 @@ function Schedule() {
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
-              message: `Are you Discard the Changes ?`,
+              message: `Are you sure you want to discard the changes? ?`,
               buttons: [
                 {
                   label: "Yes",
