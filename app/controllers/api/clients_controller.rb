@@ -4,11 +4,8 @@ class Api::ClientsController < ApplicationController
   before_action :find_client, only: [:sign_in, :password_update]
 
   def index
-    clients = if params[:employee_id]
-      Employee.where(id: params[:employee_id])&.first&.clients
-    else
-      Client.all
-    end
+    employee = Employee.find_by(id: params[:employee_id])
+    clients = employee.is_admin? ? Employee.where(id: params[:employee_id])&.first&.clients : Client.all
 
     render json: clients, status: :ok
   end
@@ -24,7 +21,7 @@ class Api::ClientsController < ApplicationController
 
   def create
     employee = Employee.find_by(reference_number: params[:ref])
-    client = employee.clients.new(client_params)
+    client = employee.is_admin? ? Client.new(client_params) : employee.clients.new(client_params)
 
     if client.save!
       session[:client_id] = client.id
