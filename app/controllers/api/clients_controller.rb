@@ -4,8 +4,7 @@ class Api::ClientsController < ApplicationController
   before_action :find_client, only: [:sign_in, :password_update]
 
   def index
-    employee = Employee.find_by(id: params[:employee_id])
-    clients = employee.is_admin? ? Employee.where(id: params[:employee_id])&.first&.clients : Client.all
+    clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
 
     render json: clients, status: :ok
   end
@@ -20,14 +19,13 @@ class Api::ClientsController < ApplicationController
   end
 
   def create
-    employee = Employee.find_by(reference_number: params[:ref])
-    client = employee.is_admin? ? Client.new(client_params) : employee.clients.new(client_params)
+    client = current_employee.is_admin? ? Client.new(client_params) : current_employee.clients.new(client_params)
 
     if client.save!
-      session[:client_id] = client.id
+      session[:client_id] = client.id if params[:skip_login] != "true"
       render json: client, status: :ok
     else
-      render json: {error: 'Something went wrong!'}, status: :unprocessable_entity
+      render json: { error: client.errors.as_json }, status: :ok
     end
   end
 

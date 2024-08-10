@@ -402,10 +402,15 @@ export const updateQuestionnaire = async (id, data) =>
 export const createResponseIntakeForm = async (data) =>
   api.post(`api/response_intake_forms`, data);
 
+export const createClient = async (data) =>
+  api.post(`/api/clients/?skip_login=true`, data);
+
 export const updateIntakeForm = async (id,data) =>
   api.patch(`/api/intake_forms/${id}`, {
     intake_form: data,
   });
+
+
 
 export const updateInvoice = async (invoiceID, data) =>
   api.patch(`/api/invoices/${invoiceID}`, data);

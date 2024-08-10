@@ -618,59 +618,83 @@ const NewIntakeForm = () => {
 
   const formValidation = () => {
     let hasError = false;
-
+  
+    if (!intakeFormData?.name) {  
+      hasError = true;
+      toast.error("Name can't be blank");
+      setIntakeFormError((prev) => ({ ...prev, ["name"]: "Name can't be blank" }));
+    }
+  
+    if (!intakeFormData?.prompt_type) {  
+      hasError = true;
+      toast.error("Prompt type can't be blank");
+      setIntakeFormError((prev) => ({ ...prev, ["prompt_type"]: "Prompt type can't be blank" }));
+    }
+  
+    if (!intakeFormData?.valid_for) { 
+      hasError = true;
+      toast.error("Valid for can't be blank");
+      setIntakeFormError((prev) => ({ ...prev, ["valid_for"]: "Valid for can't be blank" }));
+    }
+  
     const newConsentsError = intakeFormData?.form_data?.consents?.consentForms?.map(() => ({}));
-
+  
     intakeFormData?.form_data?.consents?.consentForms?.forEach((consent, index) => {
-      const { name, text, type, declaration, disagreeOption } = consent;
+      const { name, type, declaration, disagreeOption } = consent;
       const consentErrors = {};
+  
+      if (!name) {
+        consentErrors.name = "Name can't be blank";
+        toast.error("Name can't be blank");
+      }
+      if (!type) {
+        consentErrors.type = "Type can't be blank";
+        toast.error("Type can't be blank");
+      }
 
-      if (name === "") consentErrors.name = "Name can't be blank";
-      if (type === "") consentErrors.type = "Type can't be blank";
-      if (declaration === "") consentErrors.declaration = "Declaration can't be blank";
-      if (disagreeOption === "") consentErrors.disagreeOption = "Disagree Option can't be blank";
+
+      if(type === "must agree"){
+        if (!declaration) {
+          consentErrors.declaration = "Declaration can't be blank";
+          toast.error("Declaration can't be blank");
+        }
+      }
+      else if(type === "agree or disagree"){
+        if (!declaration) {
+          consentErrors.declaration = "Declaration can't be blank";
+          toast.error("Declaration can't be blank");
+        }
+
+        if (!disagreeOption) {
+          consentErrors.disagreeOption = "Disagree Option can't be blank";
+          toast.error("Disagree Option can't be blank");
+        }
+      }
+ 
+
 
       if (Object.keys(consentErrors)?.length > 0) {
         hasError = true;
         newConsentsError[index] = consentErrors;
       }
     });
-
+  
     const newFormErrors = {
       ...intakeFormError,
       form_data: {
         ...intakeFormError?.form_data,
         consents: {
-          ...intakeFormError?.form_data?.consents,consentForms:newConsentsError
-        }
-      }
+          ...intakeFormError?.form_data?.consents,
+          consentForms: newConsentsError,
+        },
+      },
     };
-
-    if (intakeFormData?.name === "") {
-      hasError = true;
-      setIntakeFormError((prev)=>({...prev,["name"]:"Name can't be blank"}))
-    }
-
-    if (intakeFormData?.prompt_type === "") {
-      hasError = true;
-      setIntakeFormError((prev)=>({...prev,["prompt_type"]:"prompt_type can't be blank"}))
-    }
-
-    if (intakeFormData?.valid_for === "") {
-      hasError = true;
-      setIntakeFormError((prev)=>({...prev,["valid_for"]:"valid_for can't be blank"}))
-
-    }
-
+  
     setIntakeFormError(newFormErrors);
-
-    if (hasError) {
-      toast.error("Something went wrong");
-      return false;
-    } else {
-      return true;
-    }
+  
+    return !hasError;
   };
+  
 
   const submitData = async (e) => {
     e.preventDefault()
@@ -682,12 +706,13 @@ const NewIntakeForm = () => {
         setTimeout(() => { window.location.replace("/intake-forms"); }, 1500);
       }
     } catch (error) {
-      toast.error("Something went wrong");
-      console.log("err", error?.response?.data?.error);
+      toast.error( error?.response?.data?.error.name[0]);
+      console.log("err", error?.response?.data?.error?.name[0]);
       setIntakeFormError((prev)=>({...prev,...error?.response?.data?.error}))
     }
   }
   };
+
 
 
   const upadteData = async (e) => {
@@ -701,8 +726,8 @@ const NewIntakeForm = () => {
         setIntakeFormData(response?.data)
       }
     } catch (error) {
-      toast.error("Something Went Wrong ");
-      console.log("err", error?.response?.data?.error);
+      toast.error( error?.response?.data?.error);
+      console.log("err", error?.response?.data?.error?.name[0]);
       setIntakeFormError((prev)=>({...prev,...error?.response?.data?.error}))
     }
   }
@@ -803,7 +828,6 @@ const NewIntakeForm = () => {
     setFormChanges(true)
   }
 
-  console.log("qutionaryFields",qutionaryFields);
   
 
   const confirmToDiscard = () => {

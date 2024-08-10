@@ -33,6 +33,7 @@ import { IoCallSharp, IoMailSharp, IoHome, IoMegaphoneSharp, IoChatbubble } from
 import { BsFillGearFill } from "react-icons/bs";
 import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
 import { useNavigate } from "react-router-dom";
+import CreateClientCard from "../components/Cards/CreateClientCart";
 
 const AllClientRoot = () => {
     const { authUserState } = useAuthContext();
@@ -54,14 +55,16 @@ const AllClientRoot = () => {
     const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
     const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+    const [showCreateClientModel, setShowCreateClientModel] = useState(false);
 
 
-console.log("sssss",selectedEmployeeData);
+    
+
+console.log("sssss",authUserState);
 
     const getEmployees = async (refetch = false) => {
         try {
             const { data } = await getClients();
-            console.log(data, 'adad')
             if (data?.length > 0) {
                 setEmployeeList(data);
                 handleSelect(data[0]);
@@ -79,9 +82,12 @@ console.log("sssss",selectedEmployeeData);
     useEffect(() => {
         getEmployees();
         // getInvoices();
-        return () => { };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        getEmployees();
+    }, [showCreateClientModel]);
 
     // const openShowInventory = (invoice, employee) => {
     //   setEmployeeInvoices({
@@ -373,7 +379,18 @@ console.log("sssss",selectedEmployeeData);
                                     </List>
                                 )}
                             </div>
+                          
                         </div>
+                        <Button
+                            onClick={() => {
+                                setShowCreateClientModel(true);
+                                setCurrentTab("client");
+                            }}
+                            variant="info"
+                            className="w-full text-white"
+                            >
+                            + Add Client
+                            </Button>
                     </>
                 }
             >
@@ -486,7 +503,16 @@ console.log("sssss",selectedEmployeeData);
                                         onHide={() => setShowCreateUserModal(false)}
                                     />
                                 )}
+
+                            {currentTab === "client" && (
+                                    <CreateClientCard
+                                        show={showCreateClientModel}
+                                        onHide={() => {setShowCreateClientModel(false)}}
+                                        getEmployees =  {getEmployees}
+                                    />
+                                )}
                             </div>
+
                             <CustomModal
                                 show={showInvoiceModal}
                                 onHide={() => setShowInvoiceModal(false)}

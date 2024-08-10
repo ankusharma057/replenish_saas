@@ -119,6 +119,7 @@ export default memo(function Header() {
                     </a>
                 </button>
 
+                  
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
@@ -278,6 +279,20 @@ export default memo(function Header() {
                       Intake Forms
                     </a>
                 </button>
+
+                <button
+                  onClick={handleMenuSHow}
+                  className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                >
+                  <a
+                    className={`no-underline text-white py-[1rem] inline-block `}
+                    href="/customers"
+                  >
+                    Clients
+                  </a>
+                </button>
+
+                
                 {(authUserState.user?.is_inv_manager === true &&
                   <>
                     <button

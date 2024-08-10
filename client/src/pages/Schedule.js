@@ -431,28 +431,53 @@ function Schedule() {
     }
   }
 
-  const showConfirmationModal = (event, readOnly) => {
-    confirmAlert({
-      title: "Confirm to do this action",
-      message: "Are you sure to do this.",
-      buttons: [
-        {
-          label: `${ !event?.client ? "Create Appointment" : 'Show Appointment' }`,
-          className: "btn btn-primary create-btn text-[16px] font-semibold px-3 py-2",
-          onClick: () => {
-            handleAddAppointmentSelect(event, readOnly);
+  function isAppointmentWithinAvailability(availabilityStart, availabilityEnd, appointments) {
+    const availabilityStartDate = new Date(availabilityStart);
+    const availabilityEndDate = new Date(availabilityEnd);
+
+    const removedValues = Array.isArray(appointments) && appointments.shift()
+
+console.log(appointments);
+
+    return appointments.some(appointment => {
+        if (!appointment.start_time) return false;
+        const appointmentStartDate = new Date(appointment.start_time);
+        return appointmentStartDate >= availabilityStartDate && appointmentStartDate <= availabilityEndDate;
+    });
+}
+
+  const showConfirmationModal = (event, readOnly, events) => {
+    console.log(event)
+    console.log(events)
+    
+    if(event?.client){
+      handleAddAppointmentSelect(event, readOnly);
+    }
+    else{
+      confirmAlert({
+        title: "Confirm to do this action",
+        message: "Are you sure to do this.",
+        buttons: [
+          {
+            label: `${ !event?.client ? "Create Appointment" : 'Show Appointment' }`,
+            className: "btn btn-primary create-btn text-[16px] font-semibold px-3 py-2",
+            onClick: () => {
+              handleAddAppointmentSelect(event, readOnly);
+            },
           },
-        },
-        {
-          label: "Delete Availability",
-          className: "btn btn-primary del-btn",
-          onClick: () => {
-            setShowConfirm(false);
-            deleteSchedule(event.id);
+          {
+            label: "Remove Availability",
+            className: "btn btn-primary del-btn",
+ 
+            onClick: () => {
+              setShowConfirm(false);
+              deleteSchedule(event.id);
+            },
           },
-        },
-      ],
-    })
+        ],
+      })
+    }
+ 
   };
 
 
@@ -945,7 +970,7 @@ function Schedule() {
             <ScheduleCalender
               events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
               onSelectEvent={(event) => {
-                showConfirmationModal(event, true);
+                showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
         
               }}
               // onSelectSlot={handleAddAppointmentSelect}
@@ -1018,6 +1043,7 @@ function Schedule() {
             setAppointmentModal(initialAppointmentModal)}
           }
         }
+
         title={
           appointmentModal?.readOnly
             ? `Appointment Details`
@@ -1172,7 +1198,7 @@ function Schedule() {
                   {/* {(clientNameOptions || []).find(
                     (op) => op?.value === appointmentModal?.client_id
                   )?.label || ""} */}
-                  {appointmentModal?.client?.name ||
+                  {appointmentModal?.location?.name ||
                     appointmentModal?.client_name ||
                     ""}
                 </span>

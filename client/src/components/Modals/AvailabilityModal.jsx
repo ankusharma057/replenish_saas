@@ -32,6 +32,7 @@ const AvailabilityModal = (props) => {
     return daysOfWeek.map((day) => { return { day: day.toLowerCase(), timings: [] } } )
   }
 
+
   const [serviceLocation, setServiceLocation] = useState([]);
   const [employeeList, setEmployeeList] = useState();
   const [selectedStaff, setSelectedStaff] = useState();
@@ -55,7 +56,6 @@ console.log("selectedOption",selectedOption);
 
     if (authUserState?.user) {
       const { data } = await getLocationEmployee(selectedOption?.id);
-      console.log("ghghghghhghsssssssssssssss", data);
       if (data?.length > 0) {
         if (authUserState?.user?.is_admin) {
           setEmployeeList(data);  
@@ -88,9 +88,12 @@ console.log("selectedOption",selectedOption);
     setScheduleData({ ...scheduleData, [att]: moment(e).format('DD-MM-YYYY') })
   };
 
+
+  console.log("ssssss",);
+
+
   const handleDone = async (e) => {
     e.preventDefault();
-
     if (
       !scheduleData.end_date ||
       !scheduleData.start_date ||
@@ -104,9 +107,23 @@ console.log("selectedOption",selectedOption);
       toast.error("Please check shift timings and select valid time interval.");
       return;
     }
+
+    const hasTiming = availabilityTimings.some(day => day.timings.length > 0)
+
+    if(!hasTiming){
+      toast.error("Please Choose Time Intervel");
+      return;
+    }
+
+    if(!scheduleData?.employee_id){
+      toast.error("Please Choose Employee");
+      return;
+    }
+
     const res = await postAvailability({ availability: { ...scheduleData, availability_timings: [...availabilityTimings] } })
     if (res.status === 201 || res.status === 200) {
       toast.success("Changes Applied Successfully");
+      setAvailabilityTimings(initialAvailabilityTimings)
       // closeModal()
     }
     // handleSubmit();

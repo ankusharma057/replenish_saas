@@ -442,7 +442,7 @@ const MyProfile = () => {
               } `}
             >
               <Box />
-              Products
+              Assigned Inventory
             </div>
 
             <div
@@ -459,7 +459,7 @@ const MyProfile = () => {
                 "pointer-events-none bg-gray-200"
               } `}
             >
-              <ArrowRightLeft /> Assigned Inventory
+              <ArrowRightLeft /> Shared Inventory
             </div>
             {/* <div
               role="button"
