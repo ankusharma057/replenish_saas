@@ -21,7 +21,7 @@ class Api::ClientsController < ApplicationController
   def create
     client = current_employee.is_admin? ? Client.new(client_params) : current_employee.clients.new(client_params)
 
-    if client.save!
+    if client.save
       session[:client_id] = client.id if params[:skip_login] != "true"
       render json: client, status: :ok
     else
@@ -64,7 +64,7 @@ class Api::ClientsController < ApplicationController
 
   private
   def client_params
-    params.require(:client).permit(:email, :name, :employee_id, :password)
+    params.require(:client).permit(:email, :name, :employee_id, :password, :temp_password)
   end
 
   def random_str

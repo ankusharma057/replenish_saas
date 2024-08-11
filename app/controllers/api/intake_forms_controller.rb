@@ -1,9 +1,8 @@
 class Api::IntakeFormsController < ApplicationController
-  skip_before_action :authorized_employee
   before_action :set_intake_form, only: %i[update destroy show]
 
   def index
-    @intake_forms = IntakeForm.treatment_intake_forms(params)
+    @intake_forms = IntakeForm.get_treatment_intake_forms(current_employee, params)
     render json: @intake_forms
   end
 

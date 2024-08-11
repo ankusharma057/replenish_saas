@@ -85,10 +85,6 @@ console.log("sssss",authUserState);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        getEmployees();
-    }, [showCreateClientModel]);
-
     // const openShowInventory = (invoice, employee) => {
     //   setEmployeeInvoices({
     //     invoices: invoice,
@@ -390,7 +386,7 @@ console.log("sssss",authUserState);
                             className="w-full text-white"
                             >
                             + Add Client
-                            </Button>
+                        </Button>
                     </>
                 }
             >

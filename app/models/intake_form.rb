@@ -15,11 +15,18 @@ class IntakeForm < ApplicationRecord
 
   enum prompt_type: { automatic: 0, manual: 1 }
 
-  def self.treatment_intake_forms(params)
-    if params[:treatment_id].present?
-      where.not(id: TreatmentIntakeForm.where(treatment_id: params[:treatment_id]).map(&:intake_form_id).uniq)
-    else
+  def self.get_treatment_intake_forms(current_employee, params)
+    intake_forms = if current_employee.is_admin?
       all
+    else
+      employee_ids = Employee.admins.map(&:id).push(current_employee.id)
+      IntakeForm.where(employee_id: employee_ids)
+    end
+
+    if params[:treatment_id].present?
+      intake_forms.where.not(id: TreatmentIntakeForm.where(treatment_id: params[:treatment_id]).map(&:intake_form_id).uniq)
+    else
+      intake_forms
     end
   end
 
