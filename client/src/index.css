@@ -297,3 +297,7 @@ input:-webkit-autofill:active {
   font-weight: 500 !important;
   padding: 0.5rem !important;
 }
+
+.css-nxo287-MuiInputBase-input-MuiOutlinedInput-input{
+  padding: 7.5px 14px;
+}

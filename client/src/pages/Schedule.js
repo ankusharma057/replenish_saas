@@ -961,7 +961,7 @@ console.log(appointments);
                   variant={"info"}
                   className=" text-white"
                 >
-                  Manage Shifts
+                  Manage Shift
                 </Button>)}
             </div>
           </div>

@@ -6,6 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthUserContext";
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { AsideLayoutProvide } from "./context/AsideLayoutContext";
+import { StyledEngineProvider } from '@mui/material/styles';
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -13,7 +15,9 @@ root.render(
     <AuthProvider>
       <AsideLayoutProvide>
         <BrowserRouter>
-          <App />
+          <StyledEngineProvider injectFirst>
+            <App />
+          </StyledEngineProvider>
         </BrowserRouter>
       </AsideLayoutProvide>
     </AuthProvider>

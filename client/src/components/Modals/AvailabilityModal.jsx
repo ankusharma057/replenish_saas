@@ -9,6 +9,11 @@ import { RxCross2 } from "react-icons/rx";
 import { getLocationEmployee, getLocations, postAvailability, getEmployeeLocations } from "../../Server";
 import { useAuthContext } from "../../context/AuthUserContext";
 import Select from "react-select";
+import dayjs from 'dayjs';
+import { DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 
 const availability = [
   { label: "Available", value: true },
@@ -31,7 +36,6 @@ const AvailabilityModal = (props) => {
   const initialAvailabilityTimings = () => {
     return daysOfWeek.map((day) => { return { day: day.toLowerCase(), timings: [] } } )
   }
-
 
   const [serviceLocation, setServiceLocation] = useState([]);
   const [employeeList, setEmployeeList] = useState();
@@ -68,9 +72,6 @@ console.log("selectedOption",selectedOption);
     } else {
       const data = [...authUserState?.user]
 
-      console.log("ghghghghhghhhhhhhhhhhhh",data);
-      
-
       if (data?.length > 0) {
         setEmployeeList(data);
         setScheduleData({ ...scheduleData, location_id: selectedOption.id })
@@ -82,14 +83,13 @@ console.log("selectedOption",selectedOption);
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const handleInputChange = (e, att) => {
     setChanges(true)
     availabilityModal[att] = moment(e).toDate();
     setScheduleData({ ...scheduleData, [att]: moment(e).format('DD-MM-YYYY') })
   };
 
-
-  console.log("ssssss",);
 
 
   const handleDone = async (e) => {
@@ -103,6 +103,9 @@ console.log("selectedOption",selectedOption);
       toast.error("Please select valid time interval.");
       return;
     }
+
+    console.log("availabilityTimings",availabilityTimings);
+
     if (!checkTimingsValidity(availabilityTimings)) {
       toast.error("Please check shift timings and select valid time interval.");
       return;
@@ -111,11 +114,29 @@ console.log("selectedOption",selectedOption);
     const hasTiming = availabilityTimings.some(day => day.timings.length > 0)
 
     if(!hasTiming){
-      toast.error("Please Choose Time Intervel");
+      toast.error("Please correct Time Intervel");
       return;
     }
 
-    if(!scheduleData?.employee_id){
+
+
+    const hasCorrectTiming = availabilityTimings.filter(day => day.timings.length > 0);
+
+    const validTiming = hasCorrectTiming.every(data =>
+      data.timings.every(datas =>
+        "start_time" in datas && datas.start_time !== null &&
+        "end_time" in datas && datas.end_time !== null
+      )
+    );
+
+    if(!validTiming){
+      toast.error("Please Choose correct Time Intervel");
+      return;
+    }
+
+
+
+    if(!("employee_id" in scheduleData)){
       toast.error("Please Choose Employee");
       return;
     }
@@ -126,7 +147,7 @@ console.log("selectedOption",selectedOption);
       setAvailabilityTimings(initialAvailabilityTimings)
       // closeModal()
     }
-    // handleSubmit();
+    handleSubmit();
   };
   let yesterday = moment().subtract(1, "day");
   function valid(current) {
@@ -149,7 +170,7 @@ console.log("selectedOption",selectedOption);
         }
       }
     }
-    handleSubmit();
+
     return true; // All timings are valid
   }
 
@@ -282,9 +303,20 @@ const DayShift = ({ day, availabilityTimings,setChanges, setAvailabilityTimings 
     setChanges(true)
   }
   const handleInputChange = (e, att, index) => {
+    const date = new Date(e.$d);
+
+    const options = {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    };
+
+    const timeString = date.toLocaleString('en-US', options);
+
     setChanges(true)
     const updatedTime = [...timings]
-    updatedTime[index] = { ...updatedTime[index], [att]: moment(e).toDate().toLocaleTimeString() }
+    updatedTime[index] = { ...updatedTime[index], [att]: timeString }
     setTimings([...updatedTime])
 
   };
@@ -310,21 +342,31 @@ const DayShift = ({ day, availabilityTimings,setChanges, setAvailabilityTimings 
             return (
               <div key={index} className="flex gap-2 items-center">
                 <div className="flex flex-col gap-2">
-                  <Datetime
+                  {/* <Datetime
                     dateFormat={false}
                     timeConstraints={{ hours: { min: 5 } }}
                     inputProps={{ placeholder: 'Start Time' }}
                     onChange={(event) => handleInputChange(event, "start_time", index)}
-                  />
+                  /> */}
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoItem >
+                          <DesktopTimePicker views={['hours', 'minutes']} onChange={(event) => handleInputChange(event, "start_time", index)}  />
+                        </DemoItem>
+                      </LocalizationProvider>
                 </div>
                 <div>to</div>
                 <div className="flex flex-col gap-2">
-                  <Datetime
+                  {/* <Datetime
                     dateFormat={false}
                     timeConstraints={{ hours: { min: 5 } }}
                     inputProps={{ placeholder: 'End Time' }}
                     onChange={(event) => handleInputChange(event, "end_time", index)}
-                  />
+                  /> */}
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoItem >
+                          <DesktopTimePicker views={['hours', 'minutes']} onChange={(event) => handleInputChange(event, "end_time", index)}  />
+                        </DemoItem>
+                      </LocalizationProvider>
                 </div>
                 <div onClick={() => handleRemoveTimes(index)} className="text-cyan-400 hover:cursor-pointer"><RxCross2 className="w-6 h-6" /></div>
               </div>
