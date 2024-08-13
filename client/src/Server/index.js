@@ -163,6 +163,13 @@ export const getClientEmployeeSchedule = async (employee_id, refetch = false) =>
     },
   });
 
+export const getClientSchedules = async (client_id, refetch = true) =>
+  api.get(`/api/client_schedules?client_id=${client_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
   export const getEmployeeAvailablities = async (employee_id, refetch = false) =>
     api.get(`api/availabilities?employee_id=${employee_id}`, {
       cache: {

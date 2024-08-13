@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_29_131824) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_13_103542) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -57,6 +57,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_29_131824) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["availabilities_id"], name: "index_availability_timings_on_availabilities_id"
+  end
+
+  create_table "chart_entries", force: :cascade do |t|
+    t.string "name"
+    t.jsonb "chart_histroy"
+    t.bigint "employee_id", null: false
+    t.bigint "client_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_chart_entries_on_client_id"
+    t.index ["employee_id"], name: "index_chart_entries_on_employee_id"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -319,6 +330,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_29_131824) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "availabilities", "employee_locations"
   add_foreign_key "availability_timings", "availabilities", column: "availabilities_id"
+  add_foreign_key "chart_entries", "clients"
+  add_foreign_key "chart_entries", "employees"
   add_foreign_key "employee_clients", "clients"
   add_foreign_key "employee_clients", "employees"
   add_foreign_key "employee_locations", "employees"

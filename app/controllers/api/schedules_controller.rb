@@ -7,6 +7,14 @@ class Api::SchedulesController < ApplicationController
     render json: schedules, status: :ok
   end
 
+  def get_client_schedule
+    schedules = Schedule.all
+    schedules = schedules.where(client_id: params[:client_id]) if params[:client_id].present?
+    schedules = schedules.where("DATE(date) BETWEEN  ?  AND ?" , date_parse(params[:start_date]), (date_parse(params[:end_date]) || Date.today)) if params[:start_date] && schedules.present?
+
+    render json: schedules, status: :ok
+  end
+
   def create
     schedule = Schedule.new(schedule_param)
     schedule.client = set_client

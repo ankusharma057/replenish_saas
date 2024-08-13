@@ -6,6 +6,7 @@ class Client < ApplicationRecord
     has_many :employee_clients, dependent: :destroy
     has_many :employees, through: :employee_clients
     has_many :response_intake_forms, dependent: :destroy
+    has_many :chart_entries, dependent: :destroy
 
     validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }
     validates :email, uniqueness: { message: 'Email already taken' }
