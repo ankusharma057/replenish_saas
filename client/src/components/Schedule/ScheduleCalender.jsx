@@ -12,7 +12,6 @@ const ScheduleCalender = ({ ...rest }) => {
   const [timeSlots, setTimeSlots] = useState(1);
   const today = new Date();
   useEffect(() => {
-    console.log(rest)
   }, [])
   return (
     <Calendar

@@ -301,3 +301,9 @@ input:-webkit-autofill:active {
 .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input{
   padding: 7.5px 14px;
 }
+
+.rbc-day-slot .rbc-event{
+  width: 100% !important;
+  left: 0px !important;
+}
+

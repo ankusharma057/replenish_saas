@@ -169,16 +169,20 @@ const ConfirmPayment = () => {
               onChange={() => handleReminderChange("email24HoursBefore")}
             />
             <Form.Check
+              title="You need to add you phone number to your account"
               type="checkbox"
               label="Text message(SMS) 2 days before appointment"
               id="textMessage2DaysBefore"
               // checked={reminderOptions.textMessage2DaysBefore}
+              disabled={true}
               onChange={() => handleReminderChange("textMessage2DaysBefore")}
             />
             <Form.Check
+              title="You need to add you phone number to your account"
               type="checkbox"
               label="Text message(SMS) 24 hours before appointment"
               id="textMessage24HoursBefore"
+              disabled={true}
               // checked={reminderOptions.textMessage24HoursBefore}
               onChange={() => handleReminderChange("textMessage24HoursBefore")}
             />

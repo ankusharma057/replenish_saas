@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { momentLocalizer } from "react-big-calendar";
+import moment from "moment";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
     deleteEmployeeRoute,
@@ -34,6 +36,7 @@ import { BsFillGearFill } from "react-icons/bs";
 import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
 import { useNavigate } from "react-router-dom";
 import CreateClientCard from "../components/Cards/CreateClientCart";
+import ScheduleCalender from "../components/Schedule/ScheduleCalender";
 
 const AllClientRoot = () => {
     const { authUserState } = useAuthContext();
@@ -57,10 +60,36 @@ const AllClientRoot = () => {
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
     const [showCreateClientModel, setShowCreateClientModel] = useState(false);
 
+    const localizer = momentLocalizer(moment);
+
 
     
 
 console.log("sssss",authUserState);
+
+// const onCalenderRangeChange = (date) => {
+//     let formattedStartDate;
+//     let formattedEndDate;
+//     if (date?.start && date.end) {
+//       formattedStartDate = moment(date.start).format("MM/DD/YYYY");
+//       formattedEndDate = moment(date.end).format("MM/DD/YYYY");
+//     } else if (date.length > 0) {
+//       formattedStartDate = moment(date[0]).format("MM/DD/YYYY");
+//       formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
+//     }
+
+//     // setCalenderCurrentRange({
+//     //   start_date: formattedStartDate,
+//     //   end_date: formattedEndDate,
+//     // });
+    
+//     // getEmployeeSchedule({
+//     //   id: selectedEmployeeData.id,
+//     //   start_date: formattedStartDate,
+//     //   end_date: formattedEndDate,
+//     //   location_id: selectedLocation?.id
+//     // });
+//   };
 
     const getEmployees = async (refetch = false) => {
         try {
@@ -242,7 +271,7 @@ console.log("sssss",authUserState);
         if (!emp.is_admin) {
             addTabs.splice(0, 0, { name: "Profile", value: "profile" });
             addTabs.push({ name: "Edit/Settings", value: "settings" });
-            addTabs.push({ name: "Chart", value: "Chart" });
+            addTabs.push({ name: "Forms", value: "Forms" });
             addTabs.push({ name: "Appointments", value: "Appointments" });
             addTabs.push({ name: "Billing", value: "Billing" });
             addTabs.push({ name: "Messages", value: "Messages" });
@@ -445,11 +474,28 @@ console.log("sssss",authUserState);
                                     </div>
                                 )}
 
-                                {currentTab === "Chart" && (
+                                {currentTab === "Appointments" && (
+                                    <div className="bg-white">
+                                        <ScheduleCalender
+                                            events={[]}
+                                            // onSelectEvent={(event) => {
+                                            //     showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
+                                        
+                                            // }}
+                                            // onSelectSlot={handleAddAppointmentSelect}
+                                            // onRangeChange={onCalenderRangeChange}
+                                            eventPropGetter={(event) => {
+                                                const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
+                                                return { style: { backgroundColor } };
+                                            }}
+                                            />
+                                    </div>
+                                )}
+
+                                {currentTab === "Forms" && (
                                     // navigate("/submited-intake-forms-preview")
                                     <SubmitedClientIntakeForm clientId={selectedEmployeeData?.id}/>
                                 )}
-                                
                                 {currentTab === "inventory" && (
                                     <InventoryTab
                                         inventoryList={selectedEmployeeData}
