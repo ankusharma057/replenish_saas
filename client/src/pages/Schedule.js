@@ -970,13 +970,13 @@ console.log(appointments);
 
           {selectedEmployeeData && (
             <ScheduleCalender
-              events={ []}
-              // onSelectEvent={(event) => {
-              //   showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
+              events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
+              onSelectEvent={(event) => {
+                showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
         
-              // }}
+              }}
               // onSelectSlot={handleAddAppointmentSelect}
-              // onRangeChange={onCalenderRangeChange}
+              onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
                 const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
                 return { style: { backgroundColor } };
