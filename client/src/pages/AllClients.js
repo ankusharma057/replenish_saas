@@ -363,7 +363,7 @@ console.log("sssss",authUserState);
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex  flex-col pl-2 gap-4 overflow-y-auto">
+                            <div className="flex h-[600px]  flex-col pl-2 gap-4 overflow-y-auto">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}
@@ -375,7 +375,6 @@ console.log("sssss",authUserState);
                                     </List>
                                 )}
                             </div>
-                          
                         </div>
                         <Button
                             onClick={() => {

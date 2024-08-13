@@ -2,6 +2,7 @@
 
 class Api::ClientsController < ApplicationController
   before_action :find_client, only: [:sign_in, :password_update]
+  skip_before_action :authorized_employee
 
   def index
     clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
@@ -19,9 +20,14 @@ class Api::ClientsController < ApplicationController
   end
 
   def create
-    client = current_employee.is_admin? ? Client.new(client_params) : current_employee.clients.new(client_params)
+    client = Client.new(client_params)
 
     if client.save
+      if (!current_employee.is_admin?)
+        client.employee_ids = [current_employee.id]
+      end
+
+      client.send_client_reset_password_mail
       session[:client_id] = client.id if params[:skip_login] != "true"
       render json: client, status: :ok
     else

@@ -12,7 +12,7 @@ const SubmitedClientIntakeForm = (clientId) => {
   const [clientResponseIntakeForms,setClientResponseIntakeForms] = useState([])   
   const  fetchClientResponseIntakeForms = async () => {
     try {
-      const {data} = (clientId?.clientId) ? await getSubmittedResponseIntakeForms(clientId?.clientId) : await getClientResponseIntakeForms();
+      const {data} = (!authUserState?.user?.is_admin) ? await getSubmittedResponseIntakeForms(clientId?.clientId, authUserState?.user?.id) : (clientId?.clientId) ? await getSubmittedResponseIntakeForms(clientId?.clientId, " ") : await getClientResponseIntakeForms();
       if (data) {
         setClientResponseIntakeForms(data)
       }

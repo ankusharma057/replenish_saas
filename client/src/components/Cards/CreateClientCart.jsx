@@ -16,6 +16,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(formInitialState);
   const [errorForm, setErrorsForm] = useState([]);
+  const { authUserState } = useAuthContext();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
       const response = await createClient(formData);
 
       if (response.status === 200) {
+        getEmployees();
         if (response?.data?.error) {
           toast.error(response?.data?.error?.name || "Failed to create client");
           setErrorsForm(response?.data?.error || {})
@@ -35,8 +37,6 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
           });
           e.target.reset();
           setErrorsForm({});
-
-          getEmployees();
 
           toast.success("Client Created Successfully");
         }
@@ -70,7 +70,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
             <Form.Label>Name</Form.Label>
             <Form.Control
               placeholder={`Enter Name`}
-              className="font-medium text-cyan-800"
+              className="font-medium text-cyan-800 mb-4"
               type="text"
               name="name"
               onChange={handleChange}
@@ -85,7 +85,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
             <Form.Label>Email</Form.Label>
             <Form.Control
               placeholder={`Enter Email`}
-              className="font-medium text-cyan-800"
+              className="font-medium text-cyan-800 mb-4"
               type="text"
               name="email"
               onChange={handleChange}
@@ -100,7 +100,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
             <Form.Label>Temp Password</Form.Label>
             <Form.Control
               placeholder={`Enter Temp Password`}
-              className="font-medium text-cyan-800"
+              className="font-medium text-cyan-800 mb-4" 
               type="password"
               name="temp_password"
               onChange={handleChange}

@@ -298,8 +298,8 @@ export const getIntakeFormsWithTreatment = async (id, refetch = false) =>
 
 
 // ---------------------------------------------------
-export const getSubmittedResponseIntakeForms = async (currentClientId,refetch = false) =>
-  api.get(`/api/response_intake_forms?client_id=${currentClientId}`, {
+export const getSubmittedResponseIntakeForms = async (currentClientId, currentEmployeeId, refetch = false) =>
+  api.get(`/api/response_intake_forms?client_id=${currentClientId}&employee_id=${currentEmployeeId}`, {
     cache: {
       ignoreCache: refetch,
     },
