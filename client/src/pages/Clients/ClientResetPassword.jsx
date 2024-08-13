@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { clientResetPassword, getUpdatedUserProfile } from "../../Server";
+import { useAuthContext } from "../../context/AuthUserContext";
 
 function ClientResetPassword() {
   const resetPasswordState = {
@@ -13,10 +14,28 @@ function ClientResetPassword() {
   };
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(resetPasswordState);
+  const { authUserState } = useAuthContext();
+
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const email = searchParams.get("email");
+  const [ email, setEmail ] = useState();
+
+  useEffect(() => {
+    const authenticatedEmail = authUserState?.client?.email;
+    const queryEmail = searchParams.get("email");
+
+    if (authenticatedEmail) {
+      if (queryEmail !== authenticatedEmail) {
+        // Update the URL with the correct email if it doesn't match
+        searchParams.set("email", authenticatedEmail);
+        navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+      }
+      setEmail(authenticatedEmail);
+    } else {
+      setEmail(queryEmail);
+    }
+  }, [authUserState, searchParams, navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

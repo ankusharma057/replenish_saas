@@ -53,7 +53,7 @@ class Api::ClientsController < ApplicationController
   end
 
   def password_update
-    if @client.update!(password: params[:password])
+    if @client.update!(password: params[:password], temp_password: nil)
       render json: @client, status: :ok
     else
       render json: {error: 'Something went wrong!'}, status: :unprocessable_entity

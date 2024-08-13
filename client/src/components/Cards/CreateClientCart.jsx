@@ -96,7 +96,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
             </span>
           </Form.Group>
 
-          <Form.Group controlId="formClientPassword">
+          {/* <Form.Group controlId="formClientPassword">
             <Form.Label>Temp Password</Form.Label>
             <Form.Control
               placeholder={`Enter Temp Password`}
@@ -109,9 +109,9 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
             <span className="text-red-400 text-sm">
               {errorForm.temp_password && errorForm.temp_password[0]}
             </span>
-          </Form.Group>
+          </Form.Group> */}
 
-          <div></div>
+          {/* <div></div> */}
 
           <Loadingbutton
             isLoading={loading}

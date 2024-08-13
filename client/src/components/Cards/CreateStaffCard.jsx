@@ -104,7 +104,7 @@ export default function CreateStaffCard({ show, onHide }) {
             onChange={handleChange}
           />
 
-          <LabelInput
+          {/* <LabelInput
             label="Password"
             controlId="password"
             placeholder={`*******`}
@@ -113,7 +113,7 @@ export default function CreateStaffCard({ show, onHide }) {
             onChange={handleChange}
             type="password"
             name="password"
-          />
+          /> */}
 
           <LabelInput
             label="Service Percentage"
