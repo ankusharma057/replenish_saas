@@ -970,7 +970,7 @@ console.log(appointments);
 
           {selectedEmployeeData && (
             <ScheduleCalender
-              events={employeeScheduleEventsData[selectedEmployeeData.id] || []}
+              events={employeeScheduleEventsData[selectedEmployeeData?.id] || []}
               onSelectEvent={(event) => {
                 showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
         

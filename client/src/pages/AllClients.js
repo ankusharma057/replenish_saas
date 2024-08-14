@@ -12,6 +12,7 @@ import {
     // getInvoiceList,
     sendResetPasswordLinkRoute,
     updateVendore,
+    getClientSchedules,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -78,33 +79,26 @@ const AllClientRoot = () => {
     const [updateEmployeeInput, setUpdateEmployeeInput] = useState({});
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
     const [showCreateClientModel, setShowCreateClientModel] = useState(false);
+    const [selectedClientSchedules, setSelectedClientSchedules] = useState([]);
     const [chartTab, setChartTab] = useState("chart_entries_list");
 
 
     const localizer = momentLocalizer(moment);
-// const onCalenderRangeChange = (date) => {
-//     let formattedStartDate;
-//     let formattedEndDate;
-//     if (date?.start && date.end) {
-//       formattedStartDate = moment(date.start).format("MM/DD/YYYY");
-//       formattedEndDate = moment(date.end).format("MM/DD/YYYY");
-//     } else if (date.length > 0) {
-//       formattedStartDate = moment(date[0]).format("MM/DD/YYYY");
-//       formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
-//     }
 
-//     // setCalenderCurrentRange({
-//     //   start_date: formattedStartDate,
-//     //   end_date: formattedEndDate,
-//     // });
-    
-//     // getEmployeeSchedule({
-//     //   id: selectedEmployeeData.id,
-//     //   start_date: formattedStartDate,
-//     //   end_date: formattedEndDate,
-//     //   location_id: selectedLocation?.id
-//     // });
-//   };
+  const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
+    try {
+      if (selectedEmployeeData) {
+        const { data } = await getClientSchedules(selectedEmployeeData, refetch);
+        setSelectedClientSchedules(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+    useEffect(() => {
+    getClientSchedule(selectedEmployeeData?.id, true);
+    }, [selectedEmployeeData]);
 
     const getEmployees = async (refetch = false) => {
         try {
@@ -1211,19 +1205,64 @@ useEffect(()=>{
 
                                 {currentTab === "Appointments" && (
                                     <div className="bg-white">
-                                        <ScheduleCalender
-                                            events={[]}
-                                            // onSelectEvent={(event) => {
-                                            //     showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
-                                        
-                                            // }}
-                                            // onSelectSlot={handleAddAppointmentSelect}
-                                            // onRangeChange={onCalenderRangeChange}
-                                            eventPropGetter={(event) => {
-                                                const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
-                                                return { style: { backgroundColor } };
-                                            }}
-                                            />
+                                        <div className={`bg-gray-200 min-h-[calc(100%-56px)]  p-3 px-4`}>
+                                        <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
+                                            <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
+                                            <h2><span>Appointment Details</span></h2> 
+
+                                            </div>
+                                            <div className="h-full border rounded-lg p-4">
+                                            <div className="h-full flex flex-col gap-3">
+
+                                                {Array.isArray(selectedClientSchedules) && selectedClientSchedules.map((form,index)=>(
+                                                    <div key={index} className="flex flex-col gap-2 border rounded-lg overflow-hidden">
+                                                    
+                                                        <div className=" p-1 flex flex-col justify-start py-2 px-3  bg-slate-50 hover:bg-blue-50 duration-300 ">
+                                                            <div className="flex justify-between p-3">
+                                                                <div>Treatment : <span className="text-blue-500">{form?.treatment?.name}</span></div>
+                                                                <div>Client : <span className="text-blue-500">{form?.client?.name}</span></div>
+                                                            </div>
+                                                            
+                                                            <div className="flex justify-between p-3">
+                                                                <div>Location : <span className="text-blue-500">{form?.location?.name}</span></div>
+                                                                <div>
+                                                                    Time: 
+                                                                    <span className="text-blue-500">
+                                                                        {new Date(form?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - 
+                                                                        {new Date(form?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col gap-2 p-3">
+                                                              <span>Transaction Details</span>
+                                                              <div className="flex gap-4">
+                                                                <div className="flex flex-col gap-1">
+                                                                  <span>Total Amount</span>
+                                                                  <span className="text-blue-500">{parseFloat(form?.total_amount)}</span>
+                                                                </div>
+                                                                <div className="flex flex-col gap-1">
+                                                                  <span>Paid Amount</span>
+                                                                  <span className="text-blue-500">{parseFloat(form?.paid_amount)}</span>
+                                                                </div>
+                                                                <div className="flex flex-col gap-1">
+                                                                  <span>Remaining Amount</span>
+                                                                  <span className="text-blue-500">
+                                                                    {parseFloat(form?.remaining_amount)}
+                                                                  </span>
+                                                                </div>
+                                                              </div>
+                                                            </div>
+                                                            </div>
+                                                            <div className="px-3 ">
+                                                            
+                                                            </div>
+                                                
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
                                     </div>
                                 )}
 
