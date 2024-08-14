@@ -302,9 +302,6 @@ export const getIntakeFormsWithTreatment = async (id, refetch = false) =>
         },
       })
 
-
-
-// ---------------------------------------------------
 export const getSubmittedResponseIntakeForms = async (currentClientId, currentEmployeeId, refetch = false) =>
   api.get(`/api/response_intake_forms?client_id=${currentClientId}&employee_id=${currentEmployeeId}`, {
     cache: {
@@ -318,8 +315,20 @@ export const getSubmittedResponseIntakeForms = async (currentClientId, currentEm
         ignoreCache: refetch,
       },
     })
-// ---------------------------------------------------
 
+export const getChartEntries = async (employeeId, clientId, refetch = false) =>
+  api.get(`/api/chart_entries?employee_id=${employeeId}&client_id=${clientId}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  })
+
+export const getChartEntry = async (id, refetch = false) =>
+  api.get(`/api/chart_entries/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  })
 
 export const loginUser = async (data) => api.post("/api/login", data);
 export const signupClient = async (data) =>
@@ -411,6 +420,9 @@ export const createResponseIntakeForm = async (data) =>
 
 export const createClient = async (data) =>
   api.post(`/api/clients/?skip_login=true`, data);
+
+export const createChartEntries = async (data) =>
+  api.post(`/api/chart_entries`, {chart_entries:data});
 
 export const updateIntakeForm = async (id,data) =>
   api.patch(`/api/intake_forms/${id}`, {
