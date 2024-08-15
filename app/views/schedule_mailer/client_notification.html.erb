@@ -7,7 +7,11 @@
 </head>
 <body>
   <p>Dear <%= @client.name %>,</p>
-  <p>Your payment of <%= @amount %> for the schedule on <%= @schedule.date %> has been successfully processed.</p>
+  <% if @amount == 50 %>
+    <p>Your payment of <%= @amount %> for the schedule on <%= @schedule.date %> has been successfully processed.</p>
+  <% else %>
+    <p>Your have successfully created a schedule on <%= @schedule.date %>.</p>
+  <% end %>
   <p>Thank you!</p>
 </body>
 </html>

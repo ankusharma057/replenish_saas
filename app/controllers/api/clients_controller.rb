@@ -27,7 +27,6 @@ class Api::ClientsController < ApplicationController
         client.employee_ids = [current_employee.id]
       end
 
-      client.send_client_reset_password_mail
       session[:client_id] = client.id if params[:skip_login] != "true"
       render json: client, status: :ok
     else

@@ -1,6 +1,8 @@
 class Api::Client::SchedulesController < ClientApplicationController
   skip_before_action :authorized_client, only: [:index, :employee_unavailability]
 
+  DEFAULT_DOWN_PAYMENT = 50
+
   def index
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
@@ -31,7 +33,8 @@ class Api::Client::SchedulesController < ClientApplicationController
     schedule = current_client.schedules.new(schedule_param)
     if schedule.save
       response_data = Stripe::Payment.create(schedule)
-      record_payment_from_session(response_data, schedule, 50)
+      amount = schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
+      record_payment_from_session(response_data, schedule, amount)
 
       render json: {schedule: ScheduleSerializer.new(schedule)}.merge!({redirect_url: response_data['url']}), status: :created
     else
@@ -44,7 +47,8 @@ class Api::Client::SchedulesController < ClientApplicationController
     if @schedule
       @schedule.update(reminder: params[:reminder])
       @schedule.update_reminder
-      send_payment_notifications(@schedule, 50)
+      amount = @schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
+      send_payment_notifications(@schedule, amount)
       render json: {message: "Reminder Updated with #{@schedule.reminder}!!"}, status: :ok
     else
       render json: {error: "Schedule not found"}, status: :unprocessable_entity

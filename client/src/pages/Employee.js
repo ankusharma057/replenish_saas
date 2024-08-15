@@ -82,9 +82,6 @@ const Employee = () => {
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
   const [formChanges,setFormChanges] = useState(false)
 
-
-  console.log("datatatta",selectedEmployeeData?.is_admin);
-
   // Questionnaires
   const navigate = useNavigate();
   const [templateTabs,setTemplateTabs] = useState("templates list")
@@ -227,8 +224,6 @@ const Employee = () => {
       };
     }
   }, [isFillingForm]);
-
-  console.log("dddd",selectedEmployeeData);
 
   // const openShowInventory = (invoice, employee) => {
   //   setEmployeeInvoices({
@@ -876,7 +871,7 @@ setTitle(title)
                           </td>
                         </tr>}
 
-                        {!selectedEmployeeData?.is_admin && <tr>
+                        <tr>
                           <th className="px-4">Mentors</th>
                           <td>
                             <div className="flex items-center">
@@ -890,7 +885,7 @@ setTitle(title)
                               /> */}
                               <Select
                                 className="w-full"
-                                options={mentorList}
+                                options={mentorList.filter((mentor) => mentor.id !== selectedEmployeeData.id )}
                                 getOptionLabel={(option) => option.name}
                                 onChange={handleMentorChange}
                                 // value={null}
@@ -927,7 +922,7 @@ setTitle(title)
                               </div>
                             </div>
                           </td>
-                        </tr>}
+                        </tr>
 
                         {/* <tr className="flex flex-col px-4">
                           {addedMentors.map((val, index) => {

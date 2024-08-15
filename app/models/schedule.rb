@@ -60,6 +60,6 @@ class Schedule < ApplicationRecord
 
   def check_for_inventory
     employee_inventory = self.employee.employees_inventories.where(product_id: self.product_id).first
-    employee_inventory ?  self.treatment.quantity <= employee_inventory.quantity : false
+    employee_inventory ? self.treatment.quantity <= employee_inventory.quantity : false
   end
 end
