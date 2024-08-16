@@ -38,25 +38,27 @@ module PdfDownloadable
             <h4 style="text-align: left;">  Vendor: '"#{employee.vendor_name}"'  </h4> 
             <br>
             <div style="text-align: right;">  Name: '"#{employee.name}"'  </div> 
+
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
-
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
+
             <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
-
             <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
+
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
-
             <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
+            
+            <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div> 
 
-            <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>  
+            <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
+            <div style="text-align: right;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
 
-            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
-            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
-
-            <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>
-            <div style="text-align: left;">  Tip: '"#{tip}"'</div>
+            <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
+            <div style="text-align: right;">  Tip: '"#{tip}"'</div>
 
           </div>
 
@@ -132,27 +134,28 @@ module PdfDownloadable
             <div style="text-align: right;">  Name: '"#{employee.name}"'  </div>
 
             <div style="text-align: left;">  Email: '"#{employee.email}"'  </div>
-
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
+
             <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
-
             <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
+
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
-
             <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
+            
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
 
-            <div style="text-align: right;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: left;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
+            <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
 
-            <div style="text-align: right;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
-            <div style="text-align: left;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
+            <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
+            <div style="text-align: right;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
 
-            <div style="text-align: right;">  Personal Discount: '"#{personal_discount}"'</div>
-            <div style="text-align: left;">  Tip: '"#{tip}"'</div>
+            <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
+            <div style="text-align: right;">  Tip: '"#{tip}"'</div>
 
-            <div style="text-align: right;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
-            <div style="text-align: left;">  Overhead Fee Value: '"#{overhead_fee_value}"'</div>
+            <div style="text-align: left;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
+            <div style="text-align: right;">  Overhead Fee Value: '"#{overhead_fee_value}"'</div>
           </div>
 
           <div></div>

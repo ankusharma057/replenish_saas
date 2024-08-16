@@ -16,27 +16,6 @@ class Api::InvoicesController < ApplicationController
     render json: invoice, status: :ok
   end
 
-  # def create
-  #   @clients = params[:clientName].each do |client|
-  #     @employee.clients.find_or_create_by(name: client)
-  #   end
-
-  #   # @products = params[:products].pluck("name", "quantity", "retail_price")
-  #   # @retail_products = params[:retail_products].pluck("name", "quantity", "retail_price")
-
-  #   if @client
-  #     @invoice = @client.source_invoices.new(invoice_params)
-  #     if @invoice.save
-  #       @invoice.save_pdf_and_send_mail(@products, @retail_products)
-  #       render json: @invoices.last, status: :created
-  #     else
-  #       render json: {'error' => @invoice.errors}, status: :bad_request
-  #     end
-  #   else
-  #     render json: {'error' => "Please provide a client."}, status: :not_found
-  #   end
-  # end
-
   def update
     if @invoice.update!(invoice_params)
       render json: @invoice, status: :ok
@@ -123,7 +102,7 @@ class Api::InvoicesController < ApplicationController
   private
 
   def invoice_params
-    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :overhead_fee_type, :overhead_fee_value)
+    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value)
   end
 
   def find_invoice

@@ -1,7 +1,7 @@
 module InvoiceGroupConcern
   extend ActiveSupport::Concern
 
-  MENTOR_INVOICE_EXCLUDE_COLUMNS = %w[employee_id paid_by_client_cash paid_by_client_credit comments personal_discount tip concierge_fee_paid gfe overhead_fee_type 
+  MENTOR_INVOICE_EXCLUDE_COLUMNS = %w[employee_id paid_by_client_cash paid_by_client_credit comments personal_discount tip concierge_fee_paid gfe provider_purchased overhead_fee_type 
                                       overhead_fee_value semag_consult_fee  total_consumable_cos total_consumable_cost source_invoice_id]
 
   included do

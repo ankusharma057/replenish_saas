@@ -1,6 +1,6 @@
 class InvoiceSerializer < ActiveModel::Serializer
   include Rails.application.routes.url_helpers
-  attributes :id, :employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :overhead_fee_type, :overhead_fee_value, :products_hash, :source_invoice_id
+  attributes :id, :employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value, :products_hash, :source_invoice_id
 
   attribute :before_images do
     object.before_images.map{|image| rails_blob_path(image, only_path: true)}
