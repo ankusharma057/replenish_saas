@@ -23,6 +23,7 @@ const initialFormState = {
   conciergeFeePaid: false,
   gfe: false,
   semaglitudeConsultation: false,
+  providerPurchased: false,
   paidByClientCash: 0,
   paidByClientCredit: 0,
   personalDiscount: 0,
@@ -391,6 +392,8 @@ export default function AddInvoices() {
         afterTax.retailTotal) *
       (semaglitude_percentage / 100); //(replace with injector percentage)
 
+    if (formData?.providerPurchased) total += totalProductPriceSum;
+    
     if (authUserState.user?.gfe)
       total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =
@@ -742,6 +745,7 @@ export default function AddInvoices() {
       concierge_fee_paid: formData?.conciergeFeePaid,
       gfe: formData?.gfe,
       semag_consult_fee: formData?.semaglitudeConsultation,
+      provider_purchased: formData?.providerPurchased,
       paid_by_client_cash: formData?.paidByClientCash,
       paid_by_client_credit: formData?.paidByClientCredit,
       personal_discount: formData?.personalDiscount,
@@ -940,6 +944,16 @@ export default function AddInvoices() {
                       className="ml-1"
                     />
                   </label>
+                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
+                    Provider Purchased:
+                    <input
+                      type="checkbox"
+                      name="providerPurchased"
+                      checked={formData?.providerPurchased}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-2"
+                    />
+                  </label>
                   {/* <label className="mb-2 block">
                     Provider Purchased:
                     <input
@@ -971,6 +985,9 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
+
+
+
                   <div className="border-t-[1px]"></div>
                   <label className="mb-2 block font-medium px-2">
                     Paid by Client Cash:
@@ -1460,6 +1477,7 @@ export default function AddInvoices() {
                   conciergeFeePaid={invoice?.concierge_fee_paid}
                   gfe={invoice?.gfe}
                   semaglitudeConsultation={invoice?.semag_consult_fee}
+                  providerpurchased={invoice?.provider_purchased}
                   paidByClientCash={invoice?.paid_by_client_cash}
                   paidByClientCredit={invoice?.paid_by_client_credit}
                   personalDiscount={invoice?.personal_discount}

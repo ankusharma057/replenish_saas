@@ -25,12 +25,14 @@ function CustomModal({
   userProfile,
   getInvoices,
 }) {
+
   const invoiceID = invoiceData.id;
   const employeeName = invoiceData.employee_name;
   const clientName = invoiceData.client_name;
   const charge = invoiceData.charge;
   const dateOfService = invoiceData.date_of_service;
   const conciergeFeePaid = invoiceData.conciergeFeePaid;
+  const providerPurchased = invoiceData.provider_purchased;
   const gfe = invoiceData.gfe;
   const paidByClientCash = invoiceData.paid_by_client_cash;
   const paidByClientCredit = invoiceData.paid_by_client_credit;
@@ -252,7 +254,7 @@ function CustomModal({
     );
   };
   console.log("fdgdfgfgg", invoiceData?.employee?.is_mentor);
-  
+
 
   return (
     <>
@@ -272,12 +274,12 @@ function CustomModal({
               }
             </div>
             {/* { !invoiceData?.employee?.is_mentor && ( */}
-              <>
-            <hr />
-            
-            <div>
-              Total: {charge}
-            </div>
+            <>
+              <hr />
+
+              <div>
+                Total: {charge}
+              </div>
             </>
             {/* // )} */}
           </>
@@ -338,97 +340,101 @@ function CustomModal({
         }
       >
         <div className="max-w-4xl mx-auto bg-white md:p-4 rounded-md">
-        { !invoiceData?.employee?.is_mentor && (
-          <>
-          <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
-            <div className="flex flex-col">
-              <span className="text-gray-700">Provider:</span>
-              <span>{employeeName}</span>
-            </div>
+          {!invoiceData?.employee?.is_mentor && (
+            <>
+              <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Provider:</span>
+                  <span>{employeeName}</span>
+                </div>
 
-            <div className="flex flex-col">
-              <span className="text-gray-700">Client Name:</span>
-              <span>{clientName}</span>
-            </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Client Name:</span>
+                  <span>{clientName}</span>
+                </div>
 
-            <div className="flex flex-col">
-              <span className="text-gray-700">Date of Service:</span>
-              <span>{dateOfService}</span>
-            </div>
-          </div>
-          
-
-          {invoiceData?.products_hash?.products?.length > 0 && (
-            <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
-              <p>
-                <b>Products</b>
-              </p>
-              <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
-                <table className="table-auto  w-full ">
-                  <thead className="whitespace-normal">
-                    <tr>
-                      <th className="min-w-[6rem]">Product</th>
-                      <th className="min-w-[6rem]">Quantity</th>
-                      <th className="min-w-[6rem]">Price</th>
-                      <th className="min-w-[6rem]">Total Price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="whitespace-normal">
-                    {invoiceData?.products_hash?.products.map((product, i) => (
-                      <tr key={i}>
-                        <td>{product[0]}</td>
-                        <td>{product[1]}</td>
-                        <td>{Number(product[2] || 0).toFixed(2)}</td>
-                        <td>
-                          {Number(product[1] * product[2] || 0).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Date of Service:</span>
+                  <span>{dateOfService}</span>
+                </div>
               </div>
-            </div>
-          )}
 
-          {invoiceData?.products_hash?.retail_products?.length > 0 && (
-            <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
-              <p>
-                <b>Retail Products</b>
-              </p>
 
-              <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
-                <table className="table-auto  w-full ">
-                  <thead className="whitespace-normal">
-                    <tr>
-                      <th className="min-w-[6rem]">Product</th>
-                      <th className="min-w-[6rem]">Quantity</th>
-                      <th className="min-w-[6rem]">Price</th>
-                      <th className="min-w-[6rem]">Total Price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="whitespace-normal">
-                    {invoiceData?.products_hash?.retail_products.map(
-                      (product, i) => (
-                        <tr key={i}>
-                          <td>{product[0]}</td>
-                          <td>{product[1]}</td>
-                          <td>{product[2]}</td>
-                          <td>{+(product[1] * product[2])}</td>
+              {invoiceData?.products_hash?.products?.length > 0 && (
+                <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                  <p>
+                    <b>Products</b>
+                  </p>
+                  <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                    <table className="table-auto  w-full ">
+                      <thead className="whitespace-normal">
+                        <tr>
+                          <th className="min-w-[6rem]">Product</th>
+                          <th className="min-w-[6rem]">Quantity</th>
+                          <th className="min-w-[6rem]">Price</th>
+                          <th className="min-w-[6rem]">Total Price</th>
                         </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-          </>
+                      </thead>
+                      <tbody className="whitespace-normal">
+                        {invoiceData?.products_hash?.products.map((product, i) => (
+                          <tr key={i}>
+                            <td>{product[0]}</td>
+                            <td>{product[1]}</td>
+                            <td>{Number(product[2] || 0).toFixed(2)}</td>
+                            <td>
+                              {Number(product[1] * product[2] || 0).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {invoiceData?.products_hash?.retail_products?.length > 0 && (
+                <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                  <p>
+                    <b>Retail Products</b>
+                  </p>
+
+                  <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                    <table className="table-auto  w-full ">
+                      <thead className="whitespace-normal">
+                        <tr>
+                          <th className="min-w-[6rem]">Product</th>
+                          <th className="min-w-[6rem]">Quantity</th>
+                          <th className="min-w-[6rem]">Price</th>
+                          <th className="min-w-[6rem]">Total Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="whitespace-normal">
+                        {invoiceData?.products_hash?.retail_products.map(
+                          (product, i) => (
+                            <tr key={i}>
+                              <td>{product[0]}</td>
+                              <td>{product[1]}</td>
+                              <td>{product[2]}</td>
+                              <td>{+(product[1] * product[2])}</td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
             <div className="flex flex-col">
               <span className="text-gray-700">Concierge Fee Paid:</span>
               <span>{conciergeFeePaid ? "Yes" : "No"}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-gray-700">Provider Purchased:</span>
+              <span>{providerPurchased ? "Yes" : "No"}</span>
             </div>
 
             <div className="flex flex-col">
