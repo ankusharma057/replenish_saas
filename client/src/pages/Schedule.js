@@ -277,8 +277,7 @@ function Schedule() {
         };
       });
     } catch (error) {
-      console.log("dfgddddddddddddddddddddddd", error);
-      
+      console.log(error);
     }
   };
 
@@ -350,9 +349,6 @@ function Schedule() {
     if (emp) {
       getClientName(emp.id);
       const { data } = await getTreatmentList(false, emp.id);
-
-      console.log("dataaa", data);
-      
       const treatmentOption = (data || []).map((inv) => {
         return {
           label: inv.name,
@@ -367,8 +363,6 @@ function Schedule() {
       getAllLocationsByEmployee(emp.id)
     }
   };
-
-  console.log("ssfddfsddfsdf",selectedEmployeeData);
 
   const getAllLocationsByEmployee = async (id) =>{
     const {data} = await getEmployeeLocations(id)
@@ -434,10 +428,7 @@ function Schedule() {
   function isAppointmentWithinAvailability(availabilityStart, availabilityEnd, appointments) {
     const availabilityStartDate = new Date(availabilityStart);
     const availabilityEndDate = new Date(availabilityEnd);
-
     const removedValues = Array.isArray(appointments) && appointments.shift()
-
-console.log(appointments);
 
     return appointments.some(appointment => {
         if (!appointment.start_time) return false;
@@ -447,9 +438,6 @@ console.log(appointments);
 }
 
   const showConfirmationModal = (event, readOnly, events) => {
-    console.log(event)
-    console.log(events)
-    
     if(event?.client){
       handleAddAppointmentSelect(event, readOnly);
     }
@@ -468,7 +456,6 @@ console.log(appointments);
           {
             label: "Remove Availability",
             className: "btn btn-primary del-btn",
- 
             onClick: () => {
               setShowConfirm(false);
               deleteSchedule(event.id);
@@ -477,9 +464,7 @@ console.log(appointments);
         ],
       })
     }
- 
   };
-
 
   const handleAddAppointmentSelect = ({ start_time, end_time, ...rest }, readOnly) => {
     let formateData = {
@@ -558,7 +543,6 @@ console.log(appointments);
       return;
     }
 
-
     const copyAppointMent = {
       ...appointmentModal,
       employee_id: selectedEmployeeData.id,
@@ -566,13 +550,9 @@ console.log(appointments);
       end_time: appointmentModal.selectedTimeSlot.end,
     };
 
-
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
     delete copyAppointMent.selectedTimeSlot;
-
-
-    console.log("asasas",copyAppointMent);
 
     const { data } = await createSchedule(copyAppointMent);
     let newCopyAppointMent = {
@@ -966,16 +946,36 @@ console.log(appointments);
             </div>
           </div>
 
-          {console.log("events",employeeScheduleEventsData[selectedEmployeeData?.id] || [] )}
-
           {selectedEmployeeData && (
             <ScheduleCalender
-              events={employeeScheduleEventsData[selectedEmployeeData?.id] || []}
+            events={(employeeScheduleEventsData[selectedEmployeeData?.id] || []).flatMap((data) => {
+              if (data.available) {
+                const start_time = new Date(data?.start_time);
+                const end_time = new Date(data?.end_time);
+            
+                const events = [];
+                let currentTime = start_time;
+            
+                while (currentTime < end_time) {
+                  const nextTime = new Date(currentTime);
+                  nextTime.setHours(currentTime.getHours() + 1);
+            
+                  events.push({
+                    ...data,
+                    start_time: currentTime,
+                    end_time: nextTime >= end_time ? end_time : nextTime,
+                  });
+            
+                  currentTime = nextTime;
+                }
+            
+                return events;
+              }
+              return [data];
+            })}
               onSelectEvent={(event) => {
                 showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
-        
               }}
-              // onSelectSlot={handleAddAppointmentSelect}
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
                 const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
@@ -1104,9 +1104,6 @@ console.log(appointments);
                       inputId="treatment"
                       isClearable
                       onChange={(selectedOption) => {
-
-                        console.log("selectedOption", selectedEmployeeData.treatmentOption);
-
                         setChanges(true);
                         var timeSlots = getTimeSlots(
                           selectedOption?.duration,
@@ -1226,7 +1223,7 @@ console.log(appointments);
                       (schedule) =>
                         moment(schedule.start_time).isSame(
                           moment(slot.start)
-                        ) && moment(schedule.end_time).isSame(moment(slot.end))
+                        ) || moment(schedule.end_time).isSame(moment(slot.end))
                     )
                 )
                 ?.map((slot) => {
