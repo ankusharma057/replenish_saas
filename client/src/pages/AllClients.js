@@ -1283,23 +1283,30 @@ useEffect(()=>{
                                         <div><div onClick={() => {setChartTab("create_new_chart_entries");}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Chart Entry</div></div>
                                     </div>
                                     <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
-                                        <div className={`grid grid-cols-[1fr,250px] gap-4  p-[8px] border-b  text-[24px]`}>
+                                        <div className={`flex justify-between p-3 border-b `}>
                                             <div>Name</div>
                                             <div className="text-right">Client Name</div>
                                         </div>
                                         {Array.isArray(chartEntriesData) && chartEntriesData.map((template, i) => (
-                                        <div onClick={()=>{setChartTab("create_new_chart_entries"); setEditId(template?.id); setChanges(false)}}  key={i} className={`grid grid-cols-[1fr,250px] gap-4  p-[8px] border-b hover:bg-slate-100`}>
-                                            <div className="flex items-center">
-                                            <div>
-                                                <div className="text-[20px]">{template?.name}</div>
-                                            </div>
-                                            </div>
-                                            <div className="self-center grid grid-cols-[1fr] gap-1 pt-1 text-[15px] text-right">
-                                                {template?.client?.name}
-                                            {/* <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Duplicate</button></Link>
-                                            {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
-                                            <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Edit</button>
-                                            )} */}
+                                        <div onClick={()=>{setChartTab("create_new_chart_entries"); setEditId(template?.id); setChanges(false)}}  key={i} className={`grid grid-cols-[1fr] gap-4 border rounded-md`}>
+                                            <div className="flex flex-col w-full">
+                                                <div className="flex justify-between p-3 border-b bg-[#f3f4f6]">
+                                                    <div className="flex items-center">
+                                                    <div>
+                                                        <div className="text-[20px]">{template?.name}</div>
+                                                    </div>
+                                                    </div>
+                                                    <div className="self-center grid grid-cols-[1fr] gap-1 pt-1 text-[15px] text-right">
+                                                        {template?.client?.name}
+                                                    {/* <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Duplicate</button></Link>
+                                                    {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
+                                                    <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Edit</button>
+                                                    )} */}
+                                                    </div>
+                                                </div>
+                                                <div className="p-3 line-clamp-3 max-h-[90px]">
+                                                    {template?.chart_histroy?.formData.find(field => field.type === "textarea")?.value}
+                                                </div>
                                             </div>
                                         </div>
                                         ))}
