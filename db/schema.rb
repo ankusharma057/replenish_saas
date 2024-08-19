@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_13_103542) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_16_135313) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -208,6 +208,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_103542) do
     t.integer "invoice_group_id"
     t.float "total_consumable_cost"
     t.integer "source_invoice_id"
+    t.boolean "provider_purchased"
   end
 
   create_table "locations", force: :cascade do |t|
