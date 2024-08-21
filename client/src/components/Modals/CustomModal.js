@@ -253,8 +253,6 @@ function CustomModal({
       </div>
     );
   };
-  console.log("fdgdfgfgg", invoiceData?.employee?.is_mentor);
-
 
   return (
     <>

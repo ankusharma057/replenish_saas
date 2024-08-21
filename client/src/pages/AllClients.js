@@ -104,8 +104,13 @@ const AllClientRoot = () => {
         try {
             const { data } = await getClients();
             if (data?.length > 0) {
-                setEmployeeList(data);
-                handleSelect(data[0]);
+                const newData = data.filter((client) =>
+                    client?.email !== null &&
+                    client?.email !== undefined &&
+                    client?.email.trim() !== ""
+                );
+                setEmployeeList(newData);
+                handleSelect(newData[0]);
             }
         } catch (error) {
             console.log(error);
