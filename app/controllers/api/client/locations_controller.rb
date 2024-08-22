@@ -21,7 +21,11 @@ class Api::Client::LocationsController < ClientApplicationController
 
   def employees
     location = Location.find_by(id: params[:id])
-    employees = location.employees
+    if location.present?
+      employees = location.employees
+    else
+      employees = []
+    end
 
     render json: employees, status: :ok
   end

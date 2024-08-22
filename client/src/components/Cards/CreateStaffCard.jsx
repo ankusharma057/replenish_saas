@@ -9,7 +9,7 @@ const formInitialState = {
   name: "",
   email: "",
   vendor_name: "",
-  password: "",
+  password: "test123",
   gfe: false,
   service_percentage: 0,
   retail_percentage: 0,

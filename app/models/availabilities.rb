@@ -8,7 +8,7 @@ class Availabilities < ApplicationRecord
     param[:from_date] = param[:from_date].present? ? Date.parse(param[:from_date]) : Date.today.beginning_of_month
 
     if param[:to_date].present?
-      Date.parse(param[:to_date])
+      param[:to_date] = Date.parse(param[:to_date])
     elsif param[:from_date].present?
       param[:to_date] = param[:from_date].end_of_month
     else

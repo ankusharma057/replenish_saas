@@ -92,6 +92,9 @@ function Schedule() {
     initialAppointmentModal
   );
 
+  console.log("appointmentModal?.timeSlots",appointmentModal?.timeSlots);
+
+
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
@@ -127,9 +130,11 @@ function Schedule() {
     end_date: "",
   });
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
-  const getEmployees = async (refetch = false) => {
+
+  console.log("selectedLocation?.id", selectedLocation?.id);
+  const getEmployees = async (refetch = true) => {
     try {
-      const { data } = await getLocationEmployee(authUserState?.user?.id);
+      const { data } = await getLocationEmployee(selectedLocation.id || null, refetch);
 
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
@@ -217,9 +222,18 @@ function Schedule() {
 
       // Format the date to YYYY-MM-DD format (if needed)
       const firstDayOfMonth = currentDate.toISOString().slice(0, 10);
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed, so add 1
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       const availabilityPayload = {
         employee_id: emp.id,
-        from_date: firstDayOfMonth,
+        from_date: formatDate(emp.start_date),
+        to_date: formatDate(emp.end_date),
         location_id: emp?.location_id || selectedLocation?.id
       };
       const resp = await fetchAvailability(availabilityPayload, refetch);
@@ -320,6 +334,12 @@ function Schedule() {
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (selectedLocation?.id) {
+      getEmployees();
+    }
+  }, [selectedLocation]);
 
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
     const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
@@ -854,6 +874,22 @@ function Schedule() {
     });
   };
 
+  const filteredTimeSlots = appointmentModal?.timeSlots?.filter((slot) => {
+    const isWithinAvailableTime = employeeScheduleEventsData[selectedEmployeeData?.id]?.some(
+      (schedule) => schedule.available &&
+        moment(slot.start).isSameOrAfter(schedule.start_time) &&
+        moment(slot.end).isSameOrBefore(schedule.end_time)
+    );
+
+    const overlapWithBooking = employeeScheduleEventsData[selectedEmployeeData?.id]?.some(
+      (schedule) => !schedule.available &&
+        moment(slot.start).isBefore(schedule.end_time) &&
+        moment(slot.end).isAfter(schedule.start_time)
+    );
+
+    return isWithinAvailableTime && !overlapWithBooking;
+  });
+
   return (
     <>
       <AsideLayout
@@ -919,20 +955,21 @@ function Schedule() {
                     onChange={onLocationChange}
                     defaultValue={serviceLocation[0]}
                   />
-                  {authUserState.user?.is_admin && (
-                    <Button
-                      onClick={() =>
-                        {setAddLocationModal((pre) => ({ ...pre, show: true }));
-                          getAllEmployees();
-                        }
-                      }
-                      variant="info"
-                      className="text-white flex w-full sm:w-fit"
-                    >
-                      Add
-                    </Button>
-                  )}
+                  
                 </div>
+              )}
+              {authUserState.user?.is_admin && (
+                <Button
+                  onClick={() =>
+                    {setAddLocationModal((pre) => ({ ...pre, show: true }));
+                      getAllEmployees();
+                    }
+                  }
+                  variant="info"
+                  className="text-white flex w-full sm:w-fit"
+                >
+                  Add
+                </Button>
               )}
 
               {authUserState.user && (
@@ -1216,17 +1253,7 @@ function Schedule() {
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              appointmentModal?.timeSlots
-                ?.filter(
-                  (slot) =>
-                    !employeeScheduleEventsData[selectedEmployeeData.id]?.some(
-                      (schedule) =>
-                        moment(schedule.start_time).isSame(
-                          moment(slot.start)
-                        ) || moment(schedule.end_time).isSame(moment(slot.end))
-                    )
-                )
-                ?.map((slot) => {
+              filteredTimeSlots ?.map((slot) => {
                   return (
                     <Form.Check
                       type="radio"
@@ -1489,27 +1516,6 @@ function Schedule() {
             placeholder="Select Employee"
           />
         </div>
-        </div>
-        <div className="flex flex-1 relative mt-2">
-          <Select
-            className="flex-fill flex-grow-1"
-            inputId="EmployeeId"
-            onChange={(event) => {
-              console.log(event, "Employee Values");
-              const transformedLocations = event.map(
-                ({ id }) => ({ location_id: id })
-              );
-              setUpdateEmployeeInput((pre) => ({
-                ...pre,
-                employee_locations_attributes: [
-                  ...transformedLocations,
-                ],
-              }));
-            }}
-            options={employeesData}
-            required
-            placeholder="Select Employee"
-          />
         </div>
         <div className="flex flex-1 relative mt-2">
           <Select
