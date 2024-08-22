@@ -7,9 +7,10 @@ class SendPdfToInvoiceMailer < ApplicationMailer
 
     attachments["#{@invoices.first.employee.name}-Finalized-Invoices-#{@invoices.ids}-#{DateTime.now.strftime('%d/%m/%y')}.pdf"] = @invoice_group.document.download
 
-    emails = Employee.admins.map(&:email)
+    emails = []
     emails << @invoices.first.employee.email
     emails << "replenishmd_527@invoicesmelio.com"
+    emails << "info@replenishmd.com"
 
     mail(
       from: 'patrick@test.com',
