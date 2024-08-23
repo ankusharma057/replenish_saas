@@ -130,7 +130,7 @@ function Schedule() {
 
   const getEmployees = async (refetch = true) => {
     try {
-      const { data } = await getLocationEmployee(selectedLocation.id || null, refetch);
+      const { data } = await getLocationEmployee(selectedLocation?.id || null, refetch);
 
       if (data) {
         const a = data?.map((emp) => ({
