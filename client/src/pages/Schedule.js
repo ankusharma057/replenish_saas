@@ -146,7 +146,9 @@ function Schedule() {
         }
         setEmployeeList(data);
         setAllEmployeeList(a);
-        handleSelectEmployee(filteredEmpData.length > 0 ? selectedEmployeeData : data[0]);
+        if(!selectedEmployeeData){
+          handleSelectEmployee(data[0]);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -178,7 +180,9 @@ function Schedule() {
         (Array.isArray(currentEmployee) && currentEmployee[0]?.id),
         updateEmployeeInput
       );
-      getEmployees();
+      setTimeout(() => {
+        getEmployees();
+      }, 500);
       toast.success("Employee has been updated successfully.");
       setSelectedEmployeeData(selectedEmployeeData);
       handleSelectEmployee(data);
@@ -676,8 +680,8 @@ function Schedule() {
       const { data } = await createLocation(copyAddLocationModal);
       if (data) {
         setAddLocationModal(initialAddLocationModal);
-        // getEmployees();
         getAllLocation(true);
+        setSelectedEmployeeData(null);
         e.target?.reset();
         toast.success("New location added successfully.");
       }
