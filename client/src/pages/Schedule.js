@@ -131,7 +131,13 @@ function Schedule() {
   });
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
 
-  console.log("selectedLocation?.id", selectedLocation?.id);
+  // console.log("selectedLocation?.id", selectedLocation?.id);
+  console.log("selectedEmployeeData", selectedEmployeeData?.id);
+  
+  // console.log("employeesData", employeesData);
+  // console.log("employeeList", employeeList);
+  
+  
   const getEmployees = async (refetch = true) => {
     try {
       const { data } = await getLocationEmployee(selectedLocation.id || null, refetch);
@@ -344,13 +350,12 @@ function Schedule() {
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
     const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
 
-    if (data?.length > 0) {
+    if (data) {
       setEmployeeLocations(
         data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
       );
     }
   };
-
 
   useEffect(() => {
     if (selectedEmployeeData?.id) {
@@ -930,6 +935,7 @@ function Schedule() {
                   {
                     setManageLocationModal((pre) => ({ ...pre, show: true }));
                     getAllEmployees();
+                    getAllEmployeeLocation(selectedEmployeeData?.id)
                   }
                 }
                 variant="info"
