@@ -92,9 +92,6 @@ function Schedule() {
     initialAppointmentModal
   );
 
-  console.log("appointmentModal?.timeSlots",appointmentModal?.timeSlots);
-
-
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
@@ -131,26 +128,25 @@ function Schedule() {
   });
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
 
-  // console.log("selectedLocation?.id", selectedLocation?.id);
-  console.log("selectedEmployeeData", selectedEmployeeData?.id);
-  
-  // console.log("employeesData", employeesData);
-  // console.log("employeeList", employeeList);
-  
-  
   const getEmployees = async (refetch = true) => {
     try {
       const { data } = await getLocationEmployee(selectedLocation.id || null, refetch);
 
-      if (data?.length > 0) {
+      if (data) {
         const a = data?.map((emp) => ({
           ...emp,
           label: emp?.name,
           value: emp?.id,
         }));
+        let filteredEmpData = [];
+        if (selectedEmployeeData) {
+          filteredEmpData = selectedEmployeeData?.employee_locations?.filter((emp) => (
+            emp?.location?.id === selectedLocation?.id
+          ));
+        }
         setEmployeeList(data);
         setAllEmployeeList(a);
-        handleSelectEmployee(data[0]);
+        handleSelectEmployee(filteredEmpData.length > 0 ? selectedEmployeeData : data[0]);
       }
     } catch (error) {
       console.log(error);
@@ -182,6 +178,7 @@ function Schedule() {
         (Array.isArray(currentEmployee) && currentEmployee[0]?.id),
         updateEmployeeInput
       );
+      getEmployees();
       toast.success("Employee has been updated successfully.");
       setSelectedEmployeeData(selectedEmployeeData);
       handleSelectEmployee(data);
@@ -854,10 +851,7 @@ function Schedule() {
                 selectedEmployeeData.id,
                 deleteLocationDetails
               );
-
               toast.success("Location removed successfully.");
-
-              // setUpdateInvoiceInput(data);
               handleSelectEmployee(data);
             } catch (error) {
               toast.error(
@@ -1472,6 +1466,7 @@ function Schedule() {
       <ModalWraper
         show={manageLocationModal.show}
         onHide={() => {
+          getEmployees();
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
@@ -1610,7 +1605,7 @@ const EmployeeLocationTableRows = ({ val, removeLocation }) => {
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={() => removeLocation(val)}
+            onClick={() => {removeLocation(val);}}
             className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
           >
             <RxCross2 className="w-6 h-6" />
