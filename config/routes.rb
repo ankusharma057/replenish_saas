@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 mount Sidekiq::Web => '/sidekiq'
 
   namespace :api do
+    get 'health_check', to: 'health_check#index'
     namespace :client do
       post '/sign_up', to: 'registrations#sign_up'
       post '/log_in', to: 'sessions#create'
