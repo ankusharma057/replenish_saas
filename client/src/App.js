@@ -48,6 +48,7 @@ const IntakeForm = lazy(() => import("./pages/IntakeForm"));
 const NewIntakeForm = lazy(() => import("./pages/NewIntakeForm"));
 const IntakeFormPreview = lazy(() => import("./pages/IntakeFormPreview"));
 const SubmitedClientIntakeForm = lazy(() => import("./pages/SubmitedClientIntakeForm"));
+const Health = lazy(() => import("./pages/Health"));
 
 function App() {
   const navigate = useNavigate();
@@ -66,12 +67,18 @@ function App() {
     } catch (error) {}
   };
   const getMyProfile = async () => {
-    const { data } = await getUpdatedUserProfile();
-    if (data) {
-      authUserDispatch({ type: LOGIN, payload: data });
-    } else {
-      if (!location.pathname.includes("clients")) navigate("/");
+    if(location.pathname === "/healthz"){
+      navigate("/healthz");
     }
+    else{
+      const { data } = await getUpdatedUserProfile();
+      if (data) {
+        authUserDispatch({ type: LOGIN, payload: data });
+      } else {
+        if (!location.pathname.includes("clients")) navigate("/");
+      }
+    }
+
   };
 
   useEffect(() => {
@@ -133,6 +140,9 @@ function App() {
     ) {
       navigate("/myprofile");
     }
+    else if(location.pathname === "/healthz"){
+      navigate("/healthz");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     location.pathname,
@@ -145,6 +155,7 @@ function App() {
   return (
     <div id="top-model" className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"h-screen"} `}>
       <Suspense fallback={<SuspenseLoading />}>
+      
         {authUserState.client ? (
           <ClientHeader />
         ) : authUserState.user ? (
@@ -154,6 +165,7 @@ function App() {
         ) : null}
 
         <Routes>
+          <Route path="/healthz" element={<Health />} />
           <Route path="/" element={<Login />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />

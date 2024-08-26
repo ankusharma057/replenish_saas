@@ -19,6 +19,13 @@ const api = axios.create({
   adapter: cache.adapter,
 });
 
+export const getHealth = async (refetch) =>
+  api.get("/api/health_check.json", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getUpdatedUserProfile = async (refetch) =>
   api.get("/api/employees/myprofile", {
     cache: {

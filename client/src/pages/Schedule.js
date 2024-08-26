@@ -128,7 +128,7 @@ function Schedule() {
   });
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
 
-  const getEmployees = async (refetch = true) => {
+  const getEmployees = async (refetch = true,remove = false ) => {
     try {
       const { data } = await getLocationEmployee(selectedLocation?.id || null, refetch);
 
@@ -138,16 +138,18 @@ function Schedule() {
           label: emp?.name,
           value: emp?.id,
         }));
-        let filteredEmpData = [];
-        if (selectedEmployeeData) {
-          filteredEmpData = selectedEmployeeData?.employee_locations?.filter((emp) => (
-            emp?.location?.id === selectedLocation?.id
-          ));
-        }
         setEmployeeList(data);
         setAllEmployeeList(a);
-        if(!selectedEmployeeData){
-          handleSelectEmployee(data[0]);
+        if(remove){
+          const check = data.find((datas)=>(datas?.id === selectedEmployeeData?.id))
+          if(check){
+            handleSelectEmployee(data[0]);
+          }
+        }
+        else{
+          if(!selectedEmployeeData){
+            setSelectedEmployeeData(data[0])
+          }
         }
       }
     } catch (error) {
@@ -1470,7 +1472,7 @@ function Schedule() {
       <ModalWraper
         show={manageLocationModal.show}
         onHide={() => {
-          getEmployees();
+          getEmployees(true, true);
           if(changes){
             confirmAlert({
               title: "Confirm to Close",
