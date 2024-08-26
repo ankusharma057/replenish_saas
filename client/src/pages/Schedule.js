@@ -144,9 +144,10 @@ function Schedule() {
           const check = data.find((datas)=>(datas?.id === selectedEmployeeData?.id))
           if(check){
             handleSelectEmployee(data[0]);
+          }else{
+            setSelectedEmployeeData(data[0])
           }
-        }
-        else{
+        }else{
           if(!selectedEmployeeData){
             setSelectedEmployeeData(data[0])
           }
