@@ -76,7 +76,7 @@ const Employee = () => {
   const [currSelectedMentor, setCurrSelectedMentor] = useState();
   const [serviceLocation, setServiceLocation] = useState([]);
   const [edittitle, setEditTitle] = useState(false)
-  const [title, setTitle] = useState("Questionnaries Form")
+  const [title, setTitle] = useState("Questionnaires Form")
   const [questionnaireForms, setQuestionnaireForms]=useState()
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();

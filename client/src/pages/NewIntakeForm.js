@@ -136,7 +136,7 @@ const profile_fields = [
 
   },
   {
-    input_name: "Preferred Name (if dirrerent)",
+    input_name: "Preferred Name (if different)",
     name: "preferred-name",
     include_in_intake: false,
     input_type: "text",

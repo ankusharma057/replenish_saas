@@ -8,9 +8,9 @@
 <body>
   <p>Dear <%= @employee.name %>,</p>
   <% if @amount == 50 %>
-    <p>A payment of <%= @amount %> has been processed for the schedule on <%= @schedule.date %> by <%= @client.name %>.</p>
+    <p>A payment of <%= @amount %> has been processed for the schedule on <%= @schedule.date.strftime('%d-%m-%Y') %> by <%= @client.name %>.</p>
   <% else %>
-    <p>An appointment on <%= @schedule.date %> has been created by <%= @client.name %>.</p>
+    <p>An appointment on <%= @schedule.date.strftime('%d-%m-%Y') %> has been created by <%= @client.name %>.</p>
   <% end %>
   <p>Thank you!</p>
 </body>

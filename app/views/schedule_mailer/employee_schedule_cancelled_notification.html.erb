@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Cancelled Notification</title>
+</head>
+<body>
+  <p>Dear <%= @employee.name %>,</p>
+  <p>The schedule with client <%= @client.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> has been cancelled.</p>
+  <p>Please adjust your schedule accordingly.</p>
+  <p>Thank you.</p>
+</body>
+</html>

@@ -153,7 +153,7 @@ const ConfirmPayment = () => {
             1
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl">How would you like to remind?</h2>
+            <h2 className="text-xl">How would you like to be reminded?</h2>
             <Form.Check
               type="checkbox"
               label="Email 2 days before appointment"
@@ -168,7 +168,7 @@ const ConfirmPayment = () => {
               // checked={reminderOptions.email24HoursBefore}
               onChange={() => handleReminderChange("email24HoursBefore")}
             />
-            <Form.Check
+            {/* <Form.Check
               title="You need to add you phone number to your account"
               type="checkbox"
               label="Text message(SMS) 2 days before appointment"
@@ -185,7 +185,7 @@ const ConfirmPayment = () => {
               disabled={true}
               // checked={reminderOptions.textMessage24HoursBefore}
               onChange={() => handleReminderChange("textMessage24HoursBefore")}
-            />
+            /> */}
           </div>
         </div>
 
@@ -194,7 +194,7 @@ const ConfirmPayment = () => {
             2
           </div>
           <div className="flex flex-col flex-1 gap-2">
-            <h2 className="text-xl">Cancellation Policy</h2>
+            <h2 className="text-xl">Intake Form</h2>
             <div className="flex flex-col justify-between">
               <p>Please fill out our online intake form</p>
               <div className="border w-[50%] rounded-md p-2 px-3">

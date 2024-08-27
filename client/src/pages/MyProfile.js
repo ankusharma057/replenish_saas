@@ -64,7 +64,7 @@ const MyProfile = () => {
     quantity: 0,
   });
   const [edittitle, setEditTitle] = useState(false);
-  const [title, setTitle] = useState("Questionnaries Form");
+  const [title, setTitle] = useState("Questionnaires Form");
   const [currentPage, setCurrentPage] = useState(1);
   const itemPerPage = 30; // Calculate the index range for the current page
   const startIndex = (currentPage - 1) * itemPerPage;

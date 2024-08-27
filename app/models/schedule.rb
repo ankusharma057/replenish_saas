@@ -17,7 +17,13 @@ class Schedule < ApplicationRecord
   end
 
   def cancel_client_schedule(current_client)
-    update(is_cancelled: true, cancelled_by: current_client.id, cancelled_at: DateTime.now)
+    if update(is_cancelled: true, cancelled_by: current_client.id, cancelled_at: DateTime.now)
+      ScheduleMailer.client_schedule_cancelled_notification(self, client).deliver_now
+      ScheduleMailer.employee_schedule_cancelled_notification(self, employee, client).deliver_now
+    else
+      Rails.logger.error "Failed to cancel the schedule with ID: #{id}"
+      false
+    end
   end
 
   def presisted_schedule
