@@ -145,11 +145,11 @@ function Schedule() {
           if(check){
             handleSelectEmployee(data[0]);
           }else{
-            setSelectedEmployeeData(data[0])
+            handleSelectEmployee(data[0])
           }
         }else{
           if(!selectedEmployeeData){
-            setSelectedEmployeeData(data[0])
+            handleSelectEmployee(data[0])
           }
         }
       }
