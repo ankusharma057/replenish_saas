@@ -1423,7 +1423,7 @@ const NewIntakeForm = () => {
                   >
                     <div className="flex justify-between items-center py-1">
                       <div className="font-semibold text-[17px]">
-                        {field?.label}intakeFormData
+                        {field?.label}
                       </div>
                       <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
                       <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">

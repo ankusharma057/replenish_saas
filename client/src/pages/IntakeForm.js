@@ -32,7 +32,7 @@ const IntakeForm = () => {
         <div className="h-[100px] flex items-center w-full border-[1px] rounded-lg px-3">
           <div className="flex justify-between w-full">
             <h3 className="m-0 p-0">{authUserState.user?.name}</h3>
-            <Link to="/new-intake-forms">
+            <Link to="/new-intake-form">
               <Button variant="info" type="button" className="text-white">New IntakeForm</Button>
             </Link>
           </div>
@@ -60,10 +60,10 @@ const IntakeForm = () => {
                     </div>
                   </div>
                   <div className="self-start grid grid-cols-[1fr,1fr,50px] gap-1 pt-1 text-[15px]">
-                    <button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?duplicate-intake-form-id=${form.id}`)}}>Duplicate</button>
+                    <button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={()=>{navigate(`/new-intake-form/?duplicate-intake-form-id=${form.id}`)}}>Duplicate</button>
                     <Link  target="_blank" className="text-black" to={`/intake-form-preview/?intake_form_id=${form?.id}`}><button className="bg-white border border-gray-900 px-2 py-1  rounded-md">Preview</button></Link>
                     {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === form?.employee?.id)) && (
-                      <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-forms/?intake-form-id=${form.id}`)}}>Edit</button>
+                      <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={()=>{navigate(`/new-intake-form/?intake-form-id=${form.id}`)}}>Edit</button>
                     )}
                   </div>
                 </div>

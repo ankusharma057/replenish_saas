@@ -393,6 +393,22 @@ const ClientLocation = () => {
     }
   };
 
+  const filteredTimeSlots = appointmentModal?.timeSlots?.filter((slot) => {
+    const isWithinAvailableTime = selectedEmpSchedules?.some(
+      (schedule) => schedule.available &&
+        moment(slot.start).isSameOrAfter(schedule.start_time) &&
+        moment(slot.end).isSameOrBefore(schedule.end_time)
+    );
+
+    const overlapWithBooking = selectedEmpSchedules.some(
+      (schedule) => !schedule.available &&
+        moment(slot.start).isBefore(schedule.end_time) &&
+        moment(slot.end).isAfter(schedule.start_time)
+    );
+
+    return isWithinAvailableTime && !overlapWithBooking;
+  });
+
   return (
     <ClientLayout>
       <div className="bg-white min-h-full rounded-lg pb-4 text-slate-800">
@@ -480,7 +496,26 @@ const ClientLocation = () => {
                 )}
                 <ClientScheduleCalender
                   onSelectEvent={(e) => handleAddAppointmentSelect(e)}
-                  events={selectedEmpSchedules || []}
+                  events={(selectedEmpSchedules || []).flatMap((data) => {
+                    if (data.available) {
+                      const start_time = new Date(data?.start_time);
+                      const end_time = new Date(data?.end_time);
+                      const events = [];
+                      let currentTime = start_time;
+                      while (currentTime < end_time) {
+                        const nextTime = new Date(currentTime);
+                        nextTime.setHours(currentTime.getHours() + 1);
+                        events.push({
+                          ...data,
+                          start_time: currentTime,
+                          end_time: nextTime >= end_time ? end_time : nextTime,
+                        });
+                        currentTime = nextTime;
+                      }
+                      return events;
+                    }
+                    return [data];
+                  })}
                   onSelectSlot={handleSelectSlot}
                   onRangeChange={onCalenderRangeChange}
                   eventPropGetter={(event) => {
@@ -596,8 +631,8 @@ const ClientLocation = () => {
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              appointmentModal?.timeSlots
-                ?.filter(
+              (filteredTimeSlots.length !==0)?
+              filteredTimeSlots.filter(
                   (slot) =>
                     !selectedEmpSchedules.some(
                       (schedule) =>
@@ -633,7 +668,7 @@ const ClientLocation = () => {
                       }}
                     />
                   );
-                })
+                }):<p>Slot is Not available for this Treatment</p>
             )}
           </div>
         </form>

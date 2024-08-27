@@ -219,7 +219,7 @@ const Questionnaires = ({
 
   useEffect(()=>{
     const path = location.pathname 
-    if(path === "/new-intake-forms"){
+    if(path === "/new-intake-form"){
       setPage("Intake Form Page")
     }
     else{

@@ -1260,7 +1260,8 @@ function Schedule() {
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              filteredTimeSlots ?.map((slot) => {
+              (filteredTimeSlots?.length !==0)?
+              filteredTimeSlots?.map((slot) => {
                   return (
                     <Form.Check
                       type="radio"
@@ -1280,7 +1281,7 @@ function Schedule() {
                       }
                     />
                   );
-                })
+                }):<p>Slot is Not available for this Treatment</p>
             )}
             {appointmentModal.readOnly && (
               <div className="flex flex-col gap-2">

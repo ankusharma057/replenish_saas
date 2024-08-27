@@ -177,10 +177,8 @@ function App() {
           <Route path="/intake-form-preview/:id?" element={<IntakeFormPreview />} />
           <Route path="/clients/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
           <Route path="/clients/submited-intake-forms-preview" element={<SubmitedClientIntakeForm />} />
-          <Route
-            path="/clients/payment/success"
-            element={<ClientPaymentSuccess />}
-          />
+          <Route path="/clients/payment/success" element={<ClientPaymentSuccess />}/>
+          <Route path="/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
 
           {authUserState.client && (
             <>
@@ -224,8 +222,7 @@ function App() {
                     <Route path="/schedule" element={<Schedule />} />
                     <Route path="/intake-forms" element={<IntakeForm />} />
                     <Route path="/new-intake-form" element={<NewIntakeForm />} />
-                    <Route path="/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
-
+                    {/* <Route path="/new-intake-form" element={<NewIntakeForm />} /> */}
                   </>
                 )}
 
@@ -236,8 +233,6 @@ function App() {
                   <Route path="/invoicelist" element={<Invoice />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
-                  <Route path="/intake-forms" element={<IntakeForm />} />
-                  <Route path="/new-intake-forms" element={<NewIntakeForm />} />
                   {/* <Route path="/signup" element={<Signup />} /> */}
                   <Route path="/myprofile" element={<MyProfile />} />
                 </>
@@ -249,10 +244,8 @@ function App() {
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/addinvoice" element={<AddInvoices />} />
                   <Route path="/intake-forms" element={<IntakeForm />} />
-                  <Route path="/new-intake-forms" element={<NewIntakeForm />} />
+                  <Route path="/new-intake-form" element={<NewIntakeForm />} />
                   <Route path="/customers" element={<AllClientRoot />} />
-
-
                 </>
               )}
             </>
