@@ -98,6 +98,7 @@ const ClientLocation = () => {
   useEffect(() => {
     getEmpByLocId();
     getLocEmp();
+    getEmpSchedule(calenderCurrentRange);
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locId, empId]);
@@ -105,7 +106,6 @@ const ClientLocation = () => {
   useEffect(() => {
     if (selectedTreatMent) {
       localStorage.setItem("treatment", JSON.stringify(selectedTreatMent));
-      console.log(selectedTreatMent, "state?.selectedTreatMent");
       updatedParams.set("treatment_id", selectedTreatMent.treatment.id);
       setParams(updatedParams);
     }
@@ -126,8 +126,6 @@ const ClientLocation = () => {
         const { data: products } = await getProductsList();
         const { data: treatments } = await getTreatmentsList(data?.id);
 
-        console.log("data-treat", data)
-
         const groupedTreatments = _(treatments)
               .groupBy('product.id')
               .map(group => ({
@@ -135,8 +133,6 @@ const ClientLocation = () => {
                 treatments: _.map(group, o => o)
               }))
               .value()
-
-        console.log("treatments", treatments);
 
         if (products?.length) {
           setProductsList(products);
@@ -194,14 +190,29 @@ const ClientLocation = () => {
           treatment: d?.treatment?.treatment || "",
         }));
 
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed, so add 1
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        const availabilityPayload = {
+          employee_id: empId,
+          from_date: formatDate(emp?.start_date),
+          to_date: formatDate(emp?.end_date),
+          location_id: locId
+        };
+
         const availibilityData = await getEmployeeAvailablities(
-          empId,true
+          availabilityPayload, true
         );
 
         const unavailibilityData = await getClientEmployeeAvailability(
           empId,true
         );
- 
+
         const availabilityTimings = availibilityData.data.map(d => {
           return d.availability_timings.map(obj => ({
             start_time: new Date(d.availability_date + " " + obj.start_time),
@@ -263,7 +274,6 @@ const ClientLocation = () => {
   const isEmp = !((!!empId && !selectedEmployee) || !empId);
 
   const handleAddAppointmentSelect = (e) => {
-    // console.log("handleAddAppointmentSelect", e);
     if (e?.client?.id && e?.client?.id === authUserState.client?.id) {
       toast("This slot is already booked by you.");
       return;
@@ -296,7 +306,6 @@ const ClientLocation = () => {
       isEdit: true,
       timeSlots: a,
     };
-   console.log("formateData",formateData);
 
     localStorage.setItem("formateData", JSON.stringify(formateData));
     formateData.timeSlots = formateData.timeSlots.filter((slot) => {
@@ -356,7 +365,6 @@ const ClientLocation = () => {
     };
 
     const { data } = await createClientSchedule(copyAppointMent);
-    console.log("data",data)
     if (data?.redirect_url) {
       const stateObject = {
           locId,

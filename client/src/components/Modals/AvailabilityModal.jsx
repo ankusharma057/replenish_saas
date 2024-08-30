@@ -53,10 +53,9 @@ const AvailabilityModal = (props) => {
       );
     }
   };
+
   const onLocationChange = async (selectedOption) => {
     setChanges(true)
-    // const { data } = await getLocationEmployee(selectedOption?.id);
-console.log("selectedOption",selectedOption);
 
     if (authUserState?.user) {
       const { data } = await getLocationEmployee(selectedOption?.id);
@@ -82,7 +81,7 @@ console.log("selectedOption",selectedOption);
     getAllLocation();
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props]);
 
   const handleInputChange = (e, att) => {
     setChanges(true)
@@ -103,8 +102,6 @@ console.log("selectedOption",selectedOption);
       toast.error("Please select valid time interval.");
       return;
     }
-
-    console.log("availabilityTimings",availabilityTimings);
 
     if (!checkTimingsValidity(availabilityTimings)) {
       toast.error("Please check shift timings and select valid time interval.");
@@ -144,7 +141,8 @@ console.log("selectedOption",selectedOption);
     const res = await postAvailability({ availability: { ...scheduleData, availability_timings: [...availabilityTimings] } })
     if (res.status === 201 || res.status === 200) {
       toast.success("Changes Applied Successfully");
-      setAvailabilityTimings(initialAvailabilityTimings)
+      setAvailabilityTimings(initialAvailabilityTimings);
+      setEmployeeList([]);
       // closeModal()
     }
     handleSubmit();
