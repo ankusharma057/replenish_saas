@@ -34,7 +34,7 @@ class Api::ProductsController < ApplicationController
   private
 
   def product_params
-    params.require(:product).permit(:name, :product_type, :cost_price, :retail_price)
+    params.require(:product).permit(:name, :product_type, :cost_price, :retail_price, :provider_purchased)
   end
 
   def set_access_control_headers

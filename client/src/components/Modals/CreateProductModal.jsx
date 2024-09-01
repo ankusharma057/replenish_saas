@@ -4,13 +4,14 @@ import LabelInput from "../Input/LabelInput";
 import Loadingbutton from "../Buttons/Loadingbutton";
 import { toast } from "react-toastify";
 import ModalWraper from "./ModalWraper";
-import { createProduct } from "../../Server";
+import { createProduct, loginUser } from "../../Server";
 
-const CreateProductModal = ({ show, onHide, getProducts }) => {
+const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
   const initialFormData = {
     name: "",
     product_type: "",
     cost_price: "",
+    provider_purchased:"",
     retail_price: "",
   };
 
@@ -18,13 +19,29 @@ const CreateProductModal = ({ show, onHide, getProducts }) => {
   const [formData, setFormData] = useState(initialFormData);
 
   const handleChange = (e) => {
-    setFormData((pre) => ({ ...pre, [e.target.name]: e.target.value }));
+    const {name, value, type, checked} = e.target
+    setFormData((pre) => ({ ...pre, [name]:(type === "checkbox") ? checked :  value }));
+    if(name === "name" && value.length === 0){
+      setFormData((prev)=>({...prev,["provider_purchased"]:false}))
+    }
+    if(type === "checkbox"){
+      if(!(/^pp\s/i).test(formData.name) && checked && formData.name !== ""){
+        setFormData((prev)=>({...prev,["name"]:`PP ${formData.name}`}))
+      }
+      else{
+        setFormData((prev)=>({...prev,["name"]:formData.name.replace(/^pp\s/i,"")}))
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      if(productList.find((data)=>(data?.name === formData?.name))){
+        console.log("ssssff",formData);
+        debugger
+      }
       setLoading(true);
       await createProduct(formData);
       toast.success(`Product Created Successfully.`);
@@ -41,6 +58,8 @@ const CreateProductModal = ({ show, onHide, getProducts }) => {
       setLoading(false);
     }
   };
+
+
 
   return (
     <ModalWraper
@@ -115,6 +134,19 @@ const CreateProductModal = ({ show, onHide, getProducts }) => {
           onChange={handleChange}
           min="0"
         />
+
+        <label className="flex justify-between font-semibold  py-2 rounded-md  transition duration-500">
+          Provider Purchased
+          <input
+            type="checkbox"
+            name="provider_purchased"
+            checked={formData?.provider_purchased} 
+            disabled={((formData.name).length <= 0)? true : false}
+            // checked={true}
+            onChange={(event) => handleChange(event)}
+            className="mr-5"
+          />
+        </label>
       </Form>
     </ModalWraper>
   );

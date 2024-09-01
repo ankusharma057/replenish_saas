@@ -23,7 +23,7 @@ const initialFormState = {
   conciergeFeePaid: false,
   gfe: false,
   semaglitudeConsultation: false,
-  providerPurchased: false,
+  provider_purchased: false,
   paidByClientCash: 0,
   paidByClientCredit: 0,
   personalDiscount: 0,
@@ -133,6 +133,8 @@ export default function AddInvoices() {
   }, []);
   console.log(productList, 'product list new');
   console.log(retailProductList, 'retail product list new');
+
+  console.log("selectedProduct",formData.products);
 
   const handleProductListChange = async (selectedOption) => {
     console.log(selectedOption, 'selected option;');
@@ -282,6 +284,17 @@ export default function AddInvoices() {
     return sum;
   };
 
+  const getProviderPurchasedCostPrice = () => {
+    let sum = 0;
+    formData.products.forEach((product) => {
+      if(product.provider_purchased){
+        console.log("product",product);
+        sum += getTotalCostPrice(product);
+      }
+    });
+    return sum;
+  };
+
   const getConsumableRetailPrice = () => {
     let sum = 0;
     formData.products.forEach((product) => {
@@ -367,7 +380,8 @@ export default function AddInvoices() {
       afterTax.conciergeFee = 50;
     }
     cashCalculations(afterTax);
-    const totalProductPriceSum = getConsumableCostPrice();
+    const totalProductPriceSum = getProviderPurchasedCostPrice();
+    console.log("totalProductPriceSum",totalProductPriceSum);
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
 
@@ -392,7 +406,12 @@ export default function AddInvoices() {
         afterTax.retailTotal) *
       (semaglitude_percentage / 100); //(replace with injector percentage)
 
-    if (formData?.providerPurchased) total += totalProductPriceSum;
+
+      
+    total += totalProductPriceSum;
+
+    // if (formData?.providerPurchased) total += totalProductPriceSum;
+
     
     if (authUserState.user?.gfe)
       total += afterTax.gfeFee + afterTax.semagConsultFee;
@@ -745,7 +764,7 @@ export default function AddInvoices() {
       concierge_fee_paid: formData?.conciergeFeePaid,
       gfe: formData?.gfe,
       semag_consult_fee: formData?.semaglitudeConsultation,
-      provider_purchased: formData?.providerPurchased,
+      provider_purchased: formData?.provider_purchased,
       paid_by_client_cash: formData?.paidByClientCash,
       paid_by_client_credit: formData?.paidByClientCredit,
       personal_discount: formData?.personalDiscount,
@@ -944,16 +963,18 @@ export default function AddInvoices() {
                       className="ml-1"
                     />
                   </label>
-                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
+
+                  {/* <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
                     Provider Purchased:
                     <input
                       type="checkbox"
-                      name="providerPurchased"
-                      checked={formData?.providerPurchased}
+                      name="provider_purchased"
+                      checked={formData?.provider_purchased}
                       onChange={(event) => handleInputChange(event)}
                       className="ml-2"
                     />
-                  </label>
+                  </label> */}
+
                   {/* <label className="mb-2 block">
                     Provider Purchased:
                     <input

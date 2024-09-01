@@ -23,6 +23,7 @@ const ProductsTab = ({
     name: "",
     product_type: "",
     cost_price: "",
+    provider_purchased:"",
     retail_price: "",
   });
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
@@ -43,11 +44,25 @@ const ProductsTab = ({
   }, [filteredInventory]);
 
   const handleProductChange = (e) => {
+    const {name, value, type, checked} = e.target
     setUpdateProductInput((pre) => ({
       ...pre,
-      [e.target.name]: e.target.value,
+      [name]:(type === "checkbox") ? checked :  value,
     }));
+    if(name === "name" && value.length === 0){
+      setUpdateProductInput((prev)=>({...prev,["provider_purchased"]:false}))
+    }
+    if(type === "checkbox"){
+      if(!(/^pp\s/i).test(updateProductInput.name) && checked && updateProductInput.name !== ""){
+        setUpdateProductInput((prev)=>({...prev,["name"]:`PP ${updateProductInput.name}`}))
+      }
+      else{
+        setUpdateProductInput((prev)=>({...prev,["name"]:updateProductInput.name.replace(/^pp\s/i,"")}))
+      }
+    }
   };
+
+  console.log("ssss",updateProductInput);
 
   const handleDelete = (product) => {
     // console.log(product);
@@ -86,6 +101,7 @@ const ProductsTab = ({
       name: updateProductInput.name,
       product_type: updateProductInput.product_type,
       cost_price: updateProductInput.cost_price,
+      provider_purchased:updateProductInput.provider_purchased,
       retail_price: updateProductInput.retail_price,
     };
     try {
@@ -169,6 +185,18 @@ const ProductsTab = ({
             required={true}
             type="number"
           />
+          <label className="flex justify-between font-  py-2 rounded-md transition duration-500">
+            Provider Purchased
+            <input
+              type="checkbox"
+              name="provider_purchased"
+              checked={updateProductInput?.provider_purchased}
+              // checked={true}
+              disabled={((updateProductInput.name).length <= 0)? true : false}
+              onChange={handleProductChange}
+              className="mr-5"
+            />
+          </label>
           <br></br>
           <Loadingbutton
             isLoading={loading}
@@ -183,6 +211,7 @@ const ProductsTab = ({
         show={show}
         onHide={() => onHide(false)}
         getProducts={getProducts}
+        productList={productList}
       />
     </div>
   );
