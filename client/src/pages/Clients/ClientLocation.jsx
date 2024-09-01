@@ -255,7 +255,6 @@ const ClientLocation = () => {
         );
         const arr = newData.concat(newAvailData);
         const arr1 = arr.concat(unavailabilityNewData,availabilityDataNew);
-        console.log(arr1, "aar1");
         setSelectedEmpSchedules(arr1);
       }
     } catch (error) {

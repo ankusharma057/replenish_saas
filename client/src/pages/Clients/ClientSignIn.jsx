@@ -44,8 +44,6 @@ function ClientSignIn() {
       if (res.status === 200) {
         authUserDispatch({ type: CLIENT_LOGIN, payload: res.data });
         toast.success("Successfully Logged In");
-        console.log(window.location.href);
-        console.log(window.location);
         if(window.location.pathname == "/clients/signin"){
           navigate("/clients/appointments")
         }else{
@@ -70,7 +68,6 @@ function ClientSignIn() {
             location_id: locId,
           };
           const { data } = await createClientSchedule(copyAppointMent);
-          console.log(data, copyAppointMent)
           if (data?.redirect_url) {
             const stateObject = {
                 locId,

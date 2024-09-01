@@ -131,13 +131,8 @@ export default function AddInvoices() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
-  console.log(productList, 'product list new');
-  console.log(retailProductList, 'retail product list new');
-
-  console.log("selectedProduct",formData.products);
 
   const handleProductListChange = async (selectedOption) => {
-    console.log(selectedOption, 'selected option;');
     setSelectedProduct(selectedOption);
     if (selectedOption) {
       if (Number(selectedOption?.quantity) <= 0.009) {
@@ -170,7 +165,6 @@ export default function AddInvoices() {
         products: [...formData.products, productToBeAdded],
       }));
       const newValues = productList.filter(obj => obj.id !== selectedOption.id);
-      console.log(newValues, "newValues is already in the list");
       setProductList([...newValues])
     }
     // const { data } = await getLocationEmployee(selectedOption?.id);
@@ -215,7 +209,6 @@ export default function AddInvoices() {
         retailProducts: [...formData.retailProducts, retailProductToBeAdded],
       }));
       const newValues = retailProductList.filter(obj => obj.id !== selectedOption.id);
-      console.log(newValues, "newValues is already in the list");
       setRetailProductList([...newValues])
 
       setIsAlert({
@@ -288,7 +281,6 @@ export default function AddInvoices() {
     let sum = 0;
     formData.products.forEach((product) => {
       if(product.provider_purchased){
-        console.log("product",product);
         sum += getTotalCostPrice(product);
       }
     });
@@ -381,7 +373,6 @@ export default function AddInvoices() {
     }
     cashCalculations(afterTax);
     const totalProductPriceSum = getProviderPurchasedCostPrice();
-    console.log("totalProductPriceSum",totalProductPriceSum);
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
 
@@ -508,7 +499,6 @@ export default function AddInvoices() {
   };
   const handleProductSelection = (selectedProductName) => {
     // change to only user
-    console.log(selectedProductName, "selectedProduct");
     const selectedProduct = authUserState.user?.employees_inventories?.find(
       (product) => product?.product?.name === selectedProductName
     );
@@ -886,7 +876,6 @@ export default function AddInvoices() {
     return quantity;
   }
 
-  console.log(allInvoiceProductsList, 'llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
   return (
     <>
       {/* <Header /> */}
@@ -1114,7 +1103,6 @@ export default function AddInvoices() {
                     <tbody className="whitespace-normal">
                       <tr key={1}>
                         <td className="relative" ref={suggestProductListRef}>
-                          {console.log(authUserState, "product list refresh request")}
                           <Select
                             className="w-full z-50"
                             options={productList}

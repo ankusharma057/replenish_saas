@@ -62,10 +62,7 @@ const ProductsTab = ({
     }
   };
 
-  console.log("ssss",updateProductInput);
-
   const handleDelete = (product) => {
-    // console.log(product);
     confirmAlert({
       title: "Confirm to delete",
       message: "Are you sure you want to delete this product",

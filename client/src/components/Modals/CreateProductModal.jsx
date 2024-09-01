@@ -38,10 +38,6 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
     e.preventDefault();
 
     try {
-      if(productList.find((data)=>(data?.name === formData?.name))){
-        console.log("ssssff",formData);
-        debugger
-      }
       setLoading(true);
       await createProduct(formData);
       toast.success(`Product Created Successfully.`);
