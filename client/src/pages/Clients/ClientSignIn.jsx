@@ -44,6 +44,13 @@ function ClientSignIn() {
       if (res.status === 200) {
         authUserDispatch({ type: CLIENT_LOGIN, payload: res.data });
         toast.success("Successfully Logged In");
+        console.log(window.location.href);
+        console.log(window.location);
+        if(window.location.pathname == "/clients/signin"){
+          navigate("/clients/appointments")
+        }else{
+          window.location.replace(window.location.href);
+        }
         if (
           localStorage.getItem("treatment") &&
           localStorage.getItem("formateData") &&

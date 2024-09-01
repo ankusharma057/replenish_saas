@@ -7,8 +7,8 @@
   <body>
     <p>
       Hi <%= @schedule.client.name %>,
-       
-      This is the gentle reminder to inform you that we are very glad to have a meet with you for this treatment <strong> <%= @schedule.treatment.name%></strong>.
+
+      This is a reminder that you have an appointment with <%= @schedule.employee.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> at <%= @schedule.start_time %> - <%= @schedule.end_time %> at <%= @schedule.location.name %>.
     </p>
   </body>
 </html>

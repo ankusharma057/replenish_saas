@@ -19,6 +19,7 @@ class Api::SchedulesController < ApplicationController
     schedule = Schedule.new(schedule_param)
     schedule.client = set_client
     if schedule.save
+      schedule.send_payment_notifications(schedule, nil)
       render json: schedule, status: :created
     else
       render json: {error: schedule.errors }, status: :unprocessable_entity
@@ -71,4 +72,11 @@ class Api::SchedulesController < ApplicationController
   def date_parse(date)
     Date.strptime(date, '%m/%d/%Y')
   end
+
+  # def send_payment_notifications(schedule, amount)
+  #   client = schedule.client
+  #   employee = schedule.employee
+  #   ScheduleMailer.client_notification(schedule, client, amount).deliver_now
+  #   ScheduleMailer.employee_notification(schedule, employee, client, amount).deliver_now
+  # end
 end

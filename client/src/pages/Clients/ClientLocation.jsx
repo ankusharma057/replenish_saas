@@ -86,7 +86,9 @@ const ClientLocation = () => {
     if (empId) {
       const fetchData = async () => {
         await getEmp();
-        await getEmpSchedule();
+        if(calenderCurrentRange.start_date !== "" && calenderCurrentRange.end_date !== ""){
+          await getEmpSchedule(calenderCurrentRange);  
+        }
       };
       fetchData();
     }
@@ -98,7 +100,9 @@ const ClientLocation = () => {
   useEffect(() => {
     getEmpByLocId();
     getLocEmp();
+    if(calenderCurrentRange.start_date !== "" && calenderCurrentRange.end_date !== ""){
     getEmpSchedule(calenderCurrentRange);
+    }
     return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locId, empId]);
@@ -389,7 +393,7 @@ const ClientLocation = () => {
       toast.error("Something went wrong. Please try again.");
     }
     setAppointmentModal(initialAppointmentModal);
-    await getEmpSchedule(true);
+    await getEmpSchedule(calenderCurrentRange, true);
     try {
     } catch (error) {
       toast.error(

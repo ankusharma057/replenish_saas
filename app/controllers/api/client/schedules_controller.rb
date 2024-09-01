@@ -48,7 +48,7 @@ class Api::Client::SchedulesController < ClientApplicationController
       @schedule.update(reminder: params[:reminder])
       @schedule.update_reminder
       amount = @schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
-      send_payment_notifications(@schedule, amount)
+      @schedule.send_payment_notifications(@schedule, amount)
       render json: {message: "Reminder Updated with #{@schedule.reminder}!!"}, status: :ok
     else
       render json: {error: "Schedule not found"}, status: :unprocessable_entity
@@ -72,7 +72,7 @@ class Api::Client::SchedulesController < ClientApplicationController
 
   def destroy
     schedule = Schedule.find_by(id: params[:id])
-    if schedule && schedule.cancel_client_schedule(current_client)
+    if schedule && schedule.cancel_schedule(current_client)
       render json: {message: "Schedule deleted."}, status: :ok
     else
       render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
@@ -92,12 +92,5 @@ class Api::Client::SchedulesController < ClientApplicationController
       amount: amount,
       session_id: session.id
     )
-  end
-
-  def send_payment_notifications(schedule, amount)
-    client = schedule.client
-    employee = schedule.employee
-    ScheduleMailer.client_notification(schedule, client, amount).deliver_now
-    ScheduleMailer.employee_notification(schedule, employee, client, amount).deliver_now
   end
 end

@@ -10,20 +10,22 @@ class Schedule < ApplicationRecord
 
   scope :balance_amount, -> { select { |schedule| schedule.remaining_amt > 0 } }
 
-  default_scope { where(is_cancelled: false) }
+  default_scope { where(is_cancelled: false) }  
 
-  def cancel_schedule(current_employee)
-    update(is_cancelled: true, cancelled_by: current_employee.id, cancelled_at: DateTime.now)
-  end
-
-  def cancel_client_schedule(current_client)
-    if update(is_cancelled: true, cancelled_by: current_client.id, cancelled_at: DateTime.now)
-      ScheduleMailer.client_schedule_cancelled_notification(self, client).deliver_now
-      ScheduleMailer.employee_schedule_cancelled_notification(self, employee, client).deliver_now
+  def cancel_schedule(data)
+    if update(is_cancelled: true, cancelled_by: data.id, cancelled_at: DateTime.now)
+      send_cancellation_emails
     else
       Rails.logger.error "Failed to cancel the schedule with ID: #{id}"
       false
     end
+  end
+
+  def send_payment_notifications(schedule, amount)
+    client = schedule.client
+    employee = schedule.employee
+    ScheduleMailer.client_notification(schedule, client, amount).deliver_now
+    ScheduleMailer.employee_notification(schedule, employee, client, amount).deliver_now
   end
 
   def presisted_schedule
@@ -67,5 +69,12 @@ class Schedule < ApplicationRecord
   def check_for_inventory
     employee_inventory = self.employee.employees_inventories.where(product_id: self.product_id).first
     employee_inventory ? self.treatment.quantity <= employee_inventory.quantity : false
+  end
+
+  private
+
+  def send_cancellation_emails
+    ScheduleMailer.client_schedule_cancelled_notification(self, client).deliver_now
+    ScheduleMailer.employee_schedule_cancelled_notification(self, employee, client).deliver_now
   end
 end
