@@ -21,11 +21,11 @@ class Schedule < ApplicationRecord
     end
   end
 
-  def send_payment_notifications(schedule, amount)
-    client = schedule.client
-    employee = schedule.employee
-    ScheduleMailer.client_notification(schedule, client, amount).deliver_now
-    ScheduleMailer.employee_notification(schedule, employee, client, amount).deliver_now
+  def send_payment_notifications(amount)
+    client = self.client
+    employee = self.employee
+    ScheduleMailer.client_notification(self, client, amount).deliver_now
+    ScheduleMailer.employee_notification(self, employee, client, amount).deliver_now
   end
 
   def presisted_schedule

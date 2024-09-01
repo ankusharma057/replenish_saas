@@ -372,7 +372,7 @@ export default function AddInvoices() {
       afterTax.conciergeFee = 50;
     }
     cashCalculations(afterTax);
-    const totalProductPriceSum = getProviderPurchasedCostPrice();
+    const totalProductPriceSum = getConsumableCostPrice();
     const totalPaidByClientAT =
       formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
 
@@ -397,13 +397,10 @@ export default function AddInvoices() {
         afterTax.retailTotal) *
       (semaglitude_percentage / 100); //(replace with injector percentage)
 
+    formData?.products.forEach((product) => {
+      if(product?.provider_purchased) total += getProviderPurchasedCostPrice();
+    })
 
-      
-    total += totalProductPriceSum;
-
-    // if (formData?.providerPurchased) total += totalProductPriceSum;
-
-    
     if (authUserState.user?.gfe)
       total += afterTax.gfeFee + afterTax.semagConsultFee;
     total =

@@ -48,7 +48,7 @@ class Api::Client::SchedulesController < ClientApplicationController
       @schedule.update(reminder: params[:reminder])
       @schedule.update_reminder
       amount = @schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
-      @schedule.send_payment_notifications(@schedule, amount)
+      @schedule.send_payment_notifications(amount)
       render json: {message: "Reminder Updated with #{@schedule.reminder}!!"}, status: :ok
     else
       render json: {error: "Schedule not found"}, status: :unprocessable_entity
@@ -62,7 +62,7 @@ class Api::Client::SchedulesController < ClientApplicationController
       amount = schedule.remaining_amt.to_i
       response_data = Stripe::Payment.create(schedule, amount)
       record_payment_from_session(response_data, schedule, amount)
-      send_payment_notifications(schedule, amount)
+      schedule.send_payment_notifications(amount)
 
       render json: {schedule: schedule}.merge!({redirect_url: response_data['url']})
     else

@@ -8,9 +8,9 @@
 <body>
   <p>Dear <%= @employee.name %>,</p>
   <% if @amount == 50 %>
-    <p>A payment of <%= @amount %> has been processed for the appointment on <%= @schedule.date.strftime('%d-%m-%Y') %> at <%= @schedule.start_time %> - <%= @schedule.end_time %> by <%= @client.name %>.</p>
+    <p>An appointment has been successfully created with <%= @client.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> at <%= @schedule.start_time.strftime('%I:%M %p') %> - <%= @schedule.end_time.strftime('%I:%M %p') %> at <%= @schedule.location.name %>.</p> <p>A payment of <%= @amount %> has been processed for the appointment by <%= @client.name %>.</p>
   <% else %>
-    <p>An appointment has been created successfully with <%= @client.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> at <%= @schedule.start_time %> - <%= @schedule.end_time %> at <%= @schedule.location.name %>.</p>
+    <p>An appointment has been created successfully with <%= @client.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> at <%= @schedule.start_time.strftime('%I:%M %p') %> - <%= @schedule.end_time.strftime('%I:%M %p') %> at <%= @schedule.location.name %>.</p>
   <% end %>
   <p>Thank you!</p>
 </body>

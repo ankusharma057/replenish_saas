@@ -52,14 +52,6 @@ const ProductsTab = ({
     if(name === "name" && value.length === 0){
       setUpdateProductInput((prev)=>({...prev,["provider_purchased"]:false}))
     }
-    if(type === "checkbox"){
-      if(!(/^pp\s/i).test(updateProductInput.name) && checked && updateProductInput.name !== ""){
-        setUpdateProductInput((prev)=>({...prev,["name"]:`PP ${updateProductInput.name}`}))
-      }
-      else{
-        setUpdateProductInput((prev)=>({...prev,["name"]:updateProductInput.name.replace(/^pp\s/i,"")}))
-      }
-    }
   };
 
   const handleDelete = (product) => {
@@ -188,8 +180,6 @@ const ProductsTab = ({
               type="checkbox"
               name="provider_purchased"
               checked={updateProductInput?.provider_purchased}
-              // checked={true}
-              disabled={((updateProductInput.name).length <= 0)? true : false}
               onChange={handleProductChange}
               className="mr-5"
             />

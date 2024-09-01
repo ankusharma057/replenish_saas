@@ -24,14 +24,6 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
     if(name === "name" && value.length === 0){
       setFormData((prev)=>({...prev,["provider_purchased"]:false}))
     }
-    if(type === "checkbox"){
-      if(!(/^pp\s/i).test(formData.name) && checked && formData.name !== ""){
-        setFormData((prev)=>({...prev,["name"]:`PP ${formData.name}`}))
-      }
-      else{
-        setFormData((prev)=>({...prev,["name"]:formData.name.replace(/^pp\s/i,"")}))
-      }
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -116,6 +108,7 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
           value={formData.cost_price}
           onChange={handleChange}
           min="0"
+          step="any"
         />
 
         <LabelInput
@@ -137,8 +130,6 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
             type="checkbox"
             name="provider_purchased"
             checked={formData?.provider_purchased} 
-            disabled={((formData.name).length <= 0)? true : false}
-            // checked={true}
             onChange={(event) => handleChange(event)}
             className="mr-5"
           />
