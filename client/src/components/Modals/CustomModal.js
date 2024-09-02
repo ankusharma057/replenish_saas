@@ -16,6 +16,7 @@ import ModalWraper from "./ModalWraper";
 import RejectInvoiceModal from "./RejectInvoiceModal";
 import UpdateInvoiceModal from "./UpdateInvoiceModal";
 import { removeDuplicateElements } from "../../helper";
+import { useLocation } from "react-router-dom";
 
 function CustomModal({
   invoiceData,
@@ -51,7 +52,7 @@ function CustomModal({
   });
 
   const { authUserDispatch } = useAuthContext();
-
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [textAreaInput, settextAreaInput] = useState("");
   const [editImages, setEditImages] = useState(true);
@@ -268,6 +269,11 @@ function CustomModal({
               {invoiceData.source_invoice_id &&
                 <div>
                   Source Invoice ID: {invoiceData.source_invoice_id}
+                </div>
+              }
+              {invoiceData.is_finalized && location.pathname?.includes("/myprofile") &&
+                <div>
+                  Finalized Invoice
                 </div>
               }
             </div>

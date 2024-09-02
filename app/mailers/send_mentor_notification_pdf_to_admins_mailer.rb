@@ -11,7 +11,7 @@ class SendMentorNotificationPdfToAdminsMailer < ApplicationMailer
 
     mail(
       from: 'patrick@test.com',
-      to: admin_emails,
+      to: emails,
       subject: "Invoice created."
     ) do |format|
       format.html { render "layouts/mentor_prompt_email" }
