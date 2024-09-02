@@ -34,7 +34,7 @@ export default memo(function ClientHeader() {
   if (!window.location.pathname.includes("/clients")) return null;
 
   return authUserState.client ? (
-    <nav className="bg-primary-dark-blue text-white relative z-20 py-2 px-0 lg:px-20 xl:px-64">
+    <nav className="bg-primary-dark-blue text-white relative z-30 py-2 px-0 lg:px-20 xl:px-64">
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
         <div className="flex items-center justify-between h-26">
           <div className="flex-shrink-0 p-2">
@@ -44,7 +44,7 @@ export default memo(function ClientHeader() {
             <div className="md:hidden">
               <button
                 onClick={handleMenuSHow}
-                className="border-none relative z-30 text-w-full py-3 5xl transition-all text-5xl text-white"
+                className="border-none relative z-50 text-w-full py-3 5xl transition-all text-5xl text-white"
               >
                 ≡
               </button>
@@ -52,7 +52,7 @@ export default memo(function ClientHeader() {
             <div
               className={` ${
                 isMenuShow ? "translate-x-full" : ""
-              } md:block pt-20 md:pt-0 z-20 fixed top-0 bg-primary-dark-blue h-screen right-0 w-1/2  gap-y-2 items-center md:w-auto md:static flex-col md:flex-row md:h-auto ml-10 flex md:items-baseline space-x-4 transition-all md:translate-x-0  `}
+              } md:block pt-20 md:pt-0 z-40 fixed top-0 bg-primary-dark-blue h-screen right-0 w-1/2  gap-y-2 items-center md:w-auto md:static flex-col md:flex-row md:h-auto ml-10 flex md:items-baseline space-x-4 transition-all md:translate-x-0  `}
             >
               
               <button
@@ -103,7 +103,7 @@ export default memo(function ClientHeader() {
         onClick={handleMenuSHow}
         className={`${
           isMenuShow ? "-translate-x-full" : ""
-        } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 md:hidden bg-black/50 `}
+        } h-[148rem] absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 md:hidden bg-black/50 `}
       ></div>
     </nav>
   ) : (

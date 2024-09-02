@@ -912,7 +912,41 @@ const MyProfile = () => {
                           <Card.Header as="h5">
                             Invoice ID {invoice.id}
                           </Card.Header>
-                          <Card.Body className="">
+                          <Card.Body className="flex justify-between">
+                          <Button
+                              onClick={async () => {
+                                confirmAlert({
+                                  title: "Confirm to delete",
+                                  message: "Are you sure you want to delete this invoice?",
+                                  buttons: [
+                                    {
+                                      label: "Yes",
+                                      onClick: async () => {
+                                        try {
+                                          toast.success(` Deleted Successfully.`);
+                                        } catch (error) {
+                                          toast.error(
+                                            error?.response?.data?.exception ||
+                                              error?.response?.statusText ||
+                                              error.message ||
+                                              "Failed to Delete the Product."
+                                          );
+                                        }
+                                      },
+                                    },
+                                    {
+                                      label: "No",
+                                      onClick: () => console.log("Click No"),
+                                    },
+                                  ],
+                                });
+                              }}
+                              variant="danger"
+                              className="text-white"
+                            >
+                            Delete
+                            </Button>
+
                             <Button
                               onClick={async () => {
                                 await setinvoiceData(invoice);

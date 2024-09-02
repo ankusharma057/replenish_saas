@@ -32,14 +32,14 @@ export default memo(function Header() {
   };
 
   const adminHeader = (
-    <nav className="bg-cyan-400 relative z-20">
+    <nav className="bg-cyan-400 relative z-30">
       <div className=" mx-auto lg:px-4 sm:pl-6 sm:pr-0 ">
         <div className="flex items-center justify-start  h-26">
           <div className=" xl:hidden flex-shrink-0 p-2">
             <a href="/addInvoice">
               <Image
                 src="/replenish-logo.png"
-                className="relative z-30"
+                className="relative z-40"
                 width="60px"
                 roundedCircle
               />
@@ -201,7 +201,7 @@ export default memo(function Header() {
       <div
         onClick={handleMenuSHow}
         className={`${isMenuShow ? "-translate-x-full" : ""
-          } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
+          } h-[148rem] absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );
@@ -369,7 +369,7 @@ export default memo(function Header() {
       <div
         onClick={handleMenuSHow}
         className={`${isMenuShow ? "-translate-x-full" : ""
-          } h-screen absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
+          } h-[148rem] absolute w-[51%] md:w-[76%] z-[2] cursor-pointer transition-all left-0 xl:hidden bg-black/50 `}
       ></div>
     </nav>
   );

@@ -437,7 +437,7 @@ const ClientLocation = () => {
         {isEmp ? (
           <ClientAsideLayout
             asideContent={
-              <div className="flex flex-col ">
+              <div className="flex flex-col h-[125rem] md:h-[130rem] lg:h-[125rem]">
                 <h3>{selectedEmployee?.name}</h3>
                 <p>Select a treatment</p>
                 <ul className="flex p-0 flex-col gap-2 ">
@@ -486,7 +486,7 @@ const ClientLocation = () => {
               ref={topViewRef}
               className="flex-1 mt-5 overflow-x-auto md:ml-3 lg:px-4"
             >
-              <div className="min-w-[450px] overflow-x-auto">
+              <div>
                 {selectedTreatMent?.treatment?.name ? (
                   <p>
                     Selected treatment
@@ -495,8 +495,9 @@ const ClientLocation = () => {
                     </span>
                   </p>
                 ) : (
-                  <p>Please select a treatment</p>
+                  <p className="pl-4">Please select a treatment</p>
                 )}
+                <div className="">
                 <ClientScheduleCalender
                   onSelectEvent={(e) => handleAddAppointmentSelect(e)}
                   events={(selectedEmpSchedules || []).flatMap((data) => {
@@ -525,10 +526,11 @@ const ClientLocation = () => {
                     const backgroundColor = ( "available" in event && event.available ) ? "#22d3ee" :"#000";                      
                     return { style: { backgroundColor } };
                   }}
-                />
+                />                  
+                </div>
               </div>
               <div className="flex  flex-col pt-4 items-center justify-center">
-                <p>
+                <p className="pl-4">
                   Select a treatment from the list on the left to view available
                   appointment times
                 </p>

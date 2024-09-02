@@ -307,3 +307,61 @@ input:-webkit-autofill:active {
   left: 0px !important;
 }
 
+.rbc-calendar{
+  padding: 30px 8px !important;
+}
+
+
+
+@media screen and (min-width: 320px) {
+  .rbc-header{
+    height: 49px;
+    white-space: normal !important;
+  }
+
+  .rbc-time-gutter {
+    width: 50px;
+    white-space: normal !important;
+  }
+  .rbc-time-slot{
+    text-align: center;
+  }
+
+  .rbc-time-header-gutter{
+    width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+  }
+
+  .rbc-label {
+    padding: 0 !important;
+    font-size: 15px !important;
+}
+
+
+}
+
+@media screen and (min-width: 768px) {
+  .rbc-header{
+    height: auto;
+    white-space: nowrap !important;
+  }
+
+.rbc-time-gutter {
+    width: auto !important;
+    white-space: nowrap !important;
+  }
+  .rbc-time-slot{
+    text-align: center;
+  }
+
+  .rbc-time-header-gutter{
+    width: 78.02px !important;
+    min-height: 78.02px !important;
+    max-width: 78.02px !important;
+  }
+  .rbc-label {
+    padding: 0 5px !important;
+    font-size: 16px !important;
+}
+}
