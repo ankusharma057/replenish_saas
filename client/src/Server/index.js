@@ -113,6 +113,13 @@ export const getInvoiceList = async (refetch) =>
     },
   });
 
+export const deleteInvoice = async (id, refetch) =>
+  api.delete(`/api/invoices/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getProductsList = async (refetch) =>
   api.get("/api/products", {
     cache: {
