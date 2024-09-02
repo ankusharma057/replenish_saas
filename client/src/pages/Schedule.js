@@ -15,7 +15,9 @@ import {
   getClients,
   getLocationsWithoutEmployee,
   getEmployeesList,
+  getEmployeesListOnly,
   getLocationEmployee,
+  getLocationEmployeeOnly,
   getLocations,
   getSchedule,
   getTreatmentList,
@@ -130,7 +132,7 @@ function Schedule() {
 
   const getEmployees = async (refetch = true,remove = false ) => {
     try {
-      const { data } = await getLocationEmployee(selectedLocation?.id || null, refetch);
+      const { data } = await getLocationEmployeeOnly(selectedLocation?.id || null, refetch);
 
       if (data) {
         const a = data?.map((emp) => ({
@@ -160,7 +162,7 @@ function Schedule() {
 
   const getAllEmployees = async (refetch = true) => {
     try {
-      const { data } = await getEmployeesList(refetch);
+      const { data } = await getEmployeesListOnly(refetch);
 
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
@@ -174,7 +176,7 @@ function Schedule() {
       console.log(error);
     }
   };
-  
+
   const updateEmployee = async (e) => {
     e.preventDefault();
     try {

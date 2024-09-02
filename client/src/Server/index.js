@@ -142,6 +142,13 @@ export const getEmployeesList = async (refetch = false) =>
     },
   });
 
+export const getEmployeesListOnly = async (refetch = false) =>
+  api.get("/api/employee_schedules", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getMentorList = async (refetch = false, employeeId) =>
   api.get(`/api/employees?type=mentor${employeeId ? `&mentor_for_employee_id=${employeeId}` : ''}`, {
     cache: {
@@ -233,6 +240,13 @@ export const getClientLocations = async (refetch = false) =>
 
 export const getLocationEmployee = async (locationId, refetch = false) =>
   api.get(`api/client/locations/${locationId}/employees`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocationEmployeeOnly = async (locationId, refetch = false) =>
+  api.get(`api/locations/${locationId}/employees`, {
     cache: {
       ignoreCache: refetch,
     },

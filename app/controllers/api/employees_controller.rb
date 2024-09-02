@@ -9,21 +9,58 @@ class Api::EmployeesController < ApplicationController
     type = params[:type].to_s.downcase
     scope_name = type.blank? ? nil : "#{type}s"
 
+    associations_to_include = [
+      :inventory_prompts, 
+      :inventory_requests, 
+      :employees_inventories, 
+      :employee_mentors, 
+      :employee_locations, 
+      :roles,
+      { invoices: [
+          :before_images_attachments, 
+          :after_images_attachments, 
+          :client, 
+          :invoice_group
+        ]
+      },
+      { employees_inventories: [:product] },
+      { employee_locations: [:location] }
+    ]
+  
     if scope_name.blank?
-      employees = Employee.all
+      # Eager load all the required associations when fetching employees
+      employees = Employee.includes(associations_to_include)
     elsif Employee.respond_to?(scope_name)
-      employees = Employee.send(scope_name).exclude_mentors_for_employee(params[:mentor_for_employee_id])
+      # Eager load the required associations for the specific scope
+      employees = Employee.send(scope_name)
+                        .includes(associations_to_include)
+                        .exclude_mentors_for_employee(params[:mentor_for_employee_id])
     else
       render json: { error: 'Type is not valid' }, status: :bad_request and return
     end
-
+  
     render json: employees, status: :ok
   end
 
   def show
-    employee = current_employee
-    render json: employee, status: :ok
+    if current_employee.present?
+      employee_id = current_employee.id
+
+      employee = Employee.includes(
+        invoices: [
+          :before_images_attachments, 
+          :after_images_attachments, 
+          :client, 
+          :invoice_group
+        ], 
+        employees_inventories: [:product], 
+        employee_locations: [:location]
+      ).find(employee_id)
+
+      render json: employee, status: :ok
+    end
   end
+  
 
   def create
     @employee = Employee.new(employee_params)
