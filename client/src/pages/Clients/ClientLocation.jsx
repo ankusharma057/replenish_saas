@@ -429,15 +429,7 @@ const ClientLocation = () => {
             <div>
               <span className="text-3xl font-thin">
                 Book an Appointment
-                <span className="text-lg">
-                  {`${params.get("locations")
-                      ? ` at ${params.get("locations")}`
-                      : ""
-                    }
-                Let us come to you!`}
-                </span>
               </span>
-              <span className="text-3xl font-thin">Go to Appointments</span>
             </div>
           }
         />
