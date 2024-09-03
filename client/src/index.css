@@ -338,6 +338,30 @@ input:-webkit-autofill:active {
     font-size: 15px !important;
 }
 
+.rbc-event-content{
+  display: none;
+}
+
+.rbc-event{
+  padding: 2px 0px !important;
+}
+
+.rbc-event-label{
+  font-size: 8px !important;
+  white-space: normal !important;
+}
+
+.react-confirm-alert-button-group > .btn{
+  font-size: 14px !important;
+  padding: 5px 8px !important;
+}
+.react-confirm-alert-body{
+width: 290px !important;
+}
+
+.react-confirm-alert-body > h1{
+  font-size: 21px;
+}
 
 }
 
@@ -364,4 +388,46 @@ input:-webkit-autofill:active {
     padding: 0 5px !important;
     font-size: 16px !important;
 }
+
+.rbc-event-content{
+  display: block;
+  font-size: 9px !important;
+  white-space: wrap !important;
+}
+
+.rbc-event-label{
+  font-size: 10px !important;
+}
+
+.react-confirm-alert-button-group > .btn{
+  font-size: 16px !important;
+  padding: 8px 12px !important;
+}
+.react-confirm-alert-body{
+width: 400px !important;
+}
+
+.react-confirm-alert-body > h1{
+  font-size: 32px;
+}
+}
+
+@media screen and (min-width: 1024px) {
+  .rbc-event-content{
+    font-size: 10px !important;
+  }
+
+  .rbc-event-label{
+    font-size: 10px;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .rbc-event-content{
+    font-size: 13px !important;
+  }
+
+  .rbc-event-label{
+    font-size: 13px !important;
+  }
 }

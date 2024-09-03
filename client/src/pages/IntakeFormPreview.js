@@ -452,10 +452,6 @@ const IntakeFormPreview = () => {
       }
     });
   };
-  
-
-  console.log("ss",intakeFormData?.response_intake_form?.response_form_data?.questionnaires[2]?.class);
-console.log(intakeFormData);
 
 const handleCombinedInputChange = (e, index) => {
   handleTypeBase64Image(index);
