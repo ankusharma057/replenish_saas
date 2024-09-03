@@ -7,11 +7,10 @@ class Api::EmployeesController < ApplicationController
 
   def index
     type = params[:type].to_s.downcase
-    mentor_for_employee_id = params[:mentor_for_employee_id]
 
     result = Employee.fetch_employees_with_associations(
       type: type,
-      mentor_for_employee_id: mentor_for_employee_id
+      mentor_for_employee_id: params[:mentor_for_employee_id]
     )
 
     if result.is_a?(Hash) && result[:error].present?
@@ -37,6 +36,8 @@ class Api::EmployeesController < ApplicationController
       ).find(employee_id)
 
       render json: employee, status: :ok
+    else
+      render json: { 'error': 'Employee Not found' }, status: :unauthorized
     end
   end
 

@@ -101,11 +101,10 @@ class Api::InvoicesController < ApplicationController
 
   def destroy
     @invoice = Invoice.find_by(id: params[:id])
-    if @invoice.present?
-      @invoice.destroy
+    if @invoice.present? && @invoice.destroy
       render json: @invoice, status: :ok
     else
-      render json: {'error' => 'Invoice not found'}, status: :not_found
+      render json: {'error' => 'Invoice not found or Unable to delete'}, status: :not_found
     end
   end
 

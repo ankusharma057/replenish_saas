@@ -11,7 +11,7 @@ class InvoiceListSerializer < ActiveModel::Serializer
   end
 
   def employee
-    employee = object.employee
+    employee = nil
     return unless employee
 
     {
