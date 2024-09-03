@@ -36,8 +36,6 @@ class Api::EmployeesController < ApplicationController
       ).find(employee_id)
 
       render json: employee, status: :ok
-    else
-      render json: { 'error': 'Employee Not found' }, status: :unauthorized
     end
   end
 
