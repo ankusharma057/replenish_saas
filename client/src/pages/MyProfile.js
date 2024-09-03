@@ -912,41 +912,40 @@ const MyProfile = () => {
                             Invoice ID {invoice.id}
                           </Card.Header>
                           <Card.Body className="flex justify-between">
-                          <Button
-                              onClick={async () => {
-                                confirmAlert({
-                                  title: "Confirm to delete",
-                                  message: "Are you sure you want to delete this invoice?",
-                                  buttons: [
-                                    {
-                                      label: "Yes",
-                                      onClick: async () => {
-                                        try {
-                                          const {data} = await deleteInvoice(invoice?.id)
-                                          if(data){
-                                            toast.success(` Deleted Successfully.`);
-                                            getEmployees();
-                                          }else{
+                            <Button
+                                onClick={async () => {
+                                  confirmAlert({
+                                    title: "Confirm to delete",
+                                    message: "Are you sure you want to delete this invoice?",
+                                    buttons: [
+                                      {
+                                        label: "Yes",
+                                        onClick: async () => {
+                                          try {
+                                            const {data} = await deleteInvoice(invoice?.id)
+                                            if(data){
+                                              toast.success(` Deleted Successfully.`);
+                                              getEmployees();
+                                            }else{
+                                              toast.error("Something went wrong")
+                                            }
+                                          } catch (error) {
                                             toast.error("Something went wrong")
                                           }
-                                        } catch (error) {
-                                          toast.error("Something went wrong")
-                                        }
+                                        },
                                       },
-                                    },
-                                    {
-                                      label: "No",
-                                      onClick: () => console.log("Click No"),
-                                    },
-                                  ],
-                                });
-                              }}
-                              variant="danger"
-                              className="text-white"
-                            >
-                            Delete
+                                      {
+                                        label: "No",
+                                        onClick: () => console.log("Click No"),
+                                      },
+                                    ],
+                                  });
+                                }}
+                                variant="danger"
+                                className="text-white"
+                              >
+                              Delete
                             </Button>
-
                             <Button
                               onClick={async () => {
                                 await setinvoiceData(invoice);

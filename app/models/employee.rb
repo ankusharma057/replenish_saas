@@ -130,4 +130,36 @@ class Employee < ApplicationRecord
     add_roles.each { |role| self.add_role role } if !add_roles.empty?
     remove_roles.each { |role| self.remove_role role } unless remove_roles.empty?
   end
+
+  def self.fetch_employees_with_associations(type:, mentor_for_employee_id: nil)
+    associations_to_include = [
+      :inventory_prompts,
+      :inventory_requests,
+      :employees_inventories,
+      :employee_mentors,
+      :employee_locations,
+      :roles,
+      { invoices: [
+          :before_images_attachments,
+          :after_images_attachments,
+          :client,
+          :invoice_group
+        ]
+      },
+      { employees_inventories: [:product] },
+      { employee_locations: [:location] }
+    ]
+
+    if type.blank?
+      employees = includes(associations_to_include)
+    elsif respond_to?("#{type}s")
+      employees = send("#{type}s")
+                  .includes(associations_to_include)
+                  .exclude_mentors_for_employee(mentor_for_employee_id)
+    else
+      return { error: 'Type is not valid' }
+    end
+
+    employees
+  end
 end

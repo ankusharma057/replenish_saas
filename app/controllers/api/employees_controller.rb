@@ -7,39 +7,18 @@ class Api::EmployeesController < ApplicationController
 
   def index
     type = params[:type].to_s.downcase
-    scope_name = type.blank? ? nil : "#{type}s"
+    mentor_for_employee_id = params[:mentor_for_employee_id]
 
-    associations_to_include = [
-      :inventory_prompts, 
-      :inventory_requests, 
-      :employees_inventories, 
-      :employee_mentors, 
-      :employee_locations, 
-      :roles,
-      { invoices: [
-          :before_images_attachments, 
-          :after_images_attachments, 
-          :client, 
-          :invoice_group
-        ]
-      },
-      { employees_inventories: [:product] },
-      { employee_locations: [:location] }
-    ]
-  
-    if scope_name.blank?
-      # Eager load all the required associations when fetching employees
-      employees = Employee.includes(associations_to_include)
-    elsif Employee.respond_to?(scope_name)
-      # Eager load the required associations for the specific scope
-      employees = Employee.send(scope_name)
-                        .includes(associations_to_include)
-                        .exclude_mentors_for_employee(params[:mentor_for_employee_id])
+    result = Employee.fetch_employees_with_associations(
+      type: type,
+      mentor_for_employee_id: mentor_for_employee_id
+    )
+
+    if result.is_a?(Hash) && result[:error].present?
+      render json: result, status: :bad_request
     else
-      render json: { error: 'Type is not valid' }, status: :bad_request and return
+      render json: result, status: :ok
     end
-  
-    render json: employees, status: :ok
   end
 
   def show
@@ -60,7 +39,6 @@ class Api::EmployeesController < ApplicationController
       render json: employee, status: :ok
     end
   end
-  
 
   def create
     @employee = Employee.new(employee_params)

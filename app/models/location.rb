@@ -15,4 +15,23 @@ class Location < ApplicationRecord
       all
     end
   end
+
+  def employees_with_associations
+    employees.includes(
+      :inventory_prompts,
+      :inventory_requests,
+      :employees_inventories,
+      :employee_mentors,
+      :employee_locations,
+      :roles,
+      invoices: [
+        :before_images_attachments,
+        :after_images_attachments,
+        :client,
+        :invoice_group
+      ],
+      employees_inventories: [:product],
+      employee_locations: [:location]
+    )
+  end
 end

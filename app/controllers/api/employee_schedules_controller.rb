@@ -6,13 +6,7 @@ class Api::EmployeeSchedulesController < ApplicationController
 
   def employees
     location = Location.find_by(id: params[:id])
-
-    if location.present?
-      employees = location.employees
-    else
-      employees = []
-    end
-
+    employees = location.present? ? location.employees : []
     render json: employees, each_serializer: EmployeeScheduleSerializer, status: :ok
   end
 end

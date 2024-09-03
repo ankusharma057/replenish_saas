@@ -21,28 +21,7 @@ class Api::Client::LocationsController < ClientApplicationController
 
   def employees
     location = Location.find_by(id: params[:id])
-
-    if location.present?
-      employees = location.employees.includes(
-        :inventory_prompts,
-        :inventory_requests,
-        :employees_inventories,
-        :employee_mentors,
-        :employee_locations,
-        :roles,
-        invoices: [
-          :before_images_attachments, 
-          :after_images_attachments, 
-          :client, 
-          :invoice_group
-        ],
-        employees_inventories: [:product],
-        employee_locations: [:location]
-      )
-    else
-      employees = []
-    end
-  
+    employees = location.present? ? location.employees_with_associations : []
     render json: employees, status: :ok
   end
 end

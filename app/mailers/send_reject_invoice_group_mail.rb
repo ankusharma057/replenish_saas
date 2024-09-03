@@ -7,7 +7,7 @@ class SendRejectInvoiceGroupMail < ApplicationMailer
     mail(
       from: 'patrick@test.com',
       to: @invoice.employee.email,
-      subject: "Invoice created."
+      subject: "Invoice Rejected."
     ) do |format|
       format.html { render "layouts/invoice_group_rejection_email" }
     end
