@@ -5,11 +5,9 @@ class Api::TreatmentsController < ApplicationController
   def index
     treatments = Treatment
                    .employee_treatments(params[:employee_id])
-                   .includes(:treatment_intake_forms, :employee, :product)
-  
+                   .includes(:employee, :product, treatment_intake_forms: :intake_form)
     render json: treatments, status: :ok
   end
-  
 
   def base_treatments
     render json: Treatment.base_treatments
