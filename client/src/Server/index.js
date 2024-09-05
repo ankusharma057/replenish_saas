@@ -163,6 +163,13 @@ export const getEmployeesListOnly = async (refetch = false) =>
     },
   });
 
+  export const getTreatmentProductsOnly = async (refetch = false) =>
+    api.get("/api/treatment_products.json", {
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+
 export const getMentorList = async (refetch = false, employeeId) =>
   api.get(`/api/employees?type=mentor${employeeId ? `&mentor_for_employee_id=${employeeId}` : ''}`, {
     cache: {

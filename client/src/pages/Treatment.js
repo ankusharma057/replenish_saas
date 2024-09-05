@@ -3,11 +3,11 @@ import {
   createTreatment,
   deleteTreatment,
   getBaseTreatmentList,
-  getProductsList,
+  getTreatmentProductsOnly,
   getTreatmentIntakeForms,
   getTreatmentList,
   updateTreatment,
-  getEmployeesList,
+  getEmployeesListOnly,
   getTreatmentIntakeForm
 } from "../Server";
 import { Button, Form, Table, ButtonGroup, ToggleButton } from "react-bootstrap";
@@ -48,9 +48,9 @@ const Treatment = () => {
   const [loading, setLoading] = useState(false);
 
 
-  const getEmployees = async (refetch = false) => {
+  const getEmployees = async (refetch = true) => {
     try {
-      const { data } = await getEmployeesList(refetch);
+      const { data } = await getEmployeesListOnly(refetch);
       if (data?.length > 0) {
         setEmployeeList(data);
         // handleSelect(data[0]);
@@ -119,7 +119,7 @@ const Treatment = () => {
 
   const getProducts = async (refetch = false) => {
     try {
-      const { data } = await getProductsList(
+      const { data } = await getTreatmentProductsOnly(
         refetch
       );
       setProductList(data);
@@ -429,7 +429,7 @@ const Treatment = () => {
   };
 
   useEffect(() => {
-    getProducts();
+    getProducts(true);
     getIntakeForm("", true);
     if (currentTab === "base-treatments") getBaseTreatments();
     else getTreatment();
