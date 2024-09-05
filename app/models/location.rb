@@ -27,11 +27,11 @@ class Location < ApplicationRecord
 
   def self.exclude_locations_for_employee(params)
     if params[:employee_id].present?
-      where(id: EmployeeLocation.where(employee_id: params[:employee_id]).map(&:location_id).uniq)
+      includes(:employees).where(id: EmployeeLocation.where(employee_id: params[:employee_id]).map(&:location_id).uniq)
     elsif params[:skip_by_employee_id].present?
-      where.not(id: EmployeeLocation.where(employee_id: params[:skip_by_employee_id]).map(&:location_id).uniq)
+      includes(:employees).where.not(id: EmployeeLocation.where(employee_id: params[:skip_by_employee_id]).map(&:location_id).uniq)
     else
-      all
+      includes(:employees).all
     end
   end
 end
