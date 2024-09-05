@@ -101,6 +101,7 @@ mount Sidekiq::Web => '/sidekiq'
     resources :chart_entries
     resources :employee_schedules, only: [:index]
     resources :invoice_lists, only: [:index]
+    resources :treatment_products, only: [:index]
 
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
 

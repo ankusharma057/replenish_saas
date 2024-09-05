@@ -12,4 +12,14 @@ class Product < ApplicationRecord
     inventory.nil? ? create_inventory(quantity: quantity.to_f) : 
       inventory.update!(quantity: (inventory.quantity.to_f + quantity.to_f))
   end
+
+  def self.with_associations_for_employee(employee_id)
+    if employee_id.present?
+      joins(:treatments)
+        .includes(treatments: :employee, invoices: [], inventory_prompts: [])
+        .where(id: Employee.find_by_id(employee_id).employees_inventories.pluck(:product_id))
+    else
+      includes(treatments: :employee, invoices: [], inventory_prompts: [])
+    end
+  end
 end
