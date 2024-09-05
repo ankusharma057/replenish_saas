@@ -3,7 +3,7 @@ class Api::QuestionnairesController < ApplicationController
   before_action :set_questionnaire, only: %i[update destroy show]
 
   def index
-    @questionnaires = Questionnaire.employee_questionnaires(params)
+    @questionnaires = Questionnaire.includes(:employee).employee_questionnaires(params)
     render json: @questionnaires
   end
 
