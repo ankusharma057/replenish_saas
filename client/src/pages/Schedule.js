@@ -15,7 +15,9 @@ import {
   getClients,
   getLocationsWithoutEmployee,
   getEmployeesList,
+  getEmployeesListOnly,
   getLocationEmployee,
+  getLocationEmployeeOnly,
   getLocations,
   getSchedule,
   getTreatmentList,
@@ -130,7 +132,7 @@ function Schedule() {
 
   const getEmployees = async (refetch = true,remove = false ) => {
     try {
-      const { data } = await getLocationEmployee(selectedLocation?.id || null, refetch);
+      const { data } = await getLocationEmployeeOnly(selectedLocation?.id || null, refetch);
 
       if (data) {
         const a = data?.map((emp) => ({
@@ -160,7 +162,7 @@ function Schedule() {
 
   const getAllEmployees = async (refetch = true) => {
     try {
-      const { data } = await getEmployeesList(refetch);
+      const { data } = await getEmployeesListOnly(refetch);
 
       if (data?.length > 0) {
         const a = data?.map((emp) => ({
@@ -174,7 +176,7 @@ function Schedule() {
       console.log(error);
     }
   };
-  
+
   const updateEmployee = async (e) => {
     e.preventDefault();
     try {
@@ -949,14 +951,14 @@ function Schedule() {
           </>
         }
       >
-        <div className="flex-1  py-10 px-2 bg-white">
+        <div className="flex-1  py-10 px-2 bg-white h-full">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <h1>{selectedEmployeeData?.name}</h1>
-            <div className="flex gap-2 flex-col sm:flex-row">
+            <div className="flex gap-2 flex-col sm:flex-row w-full md:w-auto">
               {serviceLocation?.length > 0 && (
                 <div className="flex flex-col gap-y-2 sm:flex-row items-center gap-x-2">
                   <Select
-                    className="w-80 z-10"
+                    className="w-full md:w-80 sm:w-full z-10"
                     options={serviceLocation}
                     placeholder="Search Places"
                     onChange={onLocationChange}

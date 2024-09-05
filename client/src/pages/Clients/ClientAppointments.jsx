@@ -66,10 +66,10 @@ function ClientSchedule() {
 
   return (
     <>
-      <div className="p-4 md:p-20">
+      <div className="p-2 md:p-20">
         <>
-          <div className="flex items-center justify-between">
-            <h1>Your Appointments</h1>
+          <div className="flex items-center justify-between pl-1">
+            <h1 className="text-center">Your Appointments</h1>
           </div>
           <ClientScheduleCalender
             events={clientSchedules || []}

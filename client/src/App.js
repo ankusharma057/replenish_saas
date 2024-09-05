@@ -153,7 +153,7 @@ function App() {
   ]);
 
   return (
-    <div id="top-model" className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"h-screen"} `}>
+    <div id="top-model" className={`overflow-x-hidden ${ (window.location.pathname).startsWith("/intake") ? "" :"md:h-screen"} `}>
       <Suspense fallback={<SuspenseLoading />}>
       
         {authUserState.client ? (

@@ -7,22 +7,38 @@ class Api::EmployeesController < ApplicationController
 
   def index
     type = params[:type].to_s.downcase
-    scope_name = type.blank? ? nil : "#{type}s"
 
-    if scope_name.blank?
-      employees = Employee.all
-    elsif Employee.respond_to?(scope_name)
-      employees = Employee.send(scope_name).exclude_mentors_for_employee(params[:mentor_for_employee_id])
+    result = Employee.fetch_employees_with_associations(
+      type: type,
+      mentor_for_employee_id: params[:mentor_for_employee_id]
+    )
+
+    if result.is_a?(Hash) && result[:error].present?
+      render json: result, status: :bad_request
     else
-      render json: { error: 'Type is not valid' }, status: :bad_request and return
+      render json: result, status: :ok
     end
-
-    render json: employees, status: :ok
   end
 
   def show
-    employee = current_employee
-    render json: employee, status: :ok
+    if current_employee.present?
+      employee_id = current_employee.id
+
+      employee = Employee.includes(
+        invoices: [
+          :before_images_attachments, 
+          :after_images_attachments, 
+          :client, 
+          :invoice_group
+        ], 
+        employees_inventories: [:product], 
+        employee_locations: [:location]
+      ).find(employee_id)
+
+      render json: employee, status: :ok
+    else
+      render json: { 'error': 'Employee Not found' }, status: :unauthorized
+    end
   end
 
   def create

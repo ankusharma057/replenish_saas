@@ -21,12 +21,7 @@ class Api::Client::LocationsController < ClientApplicationController
 
   def employees
     location = Location.find_by(id: params[:id])
-    if location.present?
-      employees = location.employees
-    else
-      employees = []
-    end
-
+    employees = location.present? ? location.employees_with_associations : []
     render json: employees, status: :ok
   end
 end

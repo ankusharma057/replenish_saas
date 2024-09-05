@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   getInvoiceList,
+  getAllInvoiceList,
   invoiceFinalize,
   multipleInvoiceFinalize,
 } from "../Server";
@@ -32,7 +33,7 @@ const Invoice = () => {
   const [multipleInvoiceData, setMultipleInvoiceData] = useState({});
 
   const getInvoices = async (refetch = false) => {
-    const { data } = await getInvoiceList(refetch);
+    const { data } = await getAllInvoiceList(refetch);
     setInvoiceList(DataFilterService.invoiceGroupByFinalized(data));
   };
 

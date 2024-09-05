@@ -113,6 +113,20 @@ export const getInvoiceList = async (refetch) =>
     },
   });
 
+export const getAllInvoiceList = async (refetch) =>
+  api.get("/api/invoice_lists", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const deleteInvoice = async (id, refetch) =>
+  api.delete(`/api/invoices/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getProductsList = async (refetch) =>
   api.get("/api/products", {
     cache: {
@@ -137,6 +151,13 @@ export const getProductsListWithId = async (refetch, id) =>
 
 export const getEmployeesList = async (refetch = false) =>
   api.get("/api/employees", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getEmployeesListOnly = async (refetch = false) =>
+  api.get("/api/employee_schedules", {
     cache: {
       ignoreCache: refetch,
     },
@@ -233,6 +254,13 @@ export const getClientLocations = async (refetch = false) =>
 
 export const getLocationEmployee = async (locationId, refetch = false) =>
   api.get(`api/client/locations/${locationId}/employees`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocationEmployeeOnly = async (locationId, refetch = false) =>
+  api.get(`api/locations/${locationId}/employees`, {
     cache: {
       ignoreCache: refetch,
     },

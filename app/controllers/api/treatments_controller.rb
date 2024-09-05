@@ -3,8 +3,13 @@ class Api::TreatmentsController < ApplicationController
   skip_before_action :authorized_employee, only: %i[index]
 
   def index
-    render json: Treatment.employee_treatments(params[:employee_id])
+    treatments = Treatment
+                   .employee_treatments(params[:employee_id])
+                   .includes(:treatment_intake_forms, :employee, :product)
+  
+    render json: treatments, status: :ok
   end
+  
 
   def base_treatments
     render json: Treatment.base_treatments

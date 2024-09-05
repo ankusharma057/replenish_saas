@@ -99,6 +99,8 @@ mount Sidekiq::Web => '/sidekiq'
     resources :response_intake_forms
     resources :questionnaires
     resources :chart_entries
+    resources :employee_schedules, only: [:index]
+    resources :invoice_lists, only: [:index]
 
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
 
@@ -120,6 +122,8 @@ mount Sidekiq::Web => '/sidekiq'
     delete '/products', to: 'products#destroy'
     get '/base_treatments', to: 'treatments#base_treatments'
     get '/client_schedules', to: 'schedules#get_client_schedule'
+    get '/locations/:id/employees', to: 'employee_schedules#employees'
+
   
   end
   get '*path', to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html?}
