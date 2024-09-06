@@ -1,9 +1,12 @@
 class ProductSerializer < ActiveModel::Serializer
-  attributes :id, :name, :product_type, :cost_price, :retail_price, :provider_purchased, :inventory_prompts, :duration
-  has_many :invoices
-  has_many :treatments
+  attributes :id, :name, :product_type, :cost_price, :retail_price, :provider_purchased, :duration
+  has_many :invoices, serializer: InvoiceSerializer, if: -> { instance_options[:include_invoices] }
+  has_many :treatments, serializer: TreatmentSerializer, if: -> { instance_options[:include_treatments] }
 
   def duration
-    object.treatments&.last&.duration
+    if @instance_options[:include_treatments]
+      object.treatments&.last&.duration
+    end
   end
 end
+

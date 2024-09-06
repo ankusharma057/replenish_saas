@@ -5,8 +5,8 @@ class Api::ProductsController < ApplicationController
   before_action :set_access_control_headers
 
   def index
-    products = Product.with_associations_for_employee(params[:employee_id])
-    render json: products, status: :ok
+    products = Employee.find_by(id: params[:employee_id])&.employees_inventories&.map(&:product) || Product.all
+    render json: products, each_serializer: ProductSerializer, status: :ok
   end
 
   def show
