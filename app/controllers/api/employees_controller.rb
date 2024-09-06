@@ -31,8 +31,10 @@ class Api::EmployeesController < ApplicationController
           :client, 
           :invoice_group
         ], 
-        employees_inventories: [:product], 
-        employee_locations: [:location]
+        employees_inventories: { product: :treatments },
+        employee_locations: :location,
+        employee_mentors: :mentor,
+        inventory_requests: []
       ).find(employee_id)
 
       render json: employee, status: :ok
