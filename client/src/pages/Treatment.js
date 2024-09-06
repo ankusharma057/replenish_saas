@@ -53,7 +53,6 @@ const Treatment = () => {
       const { data } = await getEmployeesListOnly(refetch);
       if (data?.length > 0) {
         setEmployeeList(data);
-        // handleSelect(data[0]);
       }
     } catch (error) {
       console.log(error);
