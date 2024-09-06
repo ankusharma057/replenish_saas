@@ -162,4 +162,19 @@ class Employee < ApplicationRecord
 
     employees
   end
+
+  def self.get_employee(employee_id)
+    Employee.includes(
+      invoices: [
+        :before_images_attachments, 
+        :after_images_attachments, 
+        :client, 
+        :invoice_group
+      ], 
+      employees_inventories: { product: :treatments },
+      employee_locations: :location,
+      employee_mentors: :mentor,
+      inventory_requests: []
+    ).find(employee_id)
+  end
 end

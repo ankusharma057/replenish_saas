@@ -22,21 +22,7 @@ class Api::EmployeesController < ApplicationController
 
   def show
     if current_employee.present?
-      employee_id = current_employee.id
-
-      employee = Employee.includes(
-        invoices: [
-          :before_images_attachments, 
-          :after_images_attachments, 
-          :client, 
-          :invoice_group
-        ], 
-        employees_inventories: { product: :treatments },
-        employee_locations: :location,
-        employee_mentors: :mentor,
-        inventory_requests: []
-      ).find(employee_id)
-
+      employee = Employee.get_employee(current_employee.id)
       render json: employee, status: :ok
     end
   end
