@@ -17,8 +17,8 @@ class Invoice < ApplicationRecord
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 
   # before_update :revise_charge
-  before_destroy :return_inventory
-  before_destroy :verify_fellow_invoices
+  before_destroy -> { return_inventory if !self.is_finalized }, if: -> { !self.is_finalized }
+  before_destroy -> { verify_fellow_invoices if !self.is_finalized }, if: -> { !self.is_finalized }
 
   scope :finalized, -> { where(is_finalized: true) }
   scope :non_finalized, -> { where(is_finalized: false) }

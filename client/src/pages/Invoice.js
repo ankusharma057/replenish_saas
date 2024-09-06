@@ -329,6 +329,7 @@ const Invoice = () => {
               invoice={invoice}
               finalizeInvoiceSubmit={finalizeInvoiceSubmit}
               seeMore={seeMore}
+              getInvoices={getInvoices}
             />
           ))}
         </div>
