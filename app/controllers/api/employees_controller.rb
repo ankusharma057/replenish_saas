@@ -7,8 +7,7 @@ class Api::EmployeesController < ApplicationController
 
   def index
     type = params[:type].to_s.downcase
-
-    result = Employee.fetch_employees_with_associations(
+    result = Employee.order(:name).fetch_employees_with_associations(
       type: type,
       mentor_for_employee_id: params[:mentor_for_employee_id]
     )

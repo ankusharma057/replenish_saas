@@ -136,6 +136,7 @@ class Employee < ApplicationRecord
   end
 
   def self.fetch_employees_with_associations(type:, mentor_for_employee_id: nil)
+    # Define associations for eager loading
     associations_to_include = [
       :inventory_prompts,
       :inventory_requests,
@@ -154,17 +155,17 @@ class Employee < ApplicationRecord
       { employee_locations: [:location] }
     ]
 
-    if type.blank?
-      employees = includes(associations_to_include)
-    elsif respond_to?("#{type}s")
-      employees = send("#{type}s")
-                  .includes(associations_to_include)
-                  .exclude_mentors_for_employee(mentor_for_employee_id)
-    else
-      return { error: 'Type is not valid' }
-    end
+    employee = if type.blank?
+              all
+            elsif respond_to?("#{type}s")
+              send("#{type}s")
+            else
+              return { error: 'Type is not valid' }
+            end
 
-    employees
+    employee = employee.includes(associations_to_include) if type.present?
+    employee = employee.exclude_mentors_for_employee(mentor_for_employee_id) if type.present?
+    employee
   end
 
   def self.get_employee(employee_id)
