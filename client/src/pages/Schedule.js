@@ -26,7 +26,12 @@ import {
   updateAvailability,
   getEmployeeLocations,
   deleteEmployeeAvailability,
-  updateVendore
+  updateVendore,
+  getLocationsOnly,
+  getEmployeeLocationsOnly,
+  getLocationsWithoutEmployeeOnly,
+  getClientsOnly,
+  getTreatmentListOnly
 } from "../Server";
 import * as dates from "react-big-calendar/lib/utils/dates";
 
@@ -309,7 +314,7 @@ function Schedule() {
 
   const getClientName = async (employee_id, refetch = false) => {
     try {
-      const { data } = await getClients(employee_id, refetch);
+      const { data } = await getClientsOnly(employee_id, refetch);
 
       if (data?.length > 0) {
         setClientNameOptions(
@@ -323,7 +328,7 @@ function Schedule() {
   };
 
   const getAllLocation = async (refetch = false) => {
-    const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
+    const { data } = authUserState.user.is_admin ? await getLocationsOnly(refetch) : await getEmployeeLocationsOnly(authUserState?.user?.id);
 
     if (data?.length > 0) {
       setSelectedLocation(previousState => {
@@ -354,7 +359,7 @@ function Schedule() {
   }, [selectedLocation]);
 
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
-    const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
+    const { data } = await getLocationsWithoutEmployeeOnly(employeeId, refetch);
 
     if (data) {
       setEmployeeLocations(
@@ -379,7 +384,7 @@ function Schedule() {
   const handleSelectEmployee = async (emp) => {
     if (emp) {
       getClientName(emp.id);
-      const { data } = await getTreatmentList(false, emp.id);
+      const { data } = await getTreatmentListOnly(false, emp.id);
       const treatmentOption = (data || []).map((inv) => {
         return {
           label: inv.name,
@@ -396,7 +401,7 @@ function Schedule() {
   };
 
   const getAllLocationsByEmployee = async (id) =>{
-    const {data} = await getEmployeeLocations(id)
+    const {data} = await getEmployeeLocationsOnly(id)
     const locationOption = (data || []).map((inv) => {
       return {
         label: inv.name,
@@ -650,7 +655,7 @@ function Schedule() {
     });
 
     if (authUserState.user.is_admin) {
-      const { data } = await getLocationEmployee(selectedOption?.id);
+      const { data } = await getLocationEmployeeOnly(selectedOption?.id);
       if (data?.length > 0) {
         setEmployeeList(data);
         setAppointmentModal((pre) => ({

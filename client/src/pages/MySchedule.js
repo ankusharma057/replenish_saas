@@ -9,8 +9,10 @@ import {
   deleteAvailability,
   getAvailability,
   getClients,
+  getClientsOnly,
   getLocationEmployee,
   getLocations,
+  getLocationsOnly,
   getSchedule,
   markAvailability,
   remainingBalancePaidToEmployee,
@@ -136,7 +138,7 @@ function MySchedule() {
   };
 
   const getAllLocation = async (refetch = false) => {
-    const { data } = await getLocations(refetch);
+    const { data } = await getLocationsOnly(refetch);
 
     if (data?.length > 0) {
       setServiceLocation(
@@ -147,7 +149,7 @@ function MySchedule() {
 
   const getClientName = async (refetch = false) => {
     try {
-      const { data } = await getClients(userData.id, refetch);
+      const { data } = await getClientsOnly(userData.id, refetch);
 
       if (data?.length > 0) {
         setClientNameOptions(

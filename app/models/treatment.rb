@@ -19,7 +19,7 @@ class Treatment < ApplicationRecord
 
   def self.employee_treatments(employee_id)
     if employee_id.present?
-      where(created_by: employee_id)
+      includes(:product).where(created_by: employee_id)
     else
       { message: "Please pass employee_id" }.to_json
     end

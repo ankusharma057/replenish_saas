@@ -6,7 +6,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
-import { getLocationEmployee, getLocations, postAvailability, getEmployeeLocations } from "../../Server";
+import { getLocationEmployee, getLocations, postAvailability, getEmployeeLocations, getLocationsOnly, getEmployeeLocationsOnly, getLocationEmployeeOnly } from "../../Server";
 import { useAuthContext } from "../../context/AuthUserContext";
 import Select from "react-select";
 import dayjs from 'dayjs';
@@ -45,7 +45,7 @@ const AvailabilityModal = (props) => {
   const [scheduleData, setScheduleData] = useState({update_all_my_locations: false});
   
   const getAllLocation = async (refetch = false) => {
-    const { data } = authUserState.user.is_admin ? await getLocations(refetch) : await getEmployeeLocations(authUserState?.user?.id);
+    const { data } = authUserState.user.is_admin ? await getLocationsOnly(refetch) : await getEmployeeLocationsOnly(authUserState?.user?.id);
 
     if (data?.length > 0) {
       setServiceLocation(
@@ -58,7 +58,7 @@ const AvailabilityModal = (props) => {
     setChanges(true)
 
     if (authUserState?.user) {
-      const { data } = await getLocationEmployee(selectedOption?.id);
+      const { data } = await getLocationEmployeeOnly(selectedOption?.id);
       if (data?.length > 0) {
         if (authUserState?.user?.is_admin) {
           setEmployeeList(data);  

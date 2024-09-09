@@ -50,6 +50,16 @@ export const getClients = async (employee_id, refetch) =>
     },
   });
 
+export const getClientsOnly = async (employee_id, refetch) =>
+api.get("/api/schedule_clients", {
+  cache: {
+    ignoreCache: refetch,
+  },
+  params: {
+    employee_id,
+  },
+});
+
 export const getIntakeForms = async (refetch) =>
   api.get("/api/intake_forms", {
     cache: {
@@ -164,7 +174,7 @@ export const getEmployeesListOnly = async (refetch = false) =>
   });
 
   export const getTreatmentProductsOnly = async (refetch = false) =>
-    api.get("/api/treatment_products.json", {
+    api.get("/api/treatment_products", {
       cache: {
         ignoreCache: refetch,
       },
@@ -232,11 +242,28 @@ export const getLocations = async (refetch = false) =>
     },
   });
 
+export const getLocationsOnly = async (refetch = false) =>
+  api.get("/api/schedule_locations", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getLocationsWithoutEmployee = async (
   employee_id,
   refetch = false
 ) =>
   api.get(`/api/locations?skip_by_employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getLocationsWithoutEmployeeOnly = async (
+  employee_id,
+  refetch = false
+) =>
+  api.get(`/api/schedule_locations?skip_by_employee_id=${employee_id}`, {
     cache: {
       ignoreCache: refetch,
     },
@@ -251,6 +278,16 @@ export const getLocationsWithoutEmployee = async (
         ignoreCache: refetch,
       },
     });
+
+export const getEmployeeLocationsOnly = async (
+  employee_id,
+  refetch = false
+) =>
+  api.get(`/api/schedule_locations?employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
 export const getClientLocations = async (refetch = false) =>
   api.get("/api/client/locations", {
@@ -576,6 +613,13 @@ export const reminder = async (id, data) =>
 
 export const getTreatmentList = async (refetch, id) =>
   api.get(`/api/treatments?employee_id=${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getTreatmentListOnly = async (refetch, id) =>
+  api.get(`/api/schedule_treatments?employee_id=${id}`, {
     cache: {
       ignoreCache: refetch,
     },
