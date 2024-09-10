@@ -1,5 +1,5 @@
 class Api::AppointmentsController < ApplicationController
-  skip_before_action :authorized_employee
+
   def index
     schedules = Schedule.all
     schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
