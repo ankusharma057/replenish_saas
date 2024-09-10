@@ -53,16 +53,20 @@ class Employee < ApplicationRecord
     Role.find_by(name: name)
   end
 
+  def roles_cache
+    @roles_cache ||= roles.pluck(:name)
+  end
+
   def is_admin?
-    has_role?(:admin)
+    roles_cache.include?('admin')
   end
 
   def is_inv_manager?
-    has_role?(:inv_manager)
+    roles_cache.include?('inv_manager')
   end
 
   def is_mentor?
-    has_role?(:mentor)
+    roles_cache.include?('mentor')
   end
 
   def send_reset_password_mail
@@ -161,5 +165,20 @@ class Employee < ApplicationRecord
     end
 
     employees
+  end
+
+  def self.get_employee(employee_id)
+    Employee.includes(
+      invoices: [
+        :before_images_attachments, 
+        :after_images_attachments, 
+        :client, 
+        :invoice_group
+      ], 
+      employees_inventories: { product: :treatments },
+      employee_locations: :location,
+      employee_mentors: :mentor,
+      inventory_requests: []
+    ).find(employee_id)
   end
 end

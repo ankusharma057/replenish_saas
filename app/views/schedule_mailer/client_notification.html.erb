@@ -7,7 +7,7 @@
 </head>
 <body>
   <p>Dear <%= @client.name %>,</p>
-  <% if @amount == 50 %>
+  <% if @amount != 0 %>
     <p>An appointment with <%= @schedule.employee.name %> has been successfully created for <%= @schedule.date.strftime('%d-%m-%Y') %> from <%= @schedule.start_time.strftime('%I:%M %p') %> to <%= @schedule.end_time.strftime('%I:%M %p') %> at <%= @schedule.location.name %>.</p> <p>Your payment of <%= @amount %> for the appointment has also been successfully processed.</p>
   <% else %>
   <p>An appointment with <%= @schedule.employee.name %> has been successfully created for <%= @schedule.date.strftime('%d-%m-%Y') %> from <%= @schedule.start_time.strftime('%I:%M %p') %> to <%= @schedule.end_time.strftime('%I:%M %p') %> at <%= @schedule.location.name %>.</p>

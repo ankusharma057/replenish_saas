@@ -17,14 +17,19 @@ class IntakeForm < ApplicationRecord
 
   def self.get_treatment_intake_forms(current_employee, params)
     intake_forms = if current_employee.is_admin?
-      all
+      includes(:employee, :treatments)
     else
       employee_ids = Employee.admins.map(&:id).push(current_employee.id)
-      IntakeForm.where(employee_id: employee_ids)
+      IntakeForm.includes(:employee, :treatments).where(employee_id: employee_ids)
     end
 
     if params[:treatment_id].present?
-      intake_forms.where.not(id: TreatmentIntakeForm.where(treatment_id: params[:treatment_id]).map(&:intake_form_id).uniq)
+      intake_forms.where.not(
+        id: TreatmentIntakeForm.includes(:intake_form) # Eager load intake_form
+                             .where(treatment_id: params[:treatment_id])
+                             .pluck(:intake_form_id)
+                             .uniq
+      )
     else
       intake_forms
     end

@@ -63,7 +63,10 @@ class Api::InvoicesController < ApplicationController
   end
 
   def finalize_multiple
-    invoices = Invoice.where(id: params["_json"].pluck(:id))
+    invoice_ids = params["_json"].pluck(:id)
+    invoices = Invoice.includes(:employee, :client, :invoice_group, :document_attachment, :document_blob)
+                      .where(id: invoice_ids)
+
     message_hash = { success: [] }
     invoices.each do |invoice|
       if invoice.finalize_and_attach_pdf
@@ -74,11 +77,11 @@ class Api::InvoicesController < ApplicationController
           message_hash[:success] << "Finalize Invoices: #{invoice.fellow_invoices.where(is_finalized: false).ids} to receive the mail"
         end
       else
-        return render json: {'error' => 'Invoice not found'}, status: :not_found
+        return render json: { 'error' => 'Invoice not found' }, status: :not_found
       end
     end
 
-    return render json: { 'message' => message_hash[:success] }, status: :ok
+    render json: { 'message' => message_hash[:success] }, status: :ok
   end
 
   def send_reject_mail
@@ -115,7 +118,7 @@ class Api::InvoicesController < ApplicationController
   end
 
   def find_invoice
-    @invoice = Invoice.find_by(id: params[:id])
+    @invoice = Invoice.includes(:employee, :client).find_by(id: params[:id])
   end
 
   def remove_images_from_blobs

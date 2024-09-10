@@ -5,11 +5,9 @@ class Api::TreatmentsController < ApplicationController
   def index
     treatments = Treatment
                    .employee_treatments(params[:employee_id])
-                   .includes(:treatment_intake_forms, :employee, :product)
-  
+                   .includes(:employee, :product, treatment_intake_forms: :intake_form)
     render json: treatments, status: :ok
   end
-  
 
   def base_treatments
     render json: Treatment.base_treatments
@@ -43,11 +41,11 @@ class Api::TreatmentsController < ApplicationController
   end
 
   def show
-    treatment = Treatment.find_by(id: params[:id])
+    treatment = Treatment.includes(treatment_intake_forms: :intake_form).find_by(id: params[:id])
     if treatment.present?
       render json: treatment, status: :ok
     else
-      render json: {error: 'Treatment does not exist'}, status: :unprocessable_entity
+      render json: { error: 'Treatment does not exist' }, status: :unprocessable_entity
     end
   end
 
