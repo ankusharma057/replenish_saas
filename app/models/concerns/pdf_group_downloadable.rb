@@ -137,7 +137,7 @@ module PdfGroupDownloadable
           <h1 style="text-align: center; color: black;"> Replenish Aesthetics and Wellness</h1>'
       str += "<h2>Bill Amount: #{source_invoices.pluck(:charge).reject{|charge| charge.nil?}.inject(:+)}</h2>"
 
-      source_invoices.each do |invoice| 
+      source_invoices.includes(:employee, :client).each do |invoice|
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
                 <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 

@@ -917,7 +917,6 @@ const getChartEntryData = async(editId) =>{
     try{
         const response = await getChartEntry(editId)
         if(response?.status === 200){
-            console.log("response",response);
             setQutionaryFields(response?.data?.chart_histroy?.formData)
             setTitle(response?.data?.name)
         }
@@ -2858,14 +2857,6 @@ useEffect(()=>{
                                         onHide={() => setShowCreateUserModal(false)}
                                     />
                                 )}
-
-                            {currentTab === "client" && (
-                                    <CreateClientCard
-                                        show={showCreateClientModel}
-                                        onHide={() => {setShowCreateClientModel(false)}}
-                                        getEmployees =  {getEmployees}
-                                    />
-                                )}
                             </div>
 
                             <CustomModal
@@ -2874,6 +2865,13 @@ useEffect(()=>{
                                 invoiceData={selectedInvoiceData}
                             />
                         </div>
+                    )}
+                    {currentTab === "client" && (
+                        <CreateClientCard
+                            show={showCreateClientModel}
+                            onHide={() => {setShowCreateClientModel(false)}}
+                            getEmployees =  {getEmployees}
+                        />
                     )}
                 </div>
             </AsideLayout>

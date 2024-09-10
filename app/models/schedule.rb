@@ -45,7 +45,7 @@ class Schedule < ApplicationRecord
   end
 
   def paid_amt
-    payments.where(status: 'paid').map{|a| a.amount.to_i || 0}.sum
+    payments.select { |payment| payment.status == 'paid' }.map { |p| p.amount.to_i }.sum
   end
 
   def timezone

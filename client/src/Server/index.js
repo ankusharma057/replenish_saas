@@ -345,6 +345,14 @@ export const getSchedule = async (params, refetch = false) =>
     params: params,
   });
 
+export const getScheduleOnly = async (params, refetch = false) =>
+  api.get(`/api/appointments`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: params,
+  });
+
 export const getClientSchedule = async (refetch = false) =>
   api.get(`/api/client/appointments`, {
     cache: {

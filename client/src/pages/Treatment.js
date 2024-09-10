@@ -96,7 +96,6 @@ const Treatment = () => {
     useState(false);
     const [changes,setChanges] = useState(false)
     useEffect(()=>{setChanges(false)},[showUpdateTreatmentModal,showCreateTreatmentModal])
-    console.log("dnuahcfushdc", changes);
   const [sorting, setSorting] = useState([]);
 
   const closeModel = (stage) => {
@@ -209,9 +208,8 @@ const Treatment = () => {
       const response = await createTreatment(payload);
 
       if (response.status === 200) {
-        toast.success("Treatment Created Successfully");
         if (response?.data?.error) {
-          toast.error(response?.data?.error?.name || "Failed to create treatment");
+          toast.error("Failed to create treatment");
           setErrorsForm(response?.data?.error || {})
         } else {
           setTreatmentForm({
@@ -224,7 +222,7 @@ const Treatment = () => {
             treatment_intake_forms_attributes: [],
           });
           setErrorsForm({});
-
+          toast.success("Treatment Created Successfully");
           setShowCreateTreatmentModal(false);
           if (currentTab === "base-treatments") await getBaseTreatments(true);
           else await getTreatment(true);
@@ -507,7 +505,7 @@ const Treatment = () => {
                 )}
               </div>
             </div>
-            <Button
+            {/* <Button
               onClick={() => {
                 setShowCreateUserModal(true);
                 setCurrentTab("staff");
@@ -516,7 +514,7 @@ const Treatment = () => {
               className="w-full text-white"
             >
               + Add Employee
-            </Button>
+            </Button> */}
           </>
         }>
         <div className="flex py-10 px-6 flex-1 items-center flex-col">

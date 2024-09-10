@@ -53,16 +53,20 @@ class Employee < ApplicationRecord
     Role.find_by(name: name)
   end
 
+  def roles_cache
+    @roles_cache ||= roles.pluck(:name)
+  end
+
   def is_admin?
-    has_role?(:admin)
+    roles_cache.include?('admin')
   end
 
   def is_inv_manager?
-    has_role?(:inv_manager)
+    roles_cache.include?('inv_manager')
   end
 
   def is_mentor?
-    has_role?(:mentor)
+    roles_cache.include?('mentor')
   end
 
   def send_reset_password_mail

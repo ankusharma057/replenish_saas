@@ -20,6 +20,7 @@ import {
   getLocationEmployeeOnly,
   getLocations,
   getSchedule,
+  getScheduleOnly,
   getTreatmentList,
   markAvailability,
   remainingBalancePaidToEmployee,
@@ -211,7 +212,7 @@ function Schedule() {
 
   const getEmployeeSchedule = async (emp, refetch = true) => {
     try {
-      const { data } = await getSchedule(
+      const { data } = await getScheduleOnly(
         {
           employee_id: emp.id,
           start_date: emp.start_date,

@@ -18,8 +18,9 @@ class Api::SchedulesController < ApplicationController
   def create
     schedule = Schedule.new(schedule_param)
     schedule.client = set_client
+    amount = 0
     if schedule.save
-      schedule.send_payment_notifications(nil)
+      schedule.send_payment_notifications(amount)
       render json: schedule, status: :created
     else
       render json: {error: schedule.errors }, status: :unprocessable_entity
