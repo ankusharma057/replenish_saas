@@ -1,12 +1,16 @@
 class EmployeeSerializer < ActiveModel::Serializer
-  attributes :id, :name, :vendor_name, :email
+   attributes :id, :name, :vendor_name, :email, :password, :gfe,
+             :service_percentage, :retail_percentage, :pay_50, :inventory_prompts,
+             :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
+             :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations
 
-  # has_many :invoices
-  # has_many :inventory_prompts, class_name: 'InventoryPrompt'
-  # has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id
-  # has_many :employees_inventories, class_name: 'EmployeeInventory'
-  # has_many :employee_mentors, class_name: 'EmployeeMentor'
-  # has_many :employee_locations, class_name: 'EmployeeLocation'
+
+  has_many :invoices
+  has_many :inventory_prompts, class_name: 'InventoryPrompt'
+  has_many :inventory_requests, class_name: 'InventoryRequest', foreign_key: :requestor_id
+  has_many :employees_inventories, class_name: 'EmployeeInventory'
+  has_many :employee_mentors, class_name: 'EmployeeMentor'
+  has_many :employee_locations, class_name: 'EmployeeLocation'
 
   # def employees_inventories
   #   object.employees_inventories&.map do |employee_inventory|

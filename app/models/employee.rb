@@ -58,15 +58,18 @@ class Employee < ApplicationRecord
   end
 
   def is_admin?
-    roles_cache.include?('admin')
+    roles.any? { |role| role.name == 'admin' }
+    # has_role?(:admin)
   end
 
   def is_inv_manager?
-    roles_cache.include?('inv_manager')
+    roles.any? { |role| role.name == 'inv_manager'  }
+    # has_role?(:inv_manager)
   end
 
   def is_mentor?
-    roles_cache.include?('mentor')
+    roles.any? { |role| role.name == 'mentor'}
+    # has_role?(:mentor)
   end
 
   def send_reset_password_mail
@@ -136,7 +139,6 @@ class Employee < ApplicationRecord
   end
 
   def self.fetch_employees_with_associations(type:, mentor_for_employee_id: nil)
-    # Define associations for eager loading
     associations_to_include = [
       :inventory_prompts,
       :inventory_requests,
@@ -155,17 +157,17 @@ class Employee < ApplicationRecord
       { employee_locations: [:location] }
     ]
 
-    employee = if type.blank?
-              all
-            elsif respond_to?("#{type}s")
-              send("#{type}s")
-            else
-              return { error: 'Type is not valid' }
-            end
+    if type.blank?
+      employees = includes(associations_to_include)
+    elsif respond_to?("#{type}s")
+      employees = send("#{type}s")
+                  .includes(associations_to_include)
+                  .exclude_mentors_for_employee(mentor_for_employee_id)
+    else
+      return { error: 'Type is not valid' }
+    end
 
-    employee = employee.includes(associations_to_include) if type.present?
-    employee = employee.exclude_mentors_for_employee(mentor_for_employee_id) if type.present?
-    employee
+    employees
   end
 
   def self.get_employee(employee_id)
