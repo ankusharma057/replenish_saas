@@ -1239,12 +1239,12 @@ export default function AddInvoices() {
                           </td>
                           <td>
                             <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                              {product.cost_price}
+                              {product.retail_price}
                             </p>
                           </td>
                           <td className="text-right">
                             {Number(
-                              product.quantity * product.cost_price || 0
+                              product.quantity * product.retail_price || 0
                             )?.toFixed(2)}
                           </td>
                           <td>

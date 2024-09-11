@@ -141,11 +141,11 @@ const AddInvoiceTemplate = ({
                         </td>
                         <td>
                           <p className="w-full p-1 text-center border-gray-500 border rounded-md my-1">
-                            {product?.cost_price}
+                            {product?.retail_price}
                           </p>
                         </td>
                         <td className=" text-center">
-                          {product?.quantity * product?.cost_price}
+                          {product?.quantity * product?.retail_price}
                         </td>
                       </tr>
                     ))}
