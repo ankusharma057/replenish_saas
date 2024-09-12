@@ -764,7 +764,7 @@ export default function AddInvoices() {
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag(),
       get_total_price_by_client: getTotalPaidByClient(),
-      total_consumable_cost: getConsumableCostPrice(),
+      total_consumable_cost: getConsumableRetailPrice(),
     };
     const invoiceList = [
       ...invoiceArray,
@@ -1447,7 +1447,7 @@ export default function AddInvoices() {
                 <div className="border rounded-lg p-2 mb-4">
                   <label className="block">
                     Total Product Price Sum:{" "}
-                    {Number(getConsumableCostPrice() || 0)?.toFixed(2)}
+                    {Number(getConsumableRetailPrice() || 0)?.toFixed(2)}
                   </label>
                 </div>
 
