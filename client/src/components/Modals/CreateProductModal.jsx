@@ -122,6 +122,7 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
           value={formData.retail_price}
           onChange={handleChange}
           min="0"
+          step="any"
         />
 
         <label className="flex justify-between font-semibold  py-2 rounded-md  transition duration-500">
