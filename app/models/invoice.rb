@@ -98,6 +98,27 @@ class Invoice < ApplicationRecord
   #   end
   # end
 
+  scope :with_associations, -> {
+    includes(
+      :products,
+      :employee,
+      :client,
+      :before_images_attachments,
+      :after_images_attachments,
+      :invoice_group
+    )
+  }
+
+  scope :filter_by_finalized, -> (is_finalized) {
+    where(is_finalized: is_finalized) if is_finalized.present?
+  }
+
+  def self.paginated_invoices(params)
+    with_associations
+      .filter_by_finalized(params[:is_finalized])
+      .paginate(page: params[:page], per_page: params[:per_page] || 12)
+  end
+
   def return_inventory
     if products_hash && products_hash.any?
       products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|

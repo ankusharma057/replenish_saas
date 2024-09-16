@@ -772,6 +772,7 @@ function MySchedule() {
       {/* Availability modal */}
       <AvailabilityModal
         availabilityModal={availabilityModal}
+        serviceLocation={serviceLocation}
         closeModal={() => setAvailabilityModal(initialAvailabilityModal)}
         handleSubmit={handleSubmit}
         setSelectedAvailability={(o) => setSelectedAvailability(o)}

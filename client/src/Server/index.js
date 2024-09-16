@@ -123,10 +123,13 @@ export const getInvoiceList = async (refetch) =>
     },
   });
 
-export const getAllInvoiceList = async (refetch) =>
+export const getAllInvoiceList = async (data, refetch) =>
   api.get("/api/invoice_lists", {
     cache: {
       ignoreCache: refetch,
+    },
+    params: {
+      ...data,
     },
   });
 

@@ -1,14 +1,12 @@
 class Api::InvoiceListsController < ApplicationController
   def index
-    invoices = Invoice.includes(
-      :products, 
-      :employee, 
-      :client, 
-      :before_images_attachments, 
-      :after_images_attachments, 
-      :invoice_group
-    ).all
-    
-    render json: invoices, each_serializer: InvoiceListSerializer, status: :ok
+    invoices = Invoice.paginated_invoices(params)
+
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
   end
 end

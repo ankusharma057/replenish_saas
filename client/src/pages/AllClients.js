@@ -1117,11 +1117,11 @@ useEffect(()=>{
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="border-t-2  py-2 bg-white">
+                        <div className="border-t-2  py-2 bg-white h-[70vh]">
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex h-[600px]  flex-col pl-2 gap-4 overflow-y-auto">
+                            <div className="flex h-[600px] flex-col pl-2 gap-4 overflow-y-auto">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}

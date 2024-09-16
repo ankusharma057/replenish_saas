@@ -681,14 +681,14 @@ setTitle(title)
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="border-t-2  py-2 bg-white">
+            <div className="border-t-2  py-2 bg-white h-[70vh]">
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
-              <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
+              <div className="flex h-[600px] flex-col pl-2 gap-4 overflow-y-auto">
                 {(employeeList || []).length > 0 && (
                   <List
-                    height={window.innerHeight - 450}
+                    height={window.innerHeight - 350}
                     itemCount={employeeList.length}
                     itemSize={45}
                     width={"100%"}

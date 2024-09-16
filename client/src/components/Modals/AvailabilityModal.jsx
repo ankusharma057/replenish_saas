@@ -43,16 +43,6 @@ const AvailabilityModal = (props) => {
   const [availabilityTimings, setAvailabilityTimings] = useState(initialAvailabilityTimings)
 
   const [scheduleData, setScheduleData] = useState({update_all_my_locations: false});
-  
-  const getAllLocation = async (refetch = false) => {
-    const { data } = authUserState.user.is_admin ? await getLocationsOnly(refetch) : await getEmployeeLocationsOnly(authUserState?.user?.id);
-
-    if (data?.length > 0) {
-      setServiceLocation(
-        data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
-      );
-    }
-  };
 
   const onLocationChange = async (selectedOption) => {
     setChanges(true)
@@ -78,9 +68,9 @@ const AvailabilityModal = (props) => {
     }
   };
   useEffect(() => {
-    getAllLocation();
-    return () => { };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setServiceLocation(
+      props?.serviceLocation.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
+    );
   }, [props]);
 
   const handleInputChange = (e, att) => {

@@ -31,16 +31,21 @@ const Invoice = () => {
   const [showMultipleFinalizeModal, setShowMultipleFinalizeModal] =
     useState(false);
   const [multipleInvoiceData, setMultipleInvoiceData] = useState({});
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const [finalized, setFinalized] = useState(false);
 
   const getInvoices = async (refetch = false) => {
-    const { data } = await getAllInvoiceList(refetch);
-    setInvoiceList(DataFilterService.invoiceGroupByFinalized(data));
+    const { data } = await getAllInvoiceList({ is_finalized: finalized,page: pageNumber}, refetch);
+    setTotalPages(data?.total_pages)
+    const invoiceList = data.invoices || [];
+    setInvoiceList(DataFilterService.invoiceGroupByFinalized(invoiceList));
   };
 
   useEffect(() => {
     getInvoices();
     return () => {};
-  }, []);
+  }, [finalized,pageNumber]);
 
   const finalizeInvoiceSubmit = (invoice) => {
     confirmAlert({
@@ -169,19 +174,6 @@ const Invoice = () => {
     });
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemPerPage = 30; // Calculate the index range for the current page
-  const startIndex = (currentPage - 1) * itemPerPage;
-  const endIndex = startIndex + itemPerPage;
-
-  // Get the invoices for the current page
-  const currentInvoices =
-    invoiceList[selectList]?.slice(startIndex, endIndex) || [];
-
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
-
   const onCustomModalHide = async () => {
     setModalShow(false);
     await getInvoices(true);
@@ -225,6 +217,7 @@ const Invoice = () => {
                       : "finalized"
                   );
                   setRadioValue(e.currentTarget.value);
+                  setFinalized((String(e.currentTarget.value) === "1")? false : true)
                 }}
               >
                 {radio.name}
@@ -295,18 +288,17 @@ const Invoice = () => {
         <div className="flex gap-x-4  justify-end my-4">
           {/* Pagination controls */}
           <Button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setPageNumber(pageNumber - 1)}
             className="!bg-cyan-400 !border-cyan-500"
-            disabled={currentPage === 1}
+            disabled={pageNumber === 1}
           >
             <ChevronLeft />
           </Button>
           <Button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setPageNumber(pageNumber + 1)}
             className="!bg-cyan-400 !border-cyan-500"
             disabled={
-              currentPage ===
-              Math.ceil((invoiceList[selectList] || []).length / itemPerPage)
+              pageNumber === totalPages
             }
           >
             <ChevronRight />
@@ -323,7 +315,7 @@ const Invoice = () => {
               />
             );
           })} */}
-          {currentInvoices.map((invoice) => (
+          {invoiceList[selectList]?.map((invoice) => (
             <InvoiceCard
               key={invoice.id}
               invoice={invoice}

@@ -343,7 +343,6 @@ function Schedule() {
   };
   useEffect(() => {
     if (authUserState.user.is_admin) {
-      getEmployees();
       getAllLocation();
     } else {
       getAllLocation();
@@ -371,7 +370,6 @@ function Schedule() {
 
   useEffect(() => {
     if (selectedEmployeeData?.id) {
-      getAllEmployeeLocation(selectedEmployeeData.id);
       setCurrentEmployee([selectedEmployeeData]);
     }
   }, [selectedEmployeeData]);
@@ -917,7 +915,7 @@ function Schedule() {
                 onChange={(e) => setEmployeeSearch(e.target.value)}
               />
             </div>
-            <div className="border-t-2  py-2 bg-white">
+            <div className="border-t-2  py-2 bg-white h-[70vh]">
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
@@ -1041,6 +1039,7 @@ function Schedule() {
       {/* Availability modal */}
       <AvailabilityModal
         availabilityModal={availabilityModal}
+        serviceLocation={serviceLocation}
         setChanges={setChanges}
         closeModal={() => {
           if(changes){
