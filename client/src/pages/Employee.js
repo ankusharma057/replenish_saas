@@ -210,11 +210,11 @@ const Employee = () => {
   useEffect(() => {
     if (selectedEmployeeData?.id) {
       getAllEmployeeLocation(selectedEmployeeData.id);
+      getAllQuestionnaires();
     }
   }, [selectedEmployeeData]);
 
-  useEffect(() => {
-    const fetchData = async (refetch = true) => {
+    const getAllQuestionnaires = async (refetch = true) => {
       try {
         const response = await getQuestionnaires( refetch );
         if (response.status === 200) {
@@ -224,8 +224,6 @@ const Employee = () => {
         console.error('Error fetching intake forms:', error);
       }
     };
-    fetchData();
-  }, [templateTabs]);
 
   useEffect(() => {
     if (isFillingForm) {
@@ -750,9 +748,6 @@ setTitle(title)
                       checked={currentTab === tab.value}
                       onChange={(e) => {
                         setCurrentTab(e.currentTarget.value);
-                        if (e.currentTarget.value === "invoice") {
-                          getEmployeeInvoices(selectedEmployeeData?.id, true);
-                        }
                       }}
                     >
                       {tab.name}
@@ -1017,7 +1012,7 @@ setTitle(title)
 
                     <div
                       className={`${
-                        selectedEmployeeData.employee_mentors.length === 0 &&
+                        selectedEmployeeData?.employee_mentors?.length === 0 &&
                         "hidden"
                       } relative overflow-x-auto shadow-md sm:rounded-lg m-4`}
                     >
@@ -1037,7 +1032,7 @@ setTitle(title)
                           </tr>
                         </thead>
                         <tbody>
-                          {selectedEmployeeData.employee_mentors.map(
+                          {selectedEmployeeData?.employee_mentors?.map(
                             (val, index) => {
                               return (
                                 <React.Fragment key={index}>
@@ -1130,7 +1125,6 @@ setTitle(title)
                           inputId="product_type"
                           isMulti
                           onChange={(event) => {
-                            console.log(event, "location values");
                             const transformedLocations = event.map(
                               ({ id }) => ({ location_id: id })
                             );
