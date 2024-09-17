@@ -138,7 +138,13 @@ function Schedule() {
 
   const getEmployees = async (refetch = true,remove = false ) => {
     try {
-      const { data } = await getLocationEmployeeOnly(selectedLocation?.id || null, refetch);
+      let data = [];
+      if (authUserState?.user?.is_admin) {
+        const response = await getLocationEmployeeOnly(selectedLocation?.id || null, refetch);
+        data = response?.data || [];
+      } else {
+        data = [authUserState?.user];
+      }
 
       if (data) {
         const a = data?.map((emp) => ({

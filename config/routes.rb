@@ -106,6 +106,7 @@ mount Sidekiq::Web => '/sidekiq'
     resources :schedule_clients, only: [:index]
     resources :schedule_treatments, only: [:index]
     resources :appointments, only: [:index]
+    resources :employees_only, only: [:index]
 
 
     post 'employee_inventories/transfer', to: 'employee_inventories#transfer'
@@ -129,6 +130,7 @@ mount Sidekiq::Web => '/sidekiq'
     get '/base_treatments', to: 'treatments#base_treatments'
     get '/client_schedules', to: 'schedules#get_client_schedule'
     get '/locations/:id/employees', to: 'employee_schedules#employees'
+    get '/employee_invoices', to: 'invoice_lists#employee_invoices'
 
   
   end

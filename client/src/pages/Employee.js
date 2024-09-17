@@ -9,6 +9,8 @@ import {
   sendResetPasswordLinkRoute,
   updateVendore,
   getQuestionnaires,
+  getEmployeesOnly,
+  getEmployeeInvoicesOnly,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -57,10 +59,7 @@ const Employee = () => {
   // const [invoiceList, setInvoiceList] = useState([]);
   // const [invModalSHow, setInvModalSHow] = useState(false);
   const [employeeList, setEmployeeList] = useState([]);
-  // const [employeeInvoices, setEmployeeInvoices] = useState({
-  //   invoices: [],
-  //   employee: {},
-  // });
+  const [employeeInvoices, setEmployeeInvoices] = useState([]);
   const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentTab, setCurrentTab] = useState("profile");
@@ -90,7 +89,7 @@ const Employee = () => {
   
   const getEmployees = async (refetch = false) => {
     try {
-      const { data } = await getEmployeesList(refetch);
+      const { data } = await getEmployeesOnly(refetch);
       if (data?.length > 0) {
         setEmployeeList(data);
         handleSelect(data[0]);
@@ -99,6 +98,19 @@ const Employee = () => {
       console.log(error);
     }
   };
+
+  const getEmployeeInvoices = async (employeeId, refetch = false) => {
+    try {
+      const { data } = await getEmployeeInvoicesOnly(employeeId, true);
+      if (data?.length > 0) {
+        setEmployeeInvoices(data);
+      }else{
+        setEmployeeInvoices([]);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  } 
 
   const getMentors = async (refetch = false, employeeId) => {
     try {
@@ -184,11 +196,16 @@ const Employee = () => {
 
   useEffect(() => {
     getEmployees();
-    getMentors();
     // getInvoices();
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (currentTab === "invoice") {
+      getEmployeeInvoices(selectedEmployeeData.id);
+    }
+  }, [currentTab, selectedEmployeeData]);
 
   useEffect(() => {
     if (selectedEmployeeData?.id) {
@@ -733,6 +750,9 @@ setTitle(title)
                       checked={currentTab === tab.value}
                       onChange={(e) => {
                         setCurrentTab(e.currentTarget.value);
+                        if (e.currentTarget.value === "invoice") {
+                          getEmployeeInvoices(selectedEmployeeData?.id, true);
+                        }
                       }}
                     >
                       {tab.name}
@@ -1056,8 +1076,8 @@ setTitle(title)
                 )}
                 {currentTab === "invoice" && (
                   <div className="flex gap-4 flex-wrap">
-                    {selectedEmployeeData?.invoices.length > 0 ? (
-                      (selectedEmployeeData?.invoices || []).map((invoice) => {
+                    {employeeInvoices?.length > 0 ? (
+                      (employeeInvoices || [])?.map((invoice) => {
                         return (
                           <div
                             onClick={() => {

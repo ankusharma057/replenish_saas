@@ -9,4 +9,14 @@ class Api::InvoiceListsController < ApplicationController
       total_entries: invoices.total_entries
     }, status: :ok
   end
+
+  def employee_invoices
+    if params[:employee_id].present?
+      @employee = Employee.find_by(id: params[:employee_id])
+      invoices = @employee.invoices.joins(:client).select('invoices.id, clients.name as client_name')
+    else
+      invoices = []
+    end
+    render json: invoices.map { |invoice| { id: invoice.id, client_name: invoice.client_name } }, status: :ok
+  end
 end

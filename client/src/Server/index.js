@@ -123,6 +123,13 @@ export const getInvoiceList = async (refetch) =>
     },
   });
 
+export const getEmployeeInvoicesOnly = async (employee_id, refetch) =>
+  api.get(`/api/employee_invoices?employee_id=${employee_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getAllInvoiceList = async (data, refetch) =>
   api.get("/api/invoice_lists", {
     cache: {
@@ -164,6 +171,13 @@ export const getProductsListWithId = async (refetch, id) =>
 
 export const getEmployeesList = async (refetch = false) =>
   api.get("/api/employees", {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const getEmployeesOnly = async (refetch = false) =>
+  api.get("/api/employees_only", {
     cache: {
       ignoreCache: refetch,
     },
