@@ -69,3 +69,6 @@ gem 'twilio-ruby'
 
 # For Payments
 gem 'stripe'
+
+# For pagination
+gem 'will_paginate', '~> 4.0', '>= 4.0.1'

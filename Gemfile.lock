@@ -201,6 +201,7 @@ GEM
     websocket-extensions (0.1.5)
     wicked_pdf (2.6.3)
       activesupport
+    will_paginate (4.0.1)
     wkhtmltopdf-binary (0.12.6.6)
     wkhtmltopdf-heroku (2.12.6.0)
     zeitwerk (2.6.8)
@@ -228,6 +229,7 @@ DEPENDENCIES
   twilio-ruby
   tzinfo-data
   wicked_pdf
+  will_paginate (~> 4.0, >= 4.0.1)
   wkhtmltopdf-binary
   wkhtmltopdf-heroku (= 2.12.6.0)
 
