@@ -11,7 +11,7 @@ import { StyledEngineProvider } from '@mui/material/styles';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  // <React.StrictMode>
+  <React.StrictMode>
     <AuthProvider>
       <AsideLayoutProvide>
         <BrowserRouter>
@@ -21,7 +21,7 @@ root.render(
         </BrowserRouter>
       </AsideLayoutProvide>
     </AuthProvider>
-  // </React.StrictMode>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
