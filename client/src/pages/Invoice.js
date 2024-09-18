@@ -218,6 +218,7 @@ const Invoice = () => {
                   );
                   setRadioValue(e.currentTarget.value);
                   setFinalized((String(e.currentTarget.value) === "1")? false : true)
+                  setPageNumber(1);
                 }}
               >
                 {radio.name}
