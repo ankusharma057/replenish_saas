@@ -6,9 +6,10 @@ class Api::ClientsController < ApplicationController
 
   def index
     clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
-
+    clients = clients.includes(:employees) if clients.present?
     render json: clients, status: :ok
   end
+
 
   def profile
     client = Client.find_by(id: session[:client_id])

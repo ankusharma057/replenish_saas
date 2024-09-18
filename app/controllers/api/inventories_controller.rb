@@ -6,7 +6,7 @@ class Api::InventoriesController < ApplicationController
   before_action :find_receiver_employee, only: :assign
 
   def index
-    @inventories = Inventory.all
+    @inventories = Inventory.includes(product: :employees_inventories)
     render json: @inventories, status: :ok
   end
 
