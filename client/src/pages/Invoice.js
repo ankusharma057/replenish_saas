@@ -34,13 +34,23 @@ const Invoice = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const [finalized, setFinalized] = useState(false);
+  const [totalEntries, setTotalEntries] = useState(0);
+  const [allInvoices, setAllInvoices] = useState([]);
 
   const getInvoices = async (refetch = false) => {
-    const { data } = await getAllInvoiceList({ is_finalized: finalized,page: pageNumber}, refetch);
+    const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber}, refetch);
     setTotalPages(data?.total_pages)
     const invoiceList = data.invoices || [];
+    if(!finalized){
+      setTotalEntries(data?.total_entries) 
+    }
     setInvoiceList(DataFilterService.invoiceGroupByFinalized(invoiceList));
   };
+
+  const getAllInvoices = async (refetch = false) => {
+    const { data } = await getAllInvoiceList({ is_finalized: false, per_page: totalEntries }, true);
+    setAllInvoices(data?.invoices || []);
+  }
 
   useEffect(() => {
     getInvoices();
@@ -229,8 +239,9 @@ const Invoice = () => {
         <div className="static lg:absolute right-4 ">
           <Button
             type="button"
-            // style={{ background: "#0A59CA" }}
-            onClick={() => setShowMultipleFinalizeModal(true)}
+            onClick={() => {setShowMultipleFinalizeModal(true);
+              getAllInvoices(true);
+            }}
             className=" whitespace-nowrap px-4 !bg-cyan-400 !border-cyan-500"
           >
             Finalize Multiple
@@ -258,7 +269,7 @@ const Invoice = () => {
         size="lg"
       >
         <div className="justify-center flex flex-wrap gap-3 min-h-[5rem] max-h-[35rem] overflow-y-auto">
-          {invoiceList["non-finalized"]?.map((invoice) => {
+          {allInvoices?.map((invoice) => {
             return (
               <FinalizeInvoicesCard
                 key={invoice.id}

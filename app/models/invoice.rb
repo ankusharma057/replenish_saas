@@ -101,11 +101,11 @@ class Invoice < ApplicationRecord
   scope :with_associations, -> {
     includes(
       :products,
-      :employee,
       :client,
       :before_images_attachments,
       :after_images_attachments,
-      :invoice_group
+      :invoice_group,
+      employee: [:roles],
     )
   }
 
