@@ -71,6 +71,33 @@ class Schedule < ApplicationRecord
     employee_inventory ? self.treatment.quantity <= employee_inventory.quantity : false
   end
 
+  def self.client_schedules(client_id)
+    return [] unless client_id.present?
+
+    schedules = Schedule.where(client_id: client_id)
+                        .includes(:treatment, :client, :location, :payments)
+
+    schedules.map do |schedule|
+      {
+        id: schedule.id,
+        treatment: {
+          name: schedule.treatment&.name
+        },
+        client: {
+          name: schedule.client&.name
+        },
+        location: {
+          name: schedule.location&.name
+        },
+        start_time: schedule.start_time,
+        end_time: schedule.end_time,
+        total_amount: schedule.amount,
+        paid_amount: schedule.paid_amt,
+        remaining_amount: schedule.remaining_amt
+      }
+    end
+  end
+
   private
 
   def send_cancellation_emails

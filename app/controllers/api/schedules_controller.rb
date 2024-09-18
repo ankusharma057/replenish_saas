@@ -55,7 +55,15 @@ class Api::SchedulesController < ApplicationController
       render json: { error: "Something went wrong or schedule not found." }, status: :unprocessable_entity
     end
   end
-  
+
+  def get_client_schedule_only
+    if params[:client_id].present?
+      render json: Schedule.client_schedules(params[:client_id]), status: :ok
+    else
+      render json: [], status: :ok
+    end
+  end
+
   private
   def schedule_param
     params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id)

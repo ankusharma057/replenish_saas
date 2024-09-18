@@ -7,9 +7,9 @@ class ChartEntry < ApplicationRecord
 
   def self.client_chart_entries(params)
     entries = if params[:employee_id].present? && params[:client_id].present?
-                where(employee_id: params[:employee_id], client_id: params[:client_id])
+                includes(:employee, :client).where(employee_id: params[:employee_id], client_id: params[:client_id])
               else
-                all
+                includes(:employee, :client)
               end
     entries.order(:created_at)
   end

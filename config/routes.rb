@@ -131,6 +131,7 @@ mount Sidekiq::Web => '/sidekiq'
     get '/client_schedules', to: 'schedules#get_client_schedule'
     get '/locations/:id/employees', to: 'employee_schedules#employees'
     get '/employee_invoices', to: 'invoice_lists#employee_invoices'
+    get 'client_schedules_only', to: 'schedules#get_client_schedule_only'
 
   
   end

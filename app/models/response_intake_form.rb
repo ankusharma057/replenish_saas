@@ -15,12 +15,14 @@ class ResponseIntakeForm < ApplicationRecord
   private
 
   def self.filter_by_client(client_id, employee_id)
+    query = includes(:intake_form, :client)
+
     if client_id.present? && employee_id.present?
-      joins(:intake_form).where(client_id: client_id, intake_forms: { employee_id: employee_id })
+      query.joins(:intake_form).where(client_id: client_id, intake_forms: { employee_id: employee_id })
     elsif client_id.present?
-      where(client_id: client_id)
+      query.where(client_id: client_id)
     else
-      all
+      query.all
     end
   end
 end

@@ -13,6 +13,7 @@ import {
     sendResetPasswordLinkRoute,
     updateVendore,
     getClientSchedules,
+    getClientSchedulesOnly,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -88,7 +89,7 @@ const AllClientRoot = () => {
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
     try {
       if (selectedEmployeeData) {
-        const { data } = await getClientSchedules(selectedEmployeeData, refetch);
+        const { data } = await getClientSchedulesOnly(selectedEmployeeData, refetch);
         setSelectedClientSchedules(data);
       }
     } catch (error) {
@@ -893,7 +894,6 @@ const handleUndoField = (index) => {
     }
     };
 
-
 const getChartEntriess = async() =>{
     try{
         const response = await getChartEntries(authUserState?.user?.id,selectedEmployeeData?.id)
@@ -910,7 +910,9 @@ const getChartEntriess = async() =>{
 }
 
 useEffect(()=>{
-    getChartEntriess()
+    if(selectedEmployeeData){
+        getChartEntriess();
+    }
 },[selectedEmployeeData])
 
 const getChartEntryData = async(editId) =>{
