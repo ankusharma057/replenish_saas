@@ -64,23 +64,31 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block hover:text-white `}
-                    href="/addinvoice"
+                  <Link
+                    className={` ${
+                      location.pathname === "/addinvoice"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/addinvoice"
                   >
                     Submit invoice
-                  </a>
+                  </Link>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/invoicelist" && "bg-[#008989a1]"} hover:bg-[#008989a1]  w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/invoicelist"
+                  <Link
+                    className={` ${
+                      location.pathname === "/invoicelist"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/invoicelist"
                   >
                     Invoice List
-                  </a>
+                  </Link>
                 </button>
                 {(authUserState.user?.is_inv_manager === true ||
                   authUserState.user?.is_admin) === true && (
@@ -88,35 +96,47 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <a
-                        className={`no-underline text-white py-[1rem] inline-block `}
-                        href="/schedule"
+                      <Link
+                        className={` ${
+                          location.pathname === "/schedule"
+                            ? "text-white"
+                            : "text-white"
+                        } no-underline text-white py-[1rem] inline-block `}
+                        to="/schedule"
                       >
                         Schedule
-                      </a>
+                      </Link>
                     </button>
                   )}
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/employees"
-                  >
-                    Staff
-                  </a>
+                <Link
+                  className={` ${
+                    location.pathname === "/employees"
+                      ? "text-white"
+                      : "text-white"
+                  } no-underline text-white py-[1rem] inline-block `}
+                  to="/employees"
+                >
+                  Staff
+                </Link>
                 </button>
                 <button
                     onClick={handleMenuSHow}
                     className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-form") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
-                    <a
-                      className={`no-underline text-white py-[1rem] inline-block `}
-                      href="/intake-forms"
+                    <Link
+                      className={` ${
+                        location.pathname === "/intake-forms"
+                          ? "text-white"
+                          : "text-white"
+                      } no-underline text-white py-[1rem] inline-block `}
+                      to="/intake-forms"
                     >
                       Intake Forms
-                    </a>
+                    </Link>
                 </button>
 
                   
@@ -124,12 +144,16 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/customers"
+                  <Link
+                    className={` ${
+                      location.pathname === "/customers"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/customers"
                   >
                     Clients
-                  </a>
+                  </Link>
                 </button>
 
                 {(authUserState.user?.is_inv_manager === true ||
@@ -138,12 +162,16 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <a
-                        className={`no-underline text-white py-[1rem] inline-block `}
-                        href="/inventories"
+                      <Link
+                        className={` ${
+                          location.pathname === "/inventories"
+                            ? "text-white"
+                            : "text-white"
+                        } no-underline text-white py-[1rem] inline-block `}
+                        to="/inventories"
                       >
                         Inventories
-                      </a>
+                      </Link>
                     </button>
                   )}
                 {(authUserState.user?.is_admin) === true && (
@@ -151,12 +179,16 @@ export default memo(function Header() {
                     onClick={handleMenuSHow}
                     className={`${location.pathname === "/treatments" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
-                    <a
-                      className={`no-underline text-white py-[1rem] inline-block `}
-                      href="/treatments"
+                    <Link
+                      className={` ${
+                        location.pathname === "/treatments"
+                          ? "text-white"
+                          : "text-white"
+                      } no-underline text-white py-[1rem] inline-block `}
+                      to="/treatments"
                     >
                       Treatments
-                    </a>
+                    </Link>
                   </button>
                 )}
 
@@ -164,12 +196,16 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/myprofile"
+                  <Link
+                    className={` ${
+                      location.pathname === "/myprofile"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/myprofile"
                   >
                     My Profile
-                  </a>
+                  </Link>
                 </button>
                 <div className="hidden xl:!ml-0 xl:flex xl:items-center xl:pl-[340px]">
                   <a href="/addInvoice">
@@ -239,57 +275,77 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block hover:text-white `}
-                    href="/addinvoice"
+                  <Link
+                    className={` ${
+                      location.pathname === "/addinvoice"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/addinvoice"
                   >
                     Submit invoice
-                  </a>
+                  </Link>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/products" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/products"
+                  <Link
+                    className={` ${
+                      location.pathname === "/products"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/products"
                   >
                     Product List
-                  </a>
+                  </Link>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/schedule"
+                  <Link
+                    className={` ${
+                      location.pathname === "/schedule"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/schedule"
                   >
                     Schedule
-                  </a>
+                  </Link>
                 </button>
                 <button
                     onClick={handleMenuSHow}
                     className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-form") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
-                    <a
-                      className={`no-underline text-white py-[1rem] inline-block `}
-                      href="/intake-forms"
+                    <Link
+                      className={` ${
+                        location.pathname === "/intake-forms"
+                          ? "text-white"
+                          : "text-white"
+                      } no-underline text-white py-[1rem] inline-block `}
+                      to="/intake-forms"
                     >
                       Intake Forms
-                    </a>
+                    </Link>
                 </button>
 
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/customers"
-                  >
-                    Clients
-                  </a>
+                  <Link
+                      className={` ${
+                        location.pathname === "/customers"
+                          ? "text-white"
+                          : "text-white"
+                      } no-underline text-white py-[1rem] inline-block `}
+                      to="/customers"
+                    >
+                      Clients
+                    </Link>
                 </button>
 
                 
@@ -299,23 +355,31 @@ export default memo(function Header() {
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <a
-                        className={`no-underline text-white py-[1rem] inline-block `}
-                        href="/employees"
+                      <Link
+                        className={` ${
+                          location.pathname === "/employees"
+                            ? "text-white"
+                            : "text-white"
+                        } no-underline text-white py-[1rem] inline-block `}
+                        to="/employees"
                       >
                         All Employees
-                      </a>
+                      </Link>
                     </button>
                     <button
                       onClick={handleMenuSHow}
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
-                      <a
-                        className={`no-underline text-white py-[1rem] inline-block `}
-                        href="/inventories"
+                      <Link
+                        className={` ${
+                          location.pathname === "/inventories"
+                            ? "text-white"
+                            : "text-white"
+                        } no-underline text-white py-[1rem] inline-block `}
+                        to="/inventories"
                       >
                         Inventories
-                      </a>
+                      </Link>
                     </button>
                   </>
                 )}
@@ -323,23 +387,31 @@ export default memo(function Header() {
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/treatments" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/treatments"
+                  <Link
+                    className={` ${
+                      location.pathname === "/treatments"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/treatments"
                   >
                     Treatments
-                  </a>
+                  </Link>
                 </button>
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
-                  <a
-                    className={`no-underline text-white py-[1rem] inline-block `}
-                    href="/myprofile"
+                  <Link
+                    className={` ${
+                      location.pathname === "/myprofile"
+                        ? "text-white"
+                        : "text-white"
+                    } no-underline text-white py-[1rem] inline-block `}
+                    to="/myprofile"
                   >
                     My Profile
-                  </a>
+                  </Link>
                 </button>
                 <div className={`hidden xl:!ml-0 xl:flex xl:items-center ${authUserState.user.is_inv_manager ? "xl:pl-[340px]" : "xl:pl-[580px]"} `}>
                   <a href="/addInvoice">
