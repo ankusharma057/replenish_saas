@@ -157,7 +157,6 @@ const Inventory = () => {
   // added
   const getRequestInventoryData = async (refetch = false) => {
     const { data } = await getRequestInventory(refetch);
-    console.log(data, "getRequestInventoryData");
     setRequestedInventoryData(data);
     setFilterInventory(data);
     setOriginalInventory(data);
@@ -449,18 +448,11 @@ const Inventory = () => {
   });
 
   const getValues = (data) => {
-    console.log(data, "getValues");
     const values = data.map((item) => item.value);
-    console.log(values, "values");
     return values;
   };
-  console.log(
-    authUserState.user?.is_inv_manager,
-    "authUserState.user?.inv_manager"
-  );
 
   useEffect(() => {
-    console.log(productTypeFilter[radioValue], "productTypeFilter");
     if (productTypeFilter[radioValue].length > 0) {
       let finalArr = [];
       for (let item in productTypeFilter[radioValue]) {
@@ -468,18 +460,15 @@ const Inventory = () => {
           const inventoryArray = originalInventory.filter(
             (inv) => inv?.product_type === productTypeFilter[radioValue][item]
           );
-          console.log(inventoryArray, "inventoryArray");
           finalArr.push(...inventoryArray);
         } else {
           const inventoryArray = originalInventory.filter(
             (inv) =>
               inv.product?.product_type === productTypeFilter[radioValue][item]
           );
-          console.log(inventoryArray, "inventoryArray");
           finalArr.push(...inventoryArray);
         }
       }
-      console.log(finalArr, "finalArr");
       setFilterInventory(finalArr);
     } else {
       setFilterInventory(originalInventory);
@@ -613,7 +602,6 @@ const Inventory = () => {
                   value={radio.value}
                   checked={radioValue === radio.value}
                   onChange={(e) => {
-                    console.log(e.currentTarget.value, "e.currentTarget.value");
                     setRadioValue(e.currentTarget.value);
                   }}
                   onClick={() => radio.data && radio.data()}
@@ -659,6 +647,7 @@ const Inventory = () => {
                       ...productInfoInput,
                       update: false,
                     });
+                    getProducts();
                   }}
                   variant="info"
                   className="truncate text-white rounded-full !text-sm md:!text-base"
