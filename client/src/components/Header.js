@@ -65,11 +65,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/addinvoice"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/addinvoice"
                   >
                     Submit invoice
@@ -80,11 +76,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/invoicelist" && "bg-[#008989a1]"} hover:bg-[#008989a1]  w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/invoicelist"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/invoicelist"
                   >
                     Invoice List
@@ -97,11 +89,7 @@ export default memo(function Header() {
                       className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
                       <Link
-                        className={` ${
-                          location.pathname === "/schedule"
-                            ? "text-white"
-                            : "text-white"
-                        } no-underline text-white py-[1rem] inline-block `}
+                        className={`no-underline text-white py-[1rem] inline-block `}
                         to="/schedule"
                       >
                         Schedule
@@ -113,11 +101,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                 <Link
-                  className={` ${
-                    location.pathname === "/employees"
-                      ? "text-white"
-                      : "text-white"
-                  } no-underline text-white py-[1rem] inline-block `}
+                  className={`no-underline text-white py-[1rem] inline-block `}
                   to="/employees"
                 >
                   Staff
@@ -128,11 +112,7 @@ export default memo(function Header() {
                     className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-form") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
                     <Link
-                      className={` ${
-                        location.pathname === "/intake-forms"
-                          ? "text-white"
-                          : "text-white"
-                      } no-underline text-white py-[1rem] inline-block `}
+                      className={`no-underline text-white py-[1rem] inline-block `}
                       to="/intake-forms"
                     >
                       Intake Forms
@@ -145,11 +125,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/customers"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/customers"
                   >
                     Clients
@@ -163,11 +139,7 @@ export default memo(function Header() {
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
                       <Link
-                        className={` ${
-                          location.pathname === "/inventories"
-                            ? "text-white"
-                            : "text-white"
-                        } no-underline text-white py-[1rem] inline-block `}
+                        className={`no-underline text-white py-[1rem] inline-block `}
                         to="/inventories"
                       >
                         Inventories
@@ -180,11 +152,7 @@ export default memo(function Header() {
                     className={`${location.pathname === "/treatments" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
                     <Link
-                      className={` ${
-                        location.pathname === "/treatments"
-                          ? "text-white"
-                          : "text-white"
-                      } no-underline text-white py-[1rem] inline-block `}
+                      className={`no-underline text-white py-[1rem] inline-block `}
                       to="/treatments"
                     >
                       Treatments
@@ -197,11 +165,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/myprofile"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/myprofile"
                   >
                     My Profile
@@ -276,11 +240,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/addinvoice" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/addinvoice"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/addinvoice"
                   >
                     Submit invoice
@@ -291,11 +251,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/products" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/products"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/products"
                   >
                     Product List
@@ -306,11 +262,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/schedule" && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/schedule"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/schedule"
                   >
                     Schedule
@@ -321,11 +273,7 @@ export default memo(function Header() {
                     className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-form") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
                     <Link
-                      className={` ${
-                        location.pathname === "/intake-forms"
-                          ? "text-white"
-                          : "text-white"
-                      } no-underline text-white py-[1rem] inline-block `}
+                      className={`no-underline text-white py-[1rem] inline-block `}
                       to="/intake-forms"
                     >
                       Intake Forms
@@ -337,11 +285,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/customers" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                      className={` ${
-                        location.pathname === "/customers"
-                          ? "text-white"
-                          : "text-white"
-                      } no-underline text-white py-[1rem] inline-block `}
+                      className={`no-underline text-white py-[1rem] inline-block `}
                       to="/customers"
                     >
                       Clients
@@ -356,11 +300,7 @@ export default memo(function Header() {
                       className={`${location.pathname === "/employees" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
                       <Link
-                        className={` ${
-                          location.pathname === "/employees"
-                            ? "text-white"
-                            : "text-white"
-                        } no-underline text-white py-[1rem] inline-block `}
+                        className={`no-underline text-white py-[1rem] inline-block `}
                         to="/employees"
                       >
                         All Employees
@@ -371,11 +311,7 @@ export default memo(function Header() {
                       className={`${location.pathname === "/inventories" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                     >
                       <Link
-                        className={` ${
-                          location.pathname === "/inventories"
-                            ? "text-white"
-                            : "text-white"
-                        } no-underline text-white py-[1rem] inline-block `}
+                        className={`no-underline text-white py-[1rem] inline-block `}
                         to="/inventories"
                       >
                         Inventories
@@ -388,11 +324,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/treatments" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/treatments"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/treatments"
                   >
                     Treatments
@@ -403,11 +335,7 @@ export default memo(function Header() {
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
-                    className={` ${
-                      location.pathname === "/myprofile"
-                        ? "text-white"
-                        : "text-white"
-                    } no-underline text-white py-[1rem] inline-block `}
+                    className={`no-underline text-white py-[1rem] inline-block `}
                     to="/myprofile"
                   >
                     My Profile
