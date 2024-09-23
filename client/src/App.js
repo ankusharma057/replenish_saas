@@ -86,7 +86,7 @@ function App() {
 
     if (!isCancelled) {
       // getClientUserProfile();
-      // getMyProfile();
+      getMyProfile();
     }
     return () => {
       isCancelled = true;
