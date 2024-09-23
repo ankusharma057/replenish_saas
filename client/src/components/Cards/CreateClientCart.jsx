@@ -20,26 +20,22 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await createClient(formData);
 
       if (response.status === 200) {
-        getEmployees();
-        if (response?.data?.error) {
-          toast.error(response?.data?.error?.name || "Failed to create client");
-          setErrorsForm(response?.data?.error || {})
+        if (response.data.error) {
+          toast.error(response.data.error.name || "Failed to create client");
+          setErrorsForm(response.data.error || {});
         } else {
-          setFormData({
-            name: "",
-            email: "",
-            temp_password: "",
-          });
-          e.target.reset();
+          setFormData(formInitialState);
           setErrorsForm({});
-
           toast.success("Client Created Successfully");
+          getEmployees();
         }
+      } else {
+        toast.error("Failed to create client");
       }
     } catch (error) {
     console.log(error);
@@ -47,6 +43,7 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
       setLoading(false);
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,14 +57,14 @@ export default function CreateClientCard({ show, onHide,  getEmployees }) {
   return (
     show && (
       <div className="hover:shadow-lg border-2 px-2 sm:px-10 py-5 border-black/15 m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
-        <h3 className=" text-3xl font-semibold my-3">Create an Client</h3>
+        <h3 className=" text-3xl font-semibold my-3">Create a Client</h3>
         <Form
           onSubmit={onSubmit}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 items-center justify-center w-full md:max-w -7xl gap-1"
         >
 
           <Form.Group controlId="formClientName">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Full Name</Form.Label>
             <Form.Control
               placeholder={`Enter Name`}
               className="font-medium text-cyan-800 mb-4"

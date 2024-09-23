@@ -2176,7 +2176,7 @@ const NewIntakeForm = () => {
                         handleChange("layout", "horizontal", editModel?.index);
                       }}
                     />
-                    <label htmlFor="horizontal">Horizondal</label>
+                    <label htmlFor="horizontal">Horizontal</label>
                   </div>
                   <div className="flex gap-1">
                     <input

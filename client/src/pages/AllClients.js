@@ -289,22 +289,21 @@ const AllClientRoot = () => {
             id: null,
             type: "heading",
             label: "Heading",
-            value: "Heading value",
             required: false,
             read_only: false,
         },
         initialCheckBox: {
             id: null,
             type: "checkbox",
-            label: "CheckBox",
+            label: "Check Box",
             layout: "horizontal",
             value: [
-                { label: "CheckBox 1", value: true },
-                { label: "CheckBox 2", value: false },
-                { label: "CheckBox 3", value: false },
-                { label: "CheckBox 4", value: false },
-                { label: "CheckBox 5", value: false },
-                { label: "CheckBox 6", value: false },
+                { label: "Check Box 1", value: true },
+                { label: "Check Box 2", value: false },
+                { label: "Check Box 3", value: false },
+                { label: "Check Box 4", value: false },
+                { label: "Check Box 5", value: false },
+                { label: "Check Box 6", value: false },
             ],
             required: false,
             read_only: false,
@@ -599,12 +598,18 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
 
     const [edittitle, setEditTitle] = useState(false)
     const [title, setTitle] = useState("Chart Entry")
-
     const handleItemClick = (name, index) => {
         if(!editId){
         setEditModel({ name, index });
         openModalFromParent(); }
     };
+
+    useEffect(() => {
+        if (selectedEmployeeData) {
+            const today = new Date().toLocaleDateString();
+            setTitle(`${selectedEmployeeData.name} - ${today}`);
+        }
+    }, [selectedEmployeeData]); 
 
     const openModalFromParent = () => {
         if (topModelRef.current && typeof topModelRef.current.openModal === 'function') {
@@ -1787,7 +1792,7 @@ useEffect(()=>{
                                         )}
                                     </div>
                                         <div className="h-[calc(100%-50px)] overflow-y-auto">
-                                        <div className="flex flex-col justify-end items-center h-[40vh]">
+                                        <div className="flex flex-col justify-between items-center h-[40vh]">
                                             <div className="flex justify-between gap-4">
 
                                             {!editId && <div className="flex bg-[#0dcaf0] text-white rounded-md">
@@ -1898,13 +1903,14 @@ useEffect(()=>{
                                             </div>
                                             <div className="border-[2px] overflow-hidden  rounded-md px-2">
                                             <textarea
-                                                className="w-full focus:outline-none max-h-[70px]"
+                                                className="w-full focus:outline-none resize-y"
                                                 value={qutionaryFields[editModel?.index]?.value}
                                                 onChange={(e) => {
-                                                handleChange("value", e?.target?.value, editModel?.index);
+                                                    handleChange("value", e.target.value, editModel?.index);
                                                 }}
                                                 rows="3"
                                             ></textarea>
+
                                             </div>
                                             <div className="flex justify-between py-1">
                                             <div>Required</div>
@@ -2156,7 +2162,7 @@ useEffect(()=>{
                                                     handleChange("layout", "horizontal", editModel?.index);
                                                     }}
                                                 />
-                                                <label htmlFor="horizontal">Horizondal</label>
+                                                <label htmlFor="horizontal">Horizontal</label>
                                                 </div>
                                                 <div className="flex gap-1">
                                                 <input
