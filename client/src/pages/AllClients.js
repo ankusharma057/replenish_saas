@@ -55,7 +55,7 @@ import Switch from "@mui/material/Switch";
 import { IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
 import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
-
+import EditProfileModal from "./EditProfileModal";
 
 
 
@@ -82,7 +82,8 @@ const AllClientRoot = () => {
     const [showCreateClientModel, setShowCreateClientModel] = useState(false);
     const [selectedClientSchedules, setSelectedClientSchedules] = useState([]);
     const [chartTab, setChartTab] = useState("chart_entries_list");
-
+    const [showEditProfileModal,setShowEditProfileModal]=useState(false)
+    const [editProfileData,setEditProfileData]=useState()
 
     const localizer = momentLocalizer(moment);
 
@@ -1112,6 +1113,11 @@ useEffect(()=>{
         }));
     };
 
+    const handleEditProfileModal=(clientData)=>{
+        setEditProfileData(clientData)
+        setShowEditProfileModal(!showEditProfileModal)
+    };
+
     return (
         <>
             <AsideLayout
@@ -1124,11 +1130,11 @@ useEffect(()=>{
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="border-t-2  py-2 bg-white h-[70vh]">
+                        <div className="border-t-2  py-2 bg-white h-70vh">
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex h-[600px] flex-col pl-2 gap-4 overflow-y-auto">
+                            <div className="flex h-100 flex-col pl-2 gap-4 overflow-y-auto">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}
@@ -1189,7 +1195,7 @@ useEffect(()=>{
                                 {currentTab === "profile" && (
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="flex flex-col bg-white p-4">
-                                            <div className="flex justify-end text-cyan-400"><BiSolidPencil /></div>
+                                            <div className="flex justify-end text-cyan-400"><BiSolidPencil onClick={()=>handleEditProfileModal(selectedEmployeeData)}/></div>
                                             <div className="flex items-center gap-6 mb-4 text-lg">
                                                 <FaUser className="w-6 h-6" />
                                                 <div>{selectedEmployeeData?.name}</div>
@@ -1207,13 +1213,14 @@ useEffect(()=>{
                                                 <div>No address found</div>
                                             </div>
                                         </div>
+                                        <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData}/>
                                     </div>
                                 )}
 
                                 {currentTab === "Appointments" && (
                                     <div className="bg-white">
                                         <div className={`bg-gray-200 min-h-[calc(100%-56px)]  p-3 px-4`}>
-                                        <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
+                                        <div className="w-100 mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
                                             <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
                                             <h2><span>Appointment Details</span></h2> 
 
@@ -1281,7 +1288,7 @@ useEffect(()=>{
                             <div className="">
                                 {/* ---------- */}
                                 <div className=" rounded-md  flex justify-center">
-                                <div className="w-[65rem] bg-white">
+                                <div className="w-100 bg-white">
                                 {chartTab === "chart_entries_list" && 
                                 <div className=" p-4 pt-2">
                                     <div className="bg-white rounded-lg">
@@ -1396,7 +1403,7 @@ useEffect(()=>{
                                         {Array.isArray(qutionaryFields) &&
                                         qutionaryFields.map((field, index) =>
                                             field?.type === "textarea" ? (
-                                            <>
+                                            <span key={index}>
                                                 {/* Note */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
@@ -1423,7 +1430,7 @@ useEffect(()=>{
                                                 <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
                                                     <textarea
                                                     className="w-full focus:outline-none"
-                                                    readOnly={editId ? true : false}
+                                                    readOnly
                                                     required={field?.required}
                                                     value={qutionaryFields[index]?.value}
                                                     onChange={(e) => {
@@ -1433,7 +1440,7 @@ useEffect(()=>{
                                                     ></textarea>
                                                 </div>
                                                 </div>
-                                            </>
+                                            </span>
                                             ) : field?.type === "signature" ? (
                                             <>
                                                 {/* Signature */}

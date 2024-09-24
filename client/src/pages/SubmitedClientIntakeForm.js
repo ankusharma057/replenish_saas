@@ -28,7 +28,7 @@ const SubmitedClientIntakeForm = (clientId) => {
 
 return (
     <div className={`bg-gray-200 min-h-[calc(100%-56px)]  p-3 px-4`}>
-    <div className="w-[82rem] mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
+    <div className="w-100 mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
         <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
         <h2><span>{Array.isArray(clientResponseIntakeForms) && clientResponseIntakeForms[0]?.client?.name}</span> Intake Forms</h2> 
 
