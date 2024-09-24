@@ -15,7 +15,6 @@ mount Sidekiq::Web => '/sidekiq'
       get '/employee_unavailability', to: 'schedules#employee_unavailability'
       get '/appointments', to: 'schedules#appointments'
       get '/balance_due_schedules', to: 'schedules#balance_due_schedules'
-      
       resources :locations, only: [ :index, :create] do
         get :employees, on: :member
       end
@@ -46,6 +45,7 @@ mount Sidekiq::Web => '/sidekiq'
         delete :sign_out
         post :password_update
         get :profile
+        patch :update
       end
     end
 

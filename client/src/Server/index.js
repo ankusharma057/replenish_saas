@@ -710,3 +710,14 @@ export const deleteTreatment = async (id, refetch) =>{
   return res;
 }
 
+
+export const UpdateClient = async (id, refetch) =>{
+  let url = `/api/clients/${id}`;
+  const res = api.patch(url, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+

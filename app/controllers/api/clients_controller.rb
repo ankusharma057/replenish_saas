@@ -10,7 +10,6 @@ class Api::ClientsController < ApplicationController
     render json: clients, status: :ok
   end
 
-
   def profile
     client = Client.find_by(id: session[:client_id])
     if client
@@ -56,7 +55,7 @@ class Api::ClientsController < ApplicationController
     if @client.update!(password: params[:password], temp_password: nil)
       render json: @client, status: :ok
     else
-      render json: {error: 'Something went wrong!'}, status: :unprocessable_entity
+      render json: {error: 'Failed to update password!'}, status: :unprocessable_entity
     end
   end
 
@@ -64,13 +63,37 @@ class Api::ClientsController < ApplicationController
     @employee = Employee.find_by(id: params[:employee_id])
     if @employee
       @employee.clients.create(sign_up_params)
+      render json: { message: 'Signed up successfully' }, status: :created
     else
+      render json: { error: 'Employee not found' }, status: :not_found
     end
   end
 
+  def update
+    @client = Client.find_by(id: params[:id])
+    if @client
+      new_email = client_params[:email].downcase
+      if @client.email == new_email
+        render json: { error: "New email can't be the same as the existing email" }, status: :unprocessable_entity
+      elsif Client.where.not(id: @client.id).exists?(email: new_email)
+        render json: { error: "Email is already taken" }, status: :unprocessable_entity
+      else
+        if @client.update(client_params)
+          render json: @client, status: :ok
+        else
+          render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+    else
+      render json: { error: "Client not found" }, status: :not_found
+    end
+  end
+
+
   private
+
   def client_params
-    params.require(:client).permit(:email, :name, :employee_id, :password, :temp_password)
+    params.require(:client).permit(:email, :name, :employee_id, :password, :temp_password, :address, :phone_number)
   end
 
   def random_str
