@@ -116,6 +116,7 @@ class Invoice < ApplicationRecord
   def self.paginated_invoices(params)
     with_associations
       .filter_by_finalized(params[:is_finalized])
+      .order(created_at: :desc)
       .paginate(page: params[:page], per_page: params[:per_page] || 12)
   end
 
