@@ -8,6 +8,7 @@ class Client < ApplicationRecord
   has_many :response_intake_forms, dependent: :destroy
   has_many :chart_entries, dependent: :destroy
 
+  validates :email, presence: { message: 'Email is required' }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }, allow_nil: true
   validates :email, uniqueness: { message: 'Email already taken' }, allow_nil: true
 
