@@ -14,6 +14,7 @@ import {
     updateVendore,
     getClientSchedules,
     getClientSchedulesOnly,
+    UpdateClient,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -1118,6 +1119,16 @@ useEffect(()=>{
         setShowEditProfileModal(!showEditProfileModal)
     };
 
+    const handleEditClientProfile = async (payload) => {
+        let {data} = await UpdateClient(editProfileData.id, true, payload)
+        if(data.statusCode===200){
+            toast.success()
+            setEditModel(false)
+        }else{
+            toast.error("Something went wrong")
+        }
+    };
+
     return (
         <>
             <AsideLayout
@@ -1213,7 +1224,7 @@ useEffect(()=>{
                                                 <div>No address found</div>
                                             </div>
                                         </div>
-                                        <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData}/>
+                                        <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData} handleEditClientProfile={handleEditClientProfile}/>
                                     </div>
                                 )}
 
