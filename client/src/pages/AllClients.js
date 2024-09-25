@@ -1120,9 +1120,10 @@ useEffect(()=>{
     };
 
     const handleEditClientProfile = async (payload) => {
-        let {data} = await UpdateClient(editProfileData.id, true, payload)
-        if(data.statusCode===200){
-            toast.success()
+        let response = await UpdateClient(editProfileData.id, true, payload)
+        console.log(response.status);
+        if(response.status===200){
+            toast.success("Client Profile Updated Successfully")
             setEditModel(false)
         }else{
             toast.error("Something went wrong")

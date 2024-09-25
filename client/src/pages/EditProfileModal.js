@@ -52,6 +52,16 @@ const EditProfileModal = (props) => {
         }
         return updatedProfileData
     }
+    const handleDisableBtn = () => {
+        if (props.editProfileData.name !== name ||
+            props.editProfileData.email !== email ||
+            props.editProfileData.phone_number !== phone ||
+            props.editProfileData.address !== address) {
+            return false
+        } else {
+            return true
+        }
+    }
     return (
         <Modal
             {...props}
@@ -85,7 +95,7 @@ const EditProfileModal = (props) => {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={handleSave}>Save</Button>
+                <Button onClick={handleSave} disabled={handleDisableBtn()}>Save</Button>
             </Modal.Footer>
         </Modal>
     );
