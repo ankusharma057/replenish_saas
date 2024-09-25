@@ -72,17 +72,19 @@ class Api::ClientsController < ApplicationController
   def update
     @client = Client.find_by(id: params[:id])
     if @client
-      new_email = client_params[:email].downcase
-      if @client.email == new_email
-        render json: { error: "New email can't be the same as the existing email" }, status: :unprocessable_entity
-      elsif Client.where.not(id: @client.id).exists?(email: new_email)
-        render json: { error: "Email is already taken" }, status: :unprocessable_entity
-      else
-        if @client.update(client_params)
-          render json: @client, status: :ok
-        else
-          render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
+      if client_params[:email].present?
+        new_email = client_params[:email].downcase
+        if @client.email == new_email
+          render json: { error: "New email can't be the same as the existing email" }, status: :unprocessable_entity and return
+        elsif Client.where.not(id: @client.id).exists?(email: new_email)
+          render json: { error: "Email is already taken" }, status: :unprocessable_entity and return
         end
+      end
+
+      if @client.update(client_params)
+        render json: @client, status: :ok
+      else
+        render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
       end
     else
       render json: { error: "Client not found" }, status: :not_found
