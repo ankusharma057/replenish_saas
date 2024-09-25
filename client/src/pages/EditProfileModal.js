@@ -11,10 +11,10 @@ const EditProfileModal = (props) => {
     const [address, setAddress] = useState('');
     useEffect(() => {
         if (props.editProfileData) {
-            setName(props.editProfileData.name);
-            setPhone(props.editProfileData.phone_number);
-            setEmail(props.editProfileData.email);
-            setAddress(props.editProfileData.address);
+            setName(props.editProfileData?.name);
+            setPhone(props.editProfileData?.phone_number);
+            setEmail(props.editProfileData?.email);
+            setAddress(props.editProfileData?.address);
         }
     }, [props.editProfileData]);
     const handleNameChange = (event) => {
@@ -38,25 +38,25 @@ const EditProfileModal = (props) => {
         const updatedProfileData = {
             client: {}
         };
-        if (props.editProfileData.name !== name) {
+        if (props.editProfileData?.name !== name) {
             updatedProfileData.client["name"] = name
         }
-        if (props.editProfileData.phone_number !== phone) {
+        if (props.editProfileData?.phone_number !== phone) {
             updatedProfileData.client["phone_number"] = phone
         }
-        if (props.editProfileData.email !== email) {
+        if (props.editProfileData?.email !== email) {
             updatedProfileData.client["email"] = email
         }
-        if (props.editProfileData.address !== address) {
+        if (props.editProfileData?.address !== address) {
             updatedProfileData.client["address"] = address
         }
         return updatedProfileData
     }
     const handleDisableBtn = () => {
-        if (props.editProfileData.name !== name ||
-            props.editProfileData.email !== email ||
-            props.editProfileData.phone_number !== phone ||
-            props.editProfileData.address !== address) {
+        if (props.editProfileData?.name !== name ||
+            props.editProfileData?.email !== email ||
+            props.editProfileData?.phone_number !== phone ||
+            props.editProfileData?.address !== address) {
             return false
         } else {
             return true
