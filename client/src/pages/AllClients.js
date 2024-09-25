@@ -1124,7 +1124,7 @@ useEffect(()=>{
         console.log(response.status);
         if(response.status===200){
             toast.success("Client Profile Updated Successfully")
-            setEditModel(false)
+            setShowEditProfileModal(false);
         }else{
             toast.error("Something went wrong")
         }
