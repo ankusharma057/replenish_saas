@@ -1121,11 +1121,21 @@ useEffect(()=>{
 
     const handleEditClientProfile = async (payload) => {
         let response = await UpdateClient(editProfileData.id, true, payload)
-        console.log(response.status);
-        if(response.status===200){
+        if (response.status === 200) {
             toast.success("Client Profile Updated Successfully")
-            setShowEditProfileModal(false);
-        }else{
+            try {
+                const { data } = await getClients();
+                if (data?.length > 0) {
+                    const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
+                    setEmployeeList(newData);
+                    let currentClient = newData.find(client => client.id === editProfileData.id)
+                    handleSelect(currentClient);
+                    setShowEditProfileModal(false)
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
             toast.error("Something went wrong")
         }
     };
