@@ -1156,7 +1156,7 @@ useEffect(()=>{
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex h-100 flex-col pl-2 gap-4 overflow-y-auto">
+                            <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}
@@ -1224,7 +1224,7 @@ useEffect(()=>{
                                             </div>
                                             <div className="flex items-center gap-6 mb-4 text-lg">
                                                 <IoCallSharp className="w-6 h-6" />
-                                                <div>No phone number</div>
+                                                <div>{selectedEmployeeData?.phone_number?selectedEmployeeData?.phone_number:"No phone number"}</div>
                                             </div>
                                             <div className="flex items-center gap-6 mb-4 text-lg">
                                                 <IoMailSharp className="w-6 h-6" />
@@ -1232,7 +1232,7 @@ useEffect(()=>{
                                             </div>
                                             <div className="flex items-center gap-6 mb-4 text-lg">
                                                 <IoHome className="w-6 h-6" />
-                                                <div>No address found</div>
+                                                <div>{selectedEmployeeData?.address?selectedEmployeeData?.address: "No address found"}</div>
                                             </div>
                                         </div>
                                         <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData} handleEditClientProfile={handleEditClientProfile}/>
