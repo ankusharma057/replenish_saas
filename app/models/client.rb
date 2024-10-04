@@ -7,6 +7,10 @@ class Client < ApplicationRecord
   has_many :employees, through: :employee_clients
   has_many :response_intake_forms, dependent: :destroy
   has_many :chart_entries, dependent: :destroy
+  has_one :client_detail, dependent: :destroy
+  has_one_attached :profile_photo
+
+  accepts_nested_attributes_for :client_detail
 
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }, allow_nil: true

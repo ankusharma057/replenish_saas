@@ -5,7 +5,7 @@ class Api::ClientsController < ApplicationController
   skip_before_action :authorized_employee
 
   def index
-    clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
+    clients = current_employee&.is_admin? ? Client.includes(:client_detail, :schedules) : current_employee&.clients
     clients = clients.includes(:employees) if clients.present?
     render json: clients, status: :ok
   end
@@ -70,7 +70,8 @@ class Api::ClientsController < ApplicationController
   end
 
   def update
-    @client = Client.find_by(id: params[:id])
+    @client = Client.includes(:client_detail).find_by(id: params[:id])
+
     if @client
       if client_params[:email].present?
         new_email = client_params[:email].downcase
@@ -91,11 +92,50 @@ class Api::ClientsController < ApplicationController
     end
   end
 
-
   private
 
   def client_params
-    params.require(:client).permit(:email, :name, :employee_id, :password, :temp_password, :address, :phone_number)
+    params.require(:client).permit(
+      :created_at,
+      :profile_photo,
+      :email, 
+      :name, 
+      :last_name,
+      :preferred_name,
+      :pronouns,
+      :prefix,
+      :middle_name,
+      :password, 
+      :temp_password, 
+      :address, 
+      :phone_number,
+      client_detail_attributes: [  
+        :city, 
+        :state, 
+        :zip_code, 
+        :country, 
+        :gender,
+        :sex,
+        :home_phone,
+        :mobile_phone,
+        :work_phone,
+        :fax_phone,
+        :date_of_birth, 
+        :personal_health_number, 
+        :family_doctor, 
+        :family_doctor_phone, 
+        :family_doctor_email, 
+        :referring_professional, 
+        :referring_professional_phone, 
+        :referring_professional_email, 
+        :emergency_contact, 
+        :emergency_contact_phone, 
+        :emergency_contact_relationship, 
+        :parent_guardian, 
+        :occupation, 
+        :employer
+      ]
+    )
   end
 
   def random_str
