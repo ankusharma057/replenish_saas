@@ -1115,8 +1115,7 @@ useEffect(()=>{
     };
 
     const handleEditProfileModal=(clientData)=>{
-        setEditProfileData(clientData)
-        setShowEditProfileModal(!showEditProfileModal)
+        navigate(`/client-profile-update/${clientData.id}`)
     };
 
     const handleEditClientProfile = async (payload) => {
