@@ -11,6 +11,9 @@ class Schedule < ApplicationRecord
   scope :balance_amount, -> { select { |schedule| schedule.remaining_amt > 0 } }
 
   default_scope { where(is_cancelled: false) }  
+  serialize :notification_settings, Hash
+  after_initialize :set_default_notification_settings
+
 
   def cancel_schedule(data)
     if update(is_cancelled: true, cancelled_by: data.id, cancelled_at: DateTime.now)
@@ -99,6 +102,20 @@ class Schedule < ApplicationRecord
   end
 
   private
+
+  def set_default_notification_settings
+    self.notification_settings ||= {
+      email_reminder_2_days: false,
+      sms_reminder_2_days: false,
+      sms_reminder_24_hours: false,
+      email_new_cancelled: false,
+      email_waitlist_openings: false,
+      sms_waitlist_openings: false,
+      ok_to_send_marketing_emails: false,
+      send_ratings_emails: false,
+      do_not_email: false
+    }
+  end
 
   def send_cancellation_emails
     ScheduleMailer.client_schedule_cancelled_notification(self, client).deliver_now

@@ -1,10 +1,10 @@
 class ClientSerializer < ActiveModel::Serializer
   attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :profile_photo
   has_one :client_detail, serializer: ClientDetailSerializer
-  attribute :reminders
+  attribute :notification_settings
 
-  def reminders
-    object.schedules.pluck(:reminder)
+  def notification_settings
+    object.schedules.pluck(:notification_settings)
   end
 
   def profile_photo

@@ -12,7 +12,6 @@ class Client < ApplicationRecord
 
   accepts_nested_attributes_for :client_detail
 
-
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }, allow_nil: true
   validates :email, uniqueness: { message: 'Email already taken' }, allow_nil: true
 
@@ -28,5 +27,21 @@ class Client < ApplicationRecord
     update!(temp_password: "#{rand_str}".gsub(/\s+/, ""))
 
     SendClientResetPasswordLinkMailer.with(client: self).reset_password_mail.deliver_now
+  end
+
+  def email_valid?(new_email)
+    if email == new_email
+      errors.add(:email, "New email can't be the same as the existing email")
+      false
+    elsif Client.where.not(id: id).exists?(email: new_email)
+      errors.add(:email, "Email is already taken")
+      false
+    else
+      true
+    end
+  end
+
+  def update_schedules(notification_settings)
+    schedules.update(notification_settings: notification_settings)
   end
 end
