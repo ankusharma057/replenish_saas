@@ -711,6 +711,16 @@ export const deleteTreatment = async (id, refetch) =>{
 }
 
 
+export const GetClientDetails = async (id,refetch) =>{
+  let url = `/api/clients/profile/?id=${id}`;
+  const res = await api.get(url,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+
 export const UpdateClient = async (id,refetch,payload) =>{
   let url = `/api/clients/${id}`;
   const res = await api.patch(url, payload,{

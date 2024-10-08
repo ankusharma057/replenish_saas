@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getChartEntries, getClients, getClientSchedulesOnly, UpdateClient } from "../../Server";
+import { getChartEntries, GetClientDetails, getClients, getClientSchedulesOnly, UpdateClient } from "../../Server";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "../../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import AsideLayout from "../../components/Layouts/AsideLayout";
 import { useAsideLayoutContext } from "../../context/AsideLayoutContext";
-import { Button, Form, Container, Navbar, ButtonGroup } from "react-bootstrap";
+import { Button, Form, Container } from "react-bootstrap";
 import "../../App.css"
 import {
   UserRound,
@@ -31,11 +31,12 @@ import 'react-phone-input-2/lib/style.css'
 import { Country, State, City } from 'country-state-city';
 import { toast } from "react-toastify";
 import { useAuthContext } from "../../context/AuthUserContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ClientsProfileUpdate = () => {
   const { authUserState } = useAuthContext();
-  const params=useParams()
+  const params=useParams();
+  const Navigate=useNavigate();
   const [employeeList, setEmployeeList] = useState([]);
   const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
@@ -56,7 +57,8 @@ const ClientsProfileUpdate = () => {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [disableCheckbox, setDisableCheckbox] = useState(false);
-  const [chartEntriesData, setChartEntriesData]=useState()
+  const [clientProfileData, setClientProfileData]=useState();
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     last_name:'',
@@ -95,21 +97,19 @@ const ClientsProfileUpdate = () => {
     dobDay:"",
     dobYear:"",
   });
-
   const [checkboxData, setCheckboxData] = useState({
-    emailReminder2Days: false,
-    smsReminder2Days: false,
-    smsReminder24Hours: false,
-    emailNotifications: false,
-    emailWaitlist: false,
-    smsWaitlist: false,
-    marketingEmails: false,
-    ratingsEmails: false,
-    allSettings:false,
+    email_reminder_2_days: false,
+    sms_reminder_2_days: false,
+    sms_reminder_24_hours: false,
+    email_new_cancelled: false,
+    email_waitlist_openings: false,
+    sms_waitlist_openings: false,
+    ok_to_send_marketing_emails: false,
+    send_ratings_emails: false,
+    do_not_email:false,
     discharged:false,
     deceased:false
   });
-
   const [phoneNumbers, setPhoneNumbers] = useState({
     home_phone: '',
     work_phone: '',
@@ -130,25 +130,22 @@ const ClientsProfileUpdate = () => {
     { name: 'November', number: '11' },
     { name: 'December', number: '12' },
   ];
-  const [selectedFiles, setSelectedFiles] = useState([]);
 
-  // Function to handle the file drop
   const handleDrop = (event) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     setSelectedFiles(files);
   };
 
-  // Function to handle file selection via input
   const handleFileSelect = (event) => {
     const files = event.target.files ? Array.from(event.target.files) : [];
     setSelectedFiles(files);
   };
 
-  // Function to prevent default drag behavior
   const handleDragOver = (event) => {
     event.preventDefault();
   };
+
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
     try {
       if (selectedEmployeeData) {
@@ -163,30 +160,96 @@ const ClientsProfileUpdate = () => {
     }
   };
 
-  const getChartEntriess = async() =>{    
-    try{
-        const response = await getChartEntries(authUserState?.user?.id,params.id)
-        if(response?.status === 200){
-            setChartEntriesData(response?.data)
-            console.log(response);
-            
-        }
-        else{
-            toast.error("Something went wrong")
-        }
-    }   
-    catch (err) {
-        console.error(err);
+  const getClientDetails = async () => {
+    try {
+      const response = await GetClientDetails(params.id, true)
+      if (response?.status === 200) {
+        setClientProfileData(response?.data)
+        fillClientProfileData();
+      }
+      else {
+        toast.error("Something went wrong")
+      }
     }
-}
+    catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fillClientProfileData=()=>{
+    const formData = {
+      name: clientProfileData.name ?? '',
+      last_name: clientProfileData.last_name ?? '',
+      middle_name: clientProfileData.middle_name ?? '', 
+      preferred_name: clientProfileData.preferred_name ?? '',
+      pronouns: clientProfileData.pronouns ?? '',
+      prefix: clientProfileData.prefix ?? '',
+      email: clientProfileData.email ?? '',
+      phone: clientProfileData.phone ?? '',
+      address: clientProfileData.address ?? '',
+      city: clientProfileData.city ?? '',
+      state: clientProfileData.state ?? '',
+      zip_code: clientProfileData.zip_code ?? '',
+      country: clientProfileData.country ?? '',
+      gender: clientProfileData.gender ?? '',
+      sex: clientProfileData.sex ?? '',
+      date_of_birth: clientProfileData.date_of_birth ?? '',
+      personal_health_number: clientProfileData.personal_health_number ?? '',
+      family_doctor: clientProfileData.family_doctor ?? '',
+      family_doctor_phone: clientProfileData.family_doctor_phone ?? '',
+      family_doctor_email: clientProfileData.family_doctor_email ?? '',
+      referring_professional: clientProfileData.referring_professional ?? '',
+      referring_professional_phone: clientProfileData.referring_professional_phone ?? '',
+      referring_professional_email: clientProfileData.referring_professional_email ?? '',
+      emergency_contact: clientProfileData.emergency_contact ?? '',
+      emergency_contact_phone: clientProfileData.emergency_contact_phone ?? '',
+      emergency_contact_relationship: clientProfileData.emergency_contact_relationship ?? '',
+      parent_guardian: clientProfileData.parent_guardian ?? '',
+      occupation: clientProfileData.occupation ?? '',
+      employer: clientProfileData.employer ?? '',
+      howHearJob: clientProfileData.howHearJob ?? '',
+      who_were_you_referred_to: clientProfileData.who_were_you_referred_to ?? '',
+      online_Booking_Policy: clientProfileData.online_Booking_Policy ?? '',
+      online_Booking_Payment_Policy: clientProfileData.online_Booking_Payment_Policy ?? '',
+      dobMonth: clientProfileData.dobMonth ?? '',
+      dobDay: clientProfileData.dobDay ?? '',
+      dobYear: clientProfileData.dobYear ?? '',
+    };
+    
+    const checkboxData = {
+      email_reminder_2_days: clientProfileData.email_reminder_2_days ?? false,
+      sms_reminder_2_days: clientProfileData.sms_reminder_2_days ?? false,
+      sms_reminder_24_hours: clientProfileData.sms_reminder_24_hours ?? false,
+      email_new_cancelled: clientProfileData.email_new_cancelled ?? false,
+      email_waitlist_openings: clientProfileData.email_waitlist_openings ?? false,
+      sms_waitlist_openings: clientProfileData.sms_waitlist_openings ?? false,
+      ok_to_send_marketing_emails: clientProfileData.ok_to_send_marketing_emails ?? false,
+      send_ratings_emails: clientProfileData.send_ratings_emails ?? false,
+      do_not_email: clientProfileData.do_not_email ?? false,
+      discharged: clientProfileData.discharged ?? false,
+      deceased: clientProfileData.deceased ?? false,
+    };
+    
+    const phoneNumbers = {
+      home_phone: clientProfileData.home_phone ?? '',
+      work_phone: clientProfileData.work_phone ?? '',
+      mobile_phone: clientProfileData.mobile_phone ?? '',
+      fax_phone: clientProfileData.fax_phone ?? '',
+    };
+
+    setFormData(formData)
+    setCheckboxData(checkboxData)
+    setPhoneNumbers(phoneNumbers)
+  }
 
   useEffect(() => {
     const countryList = Country.getAllCountries();
     setCountries(countryList);
     getEmployees();
     getClientSchedule(selectedEmployeeData?.id, true);
+
     window.addEventListener("scroll", handleScroll);
-    getChartEntriess()
+    getClientDetails()
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -209,6 +272,7 @@ const ClientsProfileUpdate = () => {
       console.log(error);
     }
   };
+
   const filteredEmployeeList = employeeList?.filter((employee) =>
     employee?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
   );
@@ -264,19 +328,18 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleFormChange = (event) => {
-    const { name, value } = event.target; // Destructure name and value from the event target
+    const { name, value } = event.target; 
     setFormData(prevState => ({
       ...prevState,
-      [name]: value, // Update the corresponding field
+      [name]: value,
     }));    
   };
 
   const handleChange = (value, name) => {
     setPhoneNumbers(prevState => ({
       ...prevState,
-      [name]: value, // Update the corresponding phone number field
+      [name]: value, 
     }));
-    console.log(`Updated ${name}:`, value);
   };
 
   const handleProunounsChange=(pronouns)=>{
@@ -291,6 +354,8 @@ const ClientsProfileUpdate = () => {
       setSelectedCountryCode(selectedCountryObj.isoCode);
       setSelectedState(''); 
       setCities([]);
+      formData.country= event.target.value
+      setFormData(formData)
       const stateList = State.getStatesOfCountry(selectedCountryObj.isoCode);
       setStates(stateList);
       formData.state = selectedCountryObj.name
@@ -306,6 +371,8 @@ const ClientsProfileUpdate = () => {
     const selectedStateObj = states.find(state => state.name === stateName); 
     if (selectedStateObj) {
       setSelectedState(stateName); 
+      formData.state= stateName
+      setFormData(formData)
       const updatedFormData = { ...formData, state: selectedStateObj.isoCode }; 
       setFormData(updatedFormData); 
       const cityList = City.getCitiesOfState(selectedCountryCode, selectedStateObj.isoCode);
@@ -319,8 +386,10 @@ const ClientsProfileUpdate = () => {
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
-    formData.citycity=city
+    formData.city=city
     setFormData(formData)
+    console.log(formData);
+    
   };
 
   const handleCheckboxChange = (event) => {
@@ -329,17 +398,16 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: checked,
     }));
-    if(name==="allSettings"){
+    if(name==="do_not_email"){
       let checkboxPayload={
-        emailReminder2Days: false,
-        smsReminder2Days: false,
-        smsReminder24Hours: false,
-        emailNotifications: !checkboxData.emailNotifications,
-        emailWaitlist: !checkboxData.emailWaitlist,
-        smsWaitlist: false,
-        marketingEmails: !checkboxData.marketingEmails,
-        ratingsEmails: !checkboxData.ratingsEmails,
-        allSettings:!checkboxData.allSettings,
+        email_reminder_2_days: false,
+        sms_reminder_2_days: false,
+        sms_reminder_24_hours: false,
+        email_new_cancelled: !checkboxData.email_new_cancelled,
+        email_waitlist_openings: !checkboxData.email_waitlist_openings,
+        sms_waitlist_openings: false,
+        ok_to_send_marketing_emails: !checkboxData.ok_to_send_marketing_emails,
+        do_not_email:!checkboxData.do_not_email,
       }
       setCheckboxData(checkboxPayload)
       setDisableCheckbox(true)
@@ -354,11 +422,61 @@ const ClientsProfileUpdate = () => {
     }
   };
 
-  const handleSubmit = async()=>{
-    let payload={}
-    let response = await UpdateClient(1, true, payload)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formDataPayload = new FormData();
+    // Client basic information
+    formDataPayload.append('client[name]', formData.name);
+    formDataPayload.append('client[last_name]', formData.last_name);
+    formDataPayload.append('client[preferred_name]', formData.preferred_name);
+    formDataPayload.append('client[pronouns]', formData.pronouns);
+    formDataPayload.append('client[prefix]', formData.prefix);
+    formDataPayload.append('client[middle_name]', formData.middle_name);
+    formDataPayload.append('client[address]', formData.address);
+    formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone); 
+    formDataPayload.append('client[personal_health_number]', formData.personal_health_number);
+    formDataPayload.append('client[family_doctor]', formData.family_doctor);
+    formDataPayload.append('client[family_doctor_phone]', formData.family_doctor_phone);
+    formDataPayload.append('client[family_doctor_email]', formData.family_doctor_email);
+    formDataPayload.append('client[referring_professional]', formData.referring_professional);
+    formDataPayload.append('client[referring_professional_phone]', formData.referring_professional_phone);
+    formDataPayload.append('client[referring_professional_email]', formData.referring_professional_email);
+    formDataPayload.append('client[emergency_contact]', formData.emergency_contact);
+    formDataPayload.append('client[emergency_contact_phone]', formData.emergency_contact_phone);
+    formDataPayload.append('client[emergency_contact_relationship]', formData.emergency_contact_relationship);
+    formDataPayload.append('client[parent_guardian]', formData.parent_guardian);
+    formDataPayload.append('client[occupation]', formData.occupation);
+    formDataPayload.append('client[employer]', formData.employer);
+
+    // Client detail attributes
+    formDataPayload.append('client[client_detail_attributes][city]', formData.city);
+    formDataPayload.append('client[client_detail_attributes][state]', formData.state);
+    formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
+    formDataPayload.append('client[client_detail_attributes][country]', formData.country);
+    formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
+    formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
+    formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
+
+    // Phone numbers
+    formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
+    formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
+    formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
+    formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
+
+    // Schedules attributes and notification settings
+    formDataPayload.append('client[schedules_attributes][notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
+    formDataPayload.append('client[schedules_attributes][notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
+    formDataPayload.append('client[schedules_attributes][notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
+    formDataPayload.append('client[schedules_attributes][notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
+    formDataPayload.append('client[schedules_attributes][notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
+    formDataPayload.append('client[schedules_attributes][notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
+    formDataPayload.append('client[schedules_attributes][notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
+    formDataPayload.append('client[schedules_attributes][notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
+    formDataPayload.append('client[schedules_attributes][notification_settings][do_not_email]', checkboxData.do_not_email);
+    let response = await UpdateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
-        toast.success("Client Profile Updated Successfully")
+        toast.success("Client Profile Updated Successfully");
+        handleNavigate();
         try {
             const { data } = await getClients();
             if (data?.length > 0) {
@@ -371,80 +489,69 @@ const ClientsProfileUpdate = () => {
     } else {
         toast.error("Something went wrong")
     }
-    
-  }
+  };
+
+  const handleNavigate=()=>{
+    Navigate("/customers")
+  };
+
   return (
     <>
       <AsideLayout
         asideContent={
           <>
-            <div>
-              <SearchInput
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="border-t-2  py-2 bg-white h-70vh">
-              <h1 className="text-xl flex gap-x-2 items-center justify-center">
-                Clients <ChevronDown />
-              </h1>
-              <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
-                {(employeeList || []).length > 0 && (
-                  <List
-                    height={window.innerHeight}
-                    itemCount={employeeList.length}
-                    itemSize={45}
-                    width={"100%"}
-                  >
-                    {EmployeeItem}
-                  </List>
-                )}
+              <div>
+                  <SearchInput
+                      placeholder="Search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                  />
               </div>
-            </div>
-            <Button
-              onClick={() => {
-                setShowCreateClientModel(true);
-                setCurrentTab("client");
-              }}
-              variant="info"
-              className="w-full text-white"
-            >
-              + Add Client
-            </Button>
+              <div className="border-t-2  py-2 bg-white h-70vh">
+                  <h1 className="text-xl flex gap-x-2 items-center justify-center">
+                      Clients <ChevronDown />
+                  </h1>
+                  <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
+                      {(employeeList || []).length > 0 && (
+                          <List
+                              height={window.innerHeight}
+                              itemCount={employeeList.length}
+                              itemSize={45}
+                              width={"100%"}
+                          >
+                              {EmployeeItem}
+                          </List>
+                      )}
+                  </div>
+              </div>
+              <Button
+                  onClick={() => {
+                      setShowCreateClientModel(true);
+                      setCurrentTab("client");
+                  }}
+                  variant="info"
+                  className="w-full text-white"
+                  >
+                  + Add Client
+              </Button>
           </>
-        }
+      }
       >
-        <div className="w-100 border p-3 ">
-          <div>
-
+        <div className="flex-1 border p-3 h-[86vh] overflow-scroll">
+        <Form>
+          <div className="d-flex justify-content-between mb-3">
             <h1 className="text-secondary fw-light">
               Edit Client - {"Teset (Test) "}Account
             </h1>
-            <div>
-                <Button variant="outline-secondary">Cancel</Button>
-                <Button variant="primary" onClick={handleSubmit}>Save</Button>
+            <div className="d-flex justify-content-between gap-2">
+                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
+                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit} >Save</Button>
             </div>
           </div>
-          <Navbar
-            bg="dark"
-            variant="dark"
-            fixed="top" // React Bootstrap 5 prop to keep Navbar fixed to the top
-            style={{
-          display: showHeader ? "block" : "none", // Controls visibility based on scroll
-          transition: "0.3s",
-          marginTop:"200px"
-        }}
-      >
-        <Container>
-          <Navbar.Brand href="#home">Scroll Header</Navbar.Brand>
-        </Container>
-      </Navbar>
           <div className="d-flex p-4 border bg-white rounded">
             <div>
               <UserRound />
             </div>
-            <Form>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -452,7 +559,6 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">First Name - Required</Form.Label>
                         <Form.Control
-                          required
                           type="text"
                           placeholder="First Name"
                           name="name"
@@ -499,12 +605,12 @@ const ClientsProfileUpdate = () => {
                       {showPronounceOptions && (
                         <div className="position-absolute w-[90%]">
                           <ListGroup>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("He/Him/His")}>He/Him/His</ListGroup.Item>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("She/Her/Hers")}>She/Her/Hers</ListGroup.Item>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("They/Them/Theirs")}>They/Them/Theirs</ListGroup.Item>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("Thon/Thon/Thon's")}>Thon/Thon/Thon's</ListGroup.Item>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("E/Em/Ems")}>E/Em/Ems</ListGroup.Item>
-                            <ListGroup.Item onClick={()=>handleProunounsChange("Ae/Aer/Aers")}>Ae/Aer/Aers</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("He/Him/His")}>He/Him/His</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("She/Her/Hers")}>She/Her/Hers</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("They/Them/Theirs")}>They/Them/Theirs</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("Thon/Thon/Thon's")}>Thon/Thon/Thon's</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("E/Em/Ems")}>E/Em/Ems</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("Ae/Aer/Aers")}>Ae/Aer/Aers</ListGroup.Item>
                           </ListGroup>
                         </div>
                       )}
@@ -512,13 +618,19 @@ const ClientsProfileUpdate = () => {
                     <Col md={3} className={"w-50"}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Prefix</Form.Label>
-                        <Form.Control
-                         type="text"
-                          placeholder="Prefix"
+                        <Form.Select
                           name="prefix"
                           value={formData.prefix}
                           onChange={handleFormChange}
-                          />
+                        >
+                          <option value="">Select a title...</option>
+                          <option value="Dr.">Dr.</option>
+                          <option value="Mrs.">Mrs.</option>
+                          <option value="Ms.">Ms.</option>
+                          <option value="Miss">Miss</option>
+                          <option value="Mr.">Mr.</option>
+                          <option value="Mx.">Mx.</option>
+                        </Form.Select>
                       </Form.Group>
                     </Col>
                     <Col md={3} className={"w-50"}>
@@ -541,8 +653,7 @@ const ClientsProfileUpdate = () => {
                     <Col md={3} className={"w-50"}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Client#</Form.Label>
-                        <Form.Control
-                         type="text" placeholder="Client" />
+                        <Form.Control type="text" placeholder="Client" value={clientProfileData?.id} readOnly/>
                       </Form.Group>
                     </Col>
                     <Col md={3} className={"w-50"}>
@@ -554,13 +665,11 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
           <div className="d-flex p-4 border bg-white mt-3 rounded">
             <div>
               <Mail />
             </div>
-            <Form className={"w-100"}>
               <div className="w-100">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -568,7 +677,6 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Email</Form.Label>
                         <Form.Control
-                          required
                           type="text"
                           placeholder="Enter Email"
                           name="email"
@@ -580,13 +688,11 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
           <div className="d-flex p-4 border bg-white rounded mt-3">
             <div>
               <Phone />
             </div>
-            <Form>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -596,8 +702,8 @@ const ClientsProfileUpdate = () => {
                         <div className="countrySelectContainer">
                           <PhoneInput
                             country={'us'}
-                            value={phoneNumbers.home}
-                            onChange={(value) => handleChange(value, 'home')}
+                            value={phoneNumbers.home_phone}
+                            onChange={(value) => handleChange(value, 'home_phone')}
                           />
                         </div>
                       </Form.Group>
@@ -608,7 +714,8 @@ const ClientsProfileUpdate = () => {
                         <div className="countrySelectContainer">
                           <PhoneInput
                             country={'us'}
-                            onChange={(value) => handleChange(value, 'mobile')}
+                            value={phoneNumbers.mobile_phone}
+                            onChange={(value) => handleChange(value, 'mobile_phone')}
                           />
                         </div>                      </Form.Group>
                     </Col>
@@ -618,8 +725,8 @@ const ClientsProfileUpdate = () => {
                         <div className="countrySelectContainer">
                           <PhoneInput
                             country={'us'}
-                            value={phoneNumbers.work}
-                            onChange={(value) => handleChange(value, 'work')}
+                            value={phoneNumbers.work_phone}
+                            onChange={(value) => handleChange(value, 'work_phone')}
                           />
                         </div>
                       </Form.Group>
@@ -630,8 +737,8 @@ const ClientsProfileUpdate = () => {
                         <div className="countrySelectContainer">
                           <PhoneInput
                             country={'us'}
-                            value={phoneNumbers.fax}
-                            onChange={(value) => handleChange(value, 'fax')}
+                            value={phoneNumbers.fax_phone}
+                            onChange={(value) => handleChange(value, 'fax_phone')}
                           />
                         </div>                      </Form.Group>
                     </Col>
@@ -646,11 +753,11 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Street Address</Form.Label>
                         <Form.Control
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleFormChange}
-                          />
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleFormChange}
+                        />
                       </Form.Group>
                     </Col>
                     <Col xs={12} sm={12} md={12} lg={12}>
@@ -666,7 +773,7 @@ const ClientsProfileUpdate = () => {
                         <Form.Label className="text-body-tertiary">Country</Form.Label>
                         <Form.Select value={selectedCountry} onChange={handleCountryChange}>
                           <option value="">Select a country</option>
-                          {countries.map(country => (
+                          {countries.map((country) => (
                             <option key={country.isoCode} value={country.name}>
                               {country.name}
                             </option>
@@ -723,13 +830,11 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
           <div className="d-flex p-4 border bg-white rounded mt-3">
             <div>
               <Briefcase />
             </div>
-            <Form>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -899,7 +1004,7 @@ const ClientsProfileUpdate = () => {
                           type="text"
                           placeholder="Enter Gender"
                           name="gender"
-                          value={formData.gender}
+                          value={formData.gender || ""}
                           onChange={handleFormChange}
                         />
                       </Form.Group>
@@ -909,7 +1014,7 @@ const ClientsProfileUpdate = () => {
                         <Form.Label className="text-body-tertiary d-flex justify-content-start align-items-center gap-2">Sex<HelpCircle size={15} /></Form.Label>
                         <Form.Select
                           name="sex"
-                          value={formData.sex}
+                          value={formData.sex  || ""}
                           onChange={handleFormChange}>
                           <option value={"Male"}>{"Male"}</option>
                           <option value={"Female"}>{"Female"}</option>
@@ -935,6 +1040,19 @@ const ClientsProfileUpdate = () => {
                     </Col>
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
+                        <Form.Label className="text-body-tertiary">Occupation</Form.Label>
+                        <Form.Control type="text" 
+                        name="occupation"
+                        value={formData.occupation}
+                        onChange={handleFormChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12}>
+                      <hr className="hr w-100" />
+                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12}>
+                      <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Employer</Form.Label>
                         <Form.Control type="text" 
                         name="employer"
@@ -946,14 +1064,12 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
           <div className="p-4 border bg-white rounded mt-3">
             <div className="d-flex">
               <div>
                 <Bell />
               </div>
-              <Form>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -965,8 +1081,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`Email 2 days before appointment`}
-                            name="emailReminder2Days"
-                            checked={checkboxData.emailReminder2Days}
+                            name="email_reminder_2_days"
+                            checked={checkboxData.email_reminder_2_days}
                             onChange={handleCheckboxChange}
                           />
                         </Form.Group>
@@ -976,8 +1092,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`Text Message (SMS) 2 days before appointment`}
-                            name="smsReminder2Days"
-                            checked={checkboxData.smsReminder2Days}
+                            name="sms_reminder_2_days"
+                            checked={checkboxData.sms_reminder_2_days}
                             onChange={handleCheckboxChange}
                           />
                         </Form.Group>
@@ -987,8 +1103,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`Text Message (SMS) 24 hours before appointment`}
-                            name="smsReminder24Hours"
-                            checked={checkboxData.smsReminder24Hours}
+                            name="sms_reminder_24_hours"
+                            checked={checkboxData.sms_reminder_24_hours}
                             onChange={handleCheckboxChange}
                           />
                         </Form.Group>
@@ -1001,8 +1117,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={"Email notifications of new, cancelled and rescheduled appointments"}
-                            name="emailNotifications"
-                            checked={checkboxData.emailNotifications}
+                            name="email_new_cancelled"
+                            checked={checkboxData.email_new_cancelled}
                             onChange={handleCheckboxChange}
                             disabled={disableCheckbox}
                           />
@@ -1016,8 +1132,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={"Email notifications of wait list openings"}
-                            name="emailWaitlist"
-                            checked={checkboxData.emailWaitlist}
+                            name="email_waitlist_openings"
+                            checked={checkboxData.email_waitlist_openings}
                             onChange={handleCheckboxChange}
                             disabled={disableCheckbox}
                           />
@@ -1028,8 +1144,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={"SMS notifications of wait list openings"}
-                            name="smsWaitlist"
-                            checked={checkboxData.smsWaitlist}
+                            name="sms_waitlist_openings"
+                            checked={checkboxData.sms_waitlist_openings}
                             onChange={handleCheckboxChange}
                           />
                         </Form.Group>
@@ -1081,7 +1197,7 @@ const ClientsProfileUpdate = () => {
                           <Form.Label className="text-body-tertiary">Who were you referred to?</Form.Label>
                           <Form.Select
                           name="who_were_you_referred_to"
-                          value={formData.who_were_you_referred_to}
+                          value={formData.who_were_you_referred_to || ""}
                           onChange={handleFormChange}
                           >
                             <option value={"Male"}>{"Male"}</option>
@@ -1093,13 +1209,11 @@ const ClientsProfileUpdate = () => {
                     </Row>
                   </Container>
                 </div>
-              </Form>
             </div>
             <div className="d-flex">
               <div>
                 <Megaphone />
               </div>
-              <Form>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -1111,8 +1225,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`OK to Send Marketing Emails`}
-                            name="marketingEmails"
-                            checked={checkboxData.marketingEmails}
+                            name="ok_to_send_marketing_emails"
+                            checked={checkboxData.ok_to_send_marketing_emails}
                             onChange={handleCheckboxChange}
                             disabled={disableCheckbox}
                           />
@@ -1123,8 +1237,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`Send Ratings Emails`}
-                            name="ratingsEmails"
-                            checked={checkboxData.ratingsEmails}
+                            name="send_ratings_emails"
+                            checked={checkboxData.send_ratings_emails}
                             onChange={handleCheckboxChange}
                             disabled={disableCheckbox}
                           />
@@ -1134,13 +1248,11 @@ const ClientsProfileUpdate = () => {
                   </Container>
                   <div></div>
                 </div>
-              </Form>
             </div>
             <div className="d-flex">
               <div>
                 <Settings />
               </div>
-              <Form>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -1152,8 +1264,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Check
                             type={"checkbox"}
                             label={`Do Not Email!`}
-                            name="allSettings"
-                            checked={checkboxData.allSettings}
+                            name="do_not_email"
+                            checked={checkboxData.do_not_email}
                             onChange={handleCheckboxChange}
                           />
                         </Form.Group>
@@ -1162,14 +1274,12 @@ const ClientsProfileUpdate = () => {
                   </Container>
                   <div></div>
                 </div>
-              </Form>
             </div>
           </div>
           <div className="d-flex p-4 border bg-white rounded mt-3a">
             <div>
               <Cloud />
             </div>
-            <Form className="w-100">
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={12} sm={12} md={12} lg={12}>
@@ -1213,10 +1323,8 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
           <div className="d-flex p-4 border bg-white rounded mt-3a">
-            <Form className="w-100">
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={12} sm={12} md={12} lg={12}>
@@ -1274,8 +1382,8 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
               </div>
-            </Form>
           </div>
+        </Form>
         </div>
       </AsideLayout>
     </>
