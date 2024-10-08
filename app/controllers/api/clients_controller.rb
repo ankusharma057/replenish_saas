@@ -5,13 +5,13 @@ class Api::ClientsController < ApplicationController
   skip_before_action :authorized_employee
 
   def index
-    clients = current_employee&.is_admin? ? Client.includes(:client_detail, :schedules) : current_employee&.clients
+    clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
     clients = clients.includes(:employees) if clients.present?
     render json: clients, status: :ok
   end
 
   def profile
-    client = Client.find_by(id: session[:client_id])
+    client = Client.includes(:client_detail, :schedules).find_by(id: session[:client_id])
     if client
       render json: client, status: :ok
     else
