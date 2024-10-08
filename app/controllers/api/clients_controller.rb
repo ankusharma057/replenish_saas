@@ -11,7 +11,7 @@ class Api::ClientsController < ApplicationController
   end
 
   def profile
-    client = Client.includes(:client_detail, :schedules).find_by(id: session[:client_id])
+    client = Client.includes(:client_detail, :schedules).find_by(id: params[:id])
     if client
       render json: client, status: :ok
     else
