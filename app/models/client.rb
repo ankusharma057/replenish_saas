@@ -9,6 +9,8 @@ class Client < ApplicationRecord
   has_many :chart_entries, dependent: :destroy
   has_one :client_detail, dependent: :destroy
   has_one_attached :profile_photo
+  belongs_to :referred_employee, class_name: 'Client', optional: true
+
 
   accepts_nested_attributes_for :client_detail
 
@@ -16,6 +18,7 @@ class Client < ApplicationRecord
   validates :email, uniqueness: { message: 'Email already taken' }, allow_nil: true
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
+  after_initialize :set_default_notification_settings
 
   def send_invitation_and_temp_password
     InvitationMailer.with(client: self).client_invitation.deliver_now
@@ -41,7 +44,19 @@ class Client < ApplicationRecord
     end
   end
 
-  def update_schedules(notification_settings)
-    schedules.update(notification_settings: notification_settings)
+  private
+
+  def set_default_notification_settings
+    self.notification_settings ||= {
+      email_reminder_2_days: false,
+      sms_reminder_2_days: false,
+      sms_reminder_24_hours: false,
+      email_new_cancelled: false,
+      email_waitlist_openings: false,
+      sms_waitlist_openings: false,
+      ok_to_send_marketing_emails: false,
+      send_ratings_emails: false,
+      do_not_email: false
+    }
   end
 end

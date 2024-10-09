@@ -70,21 +70,12 @@ class Api::ClientsController < ApplicationController
   end
 
   def update
-    @client = Client.includes(:client_detail, :schedules).find_by(id: params[:id])    
-    return render json: { error: "Client not found" }, status: :not_found unless @client
-    if client_params[:email].present?
-      new_email = client_params[:email].downcase
-      unless @client.email_valid?(new_email)
-        return render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
-      end
+    client = Client.includes(:client_detail, :schedules).find_by(id: params[:id])
+    if client.nil?
+      render json: { error: 'Client not found' }, status: :not_found and return
     end
-
-    if @client.update(client_params.except(:schedules_attributes))
-      if client_params[:schedules_attributes].present?
-        notification_settings = client_params[:schedules_attributes][:notification_settings].to_h.deep_symbolize_keys
-        @client.update_schedules(notification_settings)
-      end
-      render json: @client, status: :ok
+    if client.update(client_params)
+       render json: client, serializer: ClientSerializer, status: :ok
     else
       render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
     end
@@ -108,6 +99,21 @@ class Api::ClientsController < ApplicationController
       :temp_password, 
       :address, 
       :phone_number,
+      :online_Booking_Policy,
+      :online_Booking_Payment_Policy,
+      :how_heard_about_us,
+      :referred_employee_id,
+      notification_settings: [
+        :email_reminder_2_days, 
+        :sms_reminder_2_days, 
+        :sms_reminder_24_hours, 
+        :email_new_cancelled, 
+        :email_waitlist_openings, 
+        :sms_waitlist_openings, 
+        :ok_to_send_marketing_emails, 
+        :send_ratings_emails,
+        :do_not_email
+      ],
       client_detail_attributes: [  
         :city, 
         :state, 
@@ -133,19 +139,6 @@ class Api::ClientsController < ApplicationController
         :parent_guardian, 
         :occupation, 
         :employer
-      ],
-      schedules_attributes: [
-        notification_settings: [
-          :email_reminder_2_days, 
-          :sms_reminder_2_days, 
-          :sms_reminder_24_hours, 
-          :email_new_cancelled, 
-          :email_waitlist_openings, 
-          :sms_waitlist_openings, 
-          :ok_to_send_marketing_emails, 
-          :send_ratings_emails,
-          :do_not_email
-        ]
       ]
     )
   end
