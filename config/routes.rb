@@ -19,6 +19,8 @@ mount Sidekiq::Web => '/sidekiq'
         get :employees, on: :member
       end
 
+      resources :stripe
+
       resources :employees, only: %i(index show)
 
       resources :intake_forms
