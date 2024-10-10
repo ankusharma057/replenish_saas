@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import ReactCardFlip from 'react-card-flip';
 import { UserRound, AlertTriangle, Phone, Mail, DollarSign, Briefcase, CalendarDays, Bell, Megaphone, File, Users, Tag, MessageCircle, Pencil, Home, X, Check, Settings, ThumbsUp, Smartphone, MoveRight, Printer, Info, Trash2, Edit, Star, Search, PlusCircle } from 'lucide-react';
 import { Ellipsis } from "react-bootstrap/esm/PageItem";
+import CountUp from 'react-countup';
 const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleSearchClients, searchQuery, searchedClients }) => {
     const [flipLeftCardIndex, setflipLeftCardIndex] = useState(null)
     const [flipRightCardIndex, setflipRightCardIndex] = useState(null)
@@ -183,7 +184,9 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                             return <div onMouseOver={() => handleLeftCardClick(index)} onMouseOut={handleLeftCardOut} key={index} className="w-[110px] h-[110px] p-1">
                                 <ReactCardFlip isFlipped={flipLeftCardIndex === index} flipDirection="horizontal">
                                     <div className="d-flex flex-column justify-content-between align-items-center">
-                                        <div className="h2 text-secondary">{item.count}</div>
+                                        <div className="h2 text-secondary">
+                                            <CountUp end={item.count}/>
+                                            </div>
                                         <div className="h6 text-center text-muted">{item.label}</div>
                                     </div>
                                     <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
@@ -203,7 +206,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                     <div className="d-flex flex-column justify-content-between align-items-center">
                                         <div className="h2 text-secondary d-flex justify-content-start">
                                             <span className="fs-6 mt-[4px]">$</span>
-                                            <span className="large">{mainAmount}</span>
+                                            <span className="large"> <CountUp end={mainAmount} />{}</span>
                                             <span className="fs-6  mt-[4px]">{decimalPart}</span>
                                         </div>
                                         <div className="h6 text-center text-muted">{item.label}</div>
@@ -564,10 +567,14 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                     <div className="d-flex justify-content-between gap-[10px] mt-2">
                                         <div className="d-flex justify-content-between w-100">
                                             <div>
+                                                <div>
                                                 <p style={{ fontSize: "14px" }}>Using suite for headshots</p>
-                                                <p style={{ color: "gray" }}>by Kimberlie Rodriguez, Mar 5, 2024</p>
+                                                    <p className="m-0" style={{ fontSize: "14px",color: "gray" }}>by Kimberlie Rodriguez, Mar 5, 2024</p>
+                                                </div>
+                                                <div>
+                                                    <p className="m-0" style={{ fontSize: "14px",color: "gray" }}>Noted on. <span style={{ color: "#0dcaf0" }}>Appointment: March 7, 2024 - 12:45pm, Restalyne Filler (60 minutes)</span></p>
+                                                </div>
                                             </div>
-                                            <p style={{ color: "gray" }}>Noted on. <span style={{ color: "#0dcaf0" }}>Appointment: March 7, 2024 - 12:45pm, Restalyne Filler (60 minutes)</span></p>
                                             <div className="d-flex gap-[10px] align-items-center" style={{ listStyle: "none" }}>
                                                 <Star />
                                                 <OverlayTrigger trigger="click" placement="left" overlay={popoverHeadshot()} >
