@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getChartEntries, GetClientDetails, getClients, getClientSchedulesOnly, UpdateClient } from "../../Server";
+import { CreateClient, GetClientDetails, getClients, getClientSchedulesOnly } from "../../Server";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "../../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
@@ -34,7 +34,6 @@ import { useAuthContext } from "../../context/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
 
 const ClientsProfileUpdate = () => {
-  const { authUserState } = useAuthContext();
   const params=useParams();
   const Navigate=useNavigate();
   const [employeeList, setEmployeeList] = useState([]);
@@ -242,18 +241,17 @@ const ClientsProfileUpdate = () => {
     setPhoneNumbers(phoneNumbers)
   }
 
-  const handleScroll=()=>{
-    document.getElementById(params.type)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
     const countryList = Country.getAllCountries();
     setCountries(countryList);
     getEmployees();
     getClientSchedule(selectedEmployeeData?.id, true);
-    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
     getClientDetails()
-    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [selectedEmployeeData?.id,]);
 
   const getEmployees = async (refetch = false) => {
@@ -415,12 +413,21 @@ const ClientsProfileUpdate = () => {
     }
   };
 
+  const handleScroll = () => {
+    if (window.scrollY > 100) {
+      setShowHeader(true);
+    } else {
+      setShowHeader(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataPayload = new FormData();
     // Client basic information
     formDataPayload.append('client[name]', formData.name);
     formDataPayload.append('client[last_name]', formData.last_name);
+    formDataPayload.append('client[email]', formData.email);
     formDataPayload.append('client[preferred_name]', formData.preferred_name);
     formDataPayload.append('client[pronouns]', formData.pronouns);
     formDataPayload.append('client[prefix]', formData.prefix);
@@ -466,9 +473,9 @@ const ClientsProfileUpdate = () => {
     formDataPayload.append('client[schedules_attributes][notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
     formDataPayload.append('client[schedules_attributes][notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
     formDataPayload.append('client[schedules_attributes][notification_settings][do_not_email]', checkboxData.do_not_email);
-    let response = await UpdateClient(params.id, true, formDataPayload)
+    let response = await CreateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
-        toast.success("Client Profile Updated Successfully");
+        toast.success("Client Created Successfully");
         handleNavigate();
         try {
             const { data } = await getClients();
@@ -500,11 +507,11 @@ const ClientsProfileUpdate = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                   />
               </div>
-              <div className="border-t-2  py-2 bg-white h-[80vh]">
+              <div className="border-t-2  py-2 bg-white h-70vh">
                   <h1 className="text-xl flex gap-x-2 items-center justify-center">
                       Clients <ChevronDown />
                   </h1>
-                  <div className="flex h-[58vh] flex-col pl-2 gap-4 overflow-y-auto border">
+                  <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
                       {(employeeList || []).length > 0 && (
                           <List
                               height={window.innerHeight}
@@ -530,45 +537,47 @@ const ClientsProfileUpdate = () => {
           </>
       }
       >
-        <div className="flex-1 border p-3 h-[88vh] overflow-scroll">
-        <Form>
+        <div className="flex-1 border p-3 h-[86vh] overflow-scroll">
+        <Form onSubmit={handleSubmit}>
           <div className="d-flex justify-content-between mb-3">
             <h1 className="text-secondary fw-light">
-              Edit Client - {"Teset (Test) "}Account
+             New Client
             </h1>
             <div className="d-flex justify-content-between gap-2">
                 <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
-                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit} >Save</Button>
+                <Button variant="btn btn-primary w-[100px] h-[40px]" type="submit" style={{backgroundColor:"#0dcaf0",border:"none"}} >Save</Button>
             </div>
           </div>
-          <div className="d-flex p-4 border bg-white rounded" id={"basic"}>
+          <div className="d-flex p-4 border bg-white rounded">
             <div>
               <UserRound />
             </div>
-              <div className="w-100 d-flex justify-content-between gap-1 ">
+              <div className="w-50 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
                     <Col md={3} className={"w-50"}>
                       <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">First Name - Required</Form.Label>
+                        <Form.Label className="text-body-tertiary">First Name - <em>Required</em></Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="First Name"
                           name="name"
                           value={formData.name}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
                     <Col md={3} className={"w-50"}>
                       <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">Last Name - Required</Form.Label>
+                        <Form.Label className="text-body-tertiary">Last Name - <em>Required</em></Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="Last Name"
                           name="last_name"
                           value={formData.last_name}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
@@ -641,23 +650,8 @@ const ClientsProfileUpdate = () => {
                   </Row>
                 </Container>
                 <div></div>
-                <Container>
-                  <Row xs={6} md={6} lg={6}>
-                    <Col md={3} className={"w-50"}>
-                      <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">Client#</Form.Label>
-                        <Form.Control type="text" placeholder="Client" value={clientProfileData?.id} readOnly/>
-                      </Form.Group>
-                    </Col>
-                    <Col md={3} className={"w-50"}>
-                      <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">Client Since</Form.Label>
-                        <Form.Control type="text" placeholder="Client Since" />
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                </Container>
               </div>
+             
           </div>
           <div className="d-flex p-4 border bg-white mt-3 rounded">
             <div>
@@ -671,10 +665,11 @@ const ClientsProfileUpdate = () => {
                         <Form.Label className="text-body-tertiary">Email</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="Enter Email"
+                          placeholder="Enter Email Address"
                           name="email"
                           value={formData.email}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
@@ -824,7 +819,7 @@ const ClientsProfileUpdate = () => {
                 </Container>
               </div>
           </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3" id={"medical"}>
+          <div className="d-flex p-4 border bg-white rounded mt-3">
             <div>
               <Briefcase />
             </div>
@@ -916,6 +911,45 @@ const ClientsProfileUpdate = () => {
                         <Form.Control
                           type="text"
                           placeholder="Enter Family Doctor Name"
+                          name="family_doctor"
+                          value={formData.family_doctor}
+                          onChange={handleFormChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12}>
+                      <div className="d-flex justify-content-between gap-[20px]">
+                        <Form.Group controlId="formFile" className="mb-3 w-100">
+                          <Form.Label className="text-body-tertiary">Phone</Form.Label>
+                          <Form.Control 
+                          type="text" 
+                          placeholder="Phone"
+                          name="family_doctor_phone"
+                          value={formData.family_doctor_phone}
+                          onChange={handleFormChange}
+                          />
+                        </Form.Group>
+                        <Form.Group controlId="formFile" className="mb-3 w-100">
+                          <Form.Label className="text-body-tertiary">Email</Form.Label>
+                          <Form.Control 
+                          type="email" 
+                          placeholder="Email" 
+                          name="family_doctor_email"
+                          value={formData.family_doctor_email}
+                          onChange={handleFormChange}
+                          />
+                        </Form.Group>
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12}>
+                      <hr className="hr w-100" />
+                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12}>
+                      <Form.Group controlId="formFile" className="mb-3">
+                        <Form.Label className="text-body-tertiary">Reffering Professional</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter Refference "
                           name="family_doctor"
                           value={formData.family_doctor}
                           onChange={handleFormChange}
@@ -1058,7 +1092,7 @@ const ClientsProfileUpdate = () => {
                 </Container>
               </div>
           </div>
-          <div className="p-4 border bg-white rounded mt-3" id={"reminders"}>
+          <div className="p-4 border bg-white rounded mt-3">
             <div className="d-flex">
               <div>
                 <Bell />

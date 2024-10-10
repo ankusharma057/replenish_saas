@@ -56,7 +56,7 @@ import Switch from "@mui/material/Switch";
 import { IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
 import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
-import EditProfileModal from "./EditProfileModal";
+import ClientProfile from "./ClientProfile";
 
 
 
@@ -85,7 +85,7 @@ const AllClientRoot = () => {
     const [chartTab, setChartTab] = useState("chart_entries_list");
     const [showEditProfileModal,setShowEditProfileModal]=useState(false)
     const [editProfileData,setEditProfileData]=useState()
-
+    const [searchedClients,setSearchedClients]=useState([])
     const localizer = momentLocalizer(moment);
 
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
@@ -95,7 +95,7 @@ const AllClientRoot = () => {
         setSelectedClientSchedules(data);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message)
     }
   };
 
@@ -112,7 +112,8 @@ const AllClientRoot = () => {
                 handleSelect(newData[0]);
             }
         } catch (error) {
-            console.log(error);
+      toast.error(error.message)
+
         }
     };
     // const getInvoices = async () => {
@@ -1114,8 +1115,12 @@ useEffect(()=>{
         }));
     };
 
-    const handleEditProfileModal=(clientData)=>{
-        navigate(`/client-profile-update/${clientData.id}`)
+    const handleNavigation=(clientData,type)=>{
+        navigate(`/client-profile-update/${clientData.id}/${type}`)
+    };
+
+    const handleAddNewClient=(clientData)=>{
+        navigate(`/add-new-client`)
     };
 
     const handleEditClientProfile = async (payload) => {
@@ -1132,11 +1137,24 @@ useEffect(()=>{
                     setShowEditProfileModal(false)
                 }
             } catch (error) {
-                console.log(error);
+                toast.error(error.message)
             }
         } else {
             toast.error("Something went wrong")
         }
+    };
+
+    const handleClientProfileFlipCard=()=>{
+        setCurrentTab("Appointments");
+    };
+
+    const handleSearchClients = (event) => {
+        setSearchedClients([])
+        setSearchQuery(event.target.value)
+        const timer = setTimeout(() => {
+            setSearchedClients(filteredEmployeeList)
+        }, 1000);
+        return () => clearTimeout(timer);
     };
 
     return (
@@ -1151,11 +1169,11 @@ useEffect(()=>{
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="border-t-2  py-2 bg-white h-70vh">
+                        <div className="border-t-2  py-2 bg-white h-[70vh]">
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
+                            <div className="flex h-[59vh] flex-col pl-2 gap-4 overflow-y-auto border">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}
@@ -1169,10 +1187,7 @@ useEffect(()=>{
                             </div>
                         </div>
                         <Button
-                            onClick={() => {
-                                setShowCreateClientModel(true);
-                                setCurrentTab("client");
-                            }}
+                            onClick={handleAddNewClient}
                             variant="info"
                             className="w-full text-white"
                             >
@@ -1181,10 +1196,10 @@ useEffect(()=>{
                     </>
                 }
             >
-                <div className="flex-1" key={selectedEmployeeData?.name}>
+                <div className="flex-1 border p-3 h-[89vh] overflow-scroll" key={selectedEmployeeData?.name}>
                     {selectedEmployeeData && (
-                        <div className=" p-2 sm:p-10">
-                            <h1 className="text-3xl mt-10  font-bold">
+                        <div className=" p-3 sm:p-10">
+                            <h1 className="text-3xl font-bold">
                                 {selectedEmployeeData?.name}
                             </h1>
                             <ButtonGroup className="w-full mb-4 md:w-auto">
@@ -1210,32 +1225,11 @@ useEffect(()=>{
                                 })}
                             </ButtonGroup>
                             <div
-                                className={`sm:p-6 rounded-b-lg ${currentTab === "staff" ? "" : "bg-transparent"
+                                className={`sm:p-0 rounded-b-lg ${currentTab === "staff" ? "" : "bg-transparent"
                                     } `}
                             >
                                 {currentTab === "profile" && (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex flex-col bg-white p-4">
-                                            <div className="flex justify-end text-cyan-400"><BiSolidPencil onClick={()=>handleEditProfileModal(selectedEmployeeData)}/></div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <FaUser className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.name}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoCallSharp className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.phone_number?selectedEmployeeData?.phone_number:"No phone number"}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoMailSharp className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.email}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoHome className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.address?selectedEmployeeData?.address: "No address found"}</div>
-                                            </div>
-                                        </div>
-                                        <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData} handleEditClientProfile={handleEditClientProfile}/>
-                                    </div>
+                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients} handleNavigation={handleNavigation}/>
                                 )}
 
                                 {currentTab === "Appointments" && (

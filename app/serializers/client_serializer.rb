@@ -1,5 +1,5 @@
 class ClientSerializer < ActiveModel::Serializer
-  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :profile_photo, :is_valid, :how_heard_about_us, :online_Booking_Policy, :online_Booking_Payment_Policy, :notification_settings
+  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :profile_photo, :how_heard_about_us, :online_Booking_Policy, :online_Booking_Payment_Policy, :notification_settings
 
   has_one :client_detail, serializer: ClientDetailSerializer
 

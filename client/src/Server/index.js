@@ -730,4 +730,13 @@ export const UpdateClient = async (id,refetch,payload) =>{
   });
   return res;
 }
+export const CreateClient = async (id,refetch,payload) =>{
+  let url = '/api/clients';
+  const res = await api.post(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
 
