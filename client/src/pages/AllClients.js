@@ -56,7 +56,7 @@ import Switch from "@mui/material/Switch";
 import { IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
 import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
-import EditProfileModal from "./EditProfileModal";
+import ClientProfile from "./ClientProfile";
 
 
 
@@ -85,7 +85,7 @@ const AllClientRoot = () => {
     const [chartTab, setChartTab] = useState("chart_entries_list");
     const [showEditProfileModal,setShowEditProfileModal]=useState(false)
     const [editProfileData,setEditProfileData]=useState()
-
+    const [searchedClients,setSearchedClients]=useState([])
     const localizer = momentLocalizer(moment);
 
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
@@ -1139,6 +1139,19 @@ useEffect(()=>{
         }
     };
 
+    const handleClientProfileFlipCard=()=>{
+        setCurrentTab("Appointments");
+    };
+
+    const handleSearchClients = (event) => {
+        setSearchedClients([])
+        setSearchQuery(event.target.value)
+        const timer = setTimeout(() => {
+            setSearchedClients(filteredEmployeeList)
+        }, 1000);
+        return () => clearTimeout(timer);
+    };
+
     return (
         <>
             <AsideLayout
@@ -1183,8 +1196,8 @@ useEffect(()=>{
             >
                 <div className="flex-1" key={selectedEmployeeData?.name}>
                     {selectedEmployeeData && (
-                        <div className=" p-2 sm:p-10">
-                            <h1 className="text-3xl mt-10  font-bold">
+                        <div className=" p-3 sm:p-10">
+                            <h1 className="text-3xl font-bold">
                                 {selectedEmployeeData?.name}
                             </h1>
                             <ButtonGroup className="w-full mb-4 md:w-auto">
@@ -1210,32 +1223,11 @@ useEffect(()=>{
                                 })}
                             </ButtonGroup>
                             <div
-                                className={`sm:p-6 rounded-b-lg ${currentTab === "staff" ? "" : "bg-transparent"
+                                className={`sm:p-0 rounded-b-lg ${currentTab === "staff" ? "" : "bg-transparent"
                                     } `}
                             >
                                 {currentTab === "profile" && (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex flex-col bg-white p-4">
-                                            <div className="flex justify-end text-cyan-400"><BiSolidPencil onClick={()=>handleEditProfileModal(selectedEmployeeData)}/></div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <FaUser className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.name}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoCallSharp className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.phone_number?selectedEmployeeData?.phone_number:"No phone number"}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoMailSharp className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.email}</div>
-                                            </div>
-                                            <div className="flex items-center gap-6 mb-4 text-lg">
-                                                <IoHome className="w-6 h-6" />
-                                                <div>{selectedEmployeeData?.address?selectedEmployeeData?.address: "No address found"}</div>
-                                            </div>
-                                        </div>
-                                        <EditProfileModal show={showEditProfileModal} onHide={() => handleEditProfileModal(false)} editProfileData={editProfileData} handleEditClientProfile={handleEditClientProfile}/>
-                                    </div>
+                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients}/>
                                 )}
 
                                 {currentTab === "Appointments" && (
