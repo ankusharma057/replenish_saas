@@ -16,6 +16,9 @@ class Client < ApplicationRecord
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }, allow_nil: true
   validates :email, uniqueness: { message: 'Email already taken' }, allow_nil: true
+  validates :name, presence: true
+  validates :last_name, presence: true
+  validates :email, presence: true
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
   after_initialize :set_default_notification_settings
