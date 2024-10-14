@@ -1118,6 +1118,10 @@ useEffect(()=>{
         navigate(`/client-profile-update/${clientData.id}`)
     };
 
+    const handleAddNewClient=(clientData)=>{
+        navigate(`/add-new-client`)
+    };
+
     const handleEditClientProfile = async (payload) => {
         let response = await UpdateClient(editProfileData.id, true, payload)
         if (response.status === 200) {
@@ -1182,10 +1186,7 @@ useEffect(()=>{
                             </div>
                         </div>
                         <Button
-                            onClick={() => {
-                                setShowCreateClientModel(true);
-                                setCurrentTab("client");
-                            }}
+                            onClick={handleAddNewClient}
                             variant="info"
                             className="w-full text-white"
                             >
