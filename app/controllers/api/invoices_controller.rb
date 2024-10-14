@@ -4,7 +4,7 @@ class Api::InvoicesController < ApplicationController
   include Rails.application.routes.url_helpers
   skip_before_action :authorized_employee
   # before_action :find_employee, only: :create
-  before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment update_images)
+  before_action :find_invoice, only: %i(finalize update send_reject_mail download_attachment update_images mark_paid)
 
   def index
     invoices = Invoice.all
@@ -108,6 +108,21 @@ class Api::InvoicesController < ApplicationController
       render json: @invoice, status: :ok
     else
       render json: {'error' => 'Invoice not found or Unable to delete'}, status: :not_found
+    end
+  end
+
+  def mark_paid
+    if @invoice.nil?
+      render json: { message: 'Invoice not found' }, status: :not_found
+      return
+    end
+    
+    @invoice.update(is_paid: true)
+
+    if @invoice.save
+      render json: { message: 'Invoice marked as paid successfully', invoice: @invoice }, status: :ok
+    else
+      render json: { message: 'Failed to mark invoice as paid' }, status: :unprocessable_entity
     end
   end
 

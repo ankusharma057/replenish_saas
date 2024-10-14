@@ -68,6 +68,7 @@ mount Sidekiq::Web => '/sidekiq'
         post :send_reject_mail
         get :download_attachment
         put :update_images
+        patch :mark_paid
       end
     end
 

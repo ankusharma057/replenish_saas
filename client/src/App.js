@@ -35,6 +35,7 @@ const ClientSignIn = lazy(() => import("./pages/Clients/ClientSignIn"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
+const InvoicesToPay = lazy(() => import("./pages/InvoicesToPay"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AddInvoices = lazy(() => import("./pages/AddInvoice"));
 const Invoice = lazy(() => import("./pages/Invoice"));
@@ -238,6 +239,7 @@ function App() {
                   <Route path="/myprofile" element={<MyProfile />} />
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
+                  <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                 </>
               ) : (
                 <>

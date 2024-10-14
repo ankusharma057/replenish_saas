@@ -740,3 +740,18 @@ export const CreateClient = async (id,refetch,payload) =>{
   return res;
 }
 
+export const markInvoiceAsPaid = async (id, refetch) => {
+  try {
+    const url = `/api/invoices/${id}/mark_paid`;
+    const res = await api.patch(url, null, {
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error('Error marking invoice as paid:', error);
+    throw error;
+  }
+}
