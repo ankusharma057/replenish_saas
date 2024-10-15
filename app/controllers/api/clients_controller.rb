@@ -21,7 +21,6 @@ class Api::ClientsController < ApplicationController
 
   def create
     client = Client.new(client_params)
-
     if client.save
       if (!current_employee.is_admin?)
         client.employee_ids = [current_employee.id]
@@ -113,6 +112,16 @@ class Api::ClientsController < ApplicationController
         :ok_to_send_marketing_emails, 
         :send_ratings_emails,
         :do_not_email
+      ],
+      online_Booking_Policy: [
+        :online_booking_allowed,
+        :online_booking_disabled
+      ],
+      online_Booking_Payment_Policy: [
+        :no_payment_reqired,
+        :requires_deposit,
+        :requires_full_payment,
+        :requires_credit_card_on_file
       ],
       client_detail_attributes: [  
         :city, 
