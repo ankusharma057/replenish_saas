@@ -236,7 +236,7 @@ function App() {
                   <Route path="/addinvoice" element={<AddInvoices />} />
                   {/* <Route path="/signup" element={<Signup />} /> */}
                   <Route path="/myprofile" element={<MyProfile />} />
-                  <Route path="/client-profile-update/:id" element={<ClientProfileUpdate />} />
+                  <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                 </>
               ) : (

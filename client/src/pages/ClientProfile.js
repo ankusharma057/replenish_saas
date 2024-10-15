@@ -4,7 +4,7 @@ import ReactCardFlip from 'react-card-flip';
 import { UserRound, AlertTriangle, Phone, Mail, DollarSign, Briefcase, CalendarDays, Bell, Megaphone, File, Users, Tag, MessageCircle, Pencil, Home, X, Check, Settings, ThumbsUp, Smartphone, MoveRight, Printer, Info, Trash2, Edit, Star, Search, PlusCircle } from 'lucide-react';
 import { Ellipsis } from "react-bootstrap/esm/PageItem";
 import CountUp from 'react-countup';
-const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleSearchClients, searchQuery, searchedClients,handleNavigate }) => {
+const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleSearchClients, searchQuery, searchedClients,handleNavigation }) => {
     const [flipLeftCardIndex, setflipLeftCardIndex] = useState(null)
     const [flipRightCardIndex, setflipRightCardIndex] = useState(null)
     const [showPopover, setShowPopover] = useState(null);
@@ -229,7 +229,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                 <div>
                                     <p className="text-body fw-bold fs-6">{handleNullValues(clientProfileData.name)}</p>
                                 </div>
-                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigate(clientProfileData)} size={20} color="#22D3EE" /></div>
+                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigation(clientProfileData,"basic")} size={20} color="#22D3EE" /></div>
                             </div>
                             <div className="d-flex gap-[10px]">
                                 <div><Phone /></div>
@@ -257,7 +257,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                 <div>
                                     <p className="text-muted fw-light fs-6">No medical info</p>
                                 </div>
-                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigate(clientProfileData)} size={20} color="#22D3EE" /></div>
+                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigation(clientProfileData,"medical")} size={20} color="#22D3EE" /></div>
                             </div>
                         </div>
                         <div className="p-3 border w-100 bg-white position-relative rounded">
@@ -272,7 +272,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                     <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.email_waitlist_openings)}Email notifications of wait list openings</p>
                                     <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.sms_waitlist_openings)}SMS notifications of wait list openings</p>
                                 </div>
-                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigate(clientProfileData)} size={20} color="#22D3EE" /></div>
+                                <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigation(clientProfileData,"reminders")} size={20} color="#22D3EE" /></div>
                             </div>
                             <div className="d-flex gap-[10px]">
                                 <div><Megaphone /></div>
@@ -422,7 +422,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                     </Alert>
                                     <ButtonGroup size="sm" aria-label="Basic example" className="w-100">
                                         <Button variant="outline-secondary d-flex justify-content-center align-items-center gap-[5px]">
-                                            <Pencil onClick={()=>handleNavigate(clientProfileData)} size={20} />
+                                            <Pencil onClick={()=>handleNavigation(clientProfileData)} size={20} />
                                             <DropdownButton as={ButtonGroup} title="Fill Out" id="bg-nested-dropdown" variant="outline" size="sm">
                                                 <Dropdown.Item eventKey="1">Fill all pending forms</Dropdown.Item>
                                                 <Dropdown.Divider />

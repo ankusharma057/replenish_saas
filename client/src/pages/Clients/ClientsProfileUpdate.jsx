@@ -242,17 +242,18 @@ const ClientsProfileUpdate = () => {
     setPhoneNumbers(phoneNumbers)
   }
 
+  const handleScroll=()=>{
+    document.getElementById(params.type)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
     const countryList = Country.getAllCountries();
     setCountries(countryList);
     getEmployees();
     getClientSchedule(selectedEmployeeData?.id, true);
-
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
     getClientDetails()
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    
   }, [selectedEmployeeData?.id,]);
 
   const getEmployees = async (refetch = false) => {
@@ -414,14 +415,6 @@ const ClientsProfileUpdate = () => {
     }
   };
 
-  const handleScroll = () => {
-    if (window.scrollY > 100) {
-      setShowHeader(true);
-    } else {
-      setShowHeader(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataPayload = new FormData();
@@ -548,7 +541,7 @@ const ClientsProfileUpdate = () => {
                 <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit} >Save</Button>
             </div>
           </div>
-          <div className="d-flex p-4 border bg-white rounded">
+          <div className="d-flex p-4 border bg-white rounded" id={"basic"}>
             <div>
               <UserRound />
             </div>
@@ -831,7 +824,7 @@ const ClientsProfileUpdate = () => {
                 </Container>
               </div>
           </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3">
+          <div className="d-flex p-4 border bg-white rounded mt-3" id={"medical"}>
             <div>
               <Briefcase />
             </div>
@@ -1065,7 +1058,7 @@ const ClientsProfileUpdate = () => {
                 </Container>
               </div>
           </div>
-          <div className="p-4 border bg-white rounded mt-3">
+          <div className="p-4 border bg-white rounded mt-3" id={"reminders"}>
             <div className="d-flex">
               <div>
                 <Bell />

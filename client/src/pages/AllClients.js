@@ -1115,8 +1115,8 @@ useEffect(()=>{
         }));
     };
 
-    const handleNavigate=(clientData)=>{
-        navigate(`/client-profile-update/${clientData.id}`)
+    const handleNavigation=(clientData,type)=>{
+        navigate(`/client-profile-update/${clientData.id}/${type}`)
     };
 
     const handleAddNewClient=(clientData)=>{
@@ -1229,7 +1229,7 @@ useEffect(()=>{
                                     } `}
                             >
                                 {currentTab === "profile" && (
-                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients} handleNavigate={handleNavigate}/>
+                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients} handleNavigation={handleNavigation}/>
                                 )}
 
                                 {currentTab === "Appointments" && (
