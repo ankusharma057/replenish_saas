@@ -427,6 +427,7 @@ const ClientsProfileUpdate = () => {
     // Client basic information
     formDataPayload.append('client[name]', formData.name);
     formDataPayload.append('client[last_name]', formData.last_name);
+    formDataPayload.append('client[email]', formData.email);
     formDataPayload.append('client[preferred_name]', formData.preferred_name);
     formDataPayload.append('client[pronouns]', formData.pronouns);
     formDataPayload.append('client[prefix]', formData.prefix);
@@ -643,7 +644,6 @@ const ClientsProfileUpdate = () => {
                           name="middle_name"
                           value={formData.middle_name}
                           onChange={handleFormChange}
-                          required
                           />
                       </Form.Group>
                     </Col>
@@ -669,6 +669,7 @@ const ClientsProfileUpdate = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
