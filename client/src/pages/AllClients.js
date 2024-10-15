@@ -95,7 +95,7 @@ const AllClientRoot = () => {
         setSelectedClientSchedules(data);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message)
     }
   };
 
@@ -112,7 +112,8 @@ const AllClientRoot = () => {
                 handleSelect(newData[0]);
             }
         } catch (error) {
-            console.log(error);
+      toast.error(error.message)
+
         }
     };
     // const getInvoices = async () => {
@@ -1114,7 +1115,7 @@ useEffect(()=>{
         }));
     };
 
-    const handleEditProfileModal=(clientData)=>{
+    const handleNavigate=(clientData)=>{
         navigate(`/client-profile-update/${clientData.id}`)
     };
 
@@ -1136,7 +1137,7 @@ useEffect(()=>{
                     setShowEditProfileModal(false)
                 }
             } catch (error) {
-                console.log(error);
+                toast.error(error.message)
             }
         } else {
             toast.error("Something went wrong")
@@ -1168,11 +1169,11 @@ useEffect(()=>{
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="border-t-2  py-2 bg-white h-70vh">
+                        <div className="border-t-2  py-2 bg-white h-[70vh]">
                             <h1 className="text-xl flex gap-x-2 items-center justify-center">
                                 Clients <ChevronDown />
                             </h1>
-                            <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
+                            <div className="flex h-[59vh] flex-col pl-2 gap-4 overflow-y-auto border">
                                 {(employeeList || []).length > 0 && (
                                     <List
                                         height={window.innerHeight}
@@ -1195,7 +1196,7 @@ useEffect(()=>{
                     </>
                 }
             >
-                <div className="flex-1" key={selectedEmployeeData?.name}>
+                <div className="flex-1 border p-3 h-[89vh] overflow-scroll" key={selectedEmployeeData?.name}>
                     {selectedEmployeeData && (
                         <div className=" p-3 sm:p-10">
                             <h1 className="text-3xl font-bold">
@@ -1228,7 +1229,7 @@ useEffect(()=>{
                                     } `}
                             >
                                 {currentTab === "profile" && (
-                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients}/>
+                                        <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients} handleNavigate={handleNavigate}/>
                                 )}
 
                                 {currentTab === "Appointments" && (

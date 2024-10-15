@@ -7,7 +7,7 @@ const AsideLayout = ({ asideContent, children, hideAsideContent=false }) => {
   const { isCollapsed, collapse } = useAsideLayoutContext();
 
   return (
-    <div className="flex relative h-[86vh] overflow-x-auto bg-gray-100">
+    <div className="flex relative h-[88vh] overflow-x-auto bg-gray-100">
       {!hideAsideContent && <>
         {isCollapsed && (
         <Button onClick={collapse} className="absolute left-4 top-1">
