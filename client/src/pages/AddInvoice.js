@@ -54,6 +54,8 @@ export default function AddInvoices() {
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
   const [clientName, setClientName] = useState("");
+  const [clientLastName, setClientLastName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [allInvoiceProductsList, setAllInvoiceProductsList] = useState(null);
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
@@ -773,6 +775,8 @@ export default function AddInvoices() {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
       clientname: clientName,
+      lastname:clientName,
+      email:clientName,
       beforeImages: blobsForBefore,
       afterImages: blobsForAfter,
 
@@ -907,43 +911,12 @@ export default function AddInvoices() {
     let selectedClient = employeeList.find((client) => client.name === event.target.value);
     setSelectedClient(selectedClient);
     setClientName(selectedClient.name)
-  };
-
-  const handleClientPayloadFormChange = (event) => {
-    const { name, value } = event.target; 
-    setClientPayload(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));    
+    setClientLastName(selectedClient.last_name)
+    setClientEmail(selectedClient.email)
   };
 
   const handleCreateClientCheckbox = (event) => {
-    setClientName("")
-    setClient("");
-    setSelectedClient("");
     setCreateClient(event.target.checked)
-  };
-
-  const handleClientCreate = async (event) => {
-    if(!clientPayload.name || !clientPayload.last_name|| !clientPayload.email){
-return toast.warn("Please Enter all Fields")
-    }
-    event.preventDefault();
-    const formDataPayload = new FormData();
-    formDataPayload.append('client[name]', clientPayload.name);
-    formDataPayload.append('client[last_name]', clientPayload.last_name);
-    formDataPayload.append('client[email]', clientPayload.email);
-    let response = await CreateClient("", true, formDataPayload);
-    if (response.status === 200) {
-      toast.success("Client Created Successfully");
-      try {
-        setClientName(response.data.name);
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      toast.error("Something went wrong");
-    }
   };
 
   return (
@@ -1158,34 +1131,9 @@ return toast.warn("Please Enter all Fields")
                   Submit
                 </button> */}
               </div>
+              
               <div className="px-2">
-
-                <div className="border rounded-lg p-2 mb-4 products-used">
-                  <table className="w-full table-auto ">
-                    <thead className="whitespace-normal">
-                      <tr className="w-full d-flex gap-[10px]">
-                        <th className="w-[50%]">Select Clients</th>
-                        <th className="w-[50%]">Client Name</th>
-                      </tr>
-                    </thead>
-                    <tbody className="whitespace-normal">
-                      <tr key={1} className="w-full d-flex gap-[10px]"> 
-                        <td className="w-[50%]">
-                          <Form.Select onChange={handleClientChange} disabled={createClient}>
-                            <option>Select Client</option>
-                            {employeeList?.length >= 0 && employeeList.map((client) => (
-                              <option value={client.name}>{client.name}</option>
-                            ))}
-                          </Form.Select>
-                        </td>
-                        <td className="w-[50%]">
-                          <input disabled={createClient} className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={clientName} readOnly/>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div className="mb-4">
+              <div className="mb-4">
                   <Form.Check // prettier-ignore
                     type={"checkbox"}
                     label={`Create Client`}
@@ -1193,6 +1141,35 @@ return toast.warn("Please Enter all Fields")
                     onChange={handleCreateClientCheckbox}
                   />
                   </div>
+                {!createClient &&
+                  <div className="border rounded-lg p-2 mb-4 products-used">
+                    <table className="w-full table-auto ">
+                      <thead className="whitespace-normal">
+                        <tr className="w-full d-flex gap-[10px]">
+                          <th className="w-[50%]">Select Clients</th>
+                          <th className="w-[50%]">Client Name</th>
+                        </tr>
+                      </thead>
+                      <tbody className="whitespace-normal">
+                        <tr key={1} className="w-full d-flex gap-[10px]">
+                          <td className="w-[50%]">
+                            <Form.Select onChange={handleClientChange} disabled={createClient}>
+                              <option>Select Client</option>
+                              {employeeList?.length >= 0 && employeeList.map((client) => (
+                                <option value={client.name}>{client.name}</option>
+                              ))}
+                            </Form.Select>
+                          </td>
+                          <td className="w-[50%]">
+                            <input disabled={createClient} className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={clientName} readOnly />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                }
+                
                 {
                   createClient &&
                     <div className="border rounded-lg p-2 mb-4 products-used">
@@ -1202,7 +1179,6 @@ return toast.warn("Please Enter all Fields")
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Email</th>
-                            <th></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1213,7 +1189,7 @@ return toast.warn("Please Enter all Fields")
                                 name="name"
                                 placeholder="Enter First Name"
                                 value={clientPayload.name}
-                                onChange={handleClientPayloadFormChange}
+                                onChange={(event)=>{setClientName(event.target.value)}}
                                 required
                               />
                             </td>
@@ -1223,7 +1199,7 @@ return toast.warn("Please Enter all Fields")
                                 name="last_name"
                                 placeholder="Enter Last Name"
                                 value={clientPayload.last_name}
-                                onChange={handleClientPayloadFormChange}
+                                onChange={(event)=>{setClientLastName(event.target.value)}}
                                 required
                               />
                             </td>
@@ -1233,14 +1209,9 @@ return toast.warn("Please Enter all Fields")
                                 name="email"
                                 placeholder="Enter Email Address"
                                 value={clientPayload.email}
-                                onChange={handleClientPayloadFormChange}
+                                onChange={(event)=>{setClientEmail(event.target.value)}}
                                 required
                               />
-                            </td>
-                            <td>
-                              <Button onClick={handleClientCreate} className="w-full bg-cyan-400 border-cyan-500 hover:bg-cyan-500 focus:bg-cyan-500">
-                                Create Client
-                              </Button>
                             </td>
                           </tr>
                         </tbody>
