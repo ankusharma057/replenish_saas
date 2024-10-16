@@ -22,6 +22,8 @@ class Client < ApplicationRecord
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
   after_initialize :set_default_notification_settings, :set_booking_policy, :set_booking_payment_policy
+  before_save :clear_temp_password_if_activated
+
 
   def send_invitation_and_temp_password
     InvitationMailer.with(client: self).client_invitation.deliver_now
@@ -64,18 +66,22 @@ class Client < ApplicationRecord
   end
 
   def set_booking_policy
-    self.online_Booking_Policy ||= {
+    self.online_booking_policy ||= {
       online_booking_allowed: true,
       online_booking_disabled: false
     }
   end
 
   def set_booking_payment_policy
-    self.online_Booking_Payment_Policy ||= {
+    self.online_booking_payment_policy ||= {
       no_payment_reqired: false,
       requires_deposit: true,
       requires_full_payment: false,
       requires_credit_card_on_file: false
     }
+  end
+
+  def clear_temp_password_if_activated
+    self.temp_password = nil if self.password_digest.present?
   end
 end

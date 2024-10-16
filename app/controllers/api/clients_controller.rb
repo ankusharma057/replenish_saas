@@ -11,7 +11,7 @@ class Api::ClientsController < ApplicationController
   end
 
   def profile
-    client = Client.includes(:client_detail, :schedules).find_by(id: params[:id])
+    client = Client.find_by(id: params[:id])
     if client
       render json: client, status: :ok
     else
@@ -29,7 +29,7 @@ class Api::ClientsController < ApplicationController
       session[:client_id] = client.id if params[:skip_login] != "true"
       render json: client, status: :ok
     else
-      render json: { error: client.errors.as_json }, status: :ok
+      render json: { error: client.errors.as_json }, status: 422
     end
   end
 
@@ -69,7 +69,7 @@ class Api::ClientsController < ApplicationController
   end
 
   def update
-    client = Client.includes(:client_detail, :schedules).find_by(id: params[:id])
+    client = Client.find_by(id: params[:id])
     if client.nil?
       render json: { error: 'Client not found' }, status: :not_found and return
     end
@@ -113,11 +113,11 @@ class Api::ClientsController < ApplicationController
         :send_ratings_emails,
         :do_not_email
       ],
-      online_Booking_Policy: [
+      online_booking_policy: [
         :online_booking_allowed,
         :online_booking_disabled
       ],
-      online_Booking_Payment_Policy: [
+      online_booking_payment_policy: [
         :no_payment_reqired,
         :requires_deposit,
         :requires_full_payment,

@@ -1,10 +1,24 @@
 class ClientSerializer < ActiveModel::Serializer
-  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :profile_photo, :how_heard_about_us, :online_Booking_Policy, :online_Booking_Payment_Policy, :notification_settings, :activated
+  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :profile_photo, :how_heard_about_us, :online_booking_policy, :online_booking_payment_policy, :notification_settings, :activated, :referred_employee
 
   has_one :client_detail, serializer: ClientDetailSerializer
 
   def activated
     object.password_digest.present?
+  end
+
+  attribute :referred_employee do
+    if object.referred_employee.present?
+      {
+        id: object.referred_employee.id,
+        name: object.referred_employee.name
+      }
+    else
+      {
+        id: nil,
+        name: ""
+      }
+    end
   end
 
   def profile_photo
