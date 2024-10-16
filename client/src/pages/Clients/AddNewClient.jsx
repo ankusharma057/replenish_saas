@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CreateClient, GetClientDetails, getClients, getClientSchedulesOnly } from "../../Server";
+import { CreateClient, GetClientDetails, getClients, getClientSchedulesOnly, getEmployeesList } from "../../Server";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "../../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
@@ -88,10 +88,9 @@ const ClientsProfileUpdate = () => {
     parent_guardian:'',
     occupation:'',
     employer:'',
-    howHearJob:"",
-    who_were_you_referred_to:"",
-    online_Booking_Policy:"",
-    online_Booking_Payment_Policy:"",
+    how_heard_about_us:"",
+    referred_employee_id:"",
+    who_were_you_referred_to_name:"",
     dobMonth:"",
     dobDay:"",
     dobYear:"",
@@ -115,6 +114,17 @@ const ClientsProfileUpdate = () => {
     mobile_phone: '',
     fax_phone:''
   });
+
+  const [onlineBookingPolicy, setOnlineBookingPolicy] = useState("");
+  const [onlineBookingAllowed, setOnlineBookingAllowed] = useState(false);
+  const [onlineBookingDisabled, setOnlineBookingDisabled] = useState(false);
+  
+  const [onlineBookingPaymentPolicy, setOnlineBookingPaymentPolicy] = useState();
+  const [requiresFullPayment, setRequiresFullPayment] = useState(false);
+  const [requiresDeposit, setRequiresDeposit] = useState(false);
+  const [requiresCreditCardOnFile, setRequiresCreditCardOnFile] = useState(false);
+  const [noPaymentReqired, setNoPaymentReqired] = useState(false);
+  const [allEmployeeList,setAllEmployeeList]=useState([]);
   const months = [
     { name: 'January', number: '01' },
     { name: 'February', number: '02' },
@@ -129,6 +139,7 @@ const ClientsProfileUpdate = () => {
     { name: 'November', number: '11' },
     { name: 'December', number: '12' },
   ];
+
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -240,18 +251,21 @@ const ClientsProfileUpdate = () => {
     setCheckboxData(checkboxData)
     setPhoneNumbers(phoneNumbers)
   }
+  const getEmployesList=async()=>{
+    let response = await getEmployeesList(true)
+    if (response.status === 200) {
+        setAllEmployeeList(response.data)
+    } else {
+      toast.error("Something went wrong")
+    }
+  };
 
   useEffect(() => {
     const countryList = Country.getAllCountries();
     setCountries(countryList);
     getEmployees();
     getClientSchedule(selectedEmployeeData?.id, true);
-
-    window.addEventListener("scroll", handleScroll);
-    getClientDetails()
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    getEmployesList();
   }, [selectedEmployeeData?.id,]);
 
   const getEmployees = async (refetch = false) => {
@@ -423,57 +437,79 @@ const ClientsProfileUpdate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataPayload = new FormData();
-    // Client basic information
-    formDataPayload.append('client[name]', formData.name);
-    formDataPayload.append('client[last_name]', formData.last_name);
-    formDataPayload.append('client[email]', formData.email);
-    formDataPayload.append('client[preferred_name]', formData.preferred_name);
-    formDataPayload.append('client[pronouns]', formData.pronouns);
-    formDataPayload.append('client[prefix]', formData.prefix);
-    formDataPayload.append('client[middle_name]', formData.middle_name);
-    formDataPayload.append('client[address]', formData.address);
-    formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone); 
-    formDataPayload.append('client[personal_health_number]', formData.personal_health_number);
-    formDataPayload.append('client[family_doctor]', formData.family_doctor);
-    formDataPayload.append('client[family_doctor_phone]', formData.family_doctor_phone);
-    formDataPayload.append('client[family_doctor_email]', formData.family_doctor_email);
-    formDataPayload.append('client[referring_professional]', formData.referring_professional);
-    formDataPayload.append('client[referring_professional_phone]', formData.referring_professional_phone);
-    formDataPayload.append('client[referring_professional_email]', formData.referring_professional_email);
-    formDataPayload.append('client[emergency_contact]', formData.emergency_contact);
-    formDataPayload.append('client[emergency_contact_phone]', formData.emergency_contact_phone);
-    formDataPayload.append('client[emergency_contact_relationship]', formData.emergency_contact_relationship);
-    formDataPayload.append('client[parent_guardian]', formData.parent_guardian);
-    formDataPayload.append('client[occupation]', formData.occupation);
-    formDataPayload.append('client[employer]', formData.employer);
+    const formData = new FormData();
 
-    // Client detail attributes
-    formDataPayload.append('client[client_detail_attributes][city]', formData.city);
-    formDataPayload.append('client[client_detail_attributes][state]', formData.state);
-    formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
-    formDataPayload.append('client[client_detail_attributes][country]', formData.country);
-    formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
-    formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
-    formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
+// Basic client information
+formData.append('client[name]', formData.name);
+formData.append('client[last_name]', formData.last_name);
+formData.append('client[email]', formData.email);
+formData.append('client[preferred_name]', formData.preferred_name);
+formData.append('client[pronouns]', formData.pronouns);
+formData.append('client[prefix]', formData.prefix);
+formData.append('client[middle_name]', formData.middle_name);
+formData.append('client[address]', formData.address);
+formData.append('client[phone_number]', phoneNumbers.mobile_phone);
 
-    // Phone numbers
-    formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
-    formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
-    formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
-    formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
+// Client detail attributes
+formData.append('client[client_detail_attributes][city]', formData.city);
+formData.append('client[client_detail_attributes][state]', formData.state);
+formData.append('client[client_detail_attributes][zip_code]', formData.zip_code);
+formData.append('client[client_detail_attributes][country]', formData.country);
+formData.append('client[client_detail_attributes][gender]', formData.gender);
+formData.append('client[client_detail_attributes][sex]', formData.sex);
+formData.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
 
-    // Schedules attributes and notification settings
-    formDataPayload.append('client[schedules_attributes][notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
-    formDataPayload.append('client[schedules_attributes][notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
-    formDataPayload.append('client[schedules_attributes][notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
-    formDataPayload.append('client[schedules_attributes][notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
-    formDataPayload.append('client[schedules_attributes][notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
-    formDataPayload.append('client[schedules_attributes][notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
-    formDataPayload.append('client[schedules_attributes][notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
-    formDataPayload.append('client[schedules_attributes][notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
-    formDataPayload.append('client[schedules_attributes][notification_settings][do_not_email]', checkboxData.do_not_email);
-    let response = await CreateClient(params.id, true, formDataPayload)
+// Phone numbers
+formData.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
+formData.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
+formData.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
+formData.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
+
+// Contact details
+formData.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
+formData.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
+formData.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
+formData.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
+formData.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
+formData.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
+formData.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
+formData.append('client[client_detail_attributes][emergency_contact]', formData.emergency_contact);
+formData.append('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone);
+formData.append('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship);
+formData.append('client[client_detail_attributes][parent_guardian]', formData.parent_guardian);
+formData.append('client[client_detail_attributes][occupation]', formData.occupation);
+formData.append('client[client_detail_attributes][employer]', formData.employer);
+
+// Notification settings
+formData.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
+formData.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
+formData.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
+formData.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
+formData.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
+formData.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
+formData.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
+formData.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
+formData.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
+
+// Referral information
+formData.append('client[referred_employee_id]', formData.referred_employee_id);
+
+// Online booking policy
+formData.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
+formData.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
+
+// Online booking payment policy
+formData.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
+formData.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
+formData.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
+formData.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
+
+// How you heard about us
+formData.append('client[how_heard_about_us]', formData.how_heard_about_us);
+console.log("@@@@@@@",formData);
+
+
+    let response = await CreateClient(params.id, true, formData)
     if (response.status === 200) {
         toast.success("Client Created Successfully");
         handleNavigate();
@@ -493,6 +529,66 @@ const ClientsProfileUpdate = () => {
 
   const handleNavigate=()=>{
     Navigate("/customers")
+  };
+
+  const handleWhoRefered = async(event) => {
+    const selectedName =await event.target.value;
+    const employee = allEmployeeList.find((employee) => employee.name === selectedName);
+  
+    if (employee) {
+      await setFormData((prevState) => ({
+        ...prevState,
+        referred_employee_id: employee.id,
+        who_were_you_referred_to_name: selectedName,
+      }));
+      
+    }
+  };
+
+  const handleOnlineBookingPolicyChange = (e) => {
+    
+    if (e.target.value === "Online booking allowed") {
+      setOnlineBookingAllowed(true)
+      setOnlineBookingDisabled(false)
+      setOnlineBookingPolicy(e.target.value)
+    }
+    if (e.target.value === "Online booking disabled") {
+      setOnlineBookingAllowed(false)
+      setOnlineBookingDisabled(true)
+      setOnlineBookingPolicy(e.target.value)
+    }
+  };
+
+
+  const handleOnlineBookingPaymentPolicyChange = (e) => {
+    if(e.target.value === "Online booking requires full payment"){
+      setRequiresFullPayment(true);
+      setRequiresDeposit(false);
+      setRequiresCreditCardOnFile(false)
+      setNoPaymentReqired(false)
+      
+    }
+    if(e.target.value === "Online booking requires a deposit"){
+      setRequiresFullPayment(false);
+      setRequiresDeposit(true);
+      setRequiresCreditCardOnFile(false)
+      setNoPaymentReqired(false)
+      setOnlineBookingPaymentPolicy(e.target.value)
+    }
+    if(e.target.value === "Online booking requires a credit card on file"){
+      setRequiresFullPayment(false);
+      setRequiresDeposit(false);
+      setRequiresCreditCardOnFile(true)
+      setNoPaymentReqired(false)
+      setOnlineBookingPaymentPolicy(e.target.value)
+    }
+    if(e.target.value === "No payment requirements for online booking"){
+      setRequiresFullPayment(false);
+      setRequiresDeposit(false);
+      setRequiresCreditCardOnFile(false)
+      setNoPaymentReqired(true)
+      setOnlineBookingPaymentPolicy(e.target.value)
+    }
   };
 
   return (
@@ -948,10 +1044,10 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Reffering Professional</Form.Label>
                         <Form.Control
-                          type="text"
-                          placeholder="Enter Refference "
-                          name="family_doctor"
-                          value={formData.family_doctor}
+                          type="number"
+                          placeholder="Enter Emergency Contact"
+                          name="referring_professional"
+                          value={formData.referring_professional}
                           onChange={handleFormChange}
                         />
                       </Form.Group>
@@ -961,25 +1057,26 @@ const ClientsProfileUpdate = () => {
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Phone</Form.Label>
                           <Form.Control 
-                          type="text" 
+                          type="number"
                           placeholder="Phone"
-                          name="family_doctor_phone"
-                          value={formData.family_doctor_phone}
+                          name="referring_professional_phone"
+                          value={formData.referring_professional_phone}
                           onChange={handleFormChange}
                           />
                         </Form.Group>
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Email</Form.Label>
                           <Form.Control 
-                          type="email" 
-                          placeholder="Email" 
-                          name="family_doctor_email"
-                          value={formData.family_doctor_email}
+                          type="email"
+                          placeholder="Relationship"
+                          name="referring_professional_email"
+                          value={formData.referring_professional_email}
                           onChange={handleFormChange}
                           />
                         </Form.Group>
                       </div>
                     </Col>
+                    
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <hr className="hr w-100" />
                     </Col>
@@ -1010,7 +1107,7 @@ const ClientsProfileUpdate = () => {
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Relationship</Form.Label>
                           <Form.Control
-                            type="email"
+                            type="text"
                             placeholder="Relationship"
                             name="emergency_contact_relationship"
                             value={formData.emergency_contact_relationship}
@@ -1223,13 +1320,16 @@ const ClientsProfileUpdate = () => {
                         <Form.Group controlId="formFile" className="mb-3">
                           <Form.Label className="text-body-tertiary">Who were you referred to?</Form.Label>
                           <Form.Select
-                          name="who_were_you_referred_to"
-                          value={formData.who_were_you_referred_to || ""}
-                          onChange={handleFormChange}
+                            name="who_were_you_referred_to_name"
+                            value={formData.who_were_you_referred_to_name}
+                            onChange={handleWhoRefered}
                           >
-                            <option value={"Male"}>{"Male"}</option>
-                            <option value={"Female"}>{"Female"}</option>
-                            <option value={"X"}>{"X"}</option>
+                            <option value="">Select Option...</option>
+                            {allEmployeeList.map((employee) => (
+                              <option key={employee.id} value={employee.name}>
+                                {employee.name}
+                              </option>
+                            ))}
                           </Form.Select>
                         </Form.Group>
                       </Col>
@@ -1314,13 +1414,13 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Online Booking Policy</Form.Label>
                         <Form.Select
-                        name="online_Booking_Policy"
-                        value={formData.online_Booking_Policy}
-                        onChange={handleFormChange}
+                          name="online_Booking_Policy"
+                          value={onlineBookingPolicy}
+                          onChange={handleOnlineBookingPolicyChange}
                         >
-                          <option value="default">Use Default Policy (Online booking allowed)</option>
-                          <option value="allowed">Online booking allowed</option>
-                          <option value="disabled">Online booking disabled</option>
+                          <option>Select Option</option>
+                          <option value="Online booking allowed">Online booking allowed</option>
+                          <option value="Online booking disabled">Online booking disabled</option>
                         </Form.Select>
                       </Form.Group>
                     </Col>
@@ -1335,15 +1435,14 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Online Booking Payment Policy</Form.Label>
                         <Form.Select
-                        name="online_Booking_Payment_Policy"
-                        value={formData.online_Booking_Payment_Policy}
-                        onChange={handleFormChange}
+                          value={onlineBookingPaymentPolicy}
+                          onChange={handleOnlineBookingPaymentPolicyChange}
                         >
-                          <option value="default">Use Default Policy (Online booking requires a deposit)</option>
-                          <option value="full-payment">Online booking requires full payment</option>
-                          <option value="deposit">Online booking requires a deposit</option>
-                          <option value="credit-card">Online booking requires a credit card on file</option>
-                          <option value="no-payment">No payment requirements for online booking</option>
+                          <option >Select Option</option>
+                          <option value="Online booking requires full payment">Online booking requires full payment</option>
+                          <option value="Online booking requires a deposit">Online booking requires a deposit</option>
+                          <option value="Online booking requires a credit card on file">Online booking requires a credit card on file</option>
+                          <option value="No payment requirements for online booking">No payment requirements for online booking</option>
                         </Form.Select>
                       </Form.Group>
                     </Col>

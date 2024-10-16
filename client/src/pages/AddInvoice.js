@@ -1,11 +1,13 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Button } from "react-bootstrap";
+import { Alert, Button, Form, Table } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { toast } from "react-toastify";
 import { LOGIN } from "../Constants/AuthConstants";
 import {
+  CreateClient,
   createGroupInvoices,
+  getClients,
   getInvoiceList,
   getUpdatedUserProfile,
 } from "../Server";
@@ -74,8 +76,35 @@ export default function AddInvoices() {
 
   const [blobsForBefore, setBlobForBefore] = useState([]);
   const [blobsForAfter, setBlobForAfter] = useState([]);
+  const [employeeList, setEmployeeList] = useState([]);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [client, setClient] = useState();
+  const [clientPayload,setClientPayload]=useState({
+    name:"",
+    last_name:"",
+    email:""
+  })
+  const [createClient,setCreateClient]=useState(false)
+
+  const getEmployees = async (refetch = false) => {
+    try {
+      const { data } = await getClients();
+      if (data?.length > 0) {        
+        const newData = data.filter(
+          (client) =>
+            client?.email !== null &&
+            client?.email !== undefined &&
+            client?.email.trim() !== ""
+        );
+        setEmployeeList(newData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
+    getEmployees()
     const newProducts = []
     authUserState.user?.employees_inventories.forEach((inventory, index) => {
       if (
@@ -873,6 +902,50 @@ export default function AddInvoices() {
     return quantity;
   }
 
+  const handleClientChange = (event) => {
+    setClient(event.target.value);
+    let selectedClient = employeeList.find((client) => client.name === event.target.value);
+    setSelectedClient(selectedClient);
+    setClientName(selectedClient.name)
+  };
+
+  const handleClientPayloadFormChange = (event) => {
+    const { name, value } = event.target; 
+    setClientPayload(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));    
+  };
+
+  const handleCreateClientCheckbox = (event) => {
+    setClientName("")
+    setClient("");
+    setSelectedClient("");
+    setCreateClient(event.target.checked)
+  };
+
+  const handleClientCreate = async (event) => {
+    if(!clientPayload.name || !clientPayload.last_name|| !clientPayload.email){
+return toast.warn("Please Enter all Fields")
+    }
+    event.preventDefault();
+    const formDataPayload = new FormData();
+    formDataPayload.append('client[name]', clientPayload.name);
+    formDataPayload.append('client[last_name]', clientPayload.last_name);
+    formDataPayload.append('client[email]', clientPayload.email);
+    let response = await CreateClient("", true, formDataPayload);
+    if (response.status === 200) {
+      toast.success("Client Created Successfully");
+      try {
+        setClientName(response.data.name);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <>
       {/* <Header /> */}
@@ -900,7 +973,7 @@ export default function AddInvoices() {
                 <div>{authUserState.user?.name}</div>
               </div>
               <div className="flex flex-col w-full gap-4 mt-2 md:w-auto md:mt-0 md:flex-row">
-                <label className=" mb-3 block relative">
+                {/* <label className=" mb-3 block relative">
                   Client Name:
                   <input
                     type="text"
@@ -915,7 +988,7 @@ export default function AddInvoices() {
                     className="w-full placeholder:text-red-600 mt-1 p-1 border-gray-300 border rounded-md"
                     required
                   />
-                </label>
+                </label> */}
 
                 <label className="mb-2 block">
                   Date of Service:
@@ -1086,6 +1159,94 @@ export default function AddInvoices() {
                 </button> */}
               </div>
               <div className="px-2">
+
+                <div className="border rounded-lg p-2 mb-4 products-used">
+                  <table className="w-full table-auto ">
+                    <thead className="whitespace-normal">
+                      <tr className="w-full d-flex gap-[10px]">
+                        <th className="w-[50%]">Select Clients</th>
+                        <th className="w-[50%]">Client Name</th>
+                      </tr>
+                    </thead>
+                    <tbody className="whitespace-normal">
+                      <tr key={1} className="w-full d-flex gap-[10px]"> 
+                        <td className="w-[50%]">
+                          <Form.Select onChange={handleClientChange} disabled={createClient}>
+                            <option>Select Client</option>
+                            {employeeList?.length >= 0 && employeeList.map((client) => (
+                              <option value={client.name}>{client.name}</option>
+                            ))}
+                          </Form.Select>
+                        </td>
+                        <td className="w-[50%]">
+                          <input disabled={createClient} className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={clientName} readOnly/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mb-4">
+                  <Form.Check // prettier-ignore
+                    type={"checkbox"}
+                    label={`Create Client`}
+                    checked={createClient}
+                    onChange={handleCreateClientCheckbox}
+                  />
+                  </div>
+                {
+                  createClient &&
+                    <div className="border rounded-lg p-2 mb-4 products-used">
+                      <Table className="w-full" striped bordered hover>
+                        <thead>
+                          <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr key={1}>
+                            <td>
+                              <Form.Control
+                                type="text"
+                                name="name"
+                                placeholder="Enter First Name"
+                                value={clientPayload.name}
+                                onChange={handleClientPayloadFormChange}
+                                required
+                              />
+                            </td>
+                            <td>
+                              <Form.Control
+                                type="text"
+                                name="last_name"
+                                placeholder="Enter Last Name"
+                                value={clientPayload.last_name}
+                                onChange={handleClientPayloadFormChange}
+                                required
+                              />
+                            </td>
+                            <td>
+                              <Form.Control
+                                type="email"
+                                name="email"
+                                placeholder="Enter Email Address"
+                                value={clientPayload.email}
+                                onChange={handleClientPayloadFormChange}
+                                required
+                              />
+                            </td>
+                            <td>
+                              <Button onClick={handleClientCreate} className="w-full bg-cyan-400 border-cyan-500 hover:bg-cyan-500 focus:bg-cyan-500">
+                                Create Client
+                              </Button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </div>
+                }
                 <div className="border rounded-lg p-2 mb-4 products-used">
                   <table className="w-full table-auto ">
                     <thead className="whitespace-normal">

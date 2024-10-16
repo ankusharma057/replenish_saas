@@ -265,12 +265,12 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                                 <div><Bell /></div>
                                 <div>
                                     <p className="text-muted fw-light" style={{ fontSize: '13px' }}>Reminder</p>
-                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.email_reminder_2_days)}Email 2 days before appointment</p>
-                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.sms_reminder_2_days)}Text Message (SMS) 2 days before appointment</p>
-                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.sms_reminder_24_hours)}Text Message (SMS) 24 hours before appointment</p>
+                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.notification_settings.email_reminder_2_days)}Email 2 days before appointment</p>
+                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.notification_settings.sms_reminder_2_days)}Text Message (SMS) 2 days before appointment</p>
+                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.notification_settings.sms_reminder_24_hours)}Text Message (SMS) 24 hours before appointment</p>
                                     <p className="text-muted fw-light" style={{ fontSize: '13px' }}>Email Notifications</p>
-                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.email_waitlist_openings)}Email notifications of wait list openings</p>
-                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.sms_waitlist_openings)}SMS notifications of wait list openings</p>
+                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.notification_settings.email_waitlist_openings)}Email notifications of wait list openings</p>
+                                    <p className="d-flex align-items-center mb-2" style={{ fontSize: '14px' }}>{handleReminderCheck(clientProfileData.notification_settings.sms_waitlist_openings)}SMS notifications of wait list openings</p>
                                 </div>
                                 <div className="position-absolute top-[20px] right-[25px] w-auto"><Pencil onClick={()=>handleNavigation(clientProfileData,"reminders")} size={20} color="#22D3EE" /></div>
                             </div>

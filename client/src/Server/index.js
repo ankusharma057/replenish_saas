@@ -712,7 +712,7 @@ export const deleteTreatment = async (id, refetch) =>{
 
 
 export const GetClientDetails = async (id,refetch) =>{
-  let url = `/api/clients/profile/?id=${id}`;
+  let url = `/api/clients/profile?id=${id}`;
   const res = await api.get(url,{
     cache: {
       ignoreCache: refetch,
