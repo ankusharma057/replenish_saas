@@ -764,10 +764,18 @@ export default function AddInvoices() {
 
   const addMoreInvoice = (submit) => {
     // clientName
+ 
     if (!clientName) {
       setIsAlert({
         isClient: true,
         message: "Please Add Client Name",
+      });
+      return;
+    }
+    if (!formData.dateOfService) {
+      setIsAlert({
+        isClient: true,
+        message: "Please Add Date of service",
       });
       return;
     }
@@ -831,10 +839,12 @@ export default function AddInvoices() {
       setSelectedProduct(null);
       setMatchingProducts([]);
       setClientName("");
+      setClient("");
       setAfterImages([]);
       setBeforeImages([]);
       setBlobForAfter([]);
       setBlobForBefore([]);
+
 
       window.scrollTo({
         top: document.body.scrollHeight + 500,
@@ -1153,7 +1163,7 @@ export default function AddInvoices() {
                       <tbody className="whitespace-normal">
                         <tr key={1} className="w-full d-flex gap-[10px]">
                           <td className="w-[50%]">
-                            <Form.Select onChange={handleClientChange} disabled={createClient}>
+                            <Form.Select value={client} onChange={handleClientChange} disabled={createClient}>
                               <option>Select Client</option>
                               {employeeList?.length >= 0 && employeeList.map((client) => (
                                 <option value={client.name}>{client.name}</option>

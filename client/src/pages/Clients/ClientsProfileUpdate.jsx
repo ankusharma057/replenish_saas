@@ -34,7 +34,6 @@ import { useAuthContext } from "../../context/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
 
 const ClientsProfileUpdate = () => {
-  const { authUserState } = useAuthContext();
   const params = useParams();
   const Navigate = useNavigate();
   const [employeeList, setEmployeeList] = useState([]);
@@ -114,7 +113,6 @@ const ClientsProfileUpdate = () => {
     mobile_phone: '',
     fax_phone: ''
   });
-
   const [onlineBookingPolicy, setOnlineBookingPolicy] = useState("");
   const [onlineBookingAllowed, setOnlineBookingAllowed] = useState(false);
   const [onlineBookingDisabled, setOnlineBookingDisabled] = useState(false);
@@ -123,7 +121,6 @@ const ClientsProfileUpdate = () => {
   const [requiresDeposit, setRequiresDeposit] = useState(false);
   const [requiresCreditCardOnFile, setRequiresCreditCardOnFile] = useState(false);
   const [noPaymentReqired, setNoPaymentReqired] = useState(false);
-
   const months = [
     { name: 'January', number: '01' },
     { name: 'February', number: '02' },
@@ -172,12 +169,15 @@ const ClientsProfileUpdate = () => {
       const response = await GetClientDetails(params.id, true)
       if (response?.status === 200) {
           setClientProfileData(response?.data);
+          fillFormDataFields(response?.data);   
       }
       else {
         getClientDetails();
       }
     }
     catch (err) {
+      toast.error(err.message)
+      
     }
   };
   const calculateDate = (dateString) => {
@@ -198,65 +198,75 @@ const ClientsProfileUpdate = () => {
     }
   }
 
-  const fillFormDataFields = async () => {
+  const fillFormDataFields = () => {
     const { year, month, day } = calculateDate(clientProfileData.client_detail?.date_of_birth);
     const formDataResponse = {
-      name: clientProfileData?.name || '',
-      last_name: clientProfileData?.last_name || '',
-      middle_name: clientProfileData?.middle_name || '',
-      preferred_name: clientProfileData?.preferred_name || '',
-      pronouns: clientProfileData?.pronouns || '',
-      prefix: clientProfileData?.prefix || '',
-      email: clientProfileData?.email || '',
-      phone: clientProfileData?.phone_number || '',
-      address: clientProfileData?.address || '',
-      city: clientProfileData?.client_detail?.city || '',
-      state: clientProfileData?.client_detail?.state || '',
-      zip_code: clientProfileData?.client_detail?.zip_code || '',
-      country: clientProfileData?.client_detail?.country || '',
-      gender: clientProfileData?.client_detail?.gender || '',
-      sex: clientProfileData?.client_detail?.sex || '',
-      date_of_birth: clientProfileData?.client_detail?.date_of_birth || '',
-      personal_health_number: clientProfileData?.client_detail?.personal_health_number || '',
-      family_doctor: clientProfileData?.client_detail?.family_doctor || '',
-      family_doctor_phone: clientProfileData?.client_detail?.family_doctor_phone || '',
-      family_doctor_email: clientProfileData?.client_detail?.family_doctor_email || '',
-      referring_professional: clientProfileData?.client_detail?.referring_professional || '',
-      referring_professional_phone: clientProfileData?.client_detail?.referring_professional_phone || '',
-      referring_professional_email: clientProfileData?.client_detail?.referring_professional_email || '',
-      emergency_contact: clientProfileData?.client_detail?.emergency_contact || '',
-      emergency_contact_phone: clientProfileData?.client_detail?.emergency_contact_phone || '',
-      emergency_contact_relationship: clientProfileData?.client_detail?.emergency_contact_relationship || '',
-      parent_guardian: clientProfileData?.client_detail?.parent_guardian || '',
-      occupation: clientProfileData?.client_detail?.occupation || '',
-      employer: clientProfileData?.client_detail?.employer || '',
-      how_heard_about_us: clientProfileData?.how_heard_about_us || '',
-      // referred_employee_id: clientProfileData?.referred_employee.id || '',
-      // referred_employee: clientProfileData?.referred_employee.name || '',
-      dobMonth: months[month - 1] || '',
-      dobDay: day || '',
-      dobYear: year || '',
+      name: clientProfileData?.name ?? '',
+      last_name: clientProfileData?.last_name ?? '',
+      middle_name: clientProfileData?.middle_name ?? '',
+      preferred_name: clientProfileData?.preferred_name ?? '',
+      pronouns: clientProfileData?.pronouns ?? '',
+      prefix: clientProfileData?.prefix ?? '',
+      email: clientProfileData?.email ?? '',
+      phone: clientProfileData?.phone_number ?? '',
+      address: clientProfileData?.address ?? '',
+      city: clientProfileData?.client_detail?.city ?? '',
+      state: clientProfileData?.client_detail?.state ?? '',
+      zip_code: clientProfileData?.client_detail?.zip_code ?? '',
+      country: clientProfileData?.client_detail?.country ?? '',
+      gender: clientProfileData?.client_detail?.gender ?? '',
+      sex: clientProfileData?.client_detail?.sex ?? '',
+      date_of_birth: clientProfileData?.client_detail?.date_of_birth ?? '',
+      personal_health_number: clientProfileData?.client_detail?.personal_health_number ?? '',
+      family_doctor: clientProfileData?.client_detail?.family_doctor ?? '',
+      family_doctor_phone: clientProfileData?.client_detail?.family_doctor_phone ?? '',
+      family_doctor_email: clientProfileData?.client_detail?.family_doctor_email ?? '',
+      referring_professional: clientProfileData?.client_detail?.referring_professional ?? '',
+      referring_professional_phone: clientProfileData?.client_detail?.referring_professional_phone ?? '',
+      referring_professional_email: clientProfileData?.client_detail?.referring_professional_email ?? '',
+      emergency_contact: clientProfileData?.client_detail?.emergency_contact ?? '',
+      emergency_contact_phone: clientProfileData?.client_detail?.emergency_contact_phone ?? '',
+      emergency_contact_relationship: clientProfileData?.client_detail?.emergency_contact_relationship ?? '',
+      parent_guardian: clientProfileData?.client_detail?.parent_guardian ?? '',
+      occupation: clientProfileData?.client_detail?.occupation ?? '',
+      employer: clientProfileData?.client_detail?.employer ?? '',
+      how_heard_about_us: clientProfileData?.how_heard_about_us ?? '',
+      referred_employee_id: clientProfileData?.referred_employee?.id ?? '',
+      referred_employee: clientProfileData?.referred_employee?.name ?? '',
+      dobMonth: months[month - 1] ?? '',
+      dobDay: day ?? '',
+      dobYear: year ?? '',
     }
     setFormData(formDataResponse);
-    console.log("@@@@@@@@@@",formData);
-    
   }
+  useEffect(() => {}, [formData]);
+
   const fillCheckboxFields = () => {
     const checkboxDetails = {
-      email_reminder_2_days: clientProfileData?.notification_settings?.email_reminder_2_days === undefined ? false : clientProfileData?.notification_settings?.email_reminder_2_days,
-      sms_reminder_2_days: clientProfileData?.notification_settings?.sms_reminder_2_days === undefined ? false : clientProfileData?.notification_settings?.sms_reminder_2_days,
-      sms_reminder_24_hours: clientProfileData?.notification_settings?.sms_reminder_24_hours === undefined ? false : clientProfileData?.notification_settings?.sms_reminder_24_hours,
-      email_new_cancelled: clientProfileData?.notification_settings?.email_new_cancelled === undefined ? false : clientProfileData?.notification_settings?.email_new_cancelled,
-      email_waitlist_openings: clientProfileData?.notification_settings?.email_waitlist_openings === undefined ? false : clientProfileData?.notification_settings?.email_waitlist_openings,
-      sms_waitlist_openings: clientProfileData?.notification_settings?.sms_waitlist_openings === undefined ? false : clientProfileData?.notification_settings?.sms_waitlist_openings,
-      ok_to_send_marketing_emails: clientProfileData?.notification_settings?.ok_to_send_marketing_emails === undefined ? false : clientProfileData?.notification_settings?.ok_to_send_marketing_emails,
-      send_ratings_emails: clientProfileData?.notification_settings?.send_ratings_emails === undefined ? false : clientProfileData?.notification_settings?.send_ratings_emails,
-      do_not_email: clientProfileData?.notification_settings?.do_not_email === undefined ? false : clientProfileData?.notification_settings?.do_not_email,
+      email_reminder_2_days: clientProfileData?.notification_settings?.email_reminder_2_days === "true",
+      sms_reminder_2_days: clientProfileData?.notification_settings?.sms_reminder_2_days === "true",
+      sms_reminder_24_hours: clientProfileData?.notification_settings?.sms_reminder_24_hours === "true",
+      email_new_cancelled: clientProfileData?.notification_settings?.email_new_cancelled === "true",
+      email_waitlist_openings: clientProfileData?.notification_settings?.email_waitlist_openings === "true",
+      sms_waitlist_openings: clientProfileData?.notification_settings?.sms_waitlist_openings === "true",
+      ok_to_send_marketing_emails: clientProfileData?.notification_settings?.ok_to_send_marketing_emails === "true",
+      send_ratings_emails: clientProfileData?.notification_settings?.send_ratings_emails === "true",
+      do_not_email: clientProfileData?.notification_settings?.do_not_email === "true",
       discharged: false,
-      deceased: false
+      deceased: false,
     };
     setCheckboxData(checkboxDetails);
   }
+
+  useEffect(() => {
+    if (clientProfileData) {
+      fillCheckboxFields();
+    }
+  }, [clientProfileData]);
+
+  useEffect(() => {
+  }, [checkboxData]);  
+
   const fillPhoneNumberFields = () => {
     const phoneNumbers = {
       home_phone: clientProfileData.client_detail?.home_phone,
@@ -265,52 +275,60 @@ const ClientsProfileUpdate = () => {
       fax_phone: clientProfileData.client_detail?.fax_phone,
     };
     setPhoneNumbers(phoneNumbers);
-
-
   }
+
+  useEffect(() =>{
+    if(clientProfileData){
+      fillPhoneNumberFields();
+    }
+  }, [clientProfileData]);
+
+  useEffect(()=>{
+  }, [phoneNumbers]);
+
   const handlePolicyAndPolicyPayments = () => {
-    if (clientProfileData.online_booking_policy.online_booking_allowed) {
+    if (clientProfileData?.online_booking_policy?.online_booking_allowed) {
       setOnlineBookingAllowed(true)
       setOnlineBookingDisabled(false)
       setOnlineBookingPolicy("Online booking allowed")
     }
-    if (clientProfileData.online_booking_policy.online_booking_disabled) {
+    if (clientProfileData?.online_booking_policy?.online_booking_disabled) {
       setOnlineBookingAllowed(false)
       setOnlineBookingDisabled(true)
       setOnlineBookingPolicy("Online booking disabled")
     }
-    if (clientProfileData.online_booking_policy.online_booking_allowed) {
+    if (clientProfileData?.online_booking_policy?.online_booking_allowed) {
       setOnlineBookingAllowed(true)
       setOnlineBookingDisabled(false)
       setOnlineBookingPolicy("Online booking allowed")
     }
-    if (clientProfileData.online_booking_policy.online_booking_disabled) {
+    if (clientProfileData?.online_booking_policy?.online_booking_disabled) {
       setOnlineBookingAllowed(false)
       setOnlineBookingDisabled(true)
       setOnlineBookingPolicy("Online booking disabled")
     }
-    if (clientProfileData.online_booking_payment_policy.requires_full_payment) {
+    if (clientProfileData?.online_booking_payment_policy?.requires_full_payment) {
       setRequiresFullPayment(true);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(false)
       setNoPaymentReqired(false)
       setOnlineBookingPaymentPolicy("Online booking requires full payment")
     }
-    if (clientProfileData.online_booking_payment_policy.requires_deposit) {
+    if (clientProfileData?.online_booking_payment_policy?.requires_deposit) {
       setRequiresFullPayment(false);
       setRequiresDeposit(true);
       setRequiresCreditCardOnFile(false)
       setNoPaymentReqired(false)
       setOnlineBookingPaymentPolicy("Online booking requires a deposit")
     }
-    if (clientProfileData.online_booking_payment_policy.requires_credit_card_on_file) {
+    if (clientProfileData?.online_booking_payment_policy?.requires_credit_card_on_file) {
       setRequiresFullPayment(false);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(true)
       setNoPaymentReqired(false)
       setOnlineBookingPaymentPolicy("Online booking requires a credit card on file")
     }
-    if (clientProfileData.online_booking_payment_policy.no_payment_reqired) {
+    if (clientProfileData?.online_booking_payment_policy?.no_payment_reqired) {
       setRequiresFullPayment(false);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(false)
@@ -318,46 +336,41 @@ const ClientsProfileUpdate = () => {
       setOnlineBookingPaymentPolicy("No payment requirements for online booking")
     }
   }
+  useEffect(()=>{}, [phoneNumbers]);
   const handleCountryStateCity = () => {
-    const selectedCountryObj = Country.getAllCountries().find(country => country.name === clientProfileData.country);
-    if (selectedCountryObj) {
-      formData.country = selectedCountryObj.name
-      setFormData(formData)
-      setSelectedCountry(selectedCountryObj.name);
-      setSelectedCountryCode(selectedCountryObj.isoCode);
-      setSelectedState('');
-      setCities([]);
-      formData.country = clientProfileData.country
-      setFormData(formData)
-      const stateList = State.getStatesOfCountry(selectedCountryObj.isoCode);
-      setStates(stateList);
-      formData.state = selectedCountryObj.name
-      setFormData(formData);
-    } else {
-      setSelectedCountry("");
-      setSelectedCountryCode("");
-    }
-    const stateName = clientProfileData.state; //
-    const selectedStateObj = states.find(state => state.name === stateName);
-    if (selectedStateObj) {
-      formData.state = stateName
-      setFormData(formData)
-      setSelectedState(stateName);
-      formData.state = stateName
-      setFormData(formData)
-      const updatedFormData = { ...formData, state: selectedStateObj.isoCode };
-      setFormData(updatedFormData);
-      const cityList = City.getCitiesOfState(selectedCountryCode, selectedStateObj.isoCode);
-      setCities(cityList);
-    } else {
-      setSelectedState("");
-      setCities([]);
-    }
-    const city = clientProfileData.city;
-    setSelectedCity(city);
-    formData.city = city
-    setFormData(formData)
+    handleCountryChange({target:{value:clientProfileData?.client_detail?.country}});
+    handleStateChange({target:{value:clientProfileData?.client_detail?.state}});
+    handleCityChange({target:{value:clientProfileData?.client_detail?.city}});
   };
+  useEffect(()=>{}, [clientProfileData.country]);
+
+  const handlePolicy = () => {
+    if (clientProfileData?.online_booking_policy?.online_booking_allowed === "true") {
+      setOnlineBookingPolicy("Online booking allowed");
+    }
+    if (clientProfileData?.online_booking_policy?.online_booking_disabled === "true") {
+      setOnlineBookingPolicy("Online booking disabled");
+    }
+    if (clientProfileData?.online_booking_payment_policy?.requires_full_payment === "true") {
+      setOnlineBookingPaymentPolicy("Online booking requires full payment");
+    }
+    if (clientProfileData?.online_booking_payment_policy?.requires_deposit === "true") {
+      setOnlineBookingPaymentPolicy("Online booking requires a deposit");
+    }
+    if (clientProfileData?.online_booking_payment_policy?.requires_credit_card_on_file === "true") {
+      setOnlineBookingPaymentPolicy("Online booking requires a credit card on file");
+    }
+    if (clientProfileData?.online_booking_payment_policy?.no_payment_reqired === "true") {
+      setOnlineBookingPaymentPolicy("No payment requirements for online booking");
+    }
+    setOnlineBookingAllowed(clientProfileData?.online_booking_policy?.online_booking_allowed === "true");
+    setOnlineBookingDisabled(clientProfileData?.online_booking_policy?.online_booking_disabled === "true");
+    setRequiresFullPayment(clientProfileData?.online_booking_payment_policy?.requires_full_payment === "true");
+    setRequiresDeposit(clientProfileData?.online_booking_payment_policy?.requires_deposit === "true");
+    setRequiresCreditCardOnFile(clientProfileData?.online_booking_payment_policy?.requires_credit_card_on_file === "true");
+    setNoPaymentReqired(clientProfileData?.online_booking_payment_policy?.no_payment_reqired === "true");
+  }
+  useEffect(()=>{}, [clientProfileData?.online_booking_policy,clientProfileData?.online_booking_payment_policy]);
 
   const handleScroll = () => {
     document.getElementById(params.type)?.scrollIntoView({ behavior: 'smooth' });
@@ -388,7 +401,8 @@ const ClientsProfileUpdate = () => {
       fillCheckboxFields();
       fillPhoneNumberFields();
       handleCountryStateCity();
-      //  handlePolicyAndPolicyPayments();
+      handlePolicy();
+       handlePolicyAndPolicyPayments();
     }else{
       getClientDetails()
     }
@@ -472,6 +486,22 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: value,
     }));
+    if(name === "dobYear"){
+      if (/^\d{0,4}$/.test(value)) {
+        setFormData(prevState => ({
+          ...prevState,
+          [name]: value,
+        }));
+      }
+    }
+    if(name === "dobDay"){
+      if (/^\d{0,2}$/.test(value)) {
+        setFormData(prevState => ({
+          ...prevState,
+          [name]: value,
+        }));
+      }
+    }
   };
 
   const handleWhoRefered = async (event) => {
@@ -522,18 +552,17 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleStateChange = (event) => {
-    const stateName = event.target.value; //
+    const stateName = event.target.value; 
     const selectedStateObj = states.find(state => state.name === stateName);
     if (selectedStateObj) {
       formData.state = stateName
       setFormData(formData)
       setSelectedState(stateName);
-      formData.state = stateName
-      setFormData(formData)
-      const updatedFormData = { ...formData, state: selectedStateObj.isoCode };
+      const updatedFormData = { ...formData, state: selectedStateObj.name };
       setFormData(updatedFormData);
-      const cityList = City.getCitiesOfState(selectedCountryCode, selectedStateObj.isoCode);
+      const cityList = City.getCitiesOfState(selectedStateObj.countryCode,selectedStateObj.isoCode)
       setCities(cityList);
+      
     } else {
       setSelectedState("");
       setCities([]);
@@ -595,19 +624,19 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[phone_number]', phoneNumbers.mobile_phone, clientProfileData.phone_number);
 
     // Client detail attributes
-    appendIfChanged('client[client_detail_attributes][city]', formData.city, clientProfileData.city);
-    appendIfChanged('client[client_detail_attributes][state]', formData.state, clientProfileData.state);
-    appendIfChanged('client[client_detail_attributes][zip_code]', formData.zip_code, clientProfileData.zip_code);
-    appendIfChanged('client[client_detail_attributes][country]', formData.country, clientProfileData.country);
-    appendIfChanged('client[client_detail_attributes][gender]', formData.gender, clientProfileData.gender);
-    appendIfChanged('client[client_detail_attributes][sex]', formData.sex, clientProfileData.sex);
+    appendIfChanged('client[client_detail_attributes][city]', formData.city, clientProfileData.client_detail.city);
+    appendIfChanged('client[client_detail_attributes][state]', formData.state, clientProfileData.client_detail.state);
+    appendIfChanged('client[client_detail_attributes][zip_code]', formData.zip_code, clientProfileData.client_detail.zip_code);
+    appendIfChanged('client[client_detail_attributes][country]', formData.country, clientProfileData.client_detail.country);
+    appendIfChanged('client[client_detail_attributes][gender]', formData.gender, clientProfileData.client_detail.gender);
+    appendIfChanged('client[client_detail_attributes][sex]', formData.sex, clientProfileData.client_detail.sex);
     appendIfChanged('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`, clientProfileData.date_of_birth);
 
     // Phone numbers
-    appendIfChanged('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone, clientProfileData.home_phone);
-    appendIfChanged('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone, clientProfileData.mobile_phone);
-    appendIfChanged('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone, clientProfileData.work_phone);
-    appendIfChanged('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone, clientProfileData.fax_phone);
+    appendIfChanged('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone, clientProfileData.client_detail.home_phone);
+    appendIfChanged('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone, clientProfileData.client_detail.mobile_phone);
+    appendIfChanged('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone, clientProfileData.client_detail.work_phone);
+    appendIfChanged('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone, clientProfileData.client_detail.fax_phone);
     // contact details
     appendIfChanged('client[client_detail_attributes][personal_health_number]', formData.personal_health_number, clientProfileData.personal_health_number);
     appendIfChanged('client[client_detail_attributes][family_doctor]', formData.family_doctor, clientProfileData.family_doctor);
@@ -638,8 +667,8 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[referred_employee_id]', formData.referred_employee_id, clientProfileData.referred_employee_id);
 
     //online booking policy
-    appendIfChanged('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed, clientProfileData.online_booking_allowed);
-    appendIfChanged('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled, clientProfileData.online_booking_disabled);
+    appendIfChanged('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed, clientProfileData?.online_booking_allowed);
+    appendIfChanged('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled, clientProfileData?.online_booking_disabled);
 
     //online booking policy payments
     appendIfChanged('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired, clientProfileData.no_payment_reqired);
@@ -650,6 +679,8 @@ const ClientsProfileUpdate = () => {
     //how you heard
     appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData.how_heard_about_us);
 
+    //profile photo
+    appendIfChanged('client[profile_pic]', selectedFiles, clientProfileData.profile_pic);
     let response = await UpdateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
       toast.success("Client Profile Updated Successfully");
@@ -680,7 +711,6 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleOnlineBookingPolicyChange = (e) => {
-
     if (e.target.value === "Online booking allowed") {
       setOnlineBookingAllowed(true)
       setOnlineBookingDisabled(false)
@@ -692,7 +722,7 @@ const ClientsProfileUpdate = () => {
       setOnlineBookingPolicy(e.target.value)
     }
   };
-
+  useEffect(()=>{},[onlineBookingAllowed,onlineBookingDisabled,onlineBookingPolicy])
 
   const handleOnlineBookingPaymentPolicyChange = (e) => {
     if (e.target.value === "Online booking requires full payment") {
@@ -723,7 +753,9 @@ const ClientsProfileUpdate = () => {
       setNoPaymentReqired(true)
       setOnlineBookingPaymentPolicy(e.target.value)
     }
+    
   };
+  useEffect(()=>{},[requiresFullPayment,requiresDeposit,requiresCreditCardOnFile,noPaymentReqired,onlineBookingPaymentPolicy])
 
   return (
     <>
@@ -912,6 +944,7 @@ const ClientsProfileUpdate = () => {
                           name="email"
                           value={formData?.email}
                           onChange={handleFormChange}
+                          readOnly
                         />
                       </Form.Group>
                     </Col>
@@ -933,7 +966,7 @@ const ClientsProfileUpdate = () => {
                           <PhoneInput
                             country={'us'}
                             value={phoneNumbers?.home_phone}
-                            onChange={(value) => handleChange(value, 'home_phone')}
+                            onChange={(value) =>{console.log(value); handleChange(value, 'home_phone')}}
                           />
                         </div>
                       </Form.Group>
@@ -1049,7 +1082,7 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Zip Code</Form.Label>
                         <Form.Control
-                          type="text"
+                          type="number"
                           placeholder="Zip Code"
                           name="zip_code"
                           value={formData.zip_code}
@@ -1125,6 +1158,8 @@ const ClientsProfileUpdate = () => {
                               name="dobYear"
                               value={formData.dobYear}
                               onChange={handleFormChange}
+                              minLength={4}
+                              maxLength={4}
                             />
                           </Form.Group>
                         </div>
@@ -1137,7 +1172,7 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Personal Health Number</Form.Label>
                         <Form.Control
-                          type="text"
+                          type="number"
                           name="personal_health_number"
                           value={formData.personal_health_number}
                           onChange={handleFormChange}

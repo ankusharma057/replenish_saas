@@ -346,6 +346,8 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: value,
     }));    
+    console.log("@@@@@@@@@@",formData);
+    
   };
 
   const handleChange = (value, name) => {
@@ -437,75 +439,77 @@ const ClientsProfileUpdate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
+    const formDataPayload = new FormData();
 
 // Basic client information
-formData.append('client[name]', formData.name);
-formData.append('client[last_name]', formData.last_name);
-formData.append('client[email]', formData.email);
-formData.append('client[preferred_name]', formData.preferred_name);
-formData.append('client[pronouns]', formData.pronouns);
-formData.append('client[prefix]', formData.prefix);
-formData.append('client[middle_name]', formData.middle_name);
-formData.append('client[address]', formData.address);
-formData.append('client[phone_number]', phoneNumbers.mobile_phone);
+console.log("@@@@@@@@",formData);
+
+formDataPayload.append('client[name]', formData?.name);
+formDataPayload.append('client[last_name]', formData?.last_name);
+formDataPayload.append('client[email]', formData?.email);
+formDataPayload.append('client[preferred_name]', formData.preferred_name);
+formDataPayload.append('client[pronouns]', formData.pronouns);
+formDataPayload.append('client[prefix]', formData.prefix);
+formDataPayload.append('client[middle_name]', formData.middle_name);
+formDataPayload.append('client[address]', formData.address);
+formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone);
 
 // Client detail attributes
-formData.append('client[client_detail_attributes][city]', formData.city);
-formData.append('client[client_detail_attributes][state]', formData.state);
-formData.append('client[client_detail_attributes][zip_code]', formData.zip_code);
-formData.append('client[client_detail_attributes][country]', formData.country);
-formData.append('client[client_detail_attributes][gender]', formData.gender);
-formData.append('client[client_detail_attributes][sex]', formData.sex);
-formData.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
+formDataPayload.append('client[client_detail_attributes][city]', formData.city);
+formDataPayload.append('client[client_detail_attributes][state]', formData.state);
+formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
+formDataPayload.append('client[client_detail_attributes][country]', formData.country);
+formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
+formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
+formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
 
 // Phone numbers
-formData.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
-formData.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
-formData.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
-formData.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
+formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
+formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
+formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
+formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
 
 // Contact details
-formData.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
-formData.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
-formData.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
-formData.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
-formData.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
-formData.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
-formData.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
-formData.append('client[client_detail_attributes][emergency_contact]', formData.emergency_contact);
-formData.append('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone);
-formData.append('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship);
-formData.append('client[client_detail_attributes][parent_guardian]', formData.parent_guardian);
-formData.append('client[client_detail_attributes][occupation]', formData.occupation);
-formData.append('client[client_detail_attributes][employer]', formData.employer);
+formDataPayload.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
+formDataPayload.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
+formDataPayload.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
+formDataPayload.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
+formDataPayload.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
+formDataPayload.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
+formDataPayload.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
+formDataPayload.append('client[client_detail_attributes][emergency_contact]', formData.emergency_contact);
+formDataPayload.append('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone);
+formDataPayload.append('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship);
+formDataPayload.append('client[client_detail_attributes][parent_guardian]', formData.parent_guardian);
+formDataPayload.append('client[client_detail_attributes][occupation]', formData.occupation);
+formDataPayload.append('client[client_detail_attributes][employer]', formData.employer);
 
 // Notification settings
-formData.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
-formData.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
-formData.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
-formData.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
-formData.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
-formData.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
-formData.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
-formData.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
-formData.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
+formDataPayload.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
+formDataPayload.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
+formDataPayload.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
+formDataPayload.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
+formDataPayload.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
+formDataPayload.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
+formDataPayload.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
+formDataPayload.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
+formDataPayload.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
 
 // Referral information
-formData.append('client[referred_employee_id]', formData.referred_employee_id);
+formDataPayload.append('client[referred_employee_id]', formData.referred_employee_id);
 
 // Online booking policy
-formData.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
-formData.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
+formDataPayload.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
+formDataPayload.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
 
 // Online booking payment policy
-formData.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
-formData.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
-formData.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
-formData.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
+formDataPayload.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
+formDataPayload.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
+formDataPayload.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
+formDataPayload.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
 
 // How you heard about us
-formData.append('client[how_heard_about_us]', formData.how_heard_about_us);
+formDataPayload.append('client[how_heard_about_us]', formData.how_heard_about_us);
 console.log("@@@@@@@",formData);
 
 
@@ -523,6 +527,9 @@ console.log("@@@@@@@",formData);
             console.log(error);
         }
     } else {
+      if(response.error.email){
+        toast.error(response.error.email)
+      }
         toast.error("Something went wrong")
     }
   };
