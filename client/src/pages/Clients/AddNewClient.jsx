@@ -1520,6 +1520,14 @@ const ClientsProfileUpdate = () => {
                 </Container>
               </div>
             </div>
+            <div className="d-flex p-4 border bg-white rounded mt-3a w-100">
+              <div className="d-flex justify-content-end  w-100">
+                <div className="d-flex justify-content-between gap-2">
+                  <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
+                  <Button variant="btn btn-primary w-[100px] h-[40px]" type="submit" style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
+                </div>
+              </div>
+            </div>
           </Form>
         </div>
       </AsideLayout>

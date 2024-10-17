@@ -783,8 +783,8 @@ export default function AddInvoices() {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
       clientname: clientName,
-      lastname:clientName,
-      email:clientName,
+      lastname:clientLastName,
+      email:clientEmail,
       beforeImages: blobsForBefore,
       afterImages: blobsForAfter,
 
@@ -858,6 +858,8 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
+    console.log("@@@@@@@",invoiceData);
+    
     confirmAlert({
       title: "Confirm to submit",
       message: `Are you sure add ${invoiceData?.length} Invoices `,

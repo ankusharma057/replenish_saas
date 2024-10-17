@@ -251,6 +251,8 @@ function App() {
                   <Route path="/intake-forms" element={<IntakeForm />} />
                   <Route path="/new-intake-form" element={<NewIntakeForm />} />
                   <Route path="/customers/:clientId?" element={<AllClientRoot />} />
+                  <Route path="/add-new-client" element={<AddNewClient />} />
+                  <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                 </>
               )}
             </>

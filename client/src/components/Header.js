@@ -11,7 +11,7 @@ export default memo(function Header() {
   const [isMenuShow, setisMenuShow] = useState(true);
   const navigate = useNavigate();
   const { authUserState, authUserDispatch } = useAuthContext();
-  const { clientId } = useParams();
+  const { clientId,type } = useParams();
   const location = useLocation();
   const handleLogout = async () => {
     try {
@@ -122,7 +122,10 @@ export default memo(function Header() {
                   
                 <button
                   onClick={handleMenuSHow}
-                  className={`${location.pathname === "/customers" || `/customers/${clientId}` ? "bg-[#008989a1]":""} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                  className={`${location.pathname === "/customers" ||
+                    location.pathname === `/add-new-client` ||
+                    location.pathname === `/customers/${clientId}` ||
+                    location.pathname === `/client-profile-update/${clientId}/${type}`?"bg-[#008989a1]":""} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                 >
                   <Link
                     className={`no-underline text-white py-[1rem] inline-block `}
