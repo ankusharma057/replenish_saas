@@ -34,8 +34,8 @@ import { useAuthContext } from "../../context/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
 
 const ClientsProfileUpdate = () => {
-  const params=useParams();
-  const Navigate=useNavigate();
+  const params = useParams();
+  const Navigate = useNavigate();
   const [employeeList, setEmployeeList] = useState([]);
   const { collapse } = useAsideLayoutContext();
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
@@ -56,44 +56,44 @@ const ClientsProfileUpdate = () => {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [disableCheckbox, setDisableCheckbox] = useState(false);
-  const [clientProfileData, setClientProfileData]=useState();
+  const [clientProfileData, setClientProfileData] = useState();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
-    last_name:'',
-    middle_name:'',
-    preferred_name:'',
-    pronouns:'',
-    prefix:'',
+    last_name: '',
+    middle_name: '',
+    preferred_name: '',
+    pronouns: '',
+    prefix: '',
     email: '',
     phone: '',
     address: '',
     city: '',
-    state:'',
-    zip_code:'',
-    country:'',
-    gender:'',
-    sex:'',
-    date_of_birth:'',
-    personal_health_number:'',
-    family_doctor:'',
-    family_doctor_phone:'',
-    family_doctor_email:'',
-    referring_professional:'',
-    referring_professional_phone:'',
-    referring_professional_email:'',
-    emergency_contact:'',
-    emergency_contact_phone:'',
-    emergency_contact_relationship:'',
-    parent_guardian:'',
-    occupation:'',
-    employer:'',
-    how_heard_about_us:"",
-    referred_employee_id:"",
-    who_were_you_referred_to_name:"",
-    dobMonth:"",
-    dobDay:"",
-    dobYear:"",
+    state: '',
+    zip_code: '',
+    country: '',
+    gender: '',
+    sex: '',
+    date_of_birth: '',
+    personal_health_number: '',
+    family_doctor: '',
+    family_doctor_phone: '',
+    family_doctor_email: '',
+    referring_professional: '',
+    referring_professional_phone: '',
+    referring_professional_email: '',
+    emergency_contact: '',
+    emergency_contact_phone: '',
+    emergency_contact_relationship: '',
+    parent_guardian: '',
+    occupation: '',
+    employer: '',
+    how_heard_about_us: "",
+    referred_employee_id: "",
+    who_were_you_referred_to_name: "",
+    dobMonth: "",
+    dobDay: "",
+    dobYear: "",
   });
   const [checkboxData, setCheckboxData] = useState({
     email_reminder_2_days: false,
@@ -104,27 +104,27 @@ const ClientsProfileUpdate = () => {
     sms_waitlist_openings: false,
     ok_to_send_marketing_emails: false,
     send_ratings_emails: false,
-    do_not_email:false,
-    discharged:false,
-    deceased:false
+    do_not_email: false,
+    discharged: false,
+    deceased: false
   });
   const [phoneNumbers, setPhoneNumbers] = useState({
     home_phone: '',
     work_phone: '',
     mobile_phone: '',
-    fax_phone:''
+    fax_phone: ''
   });
 
   const [onlineBookingPolicy, setOnlineBookingPolicy] = useState("");
   const [onlineBookingAllowed, setOnlineBookingAllowed] = useState(false);
   const [onlineBookingDisabled, setOnlineBookingDisabled] = useState(false);
-  
+
   const [onlineBookingPaymentPolicy, setOnlineBookingPaymentPolicy] = useState();
   const [requiresFullPayment, setRequiresFullPayment] = useState(false);
   const [requiresDeposit, setRequiresDeposit] = useState(false);
   const [requiresCreditCardOnFile, setRequiresCreditCardOnFile] = useState(false);
   const [noPaymentReqired, setNoPaymentReqired] = useState(false);
-  const [allEmployeeList,setAllEmployeeList]=useState([]);
+  const [allEmployeeList, setAllEmployeeList] = useState([]);
   const months = [
     { name: 'January', number: '01' },
     { name: 'February', number: '02' },
@@ -186,11 +186,11 @@ const ClientsProfileUpdate = () => {
     }
   };
 
-  const fillClientProfileData=()=>{
+  const fillClientProfileData = () => {
     const formData = {
       name: clientProfileData.name ?? '',
       last_name: clientProfileData.last_name ?? '',
-      middle_name: clientProfileData.middle_name ?? '', 
+      middle_name: clientProfileData.middle_name ?? '',
       preferred_name: clientProfileData.preferred_name ?? '',
       pronouns: clientProfileData.pronouns ?? '',
       prefix: clientProfileData.prefix ?? '',
@@ -225,7 +225,7 @@ const ClientsProfileUpdate = () => {
       dobDay: clientProfileData.dobDay ?? '',
       dobYear: clientProfileData.dobYear ?? '',
     };
-    
+
     const checkboxData = {
       email_reminder_2_days: clientProfileData.email_reminder_2_days ?? false,
       sms_reminder_2_days: clientProfileData.sms_reminder_2_days ?? false,
@@ -239,7 +239,7 @@ const ClientsProfileUpdate = () => {
       discharged: clientProfileData.discharged ?? false,
       deceased: clientProfileData.deceased ?? false,
     };
-    
+
     const phoneNumbers = {
       home_phone: clientProfileData.home_phone ?? '',
       work_phone: clientProfileData.work_phone ?? '',
@@ -251,10 +251,10 @@ const ClientsProfileUpdate = () => {
     setCheckboxData(checkboxData)
     setPhoneNumbers(phoneNumbers)
   }
-  const getEmployesList=async()=>{
+  const getEmployesList = async () => {
     let response = await getEmployeesList(true)
     if (response.status === 200) {
-        setAllEmployeeList(response.data)
+      setAllEmployeeList(response.data)
     } else {
       toast.error("Something went wrong")
     }
@@ -271,7 +271,7 @@ const ClientsProfileUpdate = () => {
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getClients();
-      if (data?.length > 0) {        
+      if (data?.length > 0) {
         const newData = data.filter(
           (client) =>
             client?.email !== null &&
@@ -317,6 +317,10 @@ const ClientsProfileUpdate = () => {
     setRadioTabs(addTabs);
   };
 
+  const handleNavigateToClient = (customerId) => {
+    Navigate(`/customers/${customerId}`)
+  };
+
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
     return (
@@ -328,11 +332,9 @@ const ClientsProfileUpdate = () => {
             if (window.innerWidth < 1024) {
               collapse();
             }
+            handleNavigateToClient(employee?.id)
           }}
-          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
-              ? "pointer-events-none bg-gray-200 "
-              : "cursor-pointer "
-            } `}
+          className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 cursor-pointer"`}
         >
           {employee.name || ""}
         </div>
@@ -341,35 +343,33 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleFormChange = (event) => {
-    const { name, value } = event.target; 
+    const { name, value } = event.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value,
-    }));    
-    console.log("@@@@@@@@@@",formData);
-    
+    }));
   };
 
   const handleChange = (value, name) => {
     setPhoneNumbers(prevState => ({
       ...prevState,
-      [name]: value, 
+      [name]: value,
     }));
   };
 
-  const handleProunounsChange=(pronouns)=>{
-    formData.pronouns=pronouns
+  const handleProunounsChange = (pronouns) => {
+    formData.pronouns = pronouns
     setFormData(formData)
   };
 
-  const handleCountryChange = (event) => {   
+  const handleCountryChange = (event) => {
     const selectedCountryObj = Country.getAllCountries().find(country => country.name === event.target.value);
     if (selectedCountryObj) {
-      setSelectedCountry(selectedCountryObj.name); 
+      setSelectedCountry(selectedCountryObj.name);
       setSelectedCountryCode(selectedCountryObj.isoCode);
-      setSelectedState(''); 
+      setSelectedState('');
       setCities([]);
-      formData.country= event.target.value
+      formData.country = event.target.value
       setFormData(formData)
       const stateList = State.getStatesOfCountry(selectedCountryObj.isoCode);
       setStates(stateList);
@@ -377,34 +377,34 @@ const ClientsProfileUpdate = () => {
       setFormData(formData);
     } else {
       setSelectedCountry("");
-      setSelectedCountryCode(""); 
+      setSelectedCountryCode("");
     }
   };
 
   const handleStateChange = (event) => {
     const stateName = event.target.value; //
-    const selectedStateObj = states.find(state => state.name === stateName); 
+    const selectedStateObj = states.find(state => state.name === stateName);
     if (selectedStateObj) {
-      setSelectedState(stateName); 
-      formData.state= stateName
+      setSelectedState(stateName);
+      formData.state = stateName
       setFormData(formData)
-      const updatedFormData = { ...formData, state: selectedStateObj.isoCode }; 
-      setFormData(updatedFormData); 
+      const updatedFormData = { ...formData, state: selectedStateObj.isoCode };
+      setFormData(updatedFormData);
       const cityList = City.getCitiesOfState(selectedCountryCode, selectedStateObj.isoCode);
-      setCities(cityList); 
+      setCities(cityList);
     } else {
       setSelectedState("");
-      setCities([]); 
+      setCities([]);
     }
   };
-  
+
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
-    formData.city=city
+    formData.city = city
     setFormData(formData)
     console.log(formData);
-    
+
   };
 
   const handleCheckboxChange = (event) => {
@@ -413,8 +413,8 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: checked,
     }));
-    if(name==="do_not_email"){
-      let checkboxPayload={
+    if (name === "do_not_email") {
+      let checkboxPayload = {
         email_reminder_2_days: false,
         sms_reminder_2_days: false,
         sms_reminder_24_hours: false,
@@ -422,7 +422,7 @@ const ClientsProfileUpdate = () => {
         email_waitlist_openings: !checkboxData.email_waitlist_openings,
         sms_waitlist_openings: false,
         ok_to_send_marketing_emails: !checkboxData.ok_to_send_marketing_emails,
-        do_not_email:!checkboxData.do_not_email,
+        do_not_email: !checkboxData.do_not_email,
       }
       setCheckboxData(checkboxPayload)
       setDisableCheckbox(true)
@@ -441,119 +441,119 @@ const ClientsProfileUpdate = () => {
     e.preventDefault();
     const formDataPayload = new FormData();
 
-// Basic client information
-console.log("@@@@@@@@",formData);
+    // Basic client information
 
-formDataPayload.append('client[name]', formData?.name);
-formDataPayload.append('client[last_name]', formData?.last_name);
-formDataPayload.append('client[email]', formData?.email);
-formDataPayload.append('client[preferred_name]', formData.preferred_name);
-formDataPayload.append('client[pronouns]', formData.pronouns);
-formDataPayload.append('client[prefix]', formData.prefix);
-formDataPayload.append('client[middle_name]', formData.middle_name);
-formDataPayload.append('client[address]', formData.address);
-formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone);
+    formDataPayload.append('client[name]', formData?.name);
+    formDataPayload.append('client[last_name]', formData?.last_name);
+    formDataPayload.append('client[email]', formData?.email);
+    formDataPayload.append('client[preferred_name]', formData.preferred_name);
+    formDataPayload.append('client[pronouns]', formData.pronouns);
+    formDataPayload.append('client[prefix]', formData.prefix);
+    formDataPayload.append('client[middle_name]', formData.middle_name);
+    formDataPayload.append('client[address]', formData.address);
+    formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone);
 
-// Client detail attributes
-formDataPayload.append('client[client_detail_attributes][city]', formData.city);
-formDataPayload.append('client[client_detail_attributes][state]', formData.state);
-formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
-formDataPayload.append('client[client_detail_attributes][country]', formData.country);
-formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
-formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
-formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
+    // Client detail attributes
+    formDataPayload.append('client[client_detail_attributes][city]', formData.city);
+    formDataPayload.append('client[client_detail_attributes][state]', formData.state);
+    formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
+    formDataPayload.append('client[client_detail_attributes][country]', formData.country);
+    formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
+    formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
+    formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
 
-// Phone numbers
-formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
-formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
-formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
-formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
+    // Phone numbers
+    formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
+    formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
+    formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
+    formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
 
-// Contact details
-formDataPayload.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
-formDataPayload.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
-formDataPayload.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
-formDataPayload.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
-formDataPayload.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
-formDataPayload.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
-formDataPayload.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
-formDataPayload.append('client[client_detail_attributes][emergency_contact]', formData.emergency_contact);
-formDataPayload.append('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone);
-formDataPayload.append('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship);
-formDataPayload.append('client[client_detail_attributes][parent_guardian]', formData.parent_guardian);
-formDataPayload.append('client[client_detail_attributes][occupation]', formData.occupation);
-formDataPayload.append('client[client_detail_attributes][employer]', formData.employer);
+    // Contact details
+    formDataPayload.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
+    formDataPayload.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
+    formDataPayload.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
+    formDataPayload.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
+    formDataPayload.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
+    formDataPayload.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
+    formDataPayload.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
+    formDataPayload.append('client[client_detail_attributes][emergency_contact]', formData.emergency_contact);
+    formDataPayload.append('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone);
+    formDataPayload.append('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship);
+    formDataPayload.append('client[client_detail_attributes][parent_guardian]', formData.parent_guardian);
+    formDataPayload.append('client[client_detail_attributes][occupation]', formData.occupation);
+    formDataPayload.append('client[client_detail_attributes][employer]', formData.employer);
 
-// Notification settings
-formDataPayload.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
-formDataPayload.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
-formDataPayload.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
-formDataPayload.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
-formDataPayload.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
-formDataPayload.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
-formDataPayload.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
-formDataPayload.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
-formDataPayload.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
+    // Notification settings
+    formDataPayload.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
+    formDataPayload.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
+    formDataPayload.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
+    formDataPayload.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
+    formDataPayload.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
+    formDataPayload.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
+    formDataPayload.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
+    formDataPayload.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
+    formDataPayload.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
 
-// Referral information
-formDataPayload.append('client[referred_employee_id]', formData.referred_employee_id);
+    // Referral information
+    formDataPayload.append('client[referred_employee_id]', formData.referred_employee_id);
 
-// Online booking policy
-formDataPayload.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
-formDataPayload.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
+    // Online booking policy
+    formDataPayload.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
+    formDataPayload.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
 
-// Online booking payment policy
-formDataPayload.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
-formDataPayload.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
-formDataPayload.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
-formDataPayload.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
+    // Online booking payment policy
+    formDataPayload.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
+    formDataPayload.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
+    formDataPayload.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
+    formDataPayload.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
 
-// How you heard about us
-formDataPayload.append('client[how_heard_about_us]', formData.how_heard_about_us);
-console.log("@@@@@@@",formData);
+    // How you heard about us
+    formDataPayload.append('client[how_heard_about_us]', formData.how_heard_about_us);
 
+    //profile pic
+    formDataPayload.append('client[profile_photo]', selectedFiles);
 
     let response = await CreateClient(params.id, true, formData)
     if (response.status === 200) {
-        toast.success("Client Created Successfully");
-        handleNavigate();
-        try {
-            const { data } = await getClients();
-            if (data?.length > 0) {
-                const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
-                setEmployeeList(newData);
-            }
-        } catch (error) {
-            console.log(error);
+      toast.success("Client Created Successfully");
+      handleNavigate();
+      try {
+        const { data } = await getClients();
+        if (data?.length > 0) {
+          const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
+          setEmployeeList(newData);
         }
+      } catch (error) {
+        console.log(error);
+      }
     } else {
-      if(response.error.email){
+      if (response.error.email) {
         toast.error(response.error.email)
       }
-        toast.error("Something went wrong")
+      toast.error("Something went wrong")
     }
   };
 
-  const handleNavigate=()=>{
+  const handleNavigate = () => {
     Navigate("/customers")
   };
 
-  const handleWhoRefered = async(event) => {
-    const selectedName =await event.target.value;
+  const handleWhoRefered = async (event) => {
+    const selectedName = await event.target.value;
     const employee = allEmployeeList.find((employee) => employee.name === selectedName);
-  
+
     if (employee) {
       await setFormData((prevState) => ({
         ...prevState,
         referred_employee_id: employee.id,
         who_were_you_referred_to_name: selectedName,
       }));
-      
+
     }
   };
 
   const handleOnlineBookingPolicyChange = (e) => {
-    
+
     if (e.target.value === "Online booking allowed") {
       setOnlineBookingAllowed(true)
       setOnlineBookingDisabled(false)
@@ -568,28 +568,28 @@ console.log("@@@@@@@",formData);
 
 
   const handleOnlineBookingPaymentPolicyChange = (e) => {
-    if(e.target.value === "Online booking requires full payment"){
+    if (e.target.value === "Online booking requires full payment") {
       setRequiresFullPayment(true);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(false)
       setNoPaymentReqired(false)
-      
+
     }
-    if(e.target.value === "Online booking requires a deposit"){
+    if (e.target.value === "Online booking requires a deposit") {
       setRequiresFullPayment(false);
       setRequiresDeposit(true);
       setRequiresCreditCardOnFile(false)
       setNoPaymentReqired(false)
       setOnlineBookingPaymentPolicy(e.target.value)
     }
-    if(e.target.value === "Online booking requires a credit card on file"){
+    if (e.target.value === "Online booking requires a credit card on file") {
       setRequiresFullPayment(false);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(true)
       setNoPaymentReqired(false)
       setOnlineBookingPaymentPolicy(e.target.value)
     }
-    if(e.target.value === "No payment requirements for online booking"){
+    if (e.target.value === "No payment requirements for online booking") {
       setRequiresFullPayment(false);
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(false)
@@ -598,63 +598,66 @@ console.log("@@@@@@@",formData);
     }
   };
 
+  const handleAddNewClient = (clientData) => {
+    Navigate(`/add-new-client`)
+  };
+
   return (
     <>
       <AsideLayout
         asideContent={
           <>
-              <div>
-                  <SearchInput
-                      placeholder="Search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-              </div>
-              <div className="border-t-2  py-2 bg-white h-70vh">
-                  <h1 className="text-xl flex gap-x-2 items-center justify-center">
-                      Clients <ChevronDown />
-                  </h1>
-                  <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
-                      {(employeeList || []).length > 0 && (
-                          <List
-                              height={window.innerHeight}
-                              itemCount={employeeList.length}
-                              itemSize={45}
-                              width={"100%"}
-                          >
-                              {EmployeeItem}
-                          </List>
-                      )}
-                  </div>
-              </div>
-              <Button
-                  onClick={() => {
-                      setShowCreateClientModel(true);
-                      setCurrentTab("client");
-                  }}
-                  variant="info"
-                  className="w-full text-white"
+            <div>
+              <SearchInput
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="border-t-2  py-2 bg-white h-70vh">
+              <h1 className="text-xl flex gap-x-2 items-center justify-center">
+                Clients <ChevronDown />
+              </h1>
+              <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
+                {(employeeList || []).length > 0 && (
+                  <List
+                    height={window.innerHeight}
+                    itemCount={employeeList.length}
+                    itemSize={45}
+                    width={"100%"}
                   >
-                  + Add Client
-              </Button>
+                    {EmployeeItem}
+                  </List>
+                )}
+              </div>
+            </div>
+            <Button
+              onClick={() => {
+                handleAddNewClient()
+              }}
+              variant="info"
+              className="w-full text-white"
+            >
+              + Add Client
+            </Button>
           </>
-      }
+        }
       >
         <div className="flex-1 border p-3 h-[86vh] overflow-scroll">
-        <Form onSubmit={handleSubmit}>
-          <div className="d-flex justify-content-between mb-3">
-            <h1 className="text-secondary fw-light">
-             New Client
-            </h1>
-            <div className="d-flex justify-content-between gap-2">
+          <Form onSubmit={handleSubmit}>
+            <div className="d-flex justify-content-between mb-3">
+              <h1 className="text-secondary fw-light">
+                New Client
+              </h1>
+              <div className="d-flex justify-content-between gap-2">
                 <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
-                <Button variant="btn btn-primary w-[100px] h-[40px]" type="submit" style={{backgroundColor:"#0dcaf0",border:"none"}} >Save</Button>
+                <Button variant="btn btn-primary w-[100px] h-[40px]" type="submit" style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
+              </div>
             </div>
-          </div>
-          <div className="d-flex p-4 border bg-white rounded">
-            <div>
-              <UserRound />
-            </div>
+            <div className="d-flex p-4 border bg-white rounded">
+              <div>
+                <UserRound />
+              </div>
               <div className="w-50 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -710,12 +713,12 @@ console.log("@@@@@@@",formData);
                       {showPronounceOptions && (
                         <div className="position-absolute w-[90%]">
                           <ListGroup>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("He/Him/His")}>He/Him/His</ListGroup.Item>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("She/Her/Hers")}>She/Her/Hers</ListGroup.Item>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("They/Them/Theirs")}>They/Them/Theirs</ListGroup.Item>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("Thon/Thon/Thon's")}>Thon/Thon/Thon's</ListGroup.Item>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("E/Em/Ems")}>E/Em/Ems</ListGroup.Item>
-                            <ListGroup.Item onMouseDown={()=>handleProunounsChange("Ae/Aer/Aers")}>Ae/Aer/Aers</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("He/Him/His")}>He/Him/His</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("She/Her/Hers")}>She/Her/Hers</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("They/Them/Theirs")}>They/Them/Theirs</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("Thon/Thon/Thon's")}>Thon/Thon/Thon's</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("E/Em/Ems")}>E/Em/Ems</ListGroup.Item>
+                            <ListGroup.Item onMouseDown={() => handleProunounsChange("Ae/Aer/Aers")}>Ae/Aer/Aers</ListGroup.Item>
                           </ListGroup>
                         </div>
                       )}
@@ -742,24 +745,24 @@ console.log("@@@@@@@",formData);
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Middle</Form.Label>
                         <Form.Control
-                         type="text"
+                          type="text"
                           placeholder="Middle"
                           name="middle_name"
                           value={formData.middle_name}
                           onChange={handleFormChange}
-                          />
+                        />
                       </Form.Group>
                     </Col>
                   </Row>
                 </Container>
                 <div></div>
               </div>
-             
-          </div>
-          <div className="d-flex p-4 border bg-white mt-3 rounded">
-            <div>
-              <Mail />
+
             </div>
+            <div className="d-flex p-4 border bg-white mt-3 rounded">
+              <div>
+                <Mail />
+              </div>
               <div className="w-100">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -779,11 +782,11 @@ console.log("@@@@@@@",formData);
                   </Row>
                 </Container>
               </div>
-          </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3">
-            <div>
-              <Phone />
             </div>
+            <div className="d-flex p-4 border bg-white rounded mt-3">
+              <div>
+                <Phone />
+              </div>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
@@ -793,7 +796,7 @@ console.log("@@@@@@@",formData);
                         <div className="countrySelectContainer">
                           <PhoneInput
                             country={'us'}
-                            value={phoneNumbers.home_phone}
+                            value={phoneNumbers?.home_phone}
                             onChange={(value) => handleChange(value, 'home_phone')}
                           />
                         </div>
@@ -831,7 +834,8 @@ console.log("@@@@@@@",formData);
                             value={phoneNumbers.fax_phone}
                             onChange={(value) => handleChange(value, 'fax_phone')}
                           />
-                        </div>                      </Form.Group>
+                        </div>
+                      </Form.Group>
                     </Col>
                   </Row>
                 </Container>
@@ -892,9 +896,9 @@ console.log("@@@@@@@",formData);
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">City</Form.Label>
-                        <Form.Select 
-                        disabled={!selectedState}
-                        value={selectedCity}
+                        <Form.Select
+                          disabled={!selectedState}
+                          value={selectedCity}
                           onChange={handleCityChange}
                         >
                           <option value="">Select a city</option>
@@ -921,17 +925,17 @@ console.log("@@@@@@@",formData);
                   </Row>
                 </Container>
               </div>
-          </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3">
-            <div>
-              <Briefcase />
             </div>
+            <div className="d-flex p-4 border bg-white rounded mt-3">
+              <div>
+                <Briefcase />
+              </div>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={6} md={6} lg={6}>
                     <Col xs={6} sm={6} md={6} lg={6}>
                       <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Check 
+                        <Form.Check
                           type={"checkbox"}
                           label={`Discharged`}
                           name="discharged"
@@ -1024,22 +1028,22 @@ console.log("@@@@@@@",formData);
                       <div className="d-flex justify-content-between gap-[20px]">
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Phone</Form.Label>
-                          <Form.Control 
-                          type="text" 
-                          placeholder="Phone"
-                          name="family_doctor_phone"
-                          value={formData.family_doctor_phone}
-                          onChange={handleFormChange}
+                          <Form.Control
+                            type="text"
+                            placeholder="Phone"
+                            name="family_doctor_phone"
+                            value={formData.family_doctor_phone}
+                            onChange={handleFormChange}
                           />
                         </Form.Group>
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Email</Form.Label>
-                          <Form.Control 
-                          type="email" 
-                          placeholder="Email" 
-                          name="family_doctor_email"
-                          value={formData.family_doctor_email}
-                          onChange={handleFormChange}
+                          <Form.Control
+                            type="email"
+                            placeholder="Email"
+                            name="family_doctor_email"
+                            value={formData.family_doctor_email}
+                            onChange={handleFormChange}
                           />
                         </Form.Group>
                       </div>
@@ -1063,27 +1067,27 @@ console.log("@@@@@@@",formData);
                       <div className="d-flex justify-content-between gap-[20px]">
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Phone</Form.Label>
-                          <Form.Control 
-                          type="number"
-                          placeholder="Phone"
-                          name="referring_professional_phone"
-                          value={formData.referring_professional_phone}
-                          onChange={handleFormChange}
+                          <Form.Control
+                            type="number"
+                            placeholder="Phone"
+                            name="referring_professional_phone"
+                            value={formData.referring_professional_phone}
+                            onChange={handleFormChange}
                           />
                         </Form.Group>
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Email</Form.Label>
-                          <Form.Control 
-                          type="email"
-                          placeholder="Relationship"
-                          name="referring_professional_email"
-                          value={formData.referring_professional_email}
-                          onChange={handleFormChange}
+                          <Form.Control
+                            type="email"
+                            placeholder="Relationship"
+                            name="referring_professional_email"
+                            value={formData.referring_professional_email}
+                            onChange={handleFormChange}
                           />
                         </Form.Group>
                       </div>
                     </Col>
-                    
+
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <hr className="hr w-100" />
                     </Col>
@@ -1131,7 +1135,7 @@ console.log("@@@@@@@",formData);
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary d-flex justify-content-start align-items-center gap-2">Gender <HelpCircle size={15} /></Form.Label>
-                        <Form.Control 
+                        <Form.Control
                           type="text"
                           placeholder="Enter Gender"
                           name="gender"
@@ -1145,7 +1149,7 @@ console.log("@@@@@@@",formData);
                         <Form.Label className="text-body-tertiary d-flex justify-content-start align-items-center gap-2">Sex<HelpCircle size={15} /></Form.Label>
                         <Form.Select
                           name="sex"
-                          value={formData.sex  || ""}
+                          value={formData.sex || ""}
                           onChange={handleFormChange}>
                           <option value={"Male"}>{"Male"}</option>
                           <option value={"Female"}>{"Female"}</option>
@@ -1172,10 +1176,10 @@ console.log("@@@@@@@",formData);
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Occupation</Form.Label>
-                        <Form.Control type="text" 
-                        name="occupation"
-                        value={formData.occupation}
-                        onChange={handleFormChange}
+                        <Form.Control type="text"
+                          name="occupation"
+                          value={formData.occupation}
+                          onChange={handleFormChange}
                         />
                       </Form.Group>
                     </Col>
@@ -1185,22 +1189,22 @@ console.log("@@@@@@@",formData);
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Employer</Form.Label>
-                        <Form.Control type="text" 
-                        name="employer"
-                        value={formData.employer}
-                        onChange={handleFormChange}
+                        <Form.Control type="text"
+                          name="employer"
+                          value={formData.employer}
+                          onChange={handleFormChange}
                         />
                       </Form.Group>
                     </Col>
                   </Row>
                 </Container>
               </div>
-          </div>
-          <div className="p-4 border bg-white rounded mt-3">
-            <div className="d-flex">
-              <div>
-                <Bell />
-              </div>
+            </div>
+            <div className="p-4 border bg-white rounded mt-3">
+              <div className="d-flex">
+                <div>
+                  <Bell />
+                </div>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -1343,11 +1347,11 @@ console.log("@@@@@@@",formData);
                     </Row>
                   </Container>
                 </div>
-            </div>
-            <div className="d-flex">
-              <div>
-                <Megaphone />
               </div>
+              <div className="d-flex">
+                <div>
+                  <Megaphone />
+                </div>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -1382,11 +1386,11 @@ console.log("@@@@@@@",formData);
                   </Container>
                   <div></div>
                 </div>
-            </div>
-            <div className="d-flex">
-              <div>
-                <Settings />
               </div>
+              <div className="d-flex">
+                <div>
+                  <Settings />
+                </div>
                 <div className="w-100 d-flex justify-content-between gap-1 ">
                   <Container>
                     <Row xs={6} md={6} lg={6}>
@@ -1408,12 +1412,12 @@ console.log("@@@@@@@",formData);
                   </Container>
                   <div></div>
                 </div>
+              </div>
             </div>
-          </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3a">
-            <div>
-              <Cloud />
-            </div>
+            <div className="d-flex p-4 border bg-white rounded mt-3a">
+              <div>
+                <Cloud />
+              </div>
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={12} sm={12} md={12} lg={12}>
@@ -1456,8 +1460,8 @@ console.log("@@@@@@@",formData);
                   </Row>
                 </Container>
               </div>
-          </div>
-          <div className="d-flex p-4 border bg-white rounded mt-3a">
+            </div>
+            <div className="d-flex p-4 border bg-white rounded mt-3a">
               <div className="w-100 d-flex justify-content-between gap-1 ">
                 <Container>
                   <Row xs={12} sm={12} md={12} lg={12}>
@@ -1515,8 +1519,8 @@ console.log("@@@@@@@",formData);
                   </Row>
                 </Container>
               </div>
-          </div>
-        </Form>
+            </div>
+          </Form>
         </div>
       </AsideLayout>
     </>

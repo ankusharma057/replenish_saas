@@ -234,7 +234,7 @@ const ClientProfile = ({ clientProfileData, handleClientProfileFlipCard, handleS
                             <div className="d-flex gap-[10px]">
                                 <div><Phone /></div>
                                 <div>
-                                    <p className="text-body fw-bold fs-6">{handleNullValues(clientProfileData.phone_number)}</p>
+                                    <p className="text-body fw-bold fs-6">{handleNullValues(clientProfileData?.client_detail?.home_number)}</p>
                                 </div>
                             </div>
                             <div className="d-flex gap-[10px]">

@@ -168,8 +168,8 @@ const ClientsProfileUpdate = () => {
     try {
       const response = await GetClientDetails(params.id, true)
       if (response?.status === 200) {
-          setClientProfileData(response?.data);
-          fillFormDataFields(response?.data);   
+        setClientProfileData(response?.data);
+        fillFormDataFields(response?.data);
       }
       else {
         getClientDetails();
@@ -177,7 +177,7 @@ const ClientsProfileUpdate = () => {
     }
     catch (err) {
       toast.error(err.message)
-      
+
     }
   };
   const calculateDate = (dateString) => {
@@ -239,7 +239,7 @@ const ClientsProfileUpdate = () => {
     }
     setFormData(formDataResponse);
   }
-  useEffect(() => {}, [formData]);
+  useEffect(() => { }, [formData]);
 
   const fillCheckboxFields = () => {
     const checkboxDetails = {
@@ -265,7 +265,7 @@ const ClientsProfileUpdate = () => {
   }, [clientProfileData]);
 
   useEffect(() => {
-  }, [checkboxData]);  
+  }, [checkboxData]);
 
   const fillPhoneNumberFields = () => {
     const phoneNumbers = {
@@ -277,13 +277,13 @@ const ClientsProfileUpdate = () => {
     setPhoneNumbers(phoneNumbers);
   }
 
-  useEffect(() =>{
-    if(clientProfileData){
+  useEffect(() => {
+    if (clientProfileData) {
       fillPhoneNumberFields();
     }
   }, [clientProfileData]);
 
-  useEffect(()=>{
+  useEffect(() => {
   }, [phoneNumbers]);
 
   const handlePolicyAndPolicyPayments = () => {
@@ -336,13 +336,13 @@ const ClientsProfileUpdate = () => {
       setOnlineBookingPaymentPolicy("No payment requirements for online booking")
     }
   }
-  useEffect(()=>{}, [phoneNumbers]);
+  useEffect(() => { }, [phoneNumbers]);
   const handleCountryStateCity = () => {
-    handleCountryChange({target:{value:clientProfileData?.client_detail?.country}});
-    handleStateChange({target:{value:clientProfileData?.client_detail?.state}});
-    handleCityChange({target:{value:clientProfileData?.client_detail?.city}});
+    handleCountryChange({ target: { value: clientProfileData?.client_detail?.country } });
+    handleStateChange({ target: { value: clientProfileData?.client_detail?.state } });
+    handleCityChange({ target: { value: clientProfileData?.client_detail?.city } });
   };
-  useEffect(()=>{}, [clientProfileData.country]);
+  useEffect(() => { }, [clientProfileData.country]);
 
   const handlePolicy = () => {
     if (clientProfileData?.online_booking_policy?.online_booking_allowed === "true") {
@@ -370,7 +370,7 @@ const ClientsProfileUpdate = () => {
     setRequiresCreditCardOnFile(clientProfileData?.online_booking_payment_policy?.requires_credit_card_on_file === "true");
     setNoPaymentReqired(clientProfileData?.online_booking_payment_policy?.no_payment_reqired === "true");
   }
-  useEffect(()=>{}, [clientProfileData?.online_booking_policy,clientProfileData?.online_booking_payment_policy]);
+  useEffect(() => { }, [clientProfileData?.online_booking_policy, clientProfileData?.online_booking_payment_policy]);
 
   const handleScroll = () => {
     document.getElementById(params.type)?.scrollIntoView({ behavior: 'smooth' });
@@ -396,17 +396,17 @@ const ClientsProfileUpdate = () => {
   }, [selectedEmployeeData?.id, params.id]);
 
   useEffect(() => {
-    if (Object.keys(clientProfileData).length  > 0) {
+    if (Object.keys(clientProfileData).length > 0) {
       fillFormDataFields();
       fillCheckboxFields();
       fillPhoneNumberFields();
       handleCountryStateCity();
       handlePolicy();
-       handlePolicyAndPolicyPayments();
-    }else{
+      handlePolicyAndPolicyPayments();
+    } else {
       getClientDetails()
     }
-    
+
   }, [clientProfileData]);
 
   const getEmployees = async (refetch = false) => {
@@ -420,7 +420,10 @@ const ClientsProfileUpdate = () => {
             client?.email.trim() !== ""
         );
         setEmployeeList(newData);
-        handleSelect(newData[0]);
+        let selectedClientData = newData.find(client => client.id == params.id);
+        if (selectedClientData) {
+          handleSelect(selectedClientData);
+        }
       }
     } catch (error) {
     }
@@ -456,6 +459,10 @@ const ClientsProfileUpdate = () => {
     addTabs.splice(3, 0, { name: "Chart Entries", value: "chart_entries" });
     setRadioTabs(addTabs);
   };
+  useEffect(() => { }, [requiresFullPayment, requiresDeposit, requiresCreditCardOnFile, noPaymentReqired, onlineBookingPaymentPolicy])
+  const handleNavigateToClient = (customerId) => {
+    Navigate(`/customers/${customerId}`)
+  };
 
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
@@ -468,6 +475,7 @@ const ClientsProfileUpdate = () => {
             if (window.innerWidth < 1024) {
               collapse();
             }
+            handleNavigateToClient(employee?.id)
           }}
           className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
             ? "pointer-events-none bg-gray-200 "
@@ -486,7 +494,7 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: value,
     }));
-    if(name === "dobYear"){
+    if (name === "dobYear") {
       if (/^\d{0,4}$/.test(value)) {
         setFormData(prevState => ({
           ...prevState,
@@ -494,7 +502,7 @@ const ClientsProfileUpdate = () => {
         }));
       }
     }
-    if(name === "dobDay"){
+    if (name === "dobDay") {
       if (/^\d{0,2}$/.test(value)) {
         setFormData(prevState => ({
           ...prevState,
@@ -552,7 +560,7 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleStateChange = (event) => {
-    const stateName = event.target.value; 
+    const stateName = event.target.value;
     const selectedStateObj = states.find(state => state.name === stateName);
     if (selectedStateObj) {
       formData.state = stateName
@@ -560,9 +568,9 @@ const ClientsProfileUpdate = () => {
       setSelectedState(stateName);
       const updatedFormData = { ...formData, state: selectedStateObj.name };
       setFormData(updatedFormData);
-      const cityList = City.getCitiesOfState(selectedStateObj.countryCode,selectedStateObj.isoCode)
+      const cityList = City.getCitiesOfState(selectedStateObj.countryCode, selectedStateObj.isoCode)
       setCities(cityList);
-      
+
     } else {
       setSelectedState("");
       setCities([]);
@@ -576,7 +584,6 @@ const ClientsProfileUpdate = () => {
     setFormData(formData)
     formData.city = city
     setFormData(formData)
-
   };
 
   const handleCheckboxChange = (event) => {
@@ -614,73 +621,73 @@ const ClientsProfileUpdate = () => {
     };
 
     // Client basic information
-    appendIfChanged('client[name]', formData.name, clientProfileData.name);
-    appendIfChanged('client[last_name]', formData.last_name, clientProfileData.last_name);
-    appendIfChanged('client[preferred_name]', formData.preferred_name, clientProfileData.preferred_name);
-    appendIfChanged('client[pronouns]', formData.pronouns, clientProfileData.pronouns);
-    appendIfChanged('client[prefix]', formData.prefix, clientProfileData.prefix);
-    appendIfChanged('client[middle_name]', formData.middle_name, clientProfileData.middle_name);
-    appendIfChanged('client[address]', formData.address, clientProfileData.address);
-    appendIfChanged('client[phone_number]', phoneNumbers.mobile_phone, clientProfileData.phone_number);
+    appendIfChanged('client[name]', formData.name, clientProfileData?.name);
+    appendIfChanged('client[last_name]', formData.last_name, clientProfileData?.last_name);
+    appendIfChanged('client[preferred_name]', formData.preferred_name, clientProfileData?.preferred_name);
+    appendIfChanged('client[pronouns]', formData.pronouns, clientProfileData?.pronouns);
+    appendIfChanged('client[prefix]', formData.prefix, clientProfileData?.prefix);
+    appendIfChanged('client[middle_name]', formData.middle_name, clientProfileData?.middle_name);
+    appendIfChanged('client[address]', formData.address, clientProfileData?.address);
+    appendIfChanged('client[phone_number]', phoneNumbers.mobile_phone, clientProfileData?.phone_number);
 
     // Client detail attributes
-    appendIfChanged('client[client_detail_attributes][city]', formData.city, clientProfileData.client_detail.city);
-    appendIfChanged('client[client_detail_attributes][state]', formData.state, clientProfileData.client_detail.state);
-    appendIfChanged('client[client_detail_attributes][zip_code]', formData.zip_code, clientProfileData.client_detail.zip_code);
-    appendIfChanged('client[client_detail_attributes][country]', formData.country, clientProfileData.client_detail.country);
-    appendIfChanged('client[client_detail_attributes][gender]', formData.gender, clientProfileData.client_detail.gender);
-    appendIfChanged('client[client_detail_attributes][sex]', formData.sex, clientProfileData.client_detail.sex);
-    appendIfChanged('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`, clientProfileData.date_of_birth);
+    appendIfChanged('client[client_detail_attributes][city]', formData.city, clientProfileData?.client_detail?.city);
+    appendIfChanged('client[client_detail_attributes][state]', formData.state, clientProfileData?.client_detail?.state);
+    appendIfChanged('client[client_detail_attributes][zip_code]', formData.zip_code, clientProfileData?.client_detail?.zip_code);
+    appendIfChanged('client[client_detail_attributes][country]', formData.country, clientProfileData?.client_detail?.country);
+    appendIfChanged('client[client_detail_attributes][gender]', formData.gender, clientProfileData?.client_detail?.gender);
+    appendIfChanged('client[client_detail_attributes][sex]', formData.sex, clientProfileData?.client_detail?.sex);
+    appendIfChanged('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`, clientProfileData?.date_of_birth);
 
     // Phone numbers
-    appendIfChanged('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone, clientProfileData.client_detail.home_phone);
-    appendIfChanged('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone, clientProfileData.client_detail.mobile_phone);
-    appendIfChanged('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone, clientProfileData.client_detail.work_phone);
-    appendIfChanged('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone, clientProfileData.client_detail.fax_phone);
+    appendIfChanged('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone, clientProfileData?.client_detail?.home_phone);
+    appendIfChanged('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone, clientProfileData?.client_detail?.mobile_phone);
+    appendIfChanged('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone, clientProfileData?.client_detail?.work_phone);
+    appendIfChanged('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone, clientProfileData?.client_detail?.fax_phone);
     // contact details
-    appendIfChanged('client[client_detail_attributes][personal_health_number]', formData.personal_health_number, clientProfileData.personal_health_number);
-    appendIfChanged('client[client_detail_attributes][family_doctor]', formData.family_doctor, clientProfileData.family_doctor);
-    appendIfChanged('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone, clientProfileData.family_doctor_phone);
-    appendIfChanged('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email, clientProfileData.family_doctor_email);
-    appendIfChanged('client[client_detail_attributes][referring_professional]', formData.referring_professional, clientProfileData.referring_professional);
-    appendIfChanged('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone, clientProfileData.referring_professional_phone);
-    appendIfChanged('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email, clientProfileData.referring_professional_email);
-    appendIfChanged('client[client_detail_attributes][emergency_contact]', formData.emergency_contact, clientProfileData.emergency_contact);
-    appendIfChanged('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone, clientProfileData.emergency_contact_phone);
-    appendIfChanged('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship, clientProfileData.emergency_contact_relationship);
-    appendIfChanged('client[client_detail_attributes][parent_guardian]', formData.parent_guardian, clientProfileData.parent_guardian);
-    appendIfChanged('client[client_detail_attributes][occupation]', formData.occupation, clientProfileData.occupation);
-    appendIfChanged('client[client_detail_attributes][employer]', formData.employer, clientProfileData.employer);
+    appendIfChanged('client[client_detail_attributes][personal_health_number]', formData.personal_health_number, clientProfileData?.personal_health_number);
+    appendIfChanged('client[client_detail_attributes][family_doctor]', formData.family_doctor, clientProfileData?.family_doctor);
+    appendIfChanged('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone, clientProfileData?.family_doctor_phone);
+    appendIfChanged('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email, clientProfileData?.family_doctor_email);
+    appendIfChanged('client[client_detail_attributes][referring_professional]', formData.referring_professional, clientProfileData?.referring_professional);
+    appendIfChanged('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone, clientProfileData?.referring_professional_phone);
+    appendIfChanged('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email, clientProfileData?.referring_professional_email);
+    appendIfChanged('client[client_detail_attributes][emergency_contact]', formData.emergency_contact, clientProfileData?.emergency_contact);
+    appendIfChanged('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone, clientProfileData?.emergency_contact_phone);
+    appendIfChanged('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship, clientProfileData?.emergency_contact_relationship);
+    appendIfChanged('client[client_detail_attributes][parent_guardian]', formData.parent_guardian, clientProfileData?.parent_guardian);
+    appendIfChanged('client[client_detail_attributes][occupation]', formData.occupation, clientProfileData?.occupation);
+    appendIfChanged('client[client_detail_attributes][employer]', formData.employer, clientProfileData?.employer);
 
     // Schedules attributes and notification settings
-    appendIfChanged('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days, clientProfileData.notification_settings.email_reminder_2_days);
-    appendIfChanged('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days, clientProfileData.notification_settings.sms_reminder_2_days);
-    appendIfChanged('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours, clientProfileData.notification_settings.sms_reminder_24_hours);
-    appendIfChanged('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled, clientProfileData.notification_settings.email_new_cancelled);
-    appendIfChanged('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings, clientProfileData.notification_settings.email_waitlist_openings);
-    appendIfChanged('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings, clientProfileData.notification_settings.sms_waitlist_openings);
-    appendIfChanged('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails, clientProfileData.notification_settings.ok_to_send_marketing_emails);
-    appendIfChanged('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails, clientProfileData.notification_settings.send_ratings_emails);
-    appendIfChanged('client[notification_settings][do_not_email]', checkboxData.do_not_email, clientProfileData.notification_settings.do_not_email);
+    appendIfChanged('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days, clientProfileData?.notification_settings?.email_reminder_2_days);
+    appendIfChanged('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days, clientProfileData?.notification_settings?.sms_reminder_2_days);
+    appendIfChanged('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours, clientProfileData?.notification_settings?.sms_reminder_24_hours);
+    appendIfChanged('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled, clientProfileData?.notification_settings?.email_new_cancelled);
+    appendIfChanged('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings, clientProfileData?.notification_settings?.email_waitlist_openings);
+    appendIfChanged('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings, clientProfileData?.notification_settings?.sms_waitlist_openings);
+    appendIfChanged('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails, clientProfileData?.notification_settings?.ok_to_send_marketing_emails);
+    appendIfChanged('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails, clientProfileData?.notification_settings?.send_ratings_emails);
+    appendIfChanged('client[notification_settings][do_not_email]', checkboxData.do_not_email, clientProfileData?.notification_settings?.do_not_email);
 
     // Who were you referred to?
-    appendIfChanged('client[referred_employee_id]', formData.referred_employee_id, clientProfileData.referred_employee_id);
+    appendIfChanged('client[referred_employee_id]', formData.referred_employee_id, clientProfileData?.referred_employee_id);
 
     //online booking policy
     appendIfChanged('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed, clientProfileData?.online_booking_allowed);
     appendIfChanged('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled, clientProfileData?.online_booking_disabled);
 
     //online booking policy payments
-    appendIfChanged('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired, clientProfileData.no_payment_reqired);
-    appendIfChanged('client[online_booking_payment_policy][requires_deposit]', requiresDeposit, clientProfileData.requires_deposit);
-    appendIfChanged('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment, clientProfileData.requires_full_payment);
-    appendIfChanged('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile, clientProfileData.requires_credit_card_on_file);
+    appendIfChanged('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired, clientProfileData?.no_payment_reqired);
+    appendIfChanged('client[online_booking_payment_policy][requires_deposit]', requiresDeposit, clientProfileData?.requires_deposit);
+    appendIfChanged('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment, clientProfileData?.requires_full_payment);
+    appendIfChanged('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile, clientProfileData?.requires_credit_card_on_file);
 
     //how you heard
-    appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData.how_heard_about_us);
+    appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData?.how_heard_about_us);
 
     //profile photo
-    appendIfChanged('client[profile_pic]', selectedFiles, clientProfileData.profile_pic);
+    appendIfChanged('client[profile_photo]', selectedFiles, clientProfileData?.profile_pic);
     let response = await UpdateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
       toast.success("Client Profile Updated Successfully");
@@ -722,7 +729,7 @@ const ClientsProfileUpdate = () => {
       setOnlineBookingPolicy(e.target.value)
     }
   };
-  useEffect(()=>{},[onlineBookingAllowed,onlineBookingDisabled,onlineBookingPolicy])
+  useEffect(() => { }, [onlineBookingAllowed, onlineBookingDisabled, onlineBookingPolicy])
 
   const handleOnlineBookingPaymentPolicyChange = (e) => {
     if (e.target.value === "Online booking requires full payment") {
@@ -753,9 +760,12 @@ const ClientsProfileUpdate = () => {
       setNoPaymentReqired(true)
       setOnlineBookingPaymentPolicy(e.target.value)
     }
-    
+
   };
-  useEffect(()=>{},[requiresFullPayment,requiresDeposit,requiresCreditCardOnFile,noPaymentReqired,onlineBookingPaymentPolicy])
+  useEffect(() => { }, [requiresFullPayment, requiresDeposit, requiresCreditCardOnFile, noPaymentReqired, onlineBookingPaymentPolicy])
+  const handleAddNewClient = (clientData) => {
+    Navigate(`/add-new-client`)
+  };
 
   return (
     <>
@@ -788,8 +798,7 @@ const ClientsProfileUpdate = () => {
             </div>
             <Button
               onClick={() => {
-                setShowCreateClientModel(true);
-                setCurrentTab("client");
+                handleAddNewClient()
               }}
               variant="info"
               className="w-full text-white"
@@ -966,7 +975,7 @@ const ClientsProfileUpdate = () => {
                           <PhoneInput
                             country={'us'}
                             value={phoneNumbers?.home_phone}
-                            onChange={(value) =>{console.log(value); handleChange(value, 'home_phone')}}
+                            onChange={(value) => {handleChange(value, 'home_phone') }}
                           />
                         </div>
                       </Form.Group>

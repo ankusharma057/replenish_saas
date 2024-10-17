@@ -172,7 +172,7 @@ function App() {
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />
           <Route path="/clients/signin" element={<ClientSignIn />} />
-          <Route path="/customers" element={<AllClientRoot />} />
+          <Route path="/customers/:clientId?" element={<AllClientRoot />} />
           <Route path="/clients" element={<ClientRoot />} />
           <Route path="/clients/location" element={<ClientLocation />} />
           <Route path="/clients/intake-form/:id?" element={<IntakeFormPreview />} />
@@ -250,7 +250,7 @@ function App() {
                   <Route path="/addinvoice" element={<AddInvoices />} />
                   <Route path="/intake-forms" element={<IntakeForm />} />
                   <Route path="/new-intake-form" element={<NewIntakeForm />} />
-                  <Route path="/customers" element={<AllClientRoot />} />
+                  <Route path="/customers/:clientId?" element={<AllClientRoot />} />
                 </>
               )}
             </>

@@ -40,7 +40,7 @@ import { BiSolidPencil } from "react-icons/bi";
 import { IoCallSharp, IoMailSharp, IoHome, IoMegaphoneSharp, IoChatbubble, IoDocumentText } from "react-icons/io5";
 import { BsFileEarmarkTextFill, BsFillGearFill, BsSliders2, BsThreeDotsVertical } from "react-icons/bs";
 import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import CreateClientCard from "../components/Cards/CreateClientCart";
 import ScheduleCalender from "../components/Schedule/ScheduleCalender";
 import { MdDelete } from "react-icons/md";
@@ -61,6 +61,7 @@ import ClientProfile from "./ClientProfile";
 
 
 const AllClientRoot = () => {
+    const { clientId } = useParams();
     const { authUserState } = useAuthContext();
     // const [invoiceList, setInvoiceList] = useState([]);
     // const [invModalSHow, setInvModalSHow] = useState(false);
@@ -99,6 +100,18 @@ const AllClientRoot = () => {
     }
   };
 
+    const handleDynamicClient = () => {
+        if (clientId) {
+            let employee = employeeList.find(employee => employee.id == clientId)
+            if (employee) {
+                setSelectedEmployeeData(employee);
+            }
+        }
+    };
+
+    useEffect(() => {
+        handleDynamicClient()
+    }, [clientId,selectedEmployeeData]);
     useEffect(() => {
     getClientSchedule(selectedEmployeeData?.id, true);
     }, [selectedEmployeeData]);
