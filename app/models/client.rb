@@ -12,7 +12,7 @@ class Client < ApplicationRecord
   belongs_to :referred_employee, class_name: 'Client', optional: true
 
 
-  accepts_nested_attributes_for :client_detail
+  accepts_nested_attributes_for :client_detail, update_only: true
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'Email Not valid' }, allow_nil: true
   validates :email, uniqueness: { message: 'Email already taken' }, allow_nil: true
@@ -21,7 +21,7 @@ class Client < ApplicationRecord
   validates :email, presence: true
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
-  after_initialize :set_default_notification_settings, :set_booking_policy, :set_booking_payment_policy
+  after_initialize :set_defaults
   before_save :clear_temp_password_if_activated
 
 
@@ -50,6 +50,12 @@ class Client < ApplicationRecord
   end
 
   private
+
+  def set_defaults
+    set_default_notification_settings
+    set_booking_policy
+    set_booking_payment_policy
+  end
 
   def set_default_notification_settings
     self.notification_settings ||= {

@@ -86,7 +86,6 @@ class Api::ClientsController < ApplicationController
   def client_params
     params.require(:client).permit(
       :created_at,
-      :profile_photo,
       :email, 
       :name, 
       :last_name,
