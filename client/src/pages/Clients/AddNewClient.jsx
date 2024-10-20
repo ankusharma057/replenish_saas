@@ -56,7 +56,6 @@ const ClientsProfileUpdate = () => {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [disableCheckbox, setDisableCheckbox] = useState(false);
-  const [clientProfileData, setClientProfileData] = useState();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -169,88 +168,6 @@ const ClientsProfileUpdate = () => {
       console.log(error);
     }
   };
-
-  const getClientDetails = async () => {
-    try {
-      const response = await GetClientDetails(params.id, true)
-      if (response?.status === 200) {
-        setClientProfileData(response?.data)
-        fillClientProfileData();
-      }
-      else {
-        toast.error("Something went wrong")
-      }
-    }
-    catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fillClientProfileData = () => {
-    const formData = {
-      name: clientProfileData.name ?? '',
-      last_name: clientProfileData.last_name ?? '',
-      middle_name: clientProfileData.middle_name ?? '',
-      preferred_name: clientProfileData.preferred_name ?? '',
-      pronouns: clientProfileData.pronouns ?? '',
-      prefix: clientProfileData.prefix ?? '',
-      email: clientProfileData.email ?? '',
-      phone: clientProfileData.phone ?? '',
-      address: clientProfileData.address ?? '',
-      city: clientProfileData.city ?? '',
-      state: clientProfileData.state ?? '',
-      zip_code: clientProfileData.zip_code ?? '',
-      country: clientProfileData.country ?? '',
-      gender: clientProfileData.gender ?? '',
-      sex: clientProfileData.sex ?? '',
-      date_of_birth: clientProfileData.date_of_birth ?? '',
-      personal_health_number: clientProfileData.personal_health_number ?? '',
-      family_doctor: clientProfileData.family_doctor ?? '',
-      family_doctor_phone: clientProfileData.family_doctor_phone ?? '',
-      family_doctor_email: clientProfileData.family_doctor_email ?? '',
-      referring_professional: clientProfileData.referring_professional ?? '',
-      referring_professional_phone: clientProfileData.referring_professional_phone ?? '',
-      referring_professional_email: clientProfileData.referring_professional_email ?? '',
-      emergency_contact: clientProfileData.emergency_contact ?? '',
-      emergency_contact_phone: clientProfileData.emergency_contact_phone ?? '',
-      emergency_contact_relationship: clientProfileData.emergency_contact_relationship ?? '',
-      parent_guardian: clientProfileData.parent_guardian ?? '',
-      occupation: clientProfileData.occupation ?? '',
-      employer: clientProfileData.employer ?? '',
-      howHearJob: clientProfileData.howHearJob ?? '',
-      who_were_you_referred_to: clientProfileData.who_were_you_referred_to ?? '',
-      online_Booking_Policy: clientProfileData.online_Booking_Policy ?? '',
-      online_Booking_Payment_Policy: clientProfileData.online_Booking_Payment_Policy ?? '',
-      dobMonth: clientProfileData.dobMonth ?? '',
-      dobDay: clientProfileData.dobDay ?? '',
-      dobYear: clientProfileData.dobYear ?? '',
-    };
-
-    const checkboxData = {
-      email_reminder_2_days: clientProfileData.email_reminder_2_days ?? false,
-      sms_reminder_2_days: clientProfileData.sms_reminder_2_days ?? false,
-      sms_reminder_24_hours: clientProfileData.sms_reminder_24_hours ?? false,
-      email_new_cancelled: clientProfileData.email_new_cancelled ?? false,
-      email_waitlist_openings: clientProfileData.email_waitlist_openings ?? false,
-      sms_waitlist_openings: clientProfileData.sms_waitlist_openings ?? false,
-      ok_to_send_marketing_emails: clientProfileData.ok_to_send_marketing_emails ?? false,
-      send_ratings_emails: clientProfileData.send_ratings_emails ?? false,
-      do_not_email: clientProfileData.do_not_email ?? false,
-      discharged: clientProfileData.discharged ?? false,
-      deceased: clientProfileData.deceased ?? false,
-    };
-
-    const phoneNumbers = {
-      home_phone: clientProfileData.home_phone ?? '',
-      work_phone: clientProfileData.work_phone ?? '',
-      mobile_phone: clientProfileData.mobile_phone ?? '',
-      fax_phone: clientProfileData.fax_phone ?? '',
-    };
-
-    setFormData(formData)
-    setCheckboxData(checkboxData)
-    setPhoneNumbers(phoneNumbers)
-  }
   const getEmployesList = async () => {
     let response = await getEmployeesList(true)
     if (response.status === 200) {
@@ -317,8 +234,8 @@ const ClientsProfileUpdate = () => {
     setRadioTabs(addTabs);
   };
 
-  const handleNavigateToClient = (customerId) => {
-    Navigate(`/customers/${customerId}`)
+  const handleNavigateToClient = () => {
+    Navigate(`/customers`)
   };
 
   const EmployeeItem = ({ index, style }) => {
@@ -332,7 +249,7 @@ const ClientsProfileUpdate = () => {
             if (window.innerWidth < 1024) {
               collapse();
             }
-            handleNavigateToClient(employee?.id)
+            handleNavigateToClient()
           }}
           className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 cursor-pointer"`}
         >
@@ -365,6 +282,8 @@ const ClientsProfileUpdate = () => {
   const handleCountryChange = (event) => {
     const selectedCountryObj = Country.getAllCountries().find(country => country.name === event.target.value);
     if (selectedCountryObj) {
+      formData.country = selectedCountryObj.name
+      setFormData(formData)
       setSelectedCountry(selectedCountryObj.name);
       setSelectedCountryCode(selectedCountryObj.isoCode);
       setSelectedState('');
@@ -382,15 +301,15 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleStateChange = (event) => {
-    const stateName = event.target.value; //
+    const stateName = event.target.value;
     const selectedStateObj = states.find(state => state.name === stateName);
     if (selectedStateObj) {
-      setSelectedState(stateName);
       formData.state = stateName
       setFormData(formData)
-      const updatedFormData = { ...formData, state: selectedStateObj.isoCode };
+      setSelectedState(stateName);
+      const updatedFormData = { ...formData, state: selectedStateObj.name };
       setFormData(updatedFormData);
-      const cityList = City.getCitiesOfState(selectedCountryCode, selectedStateObj.isoCode);
+      const cityList = City.getCitiesOfState(selectedStateObj.countryCode, selectedStateObj.isoCode)
       setCities(cityList);
     } else {
       setSelectedState("");
@@ -403,8 +322,8 @@ const ClientsProfileUpdate = () => {
     setSelectedCity(city);
     formData.city = city
     setFormData(formData)
-    console.log(formData);
-
+    formData.city = city
+    setFormData(formData)
   };
 
   const handleCheckboxChange = (event) => {
@@ -426,53 +345,117 @@ const ClientsProfileUpdate = () => {
       }
       setCheckboxData(checkboxPayload)
       setDisableCheckbox(true)
+
     }
   };
-
-  const handleScroll = () => {
-    if (window.scrollY > 100) {
-      setShowHeader(true);
-    } else {
-      setShowHeader(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataPayload = new FormData();
+    console.log("@@@@@@@formdata",formData);
+    console.log("@@@@@@@phonenumbers",phoneNumbers);
+    console.log("@@@@@@@country",selectedCountry);
+    console.log("@@@@@@@state",selectedState);
+    console.log("@@@@@@@city",selectedCity);
 
-    // Basic client information
-
+  //   const formDataPayload = {
+  //     client: {
+  //         name: formData?.name || '',
+  //         last_name: formData?.last_name || '',
+  //         preferred_name: formData?.preferred_name || '',
+  //         pronouns: formData?.pronouns || '',
+  //         prefix: formData?.prefix || '',
+  //         middle_name: formData?.middle_name || '',
+  //         address: formData?.address || '',
+  //         phone_number: phoneNumbers.mobile_phone || '',
+  //         client_detail_attributes: {
+  //             city:formData?.city || '',
+  //             state: formData?.state || '',
+  //             zip_code: formData.zip_code || '',
+  //             country: formData.country || '',
+  //             gender: formData.gender || '',
+  //             sex: formData.sex || '',
+  //             date_of_birth: (formData.dobYear || formData.dobMonth || formData.dobDay) 
+  //                 ? `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}` 
+  //                 : '',
+  //             home_phone: phoneNumbers.home_phone || '',
+  //             mobile_phone: phoneNumbers.mobile_phone || '',
+  //             work_phone: phoneNumbers.work_phone || '',
+  //             fax_phone: phoneNumbers.fax_phone || '',
+  //             personal_health_number: formData.personal_health_number || '',
+  //             family_doctor: formData.family_doctor || '',
+  //             family_doctor_phone: formData.family_doctor_phone || '',
+  //             family_doctor_email: formData.family_doctor_email || '',
+  //             referring_professional: formData.referring_professional || '',
+  //             referring_professional_phone: formData.referring_professional_phone || '',
+  //             referring_professional_email: formData.referring_professional_email || '',
+  //             emergency_contact: formData.emergency_contact || '',
+  //             emergency_contact_phone: formData.emergency_contact_phone || '',
+  //             emergency_contact_relationship: formData.emergency_contact_relationship || '',
+  //             parent_guardian: formData.parent_guardian || '',
+  //             occupation: formData.occupation || '',
+  //             employer: formData.employer || '',
+  //         },
+  //         notification_settings: {
+  //             email_reminder_2_days: checkboxData?.email_reminder_2_days || false,
+  //             sms_reminder_2_days: checkboxData?.sms_reminder_2_days || false,
+  //             sms_reminder_24_hours: checkboxData?.sms_reminder_24_hours || false,
+  //             email_new_cancelled: checkboxData?.email_new_cancelled || false,
+  //             email_waitlist_openings: checkboxData?.email_waitlist_openings || false,
+  //             sms_waitlist_openings: checkboxData?.sms_waitlist_openings || false,
+  //             ok_to_send_marketing_emails: checkboxData?.ok_to_send_marketing_emails || false,
+  //             send_ratings_emails: checkboxData?.send_ratings_emails || false,
+  //             do_not_email: checkboxData?.do_not_email || false,
+  //         },
+  //         referred_employee_id: formData?.referred_employee_id || '',
+  //         online_booking_policy: {
+  //             online_booking_allowed: onlineBookingAllowed || false,
+  //             online_booking_disabled: onlineBookingDisabled || false,
+  //         },
+  //         online_booking_payment_policy: {
+  //             no_payment_required: checkboxData.no_payment_required || false,
+  //             requires_deposit: checkboxData.requires_deposit || false,
+  //             requires_full_payment: checkboxData.requires_full_payment || false,
+  //             requires_credit_card_on_file: checkboxData.requires_credit_card_on_file || false,
+  //         },
+  //         how_heard_about_us: formData?.how_heard_about_us || '',
+  //     }
+  // };
+  
+    
+    // Client basic information
     formDataPayload.append('client[name]', formData?.name);
-    formDataPayload.append('client[last_name]', formData?.last_name);
     formDataPayload.append('client[email]', formData?.email);
-    formDataPayload.append('client[preferred_name]', formData.preferred_name);
-    formDataPayload.append('client[pronouns]', formData.pronouns);
-    formDataPayload.append('client[prefix]', formData.prefix);
-    formDataPayload.append('client[middle_name]', formData.middle_name);
-    formDataPayload.append('client[address]', formData.address);
+    formDataPayload.append('client[last_name]', formData?.last_name);
+    formDataPayload.append('client[preferred_name]', formData?.preferred_name);
+    formDataPayload.append('client[pronouns]', formData?.pronouns);
+    formDataPayload.append('client[prefix]', formData?.prefix);
+    formDataPayload.append('client[middle_name]', formData?.middle_name);
+    formDataPayload.append('client[address]', formData?.address);
     formDataPayload.append('client[phone_number]', phoneNumbers.mobile_phone);
 
-    // Client detail attributes
-    formDataPayload.append('client[client_detail_attributes][city]', formData.city);
+    // // // // Client detail attributes
+    formDataPayload.append('client[client_detail_attributes][city]', selectedCity);
     formDataPayload.append('client[client_detail_attributes][state]', formData.state);
     formDataPayload.append('client[client_detail_attributes][zip_code]', formData.zip_code);
     formDataPayload.append('client[client_detail_attributes][country]', formData.country);
     formDataPayload.append('client[client_detail_attributes][gender]', formData.gender);
     formDataPayload.append('client[client_detail_attributes][sex]', formData.sex);
-    formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
-
-    // Phone numbers
+    if(formData.dobYear ||formData.dobMonth ||formData.dobDay){
+      if(formData.dobYear !== "" ||formData.dobMonth !== "" ||formData.dobDay !== ""){
+        formDataPayload.append('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`);
+      }
+    }
+    // // // Phone numbers
     formDataPayload.append('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone);
     formDataPayload.append('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone);
     formDataPayload.append('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone);
     formDataPayload.append('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone);
-
-    // Contact details
+    // // // contact details
     formDataPayload.append('client[client_detail_attributes][personal_health_number]', formData.personal_health_number);
     formDataPayload.append('client[client_detail_attributes][family_doctor]', formData.family_doctor);
     formDataPayload.append('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone);
     formDataPayload.append('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email);
+    
     formDataPayload.append('client[client_detail_attributes][referring_professional]', formData.referring_professional);
     formDataPayload.append('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone);
     formDataPayload.append('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email);
@@ -483,37 +466,36 @@ const ClientsProfileUpdate = () => {
     formDataPayload.append('client[client_detail_attributes][occupation]', formData.occupation);
     formDataPayload.append('client[client_detail_attributes][employer]', formData.employer);
 
-    // Notification settings
-    formDataPayload.append('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days);
-    formDataPayload.append('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days);
-    formDataPayload.append('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours);
-    formDataPayload.append('client[notification_settings][email_new_cancelled]', checkboxData.email_new_cancelled);
-    formDataPayload.append('client[notification_settings][email_waitlist_openings]', checkboxData.email_waitlist_openings);
-    formDataPayload.append('client[notification_settings][sms_waitlist_openings]', checkboxData.sms_waitlist_openings);
-    formDataPayload.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData.ok_to_send_marketing_emails);
-    formDataPayload.append('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails);
-    formDataPayload.append('client[notification_settings][do_not_email]', checkboxData.do_not_email);
+    // Schedules attributes and notification settings    
+    formDataPayload.append('client[notification_settings][email_reminder_2_days]', checkboxData?.email_reminder_2_days);
+    formDataPayload.append('client[notification_settings][sms_reminder_2_days]', checkboxData?.sms_reminder_2_days);
+    formDataPayload.append('client[notification_settings][sms_reminder_24_hours]', checkboxData?.sms_reminder_24_hours);
+    formDataPayload.append('client[notification_settings][email_new_cancelled]', checkboxData?.email_new_cancelled);
+    formDataPayload.append('client[notification_settings][email_waitlist_openings]', checkboxData?.email_waitlist_openings);
+    formDataPayload.append('client[notification_settings][sms_waitlist_openings]', checkboxData?.sms_waitlist_openings);
+    formDataPayload.append('client[notification_settings][ok_to_send_marketing_emails]', checkboxData?.ok_to_send_marketing_emails);
+    formDataPayload.append('client[notification_settings][send_ratings_emails]', checkboxData?.send_ratings_emails);
+    formDataPayload.append('client[notification_settings][do_not_email]', checkboxData?.do_not_email);
 
-    // Referral information
-    formDataPayload.append('client[referred_employee_id]', formData.referred_employee_id);
+    // Who were you referred to?
+    formDataPayload.append('client[referred_employee_id]', formData?.referred_employee_id);
 
-    // Online booking policy
+    //online booking policy
     formDataPayload.append('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed);
     formDataPayload.append('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled);
 
-    // Online booking payment policy
-    formDataPayload.append('client[online_booking_payment_policy][no_payment_required]', noPaymentReqired);
+    //online booking policy payments
+    formDataPayload.append('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired);
     formDataPayload.append('client[online_booking_payment_policy][requires_deposit]', requiresDeposit);
     formDataPayload.append('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment);
     formDataPayload.append('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile);
 
-    // How you heard about us
-    formDataPayload.append('client[how_heard_about_us]', formData.how_heard_about_us);
+    //how you heard
+    formDataPayload.append('client[how_heard_about_us]', formData?.how_heard_about_us);
 
-    //profile pic
-    formDataPayload.append('client[profile_photo]', selectedFiles);
-
-    let response = await CreateClient(params.id, true, formData)
+    //profile photo
+  
+    let response = await CreateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
       toast.success("Client Created Successfully");
       handleNavigate();
@@ -566,6 +548,7 @@ const ClientsProfileUpdate = () => {
     }
   };
 
+  useEffect(() => { }, [onlineBookingAllowed, onlineBookingDisabled, onlineBookingPolicy])
 
   const handleOnlineBookingPaymentPolicyChange = (e) => {
     if (e.target.value === "Online booking requires full payment") {
@@ -914,7 +897,7 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Zip Code</Form.Label>
                         <Form.Control
-                          type="text"
+                          type="number"
                           placeholder="Zip Code"
                           name="zip_code"
                           value={formData.zip_code}
@@ -1002,7 +985,7 @@ const ClientsProfileUpdate = () => {
                       <Form.Group controlId="formFile" className="mb-3">
                         <Form.Label className="text-body-tertiary">Personal Health Number</Form.Label>
                         <Form.Control
-                          type="text"
+                          type="number"
                           name="personal_health_number"
                           value={formData.personal_health_number}
                           onChange={handleFormChange}
@@ -1029,7 +1012,7 @@ const ClientsProfileUpdate = () => {
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Phone</Form.Label>
                           <Form.Control
-                            type="text"
+                            type="number"
                             placeholder="Phone"
                             name="family_doctor_phone"
                             value={formData.family_doctor_phone}
@@ -1053,7 +1036,7 @@ const ClientsProfileUpdate = () => {
                     </Col>
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">Reffering Professional</Form.Label>
+                        <Form.Label className="text-body-tertiary">Referring Professional</Form.Label>
                         <Form.Control
                           type="number"
                           placeholder="Enter Emergency Contact"
@@ -1079,7 +1062,6 @@ const ClientsProfileUpdate = () => {
                           <Form.Label className="text-body-tertiary">Email</Form.Label>
                           <Form.Control
                             type="email"
-                            placeholder="Relationship"
                             name="referring_professional_email"
                             value={formData.referring_professional_email}
                             onChange={handleFormChange}
@@ -1297,8 +1279,8 @@ const ClientsProfileUpdate = () => {
                           <Form.Label className="text-body-tertiary">How did you hear about us?</Form.Label>
                           <Form.Control
                             type="search"
-                            name="howHearJob"
-                            value={formData.howHearJob}
+                            name="how_heard_about_us"
+                            value={formData.how_heard_about_us}
                             onChange={handleFormChange}
                           />
                         </Form.Group>

@@ -169,7 +169,6 @@ const ClientsProfileUpdate = () => {
       const response = await GetClientDetails(params.id, true)
       if (response?.status === 200) {
         setClientProfileData(response?.data);
-        fillFormDataFields(response?.data);
       }
       else {
         getClientDetails();
@@ -198,9 +197,27 @@ const ClientsProfileUpdate = () => {
     }
   }
 
-  const fillFormDataFields = () => {
-    const { year, month, day } = calculateDate(clientProfileData.client_detail?.date_of_birth);
-    const formDataResponse = {
+  
+  const fillFormDataFields = async () => {
+    let date_of_birth = { year: "", month: "", day: "" };
+    const calculateDob = () => {
+      return new Promise((resolve, reject) => {
+        const { year, month, day } = calculateDate(clientProfileData.client_detail?.date_of_birth);
+        date_of_birth = { year: year, month: months[month - 1]?.name, day: day };
+        resolve();
+      });
+    };
+    const processDob = async () => {
+        await calculateDob();
+        if (Object.values(date_of_birth).some(value => value === '')) {
+          await calculateDob();
+        }
+    };
+    if(clientProfileData.client_detail?.date_of_birth !== null){
+      await processDob();
+    }
+    setFormData(prevState => ({
+      ...prevState,
       name: clientProfileData?.name ?? '',
       last_name: clientProfileData?.last_name ?? '',
       middle_name: clientProfileData?.middle_name ?? '',
@@ -232,26 +249,26 @@ const ClientsProfileUpdate = () => {
       employer: clientProfileData?.client_detail?.employer ?? '',
       how_heard_about_us: clientProfileData?.how_heard_about_us ?? '',
       referred_employee_id: clientProfileData?.referred_employee?.id ?? '',
-      referred_employee: clientProfileData?.referred_employee?.name ?? '',
-      dobMonth: months[month - 1] ?? '',
-      dobDay: day ?? '',
-      dobYear: year ?? '',
-    }
-    setFormData(formDataResponse);
+      who_were_you_referred_to_name:clientProfileData?.referred_employee?.name,
+      dobMonth: date_of_birth.month,
+      dobDay: date_of_birth.day,
+      dobYear: date_of_birth.year,
+    }));
+
   }
   useEffect(() => { }, [formData]);
 
   const fillCheckboxFields = () => {
     const checkboxDetails = {
-      email_reminder_2_days: clientProfileData?.notification_settings?.email_reminder_2_days === "true",
-      sms_reminder_2_days: clientProfileData?.notification_settings?.sms_reminder_2_days === "true",
-      sms_reminder_24_hours: clientProfileData?.notification_settings?.sms_reminder_24_hours === "true",
-      email_new_cancelled: clientProfileData?.notification_settings?.email_new_cancelled === "true",
-      email_waitlist_openings: clientProfileData?.notification_settings?.email_waitlist_openings === "true",
-      sms_waitlist_openings: clientProfileData?.notification_settings?.sms_waitlist_openings === "true",
-      ok_to_send_marketing_emails: clientProfileData?.notification_settings?.ok_to_send_marketing_emails === "true",
-      send_ratings_emails: clientProfileData?.notification_settings?.send_ratings_emails === "true",
-      do_not_email: clientProfileData?.notification_settings?.do_not_email === "true",
+      email_reminder_2_days: clientProfileData?.notification_settings?.email_reminder_2_days === "true"?true:false,
+      sms_reminder_2_days: clientProfileData?.notification_settings?.sms_reminder_2_days === "true"?true:false,
+      sms_reminder_24_hours: clientProfileData?.notification_settings?.sms_reminder_24_hours === "true"?true:false,
+      email_new_cancelled: clientProfileData?.notification_settings?.email_new_cancelled === "true"?true:false,
+      email_waitlist_openings: clientProfileData?.notification_settings?.email_waitlist_openings === "true"?true:false,
+      sms_waitlist_openings: clientProfileData?.notification_settings?.sms_waitlist_openings === "true"?true:false,
+      ok_to_send_marketing_emails: clientProfileData?.notification_settings?.ok_to_send_marketing_emails === "true"?true:false,
+      send_ratings_emails: clientProfileData?.notification_settings?.send_ratings_emails === "true"?true:false,
+      do_not_email: clientProfileData?.notification_settings?.do_not_email === "true"?true:false,
       discharged: false,
       deceased: false,
     };
@@ -269,10 +286,10 @@ const ClientsProfileUpdate = () => {
 
   const fillPhoneNumberFields = () => {
     const phoneNumbers = {
-      home_phone: clientProfileData.client_detail?.home_phone,
-      work_phone: clientProfileData.client_detail?.work_phone,
-      mobile_phone: clientProfileData.client_detail?.mobile_phone,
-      fax_phone: clientProfileData.client_detail?.fax_phone,
+      home_phone: clientProfileData.client_detail?.home_phone === undefined || clientProfileData.client_detail?.home_phone === null ?"": clientProfileData.client_detail?.home_phone,
+      work_phone: clientProfileData.client_detail?.work_phone=== undefined || clientProfileData.client_detail?.work_phone === null ?"": clientProfileData.client_detail?.work_phone,
+      mobile_phone: clientProfileData.client_detail?.mobile_phone=== undefined || clientProfileData.client_detail?.mobile_phone === null ?"": clientProfileData.client_detail?.mobile_phone,
+      fax_phone: clientProfileData.client_detail?.fax_phone=== undefined || clientProfileData.client_detail?.fax_phone === null ?"":clientProfileData.client_detail?.fax_phone ,
     };
     setPhoneNumbers(phoneNumbers);
   }
@@ -461,7 +478,8 @@ const ClientsProfileUpdate = () => {
   };
   useEffect(() => { }, [requiresFullPayment, requiresDeposit, requiresCreditCardOnFile, noPaymentReqired, onlineBookingPaymentPolicy])
   const handleNavigateToClient = (customerId) => {
-    Navigate(`/customers/${customerId}`)
+    localStorage.setItem("clientId",customerId)
+    Navigate(`/customers`)
   };
 
   const EmployeeItem = ({ index, style }) => {
@@ -512,14 +530,14 @@ const ClientsProfileUpdate = () => {
     }
   };
 
-  const handleWhoRefered = async (event) => {
-    const selectedName = await event.target.value;
+  const handleWhoRefered = (event) => {
+    const selectedName = event.target.value;
     const employee = allEmployeeList.find((employee) => employee.name === selectedName);
 
     if (employee) {
-      await setFormData((prevState) => ({
+      setFormData((prevState) => ({
         ...prevState,
-        referred_employee_id: employee.id,
+        referred_employee_id: Number(employee.id),
         who_were_you_referred_to_name: selectedName,
       }));
 
@@ -592,19 +610,28 @@ const ClientsProfileUpdate = () => {
       ...prevState,
       [name]: checked,
     }));
-    if (name === "do_not_email") {
+    if (name === "do_not_email" && event.target.checked === true) {
+      setCheckboxData(prevState => ({
+        ...prevState,
+        email_new_cancelled: false,
+        email_waitlist_openings: false,
+        ok_to_send_marketing_emails: false,
+        send_ratings_emails: false,
+      }));
+    }else if (name === "do_not_email" && event.target.checked === false){
       let checkboxPayload = {
-        email_reminder_2_days: false,
-        sms_reminder_2_days: false,
-        sms_reminder_24_hours: false,
-        email_new_cancelled: !checkboxData.email_new_cancelled,
-        email_waitlist_openings: !checkboxData.email_waitlist_openings,
-        sms_waitlist_openings: false,
-        ok_to_send_marketing_emails: !checkboxData.ok_to_send_marketing_emails,
+        email_reminder_2_days: checkboxData.email_reminder_2_days,
+        sms_reminder_2_days: checkboxData.sms_reminder_2_days,
+        sms_reminder_24_hours: checkboxData.sms_reminder_24_hours,
+        email_new_cancelled: checkboxData.email_new_cancelled,
+        email_waitlist_openings: checkboxData.email_waitlist_openings,
+        ok_to_send_marketing_emails: checkboxData.ok_to_send_marketing_emails,
+        send_ratings_emails:checkboxData.send_ratings_emails,
+        sms_waitlist_openings: checkboxData.sms_waitlist_openings,
         do_not_email: !checkboxData.do_not_email,
       }
       setCheckboxData(checkboxPayload)
-      setDisableCheckbox(true)
+      setDisableCheckbox(!checkboxData.do_not_email)
 
     }
   };
@@ -612,13 +639,47 @@ const ClientsProfileUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataPayload = new FormData();
-
+    let date_of_birth = "";
     // Helper function to conditionally append fields if the value differs from clientProfileData
     const appendIfChanged = (formDataKey, formDataValue, profileDataValue) => {
-      if (formDataValue !== profileDataValue) {
-        formDataPayload.append(formDataKey, formDataValue);
+      let valueToAppend = formDataValue === 'true' ? true : formDataValue === 'false' ? false : formDataValue === null ? "": formDataValue;
+      let valueToCompare = profileDataValue === 'true' ? true : profileDataValue === 'false' ? false : profileDataValue === null ? "": profileDataValue === undefined ? false:profileDataValue;
+      if(formDataKey === 'client[referred_employee_id]'){
+        if(formDataValue === null){
+         valueToAppend = null
+          formDataPayload.append(formDataKey, valueToAppend);
+        }
+      }
+      else if (valueToAppend !== valueToCompare) {
+        formDataPayload.append(formDataKey, valueToAppend);
       }
     };
+
+    const createDOB =(year,month,day)=>{
+      if(!year || !month || !day){
+        toast.error("Year Month and Day required for Birth Date")
+        return {success:false,date_of_birth:""}
+      }else{
+        return  {success:true,date_of_birth:`${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`}
+      }
+    };
+   
+    const checkDob=()=>{
+      if(formData?.dobYear !== "" && formData?.dobMonth !== "" && formData?.dobDay !== ""){
+        if (!formData.dobYear || !formData.dobMonth || !formData.dobDay) {
+          return toast.error("Year Month and Day required for Birth Date")
+        }else{
+          const createDobRes=createDOB(formData.dobYear,formData.dobMonth,formData.dobDay)
+          if(createDobRes.success){
+            date_of_birth= createDobRes.date_of_birth
+          }else{
+            checkDob()
+          }
+        }
+      }
+    }
+    checkDob()
+    
 
     // Client basic information
     appendIfChanged('client[name]', formData.name, clientProfileData?.name);
@@ -630,36 +691,37 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[address]', formData.address, clientProfileData?.address);
     appendIfChanged('client[phone_number]', phoneNumbers.mobile_phone, clientProfileData?.phone_number);
 
-    // Client detail attributes
-    appendIfChanged('client[client_detail_attributes][city]', formData.city, clientProfileData?.client_detail?.city);
+    // // // // Client detail attributes
+    appendIfChanged('client[client_detail_attributes][city]', selectedCity, clientProfileData?.client_detail?.city);
     appendIfChanged('client[client_detail_attributes][state]', formData.state, clientProfileData?.client_detail?.state);
     appendIfChanged('client[client_detail_attributes][zip_code]', formData.zip_code, clientProfileData?.client_detail?.zip_code);
     appendIfChanged('client[client_detail_attributes][country]', formData.country, clientProfileData?.client_detail?.country);
     appendIfChanged('client[client_detail_attributes][gender]', formData.gender, clientProfileData?.client_detail?.gender);
     appendIfChanged('client[client_detail_attributes][sex]', formData.sex, clientProfileData?.client_detail?.sex);
-    appendIfChanged('client[client_detail_attributes][date_of_birth]', `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`, clientProfileData?.date_of_birth);
+    appendIfChanged('client[client_detail_attributes][date_of_birth]', date_of_birth, clientProfileData?.client_detail?.date_of_birth);
 
-    // Phone numbers
+    // // // Phone numbers
     appendIfChanged('client[client_detail_attributes][home_phone]', phoneNumbers.home_phone, clientProfileData?.client_detail?.home_phone);
     appendIfChanged('client[client_detail_attributes][mobile_phone]', phoneNumbers.mobile_phone, clientProfileData?.client_detail?.mobile_phone);
     appendIfChanged('client[client_detail_attributes][work_phone]', phoneNumbers.work_phone, clientProfileData?.client_detail?.work_phone);
     appendIfChanged('client[client_detail_attributes][fax_phone]', phoneNumbers.fax_phone, clientProfileData?.client_detail?.fax_phone);
-    // contact details
-    appendIfChanged('client[client_detail_attributes][personal_health_number]', formData.personal_health_number, clientProfileData?.personal_health_number);
-    appendIfChanged('client[client_detail_attributes][family_doctor]', formData.family_doctor, clientProfileData?.family_doctor);
-    appendIfChanged('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone, clientProfileData?.family_doctor_phone);
-    appendIfChanged('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email, clientProfileData?.family_doctor_email);
-    appendIfChanged('client[client_detail_attributes][referring_professional]', formData.referring_professional, clientProfileData?.referring_professional);
-    appendIfChanged('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone, clientProfileData?.referring_professional_phone);
-    appendIfChanged('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email, clientProfileData?.referring_professional_email);
-    appendIfChanged('client[client_detail_attributes][emergency_contact]', formData.emergency_contact, clientProfileData?.emergency_contact);
-    appendIfChanged('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone, clientProfileData?.emergency_contact_phone);
-    appendIfChanged('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship, clientProfileData?.emergency_contact_relationship);
-    appendIfChanged('client[client_detail_attributes][parent_guardian]', formData.parent_guardian, clientProfileData?.parent_guardian);
-    appendIfChanged('client[client_detail_attributes][occupation]', formData.occupation, clientProfileData?.occupation);
-    appendIfChanged('client[client_detail_attributes][employer]', formData.employer, clientProfileData?.employer);
+    // // // contact details
+    appendIfChanged('client[client_detail_attributes][personal_health_number]', formData.personal_health_number, clientProfileData?.client_detail?.personal_health_number);
+    appendIfChanged('client[client_detail_attributes][family_doctor]', formData.family_doctor, clientProfileData?.client_detail?.family_doctor);
+    appendIfChanged('client[client_detail_attributes][family_doctor_phone]', formData.family_doctor_phone, clientProfileData?.client_detail?.family_doctor_phone);
+    appendIfChanged('client[client_detail_attributes][family_doctor_email]', formData.family_doctor_email, clientProfileData?.client_detail?.family_doctor_email);
+    
+    appendIfChanged('client[client_detail_attributes][referring_professional]', formData.referring_professional, clientProfileData?.client_detail?.referring_professional);
+    appendIfChanged('client[client_detail_attributes][referring_professional_phone]', formData.referring_professional_phone, clientProfileData?.client_detail?.referring_professional_phone);
+    appendIfChanged('client[client_detail_attributes][referring_professional_email]', formData.referring_professional_email, clientProfileData?.client_detail?.referring_professional_email);
+    appendIfChanged('client[client_detail_attributes][emergency_contact]', formData.emergency_contact, clientProfileData?.client_detail?.emergency_contact);
+    appendIfChanged('client[client_detail_attributes][emergency_contact_phone]', formData.emergency_contact_phone, clientProfileData?.client_detail?.emergency_contact_phone);
+    appendIfChanged('client[client_detail_attributes][emergency_contact_relationship]', formData.emergency_contact_relationship, clientProfileData?.client_detail?.emergency_contact_relationship);
+    appendIfChanged('client[client_detail_attributes][parent_guardian]', formData.parent_guardian, clientProfileData?.client_detail?.parent_guardian);
+    appendIfChanged('client[client_detail_attributes][occupation]', formData.occupation, clientProfileData?.client_detail?.occupation);
+    appendIfChanged('client[client_detail_attributes][employer]', formData.employer, clientProfileData?.client_detail?.employer);
 
-    // Schedules attributes and notification settings
+    // // Schedules attributes and notification settings
     appendIfChanged('client[notification_settings][email_reminder_2_days]', checkboxData.email_reminder_2_days, clientProfileData?.notification_settings?.email_reminder_2_days);
     appendIfChanged('client[notification_settings][sms_reminder_2_days]', checkboxData.sms_reminder_2_days, clientProfileData?.notification_settings?.sms_reminder_2_days);
     appendIfChanged('client[notification_settings][sms_reminder_24_hours]', checkboxData.sms_reminder_24_hours, clientProfileData?.notification_settings?.sms_reminder_24_hours);
@@ -670,43 +732,49 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[notification_settings][send_ratings_emails]', checkboxData.send_ratings_emails, clientProfileData?.notification_settings?.send_ratings_emails);
     appendIfChanged('client[notification_settings][do_not_email]', checkboxData.do_not_email, clientProfileData?.notification_settings?.do_not_email);
 
-    // Who were you referred to?
-    appendIfChanged('client[referred_employee_id]', formData.referred_employee_id, clientProfileData?.referred_employee_id);
+    // // Who were you referred to?   
+    appendIfChanged('client[referred_employee_id]', formData.referred_employee_id, clientProfileData?.referred_employee?.id);
 
-    //online booking policy
-    appendIfChanged('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed, clientProfileData?.online_booking_allowed);
-    appendIfChanged('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled, clientProfileData?.online_booking_disabled);
+    // // //online booking policy
+    appendIfChanged('client[online_booking_policy][online_booking_allowed]', onlineBookingAllowed, clientProfileData?.online_booking_policy?.online_booking_allowed);
+    appendIfChanged('client[online_booking_policy][online_booking_disabled]', onlineBookingDisabled, clientProfileData?.online_booking_policy?.online_booking_disabled);
 
-    //online booking policy payments
-    appendIfChanged('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired, clientProfileData?.no_payment_reqired);
-    appendIfChanged('client[online_booking_payment_policy][requires_deposit]', requiresDeposit, clientProfileData?.requires_deposit);
-    appendIfChanged('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment, clientProfileData?.requires_full_payment);
-    appendIfChanged('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile, clientProfileData?.requires_credit_card_on_file);
+    // // //online booking policy payments
+    appendIfChanged('client[online_booking_payment_policy][no_payment_reqired', noPaymentReqired, clientProfileData?.online_booking_payment_policy?.no_payment_reqired);
+    appendIfChanged('client[online_booking_payment_policy][requires_deposit]', requiresDeposit, clientProfileData?.online_booking_payment_policy?.requires_deposit);
+    appendIfChanged('client[online_booking_payment_policy][requires_full_payment]', requiresFullPayment, clientProfileData?.online_booking_payment_policy?.requires_full_payment);
+    appendIfChanged('client[online_booking_payment_policy][requires_credit_card_on_file]', requiresCreditCardOnFile, clientProfileData?.online_booking_payment_policy?.requires_credit_card_on_file);
 
-    //how you heard
+    // // //how you heard
     appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData?.how_heard_about_us);
 
     //profile photo
-    appendIfChanged('client[profile_photo]', selectedFiles, clientProfileData?.profile_pic);
-    let response = await UpdateClient(params.id, true, formDataPayload)
-    if (response.status === 200) {
-      toast.success("Client Profile Updated Successfully");
-      handleNavigate();
-      try {
-        const { data } = await getClients();
-        if (data?.length > 0) {
-          const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
-          setEmployeeList(newData);
+    // appendIfChanged('client[profile_photo]', selectedFiles, clientProfileData?.profile_pic);
+    const isEmpty = !Array.from(formDataPayload.entries()).length;
+    if (!isEmpty) {
+      let response = await UpdateClient(params.id, true, formDataPayload)
+      if (response.status === 200) {
+        toast.success("Client Profile Updated Successfully");
+        handleNavigate(`/customers`);
+        localStorage.setItem("clientId", params.id)
+        try {
+          const { data } = await getClients();
+          if (data?.length > 0) {
+            const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
+            setEmployeeList(newData);
+          }
+        } catch (error) {
         }
-      } catch (error) {
+      } else {
+        toast.error("Something went wrong")
       }
-    } else {
-      toast.error("Something went wrong")
+    }else{
+      toast.warning("Please change any value")
     }
   };
 
-  const handleNavigate = () => {
-    Navigate("/customers")
+  const handleNavigate = (path) => {
+    Navigate(path)
   };
 
   const formatDate = (date) => {
@@ -737,7 +805,7 @@ const ClientsProfileUpdate = () => {
       setRequiresDeposit(false);
       setRequiresCreditCardOnFile(false)
       setNoPaymentReqired(false)
-
+      setOnlineBookingPaymentPolicy(e.target.value)
     }
     if (e.target.value === "Online booking requires a deposit") {
       setRequiresFullPayment(false);
@@ -815,8 +883,8 @@ const ClientsProfileUpdate = () => {
                 Edit Client - {"Teset (Test) "}Account
               </h1>
               <div className="d-flex justify-content-between gap-2">
-                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
-                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit} >Save</Button>
+                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate("/customers")}>Cancel</Button>
+                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
               </div>
             </div>
             <div className="d-flex p-4 border bg-white rounded" id={"basic"}>
@@ -1232,9 +1300,9 @@ const ClientsProfileUpdate = () => {
                     </Col>
                     <Col xs={12} sm={12} md={12} lg={12}>
                       <Form.Group controlId="formFile" className="mb-3">
-                        <Form.Label className="text-body-tertiary">Reffering Professional</Form.Label>
+                        <Form.Label className="text-body-tertiary">Referring Professional</Form.Label>
                         <Form.Control
-                          type="number"
+                          type="text"
                           placeholder="Enter Emergency Contact"
                           name="referring_professional"
                           value={formData.referring_professional}
@@ -1329,6 +1397,7 @@ const ClientsProfileUpdate = () => {
                           name="sex"
                           value={formData.sex}
                           onChange={handleFormChange}>
+                          <option>{"Select Option"}</option>
                           <option value={"Male"}>{"Male"}</option>
                           <option value={"Female"}>{"Female"}</option>
                           <option value={"X"}>{"X"}</option>
@@ -1433,7 +1502,7 @@ const ClientsProfileUpdate = () => {
                             name="email_new_cancelled"
                             checked={checkboxData.email_new_cancelled}
                             onChange={handleCheckboxChange}
-                            disabled={disableCheckbox}
+                            disabled={checkboxData.do_not_email}
                           />
                         </Form.Group>
                       </Col>
@@ -1448,7 +1517,7 @@ const ClientsProfileUpdate = () => {
                             name="email_waitlist_openings"
                             checked={checkboxData.email_waitlist_openings}
                             onChange={handleCheckboxChange}
-                            disabled={disableCheckbox}
+                            disabled={checkboxData.do_not_email}
                           />
                         </Form.Group>
                       </Col>
@@ -1480,30 +1549,6 @@ const ClientsProfileUpdate = () => {
                             onChange={handleFormChange}
                           />
                         </Form.Group>
-                        {/* {formData.how_heard_about_us.length > 0 && (
-                          <div className="position-absolute w-[90%] bg-white layer-2">
-                            <ListGroup>
-                              <ListGroup.Item className="bg-white">
-                                He/Him/His
-                              </ListGroup.Item>
-                              <ListGroup.Item className="bg-white">
-                                She/Her/Hers
-                              </ListGroup.Item>
-                              <ListGroup.Item className="bg-white">
-                                They/Them/Theirs
-                              </ListGroup.Item>
-                              <ListGroup.Item className="bg-white">
-                                Thon/Thon/Thon's
-                              </ListGroup.Item>
-                              <ListGroup.Item className="bg-white">
-                                E/Em/Ems
-                              </ListGroup.Item>
-                              <ListGroup.Item className="bg-white">
-                                Ae/Aer/Aers
-                              </ListGroup.Item>
-                            </ListGroup>
-                          </div>
-                        )} */}
                       </Col>
                       <Col xs={12} sm={12} md={12} lg={12}>
                         <Form.Group controlId="formFile" className="mb-3">
@@ -1534,7 +1579,7 @@ const ClientsProfileUpdate = () => {
                   <Container>
                     <Row xs={6} md={6} lg={6}>
                       <Col xs={12} sm={12} md={12} lg={12}>
-                        <Form.Label className="text-body-tertiary">Marketing Emails</Form.Label>
+                        <Form.Label className="text-body-tertiary">OK to Send Marketing Emails</Form.Label>
                       </Col>
                       <Col xs={12} sm={12} md={12} lg={12}>
                         <Form.Group controlId="formFile" className="mb-3">
@@ -1544,7 +1589,7 @@ const ClientsProfileUpdate = () => {
                             name="ok_to_send_marketing_emails"
                             checked={checkboxData.ok_to_send_marketing_emails}
                             onChange={handleCheckboxChange}
-                            disabled={disableCheckbox}
+                            disabled={checkboxData.do_not_email}
                           />
                         </Form.Group>
                       </Col>
@@ -1556,7 +1601,7 @@ const ClientsProfileUpdate = () => {
                             name="send_ratings_emails"
                             checked={checkboxData.send_ratings_emails}
                             onChange={handleCheckboxChange}
-                            disabled={disableCheckbox}
+                            disabled={checkboxData.do_not_email}
                           />
                         </Form.Group>
                       </Col>
@@ -1701,8 +1746,8 @@ const ClientsProfileUpdate = () => {
             <div className="d-flex p-3 border bg-white rounded mt-3a w-100">
             <div className="d-flex justify-content-end w-100">
               <div className="d-flex justify-content-between gap-2">
-                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={handleNavigate}>Cancel</Button>
-                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit} >Save</Button>
+                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate("/customers")}>Cancel</Button>
+                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }}>Save</Button>
               </div>
             </div>
             </div>

@@ -61,7 +61,7 @@ import ClientProfile from "./ClientProfile";
 
 
 const AllClientRoot = () => {
-    const { clientId } = useParams();
+    let clientId=localStorage.getItem("clientId")
     const { authUserState } = useAuthContext();
     // const [invoiceList, setInvoiceList] = useState([]);
     // const [invModalSHow, setInvModalSHow] = useState(false);
@@ -100,18 +100,6 @@ const AllClientRoot = () => {
     }
   };
 
-    const handleDynamicClient = () => {
-        if (clientId) {
-            let employee = employeeList.find(employee => employee.id == clientId)
-            if (employee) {
-                setSelectedEmployeeData(employee);
-            }
-        }
-    };
-
-    useEffect(() => {
-        handleDynamicClient()
-    }, [clientId,selectedEmployeeData]);
     useEffect(() => {
     getClientSchedule(selectedEmployeeData?.id, true);
     }, [selectedEmployeeData]);
@@ -1169,6 +1157,19 @@ useEffect(()=>{
         }, 1000);
         return () => clearTimeout(timer);
     };
+
+    // const handleDynamicClient = () => {
+    //     if (clientId) {
+    //         let employee = employeeList.find(employee => employee.id == clientId)
+    //         if (employee) {
+    //             setSelectedEmployeeData(employee);
+    //         }
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     handleDynamicClient()
+    // }, []);
 
     return (
         <>
