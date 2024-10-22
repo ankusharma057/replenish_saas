@@ -129,7 +129,7 @@ export default memo(function Header() {
                 >
                   <Link
                     className={`no-underline text-white py-[1rem] inline-block `}
-                    to="/customers"
+                    to="/customers/1"
                   >
                     Clients
                   </Link>

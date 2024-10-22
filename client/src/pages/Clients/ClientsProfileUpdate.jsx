@@ -170,9 +170,6 @@ const ClientsProfileUpdate = () => {
       if (response?.status === 200) {
         setClientProfileData(response?.data);
       }
-      else {
-        getClientDetails();
-      }
     }
     catch (err) {
       toast.error(err.message)
@@ -215,7 +212,7 @@ const ClientsProfileUpdate = () => {
     };
     if(clientProfileData.client_detail?.date_of_birth !== null){
       await processDob();
-    }
+    }    
     setFormData(prevState => ({
       ...prevState,
       name: clientProfileData?.name ?? '',
@@ -249,12 +246,12 @@ const ClientsProfileUpdate = () => {
       employer: clientProfileData?.client_detail?.employer ?? '',
       how_heard_about_us: clientProfileData?.how_heard_about_us ?? '',
       referred_employee_id: clientProfileData?.referred_employee?.id ?? '',
-      who_were_you_referred_to_name:clientProfileData?.referred_employee?.name,
-      dobMonth: date_of_birth.month,
-      dobDay: date_of_birth.day,
-      dobYear: date_of_birth.year,
+      who_were_you_referred_to_name:clientProfileData?.referred_employee?.name || '',
+      dobMonth: date_of_birth?.month,
+      dobDay: date_of_birth?.day,
+      dobYear: date_of_birth?.year,
     }));
-
+    
   }
   useEffect(() => { }, [formData]);
 
@@ -410,7 +407,7 @@ const ClientsProfileUpdate = () => {
     getEmployees();
     getClientSchedule(selectedEmployeeData?.id, true);
     handleScroll();
-  }, [selectedEmployeeData?.id, params.id]);
+  }, [selectedEmployeeData?.id]);
 
   useEffect(() => {
     if (Object.keys(clientProfileData).length > 0) {
@@ -420,11 +417,11 @@ const ClientsProfileUpdate = () => {
       handleCountryStateCity();
       handlePolicy();
       handlePolicyAndPolicyPayments();
-    } else {
+    }  else {
       getClientDetails()
     }
 
-  }, [clientProfileData]);
+  }, [clientProfileData,clientProfileData?.referred_employee?.id]);
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -478,8 +475,7 @@ const ClientsProfileUpdate = () => {
   };
   useEffect(() => { }, [requiresFullPayment, requiresDeposit, requiresCreditCardOnFile, noPaymentReqired, onlineBookingPaymentPolicy])
   const handleNavigateToClient = (customerId) => {
-    localStorage.setItem("clientId",customerId)
-    Navigate(`/customers`)
+    Navigate(`/customers/${customerId}`)
   };
 
   const EmployeeItem = ({ index, style }) => {
@@ -528,6 +524,13 @@ const ClientsProfileUpdate = () => {
         }));
       }
     }
+    if(name === "dobMonth"){
+      let filterValue= months.find((item)=> item.name=value)
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: filterValue.number,
+      }));
+    }
   };
 
   const handleWhoRefered = (event) => {
@@ -535,6 +538,8 @@ const ClientsProfileUpdate = () => {
     const employee = allEmployeeList.find((employee) => employee.name === selectedName);
 
     if (employee) {
+      console.log("@@@@@@@",employee);
+      
       setFormData((prevState) => ({
         ...prevState,
         referred_employee_id: Number(employee.id),
@@ -643,10 +648,9 @@ const ClientsProfileUpdate = () => {
     // Helper function to conditionally append fields if the value differs from clientProfileData
     const appendIfChanged = (formDataKey, formDataValue, profileDataValue) => {
       let valueToAppend = formDataValue === 'true' ? true : formDataValue === 'false' ? false : formDataValue === null ? "": formDataValue;
-      let valueToCompare = profileDataValue === 'true' ? true : profileDataValue === 'false' ? false : profileDataValue === null ? "": profileDataValue === undefined ? false:profileDataValue;
+      let valueToCompare = profileDataValue === 'true' ? true : profileDataValue === 'false' ? false : profileDataValue === null ? "": profileDataValue === undefined ? false:profileDataValue;      
       if(formDataKey === 'client[referred_employee_id]'){
-        if(formDataValue === null){
-         valueToAppend = null
+        if(formDataValue !== null){
           formDataPayload.append(formDataKey, valueToAppend);
         }
       }
@@ -755,8 +759,7 @@ const ClientsProfileUpdate = () => {
       let response = await UpdateClient(params.id, true, formDataPayload)
       if (response.status === 200) {
         toast.success("Client Profile Updated Successfully");
-        handleNavigate(`/customers`);
-        localStorage.setItem("clientId", params.id)
+        Navigate(`/customers/${params.id}`);
         try {
           const { data } = await getClients();
           if (data?.length > 0) {
@@ -880,10 +883,10 @@ const ClientsProfileUpdate = () => {
           <Form>
             <div className="d-flex justify-content-between mb-3">
               <h1 className="text-secondary fw-light">
-                Edit Client - {"Teset (Test) "}Account
+                Edit Client - {clientProfileData.name+ " "+ clientProfileData.middle_name+ " " + clientProfileData.last_name +" "}Account
               </h1>
               <div className="d-flex justify-content-between gap-2">
-                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate("/customers")}>Cancel</Button>
+                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate(`/customers/${params.id}`)}>Cancel</Button>
                 <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
               </div>
             </div>
@@ -1213,7 +1216,7 @@ const ClientsProfileUpdate = () => {
                               onChange={handleFormChange}>
                               <option>{"Select a month"}</option>
                               {months.map((month, index) => (
-                                <option key={index} value={month.number}>
+                                <option key={index} value={month.name}>
                                   {month.name}
                                 </option>
                               ))}
@@ -1555,10 +1558,10 @@ const ClientsProfileUpdate = () => {
                           <Form.Label className="text-body-tertiary">Who were you referred to?</Form.Label>
                           <Form.Select
                             name="who_were_you_referred_to_name"
-                            value={formData.who_were_you_referred_to_name}
+                            value={formData?.who_were_you_referred_to_name}
                             onChange={handleWhoRefered}
                           >
-                            <option value="">Select Option...</option>
+                            <option value="">Select Option</option>
                             {allEmployeeList.map((employee) => (
                               <option key={employee.id} value={employee.name}>
                                 {employee.name}
@@ -1746,7 +1749,7 @@ const ClientsProfileUpdate = () => {
             <div className="d-flex p-3 border bg-white rounded mt-3a w-100">
             <div className="d-flex justify-content-end w-100">
               <div className="d-flex justify-content-between gap-2">
-                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate("/customers")}>Cancel</Button>
+                <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate(`/customers/${params.id}`)}>Cancel</Button>
                 <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }}>Save</Button>
               </div>
             </div>

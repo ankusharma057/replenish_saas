@@ -234,8 +234,8 @@ const ClientsProfileUpdate = () => {
     setRadioTabs(addTabs);
   };
 
-  const handleNavigateToClient = () => {
-    Navigate(`/customers`)
+  const handleNavigateToClient = (customerId) => {
+    Navigate(`/customers/${customerId}`)
   };
 
   const EmployeeItem = ({ index, style }) => {
@@ -249,7 +249,7 @@ const ClientsProfileUpdate = () => {
             if (window.innerWidth < 1024) {
               collapse();
             }
-            handleNavigateToClient()
+            handleNavigateToClient(employee.id)
           }}
           className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 cursor-pointer"`}
         >
@@ -260,12 +260,13 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleFormChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value } = event?.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value,
     }));
   };
+  useEffect(() => {}, [formData]);
 
   const handleChange = (value, name) => {
     setPhoneNumbers(prevState => ({
@@ -351,77 +352,7 @@ const ClientsProfileUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataPayload = new FormData();
-    console.log("@@@@@@@formdata",formData);
-    console.log("@@@@@@@phonenumbers",phoneNumbers);
-    console.log("@@@@@@@country",selectedCountry);
-    console.log("@@@@@@@state",selectedState);
-    console.log("@@@@@@@city",selectedCity);
-
-  //   const formDataPayload = {
-  //     client: {
-  //         name: formData?.name || '',
-  //         last_name: formData?.last_name || '',
-  //         preferred_name: formData?.preferred_name || '',
-  //         pronouns: formData?.pronouns || '',
-  //         prefix: formData?.prefix || '',
-  //         middle_name: formData?.middle_name || '',
-  //         address: formData?.address || '',
-  //         phone_number: phoneNumbers.mobile_phone || '',
-  //         client_detail_attributes: {
-  //             city:formData?.city || '',
-  //             state: formData?.state || '',
-  //             zip_code: formData.zip_code || '',
-  //             country: formData.country || '',
-  //             gender: formData.gender || '',
-  //             sex: formData.sex || '',
-  //             date_of_birth: (formData.dobYear || formData.dobMonth || formData.dobDay) 
-  //                 ? `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}` 
-  //                 : '',
-  //             home_phone: phoneNumbers.home_phone || '',
-  //             mobile_phone: phoneNumbers.mobile_phone || '',
-  //             work_phone: phoneNumbers.work_phone || '',
-  //             fax_phone: phoneNumbers.fax_phone || '',
-  //             personal_health_number: formData.personal_health_number || '',
-  //             family_doctor: formData.family_doctor || '',
-  //             family_doctor_phone: formData.family_doctor_phone || '',
-  //             family_doctor_email: formData.family_doctor_email || '',
-  //             referring_professional: formData.referring_professional || '',
-  //             referring_professional_phone: formData.referring_professional_phone || '',
-  //             referring_professional_email: formData.referring_professional_email || '',
-  //             emergency_contact: formData.emergency_contact || '',
-  //             emergency_contact_phone: formData.emergency_contact_phone || '',
-  //             emergency_contact_relationship: formData.emergency_contact_relationship || '',
-  //             parent_guardian: formData.parent_guardian || '',
-  //             occupation: formData.occupation || '',
-  //             employer: formData.employer || '',
-  //         },
-  //         notification_settings: {
-  //             email_reminder_2_days: checkboxData?.email_reminder_2_days || false,
-  //             sms_reminder_2_days: checkboxData?.sms_reminder_2_days || false,
-  //             sms_reminder_24_hours: checkboxData?.sms_reminder_24_hours || false,
-  //             email_new_cancelled: checkboxData?.email_new_cancelled || false,
-  //             email_waitlist_openings: checkboxData?.email_waitlist_openings || false,
-  //             sms_waitlist_openings: checkboxData?.sms_waitlist_openings || false,
-  //             ok_to_send_marketing_emails: checkboxData?.ok_to_send_marketing_emails || false,
-  //             send_ratings_emails: checkboxData?.send_ratings_emails || false,
-  //             do_not_email: checkboxData?.do_not_email || false,
-  //         },
-  //         referred_employee_id: formData?.referred_employee_id || '',
-  //         online_booking_policy: {
-  //             online_booking_allowed: onlineBookingAllowed || false,
-  //             online_booking_disabled: onlineBookingDisabled || false,
-  //         },
-  //         online_booking_payment_policy: {
-  //             no_payment_required: checkboxData.no_payment_required || false,
-  //             requires_deposit: checkboxData.requires_deposit || false,
-  //             requires_full_payment: checkboxData.requires_full_payment || false,
-  //             requires_credit_card_on_file: checkboxData.requires_credit_card_on_file || false,
-  //         },
-  //         how_heard_about_us: formData?.how_heard_about_us || '',
-  //     }
-  // };
-  
-    
+   
     // Client basic information
     formDataPayload.append('client[name]', formData?.name);
     formDataPayload.append('client[email]', formData?.email);
@@ -1133,6 +1064,7 @@ const ClientsProfileUpdate = () => {
                           name="sex"
                           value={formData.sex || ""}
                           onChange={handleFormChange}>
+                          <option >{"Select Option"}</option>
                           <option value={"Male"}>{"Male"}</option>
                           <option value={"Female"}>{"Female"}</option>
                           <option value={"X"}>{"X"}</option>

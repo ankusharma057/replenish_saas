@@ -61,7 +61,7 @@ import ClientProfile from "./ClientProfile";
 
 
 const AllClientRoot = () => {
-    let clientId=localStorage.getItem("clientId")
+    let { clientId } = useParams();
     const { authUserState } = useAuthContext();
     // const [invoiceList, setInvoiceList] = useState([]);
     // const [invModalSHow, setInvModalSHow] = useState(false);
@@ -110,7 +110,11 @@ const AllClientRoot = () => {
             if (data?.length > 0) {
                 const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
                 setEmployeeList(newData);
-                handleSelect(newData[0]);
+                if (clientId) {
+                    let newClient = newData.find(client => client.id == clientId)
+                    console.log("@@@@@@@@", newClient);
+                    handleSelect(newClient);
+                }
             }
         } catch (error) {
       toast.error(error.message)
@@ -988,6 +992,7 @@ useEffect(()=>{
     );
 
     const handleSelect = (emp) => {
+        navigate(`/customers/${emp.id}`);
         setSelectedEmployeeData(emp);
         setRadioTabs([]);
         setUpdateEmployeeInput({});
@@ -1124,27 +1129,6 @@ useEffect(()=>{
         navigate(`/add-new-client`)
     };
 
-    const handleEditClientProfile = async (payload) => {
-        let response = await UpdateClient(editProfileData.id, true, payload)
-        if (response.status === 200) {
-            toast.success("Client Profile Updated Successfully")
-            try {
-                const { data } = await getClients();
-                if (data?.length > 0) {
-                    const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
-                    setEmployeeList(newData);
-                    let currentClient = newData.find(client => client.id === editProfileData.id)
-                    handleSelect(currentClient);
-                    setShowEditProfileModal(false)
-                }
-            } catch (error) {
-                toast.error(error.message)
-            }
-        } else {
-            toast.error("Something went wrong")
-        }
-    };
-
     const handleClientProfileFlipCard=()=>{
         setCurrentTab("Appointments");
     };
@@ -1158,18 +1142,6 @@ useEffect(()=>{
         return () => clearTimeout(timer);
     };
 
-    // const handleDynamicClient = () => {
-    //     if (clientId) {
-    //         let employee = employeeList.find(employee => employee.id == clientId)
-    //         if (employee) {
-    //             setSelectedEmployeeData(employee);
-    //         }
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     handleDynamicClient()
-    // }, []);
 
     return (
         <>
