@@ -880,14 +880,14 @@ const ClientsProfileUpdate = () => {
         }
       >
         <div className="flex-1 border p-3 h-[88vh] overflow-scroll">
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <div className="d-flex justify-content-between mb-3">
               <h1 className="text-secondary fw-light">
                 Edit Client - {clientProfileData.name+ " "+ clientProfileData.middle_name+ " " + clientProfileData.last_name +" "}Account
               </h1>
               <div className="d-flex justify-content-between gap-2">
                 <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate(`/customers/${params.id}`)}>Cancel</Button>
-                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
+                <Button variant="primary w-[100px] h-[40px]" type="submit"  style={{ backgroundColor: "#0dcaf0", border: "none" }} >Save</Button>
               </div>
             </div>
             <div className="d-flex p-4 border bg-white rounded" id={"basic"}>
@@ -906,6 +906,7 @@ const ClientsProfileUpdate = () => {
                           name="name"
                           value={formData.name}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
@@ -918,6 +919,7 @@ const ClientsProfileUpdate = () => {
                           name="last_name"
                           value={formData?.last_name}
                           onChange={handleFormChange}
+                          required
                         />
                       </Form.Group>
                     </Col>
@@ -1025,6 +1027,7 @@ const ClientsProfileUpdate = () => {
                           value={formData?.email}
                           onChange={handleFormChange}
                           readOnly
+                          required
                         />
                       </Form.Group>
                     </Col>
@@ -1367,7 +1370,7 @@ const ClientsProfileUpdate = () => {
                         <Form.Group controlId="formFile" className="mb-3 w-100">
                           <Form.Label className="text-body-tertiary">Relationship</Form.Label>
                           <Form.Control
-                            type="email"
+                            type="text"
                             placeholder="Relationship"
                             name="emergency_contact_relationship"
                             value={formData.emergency_contact_relationship}
@@ -1750,7 +1753,7 @@ const ClientsProfileUpdate = () => {
             <div className="d-flex justify-content-end w-100">
               <div className="d-flex justify-content-between gap-2">
                 <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate(`/customers/${params.id}`)}>Cancel</Button>
-                <Button variant="primary w-[100px] h-[40px]" type="submit" onClick={handleSubmit}  style={{ backgroundColor: "#0dcaf0", border: "none" }}>Save</Button>
+                <Button variant="primary w-[100px] h-[40px]" type="submit"  style={{ backgroundColor: "#0dcaf0", border: "none" }}>Save</Button>
               </div>
             </div>
             </div>
