@@ -9,7 +9,7 @@ class Client < ApplicationRecord
   has_many :chart_entries, dependent: :destroy
   has_one :client_detail, dependent: :destroy
   has_one_attached :profile_photo
-  belongs_to :referred_employee, class_name: 'Client', optional: true
+  belongs_to :referred_employee, class_name: 'Employee', optional: true
 
 
   accepts_nested_attributes_for :client_detail, update_only: true
