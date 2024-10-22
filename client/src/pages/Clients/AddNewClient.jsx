@@ -429,7 +429,7 @@ const ClientsProfileUpdate = () => {
     let response = await CreateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
       toast.success("Client Created Successfully");
-      handleNavigate();
+      Navigate(`/customers/${response.data.id}`)
       try {
         const { data } = await getClients();
         if (data?.length > 0) {
