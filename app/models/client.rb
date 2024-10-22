@@ -53,8 +53,20 @@ class Client < ApplicationRecord
   private
 
   def set_default_notification_settings_if_blank
-    set_default_notification_settings if self.notification_settings.blank?
-    save if changed?
+    if self.notification_settings.blank?
+      self.notification_settings = {
+        "email_reminder_2_days" => false,
+        "sms_reminder_2_days" => false,
+        "sms_reminder_24_hours" => false,
+        "email_new_cancelled" => false,
+        "email_waitlist_openings" => false,
+        "sms_waitlist_openings" => false,
+        "ok_to_send_marketing_emails" => false,
+        "send_ratings_emails" => false,
+        "do_not_email" => false
+      }
+      save
+    end
   end
 
   def set_defaults
