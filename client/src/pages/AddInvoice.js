@@ -1,6 +1,6 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Button, Form, Table } from "react-bootstrap";
+import { Alert, Button, Form, ListGroup, Table } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { toast } from "react-toastify";
 import { LOGIN } from "../Constants/AuthConstants";
@@ -87,6 +87,7 @@ export default function AddInvoices() {
     email:""
   })
   const [createClient,setCreateClient]=useState(false)
+  const [showClientList,setShowClientList]=useState(false)
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -920,16 +921,17 @@ export default function AddInvoices() {
 
   const handleClientChange = (event) => {
     setClient(event.target.value);
-    let selectedClient = employeeList.find((client) => client.name === event.target.value);
-    setSelectedClient(selectedClient);
-    setClientName(selectedClient.name)
-    setClientLastName(selectedClient.last_name)
-    setClientEmail(selectedClient.email)
   };
 
   const handleCreateClientCheckbox = (event) => {
     setCreateClient(event.target.checked)
   };
+
+  const handleSelectClient=(clientName)=>{
+    setShowClientList(true)
+    setClient(clientName)
+    setClient(clientName)
+  }
 
   return (
     <>
@@ -1158,22 +1160,27 @@ export default function AddInvoices() {
                     <table className="w-full table-auto ">
                       <thead className="whitespace-normal">
                         <tr className="w-full d-flex gap-[10px]">
-                          <th className="w-[50%]">Select Clients</th>
                           <th className="w-[50%]">Client Name</th>
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
                         <tr key={1} className="w-full d-flex gap-[10px]">
-                          <td className="w-[50%]">
-                            <Form.Select value={client} onChange={handleClientChange} disabled={createClient}>
-                              <option>Select Client</option>
-                              {employeeList?.length >= 0 && employeeList.map((client) => (
-                                <option value={client.name}>{client.name}</option>
-                              ))}
-                            </Form.Select>
-                          </td>
-                          <td className="w-[50%]">
-                            <input disabled={createClient} className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={clientName} readOnly />
+                          <td className="w-[50%]" style={{position:"relative"}}>
+                            <input className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={client} onChange={handleClientChange} onFocus={()=>setShowClientList(true)} onBlur={()=>{ setTimeout(() => setShowClientList(false), 150)}}/>
+                            {showClientList &&
+                              <ListGroup style={{ position: "absolute", zIndex: 999, display: "flex", flexDirection: "column", backgroundColor: "#fff", width: "100%", maxHeight: "300px", overflow: "scroll" }}>
+                                {employeeList.filter(item => item?.name?.toLowerCase()?.includes(client?.toLowerCase()))?.map((client,index) => (
+                                  <ListGroup.Item
+                                    key={index}
+                                    value={client?.name}
+                                    onMouseOver={() => setShowClientList(true)}
+                                    onMouseDown={() => handleSelectClient(client?.name)}
+                                  >
+                                    {client?.name}
+                                  </ListGroup.Item>
+                                ))}
+                              </ListGroup>}
+                            
                           </td>
                         </tr>
                       </tbody>

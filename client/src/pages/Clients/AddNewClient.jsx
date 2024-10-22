@@ -448,7 +448,7 @@ const ClientsProfileUpdate = () => {
   };
 
   const handleNavigate = () => {
-    Navigate("/customers")
+    Navigate("/customers/1")
   };
 
   const handleWhoRefered = async (event) => {
@@ -528,11 +528,11 @@ const ClientsProfileUpdate = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="border-t-2  py-2 bg-white h-70vh">
+            <div className="border-t-2  py-2 bg-white h-80vh">
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 Clients <ChevronDown />
               </h1>
-              <div className="flex h-[53.8vh] flex-col pl-2 gap-4 overflow-y-auto border">
+              <div className="flex h-[58vh] flex-col pl-2 gap-4 overflow-y-auto border">
                 {(employeeList || []).length > 0 && (
                   <List
                     height={window.innerHeight}
