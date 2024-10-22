@@ -199,7 +199,7 @@ const ClientsProfileUpdate = () => {
     let date_of_birth = { year: "", month: "", day: "" };
     const calculateDob = () => {
       return new Promise((resolve, reject) => {
-        const { year, month, day } = calculateDate(clientProfileData.client_detail?.date_of_birth);
+      const { year, month, day } = calculateDate(clientProfileData.client_detail?.date_of_birth);
         date_of_birth = { year: year, month: months[month - 1]?.name, day: day };
         resolve();
       });
@@ -246,14 +246,13 @@ const ClientsProfileUpdate = () => {
       employer: clientProfileData?.client_detail?.employer ?? '',
       how_heard_about_us: clientProfileData?.how_heard_about_us ?? '',
       referred_employee_id: clientProfileData?.referred_employee?.id ?? '',
-      who_were_you_referred_to_name:clientProfileData?.referred_employee?.name || '',
+      who_were_you_referred_to_name:clientProfileData?.referred_employee?.name ?? '',
       dobMonth: date_of_birth?.month,
       dobDay: date_of_birth?.day,
       dobYear: date_of_birth?.year,
     }));
     
   }
-  useEffect(() => { }, [formData]);
 
   const fillCheckboxFields = () => {
     const checkboxDetails = {
@@ -272,21 +271,18 @@ const ClientsProfileUpdate = () => {
     setCheckboxData(checkboxDetails);
   }
 
-  useEffect(() => {
-    if (clientProfileData) {
-      fillCheckboxFields();
-    }
-  }, [clientProfileData]);
+  useEffect(() => { }, [formData]);
 
-  useEffect(() => {
-  }, [checkboxData]);
+  useEffect(() => {}, [clientProfileData]);
+
+  useEffect(() => {}, [checkboxData]);
 
   const fillPhoneNumberFields = () => {
     const phoneNumbers = {
-      home_phone: clientProfileData.client_detail?.home_phone === undefined || clientProfileData.client_detail?.home_phone === null ?"": clientProfileData.client_detail?.home_phone,
-      work_phone: clientProfileData.client_detail?.work_phone=== undefined || clientProfileData.client_detail?.work_phone === null ?"": clientProfileData.client_detail?.work_phone,
-      mobile_phone: clientProfileData.client_detail?.mobile_phone=== undefined || clientProfileData.client_detail?.mobile_phone === null ?"": clientProfileData.client_detail?.mobile_phone,
-      fax_phone: clientProfileData.client_detail?.fax_phone=== undefined || clientProfileData.client_detail?.fax_phone === null ?"":clientProfileData.client_detail?.fax_phone ,
+      home_phone: clientProfileData.client_detail?.home_phone === "undefined" || clientProfileData.client_detail?.home_phone === undefined || clientProfileData.client_detail?.home_phone === null ?"": clientProfileData.client_detail?.home_phone,
+      work_phone: clientProfileData.client_detail?.work_phone=== "undefined" || clientProfileData.client_detail?.work_phone=== undefined || clientProfileData.client_detail?.work_phone === null ?"": clientProfileData.client_detail?.work_phone,
+      mobile_phone: clientProfileData.client_detail?.mobile_phone=== "undefined" || clientProfileData.client_detail?.mobile_phone=== undefined || clientProfileData.client_detail?.mobile_phone === null ?"": clientProfileData.client_detail?.mobile_phone,
+      fax_phone: clientProfileData.client_detail?.fax_phone=== "undefined" || clientProfileData.client_detail?.fax_phone=== undefined || clientProfileData.client_detail?.fax_phone === null ?"":clientProfileData.client_detail?.fax_phone ,
     };
     setPhoneNumbers(phoneNumbers);
   }
@@ -352,9 +348,13 @@ const ClientsProfileUpdate = () => {
   }
   useEffect(() => { }, [phoneNumbers]);
   const handleCountryStateCity = () => {
-    handleCountryChange({ target: { value: clientProfileData?.client_detail?.country } });
-    handleStateChange({ target: { value: clientProfileData?.client_detail?.state } });
-    handleCityChange({ target: { value: clientProfileData?.client_detail?.city } });
+    if(clientProfileData?.client_detail?.country !== ""){
+      handleCountryChange({ target: { value: clientProfileData?.client_detail?.country } });
+    }else if(clientProfileData?.client_detail?.state !== ""){
+      handleStateChange({ target: { value: clientProfileData?.client_detail?.state } });
+    }else if(clientProfileData?.client_detail?.city !== ""){
+      handleCityChange({ target: { value: clientProfileData?.client_detail?.city } });
+    }
   };
   useEffect(() => { }, [clientProfileData.country]);
 
@@ -410,7 +410,7 @@ const ClientsProfileUpdate = () => {
   }, [selectedEmployeeData?.id]);
 
   useEffect(() => {
-    if (Object.keys(clientProfileData).length > 0) {
+    if (clientProfileData && Object.keys(clientProfileData).length > 0) {
       fillFormDataFields();
       fillCheckboxFields();
       fillPhoneNumberFields();
@@ -419,9 +419,9 @@ const ClientsProfileUpdate = () => {
       handlePolicyAndPolicyPayments();
     }  else {
       getClientDetails()
-    }
+    } 
 
-  }, [clientProfileData,clientProfileData?.referred_employee?.id]);
+  }, [clientProfileData]);
 
   const getEmployees = async (refetch = false) => {
     try {
@@ -538,8 +538,6 @@ const ClientsProfileUpdate = () => {
     const employee = allEmployeeList.find((employee) => employee.name === selectedName);
 
     if (employee) {
-      console.log("@@@@@@@",employee);
-      
       setFormData((prevState) => ({
         ...prevState,
         referred_employee_id: Number(employee.id),
@@ -838,6 +836,9 @@ const ClientsProfileUpdate = () => {
     Navigate(`/add-new-client`)
   };
 
+  console.log("@@@@@@@@",formData);
+  
+
   return (
     <>
       <AsideLayout
@@ -883,7 +884,7 @@ const ClientsProfileUpdate = () => {
           <Form onSubmit={handleSubmit}>
             <div className="d-flex justify-content-between mb-3">
               <h1 className="text-secondary fw-light">
-                Edit Client - {clientProfileData.name+ " "+ clientProfileData.middle_name+ " " + clientProfileData.last_name +" "}Account
+                Edit Client - {clientProfileData.name+ " "}Account
               </h1>
               <div className="d-flex justify-content-between gap-2">
                 <Button variant="outline-secondary w-[100px] h-[40px] fs-6" onClick={()=>handleNavigate(`/customers/${params.id}`)}>Cancel</Button>
