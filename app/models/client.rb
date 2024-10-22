@@ -22,6 +22,7 @@ class Client < ApplicationRecord
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
   after_initialize :set_defaults
+  after_find :set_default_notification_settings_if_blank
   before_save :clear_temp_password_if_activated
 
 
@@ -51,6 +52,10 @@ class Client < ApplicationRecord
 
   private
 
+  def set_default_notification_settings_if_blank
+    set_default_notification_settings if self.notification_settings.blank?
+    save if changed?
+  end
 
   def set_defaults
     set_default_notification_settings
