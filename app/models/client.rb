@@ -22,7 +22,6 @@ class Client < ApplicationRecord
 
   after_create :send_invitation_and_temp_password, if: -> { email.present? }
   after_initialize :set_defaults
-  after_find :set_default_notification_settings_if_blank
   before_save :clear_temp_password_if_activated
 
 
@@ -52,22 +51,6 @@ class Client < ApplicationRecord
 
   private
 
-  def set_default_notification_settings_if_blank
-    if self.notification_settings.blank?
-      self.notification_settings = {
-        "email_reminder_2_days" => false,
-        "sms_reminder_2_days" => false,
-        "sms_reminder_24_hours" => false,
-        "email_new_cancelled" => false,
-        "email_waitlist_openings" => false,
-        "sms_waitlist_openings" => false,
-        "ok_to_send_marketing_emails" => false,
-        "send_ratings_emails" => false,
-        "do_not_email" => false
-      }
-      save
-    end
-  end
 
   def set_defaults
     set_default_notification_settings

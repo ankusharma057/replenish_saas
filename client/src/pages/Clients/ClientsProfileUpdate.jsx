@@ -350,13 +350,15 @@ const ClientsProfileUpdate = () => {
   const handleCountryStateCity = () => {
     if(clientProfileData?.client_detail?.country !== ""){
       handleCountryChange({ target: { value: clientProfileData?.client_detail?.country } });
-    }else if(clientProfileData?.client_detail?.state !== ""){
+    }
+    if(clientProfileData && clientProfileData?.client_detail?.state && clientProfileData?.client_detail?.state !== ""){
       handleStateChange({ target: { value: clientProfileData?.client_detail?.state } });
-    }else if(clientProfileData?.client_detail?.city !== ""){
+    }
+    if(clientProfileData && clientProfileData?.client_detail?.city && clientProfileData?.client_detail?.city !== ""){
       handleCityChange({ target: { value: clientProfileData?.client_detail?.city } });
     }
   };
-  useEffect(() => { }, [clientProfileData.country]);
+  useEffect(() => { }, [clientProfileData]);
 
   const handlePolicy = () => {
     if (clientProfileData?.online_booking_policy?.online_booking_allowed === "true") {
@@ -411,10 +413,10 @@ const ClientsProfileUpdate = () => {
 
   useEffect(() => {
     if (clientProfileData && Object.keys(clientProfileData).length > 0) {
+      handleCountryStateCity();
       fillFormDataFields();
       fillCheckboxFields();
       fillPhoneNumberFields();
-      handleCountryStateCity();
       handlePolicy();
       handlePolicyAndPolicyPayments();
     }  else {
@@ -835,10 +837,6 @@ const ClientsProfileUpdate = () => {
   const handleAddNewClient = (clientData) => {
     Navigate(`/add-new-client`)
   };
-
-  console.log("@@@@@@@@",formData);
-  
-
   return (
     <>
       <AsideLayout
