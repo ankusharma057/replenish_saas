@@ -18,6 +18,8 @@ import { useAuthContext } from "../context/AuthUserContext";
 import { MdOutlineCancel } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import Select from "react-select";
+import DatePicker from "react-multi-date-picker";
+import { SlCalender } from "react-icons/sl";
 
 const initialFormState = {
   clientName: "",
@@ -96,7 +98,7 @@ export default function AddInvoices() {
         const newData = data.filter(
           (client) =>
             client?.email !== null &&
-            client?.email !== undefined &&
+          client?.email !== undefined &&
             client?.email.trim() !== ""
         );
         setEmployeeList(newData);
@@ -255,7 +257,7 @@ export default function AddInvoices() {
     const { name, value, type, checked } = event.target;
     const inputValue =
       type === "checkbox" ? checked : isNaN(value) ? value : +value;
-
+    
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: inputValue,
@@ -859,8 +861,6 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-    console.log("@@@@@@@",invoiceData);
-    
     confirmAlert({
       title: "Confirm to submit",
       message: `Are you sure add ${invoiceData?.length} Invoices `,
@@ -977,15 +977,24 @@ export default function AddInvoices() {
                   />
                 </label> */}
 
-                <label className="mb-2 block">
+                <label className="mb-2 block d-flex flex-column">
                   Date of Service:
-                  <input
-                    type="date"
-                    name="dateOfService"
+                  <div className="w-full d-flex p-1 border align-items-center rounded border-gray-300">
+                  <DatePicker
+                    format="MM/DD/YYYY"
                     value={formData.dateOfService}
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
+                    onChange={(value) => setFormData((prevstate) => ({ ...prevstate, dateOfService: value }))}
+                    multiple={false}
+                    style={{
+                      width:"100%",
+                      padding:"10px",
+                      border:"none",
+                      outline:"none"
+                    }}
+                    placeholder="mm/dd/yyyy"
                   />
+                  <SlCalender />
+                  </div>
                 </label>
 
               </div>
