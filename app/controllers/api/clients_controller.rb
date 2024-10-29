@@ -73,10 +73,17 @@ class Api::ClientsController < ApplicationController
     if client.nil?
       render json: { error: 'Client not found' }, status: :not_found and return
     end
-    if client.update(client_params)
-       render json: client, serializer: ClientSerializer, status: :ok
+    permitted_params = client_params
+    if permitted_params[:notification_settings].present?
+      existing_settings = client.notification_settings || {}
+      new_settings = permitted_params[:notification_settings]
+      merged_settings = existing_settings.merge(new_settings)
+      permitted_params[:notification_settings] = merged_settings
+    end
+    if client.update(permitted_params)
+      render json: client, serializer: ClientSerializer, status: :ok
     else
-      render json: { errors: @client.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: client.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
