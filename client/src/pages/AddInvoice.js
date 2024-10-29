@@ -23,7 +23,7 @@ import { SlCalender } from "react-icons/sl";
 
 const initialFormState = {
   clientName: "",
-  dateOfService: "",
+  dateOfService: new Date(),
   conciergeFeePaid: false,
   gfe: false,
   semaglitudeConsultation: false,
