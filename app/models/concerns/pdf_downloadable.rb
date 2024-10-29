@@ -43,7 +43,7 @@ module PdfDownloadable
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
 
             <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
-            <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
+            <div style="text-align: right;">  Client Name: '"#{client&.name}"' </div>  
 
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
             <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
@@ -137,7 +137,7 @@ module PdfDownloadable
             <div style="text-align: right;"> Invoice: '"#{id}"' </div>  
 
             <div style="text-align: left;"> Charge: '"#{charge&.round(2)}"' </div>
-            <div style="text-align: right;">  Client Name: '"#{client.name}"' </div>  
+            <div style="text-align: right;">  Client Name: '"#{client&.name}"' </div>  
 
             <div style="text-align: left;">  Date of Service: '"#{date_of_service}"' </div> 
             <div style="text-align: right;">  Concierge Fee Paid: '"#{concierge_fee_paid ? 'Yes' : 'No'}"'</div>  

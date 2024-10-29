@@ -790,7 +790,6 @@ export default function AddInvoices() {
       email:clientEmail,
       beforeImages: blobsForBefore,
       afterImages: blobsForAfter,
-
       date_of_service: formData?.dateOfService,
       concierge_fee_paid: formData?.conciergeFeePaid,
       gfe: formData?.gfe,
@@ -870,6 +869,7 @@ export default function AddInvoices() {
           onClick: async () => {
             try {
               setLoading(true);
+              console.log('ADADADAD', invoiceData);
               await createGroupInvoices(invoiceData);
               toast.success("Invoice created successfully.");
               await getInvoiceList(true);
@@ -1637,7 +1637,7 @@ export default function AddInvoices() {
                   id={invoice.id}
                   user={invoice.user_name}
                   employee_id={invoice.employee_id}
-                  clientname={invoice.clientname}
+                  clientname={invoice.clintname}
                   dateOfService={invoice?.date_of_service}
                   conciergeFeePaid={invoice?.concierge_fee_paid}
                   gfe={invoice?.gfe}

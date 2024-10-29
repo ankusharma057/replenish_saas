@@ -12,6 +12,7 @@ module InvoiceGroupConcern
     @invoice_group = InvoiceGroup.create!
 
     params['_json'].each do |invoice_param|
+      invoice_param['date_of_service'] = Time.at(invoice_param['date_of_service']/1000).to_date
       client = @employee.clients.find_or_create_by(name: invoice_param['clientname'], last_name: invoice_param['lastname'], email: invoice_param['email'] )
       employee_invoice = create_invoice_for_employee(@employee, invoice_param, client)
 

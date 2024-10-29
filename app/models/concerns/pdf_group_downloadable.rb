@@ -48,7 +48,7 @@ module PdfGroupDownloadable
                   <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
 
                   <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
-                  <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
+                  <div style="text-align: right;">  Client Name: '"#{invoice.client&.name}"' </div>  
 
                   <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
                   <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  
@@ -148,7 +148,7 @@ module PdfGroupDownloadable
                 <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
                 
                 <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
-                <div style="text-align: right;">  Client Name: '"#{invoice.client.name}"' </div>  
+                <div style="text-align: right;">  Client Name: '"#{invoice.client&.name}"' </div>  
 
                 <div style="text-align: left;">  Date of Service: '"#{invoice.date_of_service}"' </div> 
                 <div style="text-align: right;">  Concierge Fee Paid: '"#{invoice.concierge_fee_paid ? 'Yes' : 'No'}"'</div>  

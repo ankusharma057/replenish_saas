@@ -835,13 +835,6 @@ const ClientsProfileUpdate = () => {
   const handleAddNewClient = (clientData) => {
     Navigate(`/add-new-client`)
   };
-<<<<<<< HEAD
-
-  console.log("@@@@@@@@",formData);
-  
-
-=======
->>>>>>> main_old
   return (
     <>
       <AsideLayout

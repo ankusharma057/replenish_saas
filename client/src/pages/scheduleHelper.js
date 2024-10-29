@@ -20,8 +20,6 @@ const getDividedSlots = (duration, start_time, maxTime) => {
     if (newSlot.end.getTime() <= maxTime.getTime()) slots.push(newSlot);
     else break;
   }
-  console.log("slots-asdasdads->>>>>>>>", slots);
-  console.log("wddwdwd", maxTime);
 
   return slots;
 };
