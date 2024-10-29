@@ -921,6 +921,11 @@ export default function AddInvoices() {
 
   const handleClientChange = (event) => {
     setClient(event.target.value);
+    let selectedClient = employeeList.find((client) => client.name === event.target.value);
+    setSelectedClient(selectedClient);
+    setClientName(selectedClient.name)
+    setClientLastName(selectedClient.last_name)
+    setClientEmail(selectedClient.email)
   };
 
   const handleCreateClientCheckbox = (event) => {
@@ -1164,7 +1169,7 @@ export default function AddInvoices() {
                     onChange={handleCreateClientCheckbox}
                   />
                   </div>
-                {!createClient &&
+                 {!createClient &&
                   <div className="border rounded-lg p-2 mb-4 products-used">
                     <table className="w-full table-auto ">
                       <thead className="whitespace-normal">
@@ -1175,21 +1180,15 @@ export default function AddInvoices() {
                       <tbody className="whitespace-normal">
                         <tr key={1} className="w-full d-flex gap-[10px]">
                           <td className="w-[50%]" style={{position:"relative"}}>
-                            <input className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={client} onChange={handleClientChange} onFocus={()=>setShowClientList(true)} onBlur={()=>{ setTimeout(() => setShowClientList(false), 150)}}/>
-                            {showClientList &&
-                              <ListGroup style={{ position: "absolute", zIndex: 999, display: "flex", flexDirection: "column", backgroundColor: "#fff", width: "100%", maxHeight: "300px", overflow: "scroll" }}>
-                                {employeeList.filter(item => item?.name?.toLowerCase()?.includes(client?.toLowerCase()))?.map((client,index) => (
-                                  <ListGroup.Item
-                                    key={index}
-                                    value={client?.name}
-                                    onMouseOver={() => setShowClientList(true)}
-                                    onMouseDown={() => handleSelectClient(client?.name)}
-                                  >
-                                    {client?.name}
-                                  </ListGroup.Item>
-                                ))}
-                              </ListGroup>}
-                            
+                            <Form.Select value={client} onChange={handleClientChange} disabled={createClient}>
+                              <option>Select Client</option>
+                              {employeeList?.length >= 0 && employeeList.map((client) => (
+                                <option value={client.name}>{client.name}</option>
+                              ))}
+                            </Form.Select>
+                          </td>
+                          <td className="w-[50%]">
+                            <input disabled={createClient} className="w-full !py-1.5 px-1 border-gray-300 border rounded-md" value={clientName} readOnly />
                           </td>
                         </tr>
                       </tbody>
@@ -1216,7 +1215,7 @@ export default function AddInvoices() {
                                 type="text"
                                 name="name"
                                 placeholder="Enter First Name"
-                                value={clientPayload.name}
+                                value={clientName}
                                 onChange={(event)=>{setClientName(event.target.value)}}
                                 required
                               />
@@ -1226,7 +1225,7 @@ export default function AddInvoices() {
                                 type="text"
                                 name="last_name"
                                 placeholder="Enter Last Name"
-                                value={clientPayload.last_name}
+                                value={clientLastName}
                                 onChange={(event)=>{setClientLastName(event.target.value)}}
                                 required
                               />
@@ -1236,7 +1235,7 @@ export default function AddInvoices() {
                                 type="email"
                                 name="email"
                                 placeholder="Enter Email Address"
-                                value={clientPayload.email}
+                                value={clientEmail}
                                 onChange={(event)=>{setClientEmail(event.target.value)}}
                                 required
                               />
