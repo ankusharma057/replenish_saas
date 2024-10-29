@@ -12,7 +12,13 @@ module InvoiceGroupConcern
     @invoice_group = InvoiceGroup.create!
 
     params['_json'].each do |invoice_param|
-      client = @employee.clients.find_or_create_by(name: invoice_param['clientname'], last_name: invoice_param['lastname'], email: invoice_param['email'] )
+      client = @employee.clients.find_by(name: invoice_param['clientname']) ||
+         @employee.clients.create(
+           name: invoice_param['clientname'],
+           last_name: invoice_param['lastname'],
+           email: invoice_param['email']
+         )
+
       employee_invoice = create_invoice_for_employee(@employee, invoice_param, client)
 
       if @employee.mentors.any?
