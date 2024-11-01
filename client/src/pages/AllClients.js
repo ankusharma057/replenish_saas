@@ -112,8 +112,14 @@ const AllClientRoot = () => {
                 setEmployeeList(newData);
                 if (clientId) {
                     let newClient = newData.find(client => client.id == clientId)
-                    console.log("@@@@@@@@", newClient);
-                    handleSelect(newClient);
+                    if(newClient){
+                        handleSelect(newClient);
+                    }else{
+                        handleSelect(newData[0]);
+                        navigate(`/customers/${newData[0].id}`)
+                    }
+                }else{
+                    handleSelect(newData[0]);
                 }
             }
         } catch (error) {

@@ -294,6 +294,7 @@ const Invoice = () => {
             invoiceData={singleInvoice}
             fiInvoiceList={singleInvoice.is_finalized}
             getInvoices={getInvoices}
+            finalizeInvoiceSubmit={finalizeInvoiceSubmit}
           />
         )}
 

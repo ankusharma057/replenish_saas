@@ -25,6 +25,7 @@ function CustomModal({
   fiInvoiceList,
   userProfile,
   getInvoices,
+  finalizeInvoiceSubmit
 }) {
 
   const invoiceID = invoiceData.id;
@@ -291,28 +292,7 @@ function CustomModal({
         size={"lg"}
         footer={
           <>
-            {userProfile?.is_admin === true && fiInvoiceList === false && (
-              <>
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    setShowRejectModal(true);
-                    // onHide();
-                  }}
-                >
-                  Reject
-                </Button>
-                <RejectInvoiceModal
-                  setShowRejectModal={setShowRejectModal}
-                  showRejectModal={showRejectModal}
-                  invoiceID={invoiceID}
-                  rejectSubmit={rejectSubmit}
-                  settextAreaInput={settextAreaInput}
-                  textAreaInput={textAreaInput}
-                  loading={loading}
-                />
-              </>
-            )}
+            
             {fiInvoiceList === false && (
               <>
                 <Button
@@ -335,6 +315,49 @@ function CustomModal({
                   loading={loading}
                   invoiceData={invoiceData}
                 />
+                {userProfile?.is_admin === true && fiInvoiceList === false && (
+              <>
+                <Button
+                 className="!bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
+                  onClick={() => {
+                   finalizeInvoiceSubmit(invoiceData)
+                  }}
+                >
+                  Finalize
+                </Button>
+                <RejectInvoiceModal
+                  setShowRejectModal={setShowRejectModal}
+                  showRejectModal={showRejectModal}
+                  invoiceID={invoiceID}
+                  rejectSubmit={rejectSubmit}
+                  settextAreaInput={settextAreaInput}
+                  textAreaInput={textAreaInput}
+                  loading={loading}
+                />
+              </>
+            )}
+            {userProfile?.is_admin === true && fiInvoiceList === false && (
+              <>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setShowRejectModal(true);
+                    // onHide();
+                  }}
+                >
+                  Reject
+                </Button>
+                <RejectInvoiceModal
+                  setShowRejectModal={setShowRejectModal}
+                  showRejectModal={showRejectModal}
+                  invoiceID={invoiceID}
+                  rejectSubmit={rejectSubmit}
+                  settextAreaInput={settextAreaInput}
+                  textAreaInput={textAreaInput}
+                  loading={loading}
+                />
+              </>
+            )}
               </>
             )}
             {invoiceData?.is_finalized && (

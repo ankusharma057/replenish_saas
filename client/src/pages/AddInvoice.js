@@ -1,6 +1,6 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Button, Form, ListGroup, Table } from "react-bootstrap";
+import { Alert, Button, Form, ListGroup, ListGroupItem, Table } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { toast } from "react-toastify";
 import { LOGIN } from "../Constants/AuthConstants";
@@ -62,8 +62,10 @@ export default function AddInvoices() {
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
   const [retailProductList, setRetailProductList] = useState([]);
+const [dateOfService,setDateOfService]=useState("")
   const [formData, setFormData] = useState({
     ...initialFormState,
+    dateOfService:Date.now()
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
   const totalRef = useRef();
@@ -90,7 +92,6 @@ export default function AddInvoices() {
   })
   const [createClient,setCreateClient]=useState(false)
   const [showClientList,setShowClientList]=useState(false)
-
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getClients();
@@ -860,50 +861,50 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-    confirmAlert({
-      title: "Confirm to submit",
-      message: `Are you sure add ${invoiceData?.length} Invoices `,
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            try {
-              setLoading(true);
-              console.log('ADADADAD', invoiceData);
-              await createGroupInvoices(invoiceData);
-              toast.success("Invoice created successfully.");
-              await getInvoiceList(true);
-              const { data: useData } = await getUpdatedUserProfile(true);
-              authUserDispatch({ type: LOGIN, payload: useData });
+      confirmAlert({
+        title: "Confirm to submit",
+        message: `Are you sure add ${invoiceData?.length} Invoices `,
+        buttons: [
+          {
+            label: "Yes",
+            onClick: async () => {
+              try {
+                setLoading(true);
+                console.log('ADADADAD', invoiceData);
+                await createGroupInvoices(invoiceData);
+                toast.success("Invoice created successfully.");
+                await getInvoiceList(true);
+                const { data: useData } = await getUpdatedUserProfile(true);
+                authUserDispatch({ type: LOGIN, payload: useData });
 
-              setClientName("");
-              setInvoiceArray([]);
-              setFormData(initialFormState);
-              setCurrentProduct({ name: "", price: 0, quantity: 1 });
-              setSelectedProduct(null);
-              setMatchingProducts([]);
-              setAfterImages([]);
-              setBeforeImages([]);
-              setBlobForAfter([]);
-              setBlobForBefore([]);
-            } catch (error) {
-              toast.error(
-                error?.response?.data?.exception ||
-                error?.response?.statusText ||
-                error.message ||
-                "Failed to create Invoice"
-              );
-            } finally {
-              setLoading(false);
-            }
+                setClientName("");
+                setInvoiceArray([]);
+                setFormData(initialFormState);
+                setCurrentProduct({ name: "", price: 0, quantity: 1 });
+                setSelectedProduct(null);
+                setMatchingProducts([]);
+                setAfterImages([]);
+                setBeforeImages([]);
+                setBlobForAfter([]);
+                setBlobForBefore([]);
+              } catch (error) {
+                toast.error(
+                  error?.response?.data?.exception ||
+                  error?.response?.statusText ||
+                  error.message ||
+                  "Failed to create Invoice"
+                );
+              } finally {
+                setLoading(false);
+              }
+            },
           },
-        },
-        {
-          label: "No",
-          onClick: () => console.log("Click No"),
-        },
-      ],
-    });
+          {
+            label: "No",
+            onClick: () => console.log("Click No"),
+          },
+        ],
+      });
   };
   function findProductQuantity(data, productId) {
     let quantity = 0;
@@ -923,9 +924,9 @@ export default function AddInvoices() {
     setClient(event.target.value);
     let selectedClient = employeeList.find((client) => client.name === event.target.value);
     setSelectedClient(selectedClient);
-    setClientName(selectedClient.name)
-    setClientLastName(selectedClient.last_name)
-    setClientEmail(selectedClient.email)
+    setClientName(selectedClient?.name)
+    setClientLastName(selectedClient?.last_name)
+    setClientEmail(selectedClient?.email)
   };
 
   const handleCreateClientCheckbox = (event) => {
@@ -935,7 +936,13 @@ export default function AddInvoices() {
   const handleSelectClient=(clientName)=>{
     setShowClientList(true)
     setClient(clientName)
-    setClient(clientName)
+    let selectedClient = employeeList.find((client) => client.name === clientName);
+    if(selectedClient){
+    setSelectedClient(selectedClient);
+    setClientName(selectedClient?.name)
+    setClientLastName(selectedClient?.last_name)
+    setClientEmail(selectedClient?.email)
+  }
   }
 
   return (
@@ -988,7 +995,7 @@ export default function AddInvoices() {
                   <DatePicker
                     format="MM/DD/YYYY"
                     value={formData.dateOfService}
-                    onChange={(value) => setFormData((prevstate) => ({ ...prevstate, dateOfService: value }))}
+                    onChange={(value) => setFormData((prevstate) => ({ ...prevstate, dateOfService: value?.toDate().getTime() }))}
                     multiple={false}
                     style={{
                       width:"100%",
@@ -1169,7 +1176,7 @@ export default function AddInvoices() {
                     onChange={handleCreateClientCheckbox}
                   />
                   </div>
-                 {!createClient &&
+                 {/* {!createClient &&
                   <div className="border rounded-lg p-2 mb-4 products-used">
                     <table className="w-full table-auto ">
                       <thead className="whitespace-normal">
@@ -1195,8 +1202,53 @@ export default function AddInvoices() {
                     </table>
                   </div>
 
-                }
-                
+                } */}
+                {!createClient && (
+                  <div className="border rounded-lg p-2 mb-4 products-used position-relative">
+                    <input
+                      className="w-full py-1.5 px-1 border-gray-300 border rounded-md"
+                      value={client}
+                      onChange={handleClientChange}
+                      onFocus={() => setShowClientList(true)}
+                      placeholder="Type to search client"
+                      onBlur={() => {
+                        // Delay hiding the list to allow click events to register
+                        setTimeout(() => setShowClientList(false), 150);
+                      }}
+                    />
+
+                    {showClientList && client?.length>0 ?(
+                      <ListGroup
+                        style={{
+                          position: 'absolute',
+                          zIndex: 999,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          backgroundColor: '#fff',
+                          width: '100%',
+                          maxHeight: '300px',
+                          overflowY: 'scroll',
+                        }}
+                      >
+                        {employeeList
+                          .filter((item) =>
+                            item?.name?.toLowerCase().includes(client?.toLowerCase())
+                          )
+                          .map((client, index) => (
+                            <ListGroup.Item
+                              key={index}
+                              value={client?.name}
+                              onMouseDown={() => handleSelectClient(client?.name)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {client?.name}
+                            </ListGroup.Item>
+                          ))}
+                      </ListGroup>
+                    ):""}
+                  </div>
+                )}
+
                 {
                   createClient &&
                     <div className="border rounded-lg p-2 mb-4 products-used">
