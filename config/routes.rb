@@ -19,7 +19,17 @@ mount Sidekiq::Web => '/sidekiq'
         get :employees, on: :member
       end
 
-      resources :stripe
+      resources :stripe do
+        collection do
+          get '/session_status', to: 'stripe#session_status'
+          get '/list_attached_cards', to: 'stripe#list_attached_cards'
+          get '/card_success', to: 'stripe#card_success'
+          post '/create_checkout_session', to: 'stripe#create_checkout_session'
+          post '/create_save_card_checkout_session', to: 'stripe#create_save_card_checkout_session'
+          post '/confirm_payment', to: 'stripe#confirm_payment'
+          delete '/remove_card', to: 'stripe#remove_card'
+        end
+      end
 
       resources :employees, only: %i(index show)
 

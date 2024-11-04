@@ -755,3 +755,96 @@ export const markInvoiceAsPaid = async (id, refetch) => {
     throw error;
   }
 }
+
+export const createSaveCardCheckoutSession = async (clientStripeId, clientId) => {
+  try {
+    const url = `/api/client/stripe/create_save_card_checkout_session?customer_id=${clientStripeId}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer_id: clientStripeId,
+        client_id: clientId
+      }),
+    });
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
+}
+
+export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId) => {
+  try {
+    const url = `/api/client/stripe/create_checkout_session`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        appointment_id: appointmentId,
+        amount: amount,
+        stripe_id: stripeId
+      }),
+    });
+
+    const data = await res.json();    
+    return data;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
+}
+
+export const confirmPayment = async (sessionId, scheduleId) => {
+  try {
+    const url = `/api/client/stripe/confirm_payment`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        schedule_id: scheduleId
+      }),
+    });
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error confirming payment:', error);
+    throw error;
+  }
+};
+
+export const fetchCreditCards = async (stripeClientId, clientId) => {
+  const response = await fetch(`/api/client/stripe/list_attached_cards?customer_id=${stripeClientId}&client_id=${clientId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch credit cards');
+  }
+  
+  return await response.json();
+};
+
+export const removeCreditCard = async (paymentMethodId) => {
+  const response = await fetch(`/api/client/stripe/remove_card`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ paymentMethodId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error.message || 'Error removing credit card');
+  }
+};

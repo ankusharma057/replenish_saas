@@ -15,6 +15,8 @@ import {
     getClientSchedules,
     getClientSchedulesOnly,
     UpdateClient,
+    createCheckoutSession,
+    confirmPayment
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -24,7 +26,7 @@ import { toast } from "react-toastify";
 // import { Form, Popover } from "react-bootstrap";
 // import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus, MoveRight, X } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import { ButtonGroup, ToggleButton, Button } from "react-bootstrap";
@@ -40,7 +42,7 @@ import { BiSolidPencil } from "react-icons/bi";
 import { IoCallSharp, IoMailSharp, IoHome, IoMegaphoneSharp, IoChatbubble, IoDocumentText } from "react-icons/io5";
 import { BsFileEarmarkTextFill, BsFillGearFill, BsSliders2, BsThreeDotsVertical } from "react-icons/bs";
 import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import CreateClientCard from "../components/Cards/CreateClientCart";
 import ScheduleCalender from "../components/Schedule/ScheduleCalender";
 import { MdDelete } from "react-icons/md";
@@ -57,11 +59,19 @@ import { IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
 import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
 import ClientProfile from "./ClientProfile";
+import { loadStripe } from '@stripe/stripe-js';
+import {
+    EmbeddedCheckoutProvider,
+    EmbeddedCheckout
+} from '@stripe/react-stripe-js';
+import ClientBilling from "./ClientBilling";
+import config from '../config';
 
 
 
 const AllClientRoot = () => {
     let { clientId } = useParams();
+    const stripePromise = loadStripe(config.STRIPE_PUBLIC_KEY);
     const { authUserState } = useAuthContext();
     // const [invoiceList, setInvoiceList] = useState([]);
     // const [invModalSHow, setInvModalSHow] = useState(false);
@@ -71,9 +81,15 @@ const AllClientRoot = () => {
     //   employee: {},
     // });
     const navigate = useNavigate();
+    const location = useLocation();
+    let queryParams = new URLSearchParams(location.search);
     const { collapse } = useAsideLayoutContext();
     const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
-    const [currentTab, setCurrentTab] = useState("profile");
+    const sessionIdExists = queryParams.has('session_id');
+
+    const [currentTab, setCurrentTab] = useState(
+        queryParams.get('payment_success') === 'true' ? "Appointments" : sessionIdExists ? "Billing" : "Profile"
+    );
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [radioTabs, setRadioTabs] = useState([]);
@@ -612,6 +628,7 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
 
     const [edittitle, setEditTitle] = useState(false)
     const [title, setTitle] = useState("Chart Entry")
+    const billingInfoRef = useRef(null);
     const handleItemClick = (name, index) => {
         if(!editId){
         setEditModel({ name, index });
@@ -804,6 +821,51 @@ setQutionaryFields((prev) => {
     return updatedFields;
 });
 };
+
+const handleAppointmentClick = (form) => {
+    if (selectedAppointment === form) {
+        debugger
+        setSelectedAppointment(null);
+    } else {
+    setSelectedAppointment(form);
+    setTimeout(() => {
+        billingInfoRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    }
+};
+
+let confirmationInProgress = false;
+
+const fetchPaymentConfirmation = async (retrievedSessionId) => {
+    if (confirmationInProgress) return;
+    confirmationInProgress = true;
+
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const response = await confirmPayment(retrievedSessionId, urlParams.get('schedule_id'));
+
+        if (response.status === 'success') {
+            toast.success('Payment confirmed successfully')
+        } else {
+            toast.error('Payment confirmation failed:', response);
+        }
+    } catch (error) {
+        console.error('Error confirming payment:', error);
+    }
+    window.history.replaceState({}, document.title, `${window.location.pathname}?tab=Appointments`);
+    getClientSchedule(selectedEmployeeData?.id, true)
+    window.location.reload();
+};
+
+useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('payment_success');
+    const retrievedSessionId = urlParams.get('session_id');
+
+    if (success && retrievedSessionId) {
+        fetchPaymentConfirmation(retrievedSessionId);
+    }
+}, []);
 
 const confirmToAddTemplate = (templateId) => {
     confirmAlert({
@@ -998,11 +1060,19 @@ useEffect(()=>{
     );
 
     const handleSelect = (emp) => {
-        navigate(`/customers/${emp.id}`);
+        navigate(`/customers/${emp.id}?${queryParams?.toString()}`);
         setSelectedEmployeeData(emp);
         setRadioTabs([]);
         setUpdateEmployeeInput({});
-        setCurrentTab(emp.is_admin ? "invoice" : "profile");
+        setCurrentTab(
+        emp.is_admin 
+            ? "invoice" 
+            : (queryParams.get('payment_success') === 'true' || queryParams.get('tab') === 'Appointments'
+            ? "Appointments" 
+            : queryParams.has('session_id') 
+                ? "Billing" 
+                : "profile")
+        );
         let addTabs = [
             // {
             //     name: "Invoices",
@@ -1031,6 +1101,8 @@ useEffect(()=>{
         }
         addTabs.splice(3,0,{ name: "Chart Entries",value: "chart_entries"})
         setRadioTabs(addTabs);
+        setIsDrawerOpen(false);
+        setSelectedAppointment(null);
     };
 
     const EmployeeItem = ({ index, style }) => {
@@ -1148,6 +1220,40 @@ useEffect(()=>{
         return () => clearTimeout(timer);
     };
 
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [clientSecret, setClientSecret] = useState(null);
+    const [showBookingInfo, setShowBookingInfo] = useState(false);
+    const [showNotes, setShowNotes] = useState(false);
+    const [showBillingInfo, setShowBillingInfo] = useState(false);
+    const [isAddingNote, setIsAddingNote] = useState(false);
+
+    const toggleDrawer = async () => {
+        if (selectedAppointment) {
+            try {
+                const { clientSecret } = await createCheckoutSession(
+                    selectedEmployeeData.id,
+                    selectedAppointment.id,
+                    selectedAppointment.remaining_amount,
+                    selectedEmployeeData.stripe_id
+                );
+                
+        
+                if (clientSecret) {
+                    setClientSecret(clientSecret);
+                    setIsDrawerOpen(true);
+                }
+            } catch (error) {
+                toast.error("Error creating checkout session:", error);
+            }
+        }
+    };
+
+    const getStatus = (totalAmount, remainingAmount) => {
+        if(totalAmount === remainingAmount) return 'Unpaid'
+        if(remainingAmount === 0) return 'Paid'
+        return 'Partially Paid'
+    }
 
     return (
         <>
@@ -1224,65 +1330,289 @@ useEffect(()=>{
                                         <ClientProfile clientProfileData={selectedEmployeeData} handleClientProfileFlipCard={handleClientProfileFlipCard} handleSearchClients={handleSearchClients} searchQuery={searchQuery} searchedClients={searchedClients} handleNavigation={handleNavigation}/>
                                 )}
 
+                                {currentTab === "Billing" && (
+                                    <ClientBilling stripeClientId={selectedEmployeeData?.stripe_id} clientId={selectedEmployeeData?.id} />
+                                )}
+
                                 {currentTab === "Appointments" && (
-                                    <div className="bg-white">
-                                        <div className={`bg-gray-200 min-h-[calc(100%-56px)]  p-3 px-4`}>
-                                        <div className="w-100 mx-auto h-full bg-white  rounded-md px-16 py-1 pb-4">
-                                            <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
-                                            <h2><span>Appointment Details</span></h2> 
-
-                                            </div>
-                                            <div className="h-full border rounded-lg p-4">
-                                            <div className="h-full flex flex-col gap-3">
-
-                                                {Array.isArray(selectedClientSchedules) && selectedClientSchedules.map((form,index)=>(
-                                                    <div key={index} className="flex flex-col gap-2 border rounded-lg overflow-hidden">
-                                                    
-                                                        <div className=" p-1 flex flex-col justify-start py-2 px-3  bg-slate-50 hover:bg-blue-50 duration-300 ">
-                                                            <div className="flex justify-between p-3">
-                                                                <div>Treatment : <span className="text-blue-500">{form?.treatment?.name}</span></div>
-                                                                <div>Client : <span className="text-blue-500">{form?.client?.name}</span></div>
-                                                            </div>
-                                                            
-                                                            <div className="flex justify-between p-3">
-                                                                <div>Location : <span className="text-blue-500">{form?.location?.name}</span></div>
-                                                                <div>
-                                                                    Time: 
-                                                                    <span className="text-blue-500">
-                                                                        {new Date(form?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - 
-                                                                        {new Date(form?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
-                                                                    </span>
+                                    <div className="flex bg-white min-h-screen">
+                                        <div className="flex-grow bg-gray-200 p-3 px-4">
+                                            <div className="w-full mx-auto h-full bg-white rounded-md px-6 py-1 pb-4 lg:px-16">
+                                                <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
+                                                    <h2><span>Appointment Details</span></h2>
+                                                </div>
+                                                <div className="border rounded-lg p-4">
+                                                    <div className="flex flex-col gap-3">
+                                                        {Array.isArray(selectedClientSchedules) && selectedClientSchedules.map((form, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="flex flex-col gap-2 border rounded-lg overflow-hidden"
+                                                                onClick={() => handleAppointmentClick(form)}
+                                                            >
+                                                                <div className="p-1 flex flex-col justify-start py-2 px-3 bg-slate-50 hover:bg-blue-50 duration-300">
+                                                                    <div className="flex justify-between p-3">
+                                                                        <div>Treatment: <span className="text-blue-500">{form?.treatment?.name}</span></div>
+                                                                        <div>Client: <span className="text-blue-500">{form?.client?.name}</span></div>
+                                                                    </div>
+                                                                    <div className="flex justify-between p-3">
+                                                                        <div>Location: <span className="text-blue-500">{form?.location?.name}</span></div>
+                                                                        <div>
+                                                                            Time:
+                                                                            <span className="text-blue-500">
+                                                                                {new Date(form?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
+                                                                                {new Date(form?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-2 p-3">
+                                                                        <span>Transaction Details</span>
+                                                                        <div className="flex gap-4">
+                                                                            <div className="flex flex-col gap-1">
+                                                                                <span>Total Amount</span>
+                                                                                <span className="text-blue-500">{parseFloat(form?.total_amount)}</span>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-1">
+                                                                                <span>Paid Amount</span>
+                                                                                <span className="text-blue-500">{parseFloat(form?.paid_amount)}</span>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-1">
+                                                                                <span>Remaining Amount</span>
+                                                                                <span className="text-blue-500">{parseFloat(form?.remaining_amount)}</span>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-1">
+                                                                                <span>Status</span>
+                                                                                <span className="text-blue-500">{getStatus(parseFloat(form?.total_amount), parseFloat(form?.remaining_amount))}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex flex-col gap-2 p-3">
-                                                              <span>Transaction Details</span>
-                                                              <div className="flex gap-4">
-                                                                <div className="flex flex-col gap-1">
-                                                                  <span>Total Amount</span>
-                                                                  <span className="text-blue-500">{parseFloat(form?.total_amount)}</span>
-                                                                </div>
-                                                                <div className="flex flex-col gap-1">
-                                                                  <span>Paid Amount</span>
-                                                                  <span className="text-blue-500">{parseFloat(form?.paid_amount)}</span>
-                                                                </div>
-                                                                <div className="flex flex-col gap-1">
-                                                                  <span>Remaining Amount</span>
-                                                                  <span className="text-blue-500">
-                                                                    {parseFloat(form?.remaining_amount)}
-                                                                  </span>
-                                                                </div>
-                                                              </div>
-                                                            </div>
-                                                            </div>
-                                                            <div className="px-3 ">
-                                                            
-                                                            </div>
-                                                
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {selectedAppointment && (
+                                            <div className="w-full lg:w-1/4 bg-gray-100 p-4" ref={billingInfoRef}>
+                                                <div className="mt-4">
+                                                    <button
+                                                        className="flex justify-between w-full rounded"
+                                                        onClick={() => setShowBookingInfo(!showBookingInfo)}
+                                                    >
+                                                        <span className="text-xl text-[#22D3EE]">Booking Info</span>
+                                                        <ChevronDown className={`transform ${showBookingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                                                    </button>
+                                                    {showBookingInfo && (
+                                                        <div className="border rounded-lg bg-white mt-2 py-2">
+                                                            <span className="px-2"><strong>Client:</strong></span><br />
+                                                            <span className="px-2">{selectedAppointment?.client?.name}</span><br />
+                                                            <span className="px-2">{selectedAppointment?.client?.email}</span>
+                                                            <hr className="my-2" />
+                                                            <span className="px-2"><strong>Location:</strong></span><br />
+                                                            <span className="px-2">{selectedAppointment?.location?.name}</span>
+                                                            <hr className="my-2" />
+                                                            <span className="px-2"><strong>Time:</strong></span><br />
+                                                            <p className="px-2 font-medium">
+                                                                {new Date(selectedAppointment?.start_time).toLocaleDateString([], {
+                                                                    weekday: 'long',
+                                                                    year: 'numeric',
+                                                                    month: 'long',
+                                                                    day: 'numeric'
+                                                                })}
+                                                                <br />
+                                                                {new Date(selectedAppointment?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
+                                                                {new Date(selectedAppointment?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                            </p>
+                                                            <hr className="my-2" />
+                                                            <span className="px-2"><strong>Treatment:</strong></span>
+                                                            <br />
+                                                            <span className="px-2 ">{selectedAppointment?.treatment?.name} - <span className="font-semibold"> ${selectedAppointment?.total_amount}</span></span>
+                                                            <br />
+                                                            <span className="px-2 ">{selectedAppointment?.employee?.name}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="mt-4">
+                                                    <button
+                                                        className="flex justify-between w-full rounded"
+                                                        onClick={() => setShowNotes(!showNotes)}
+                                                    >
+                                                        <span className="text-xl text-[#22D3EE]">Notes</span>
+                                                        <ChevronDown className={`transform ${showNotes ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                                                    </button>
+                                                    {showNotes && (
+                                                        <div className="border p-2 rounded-lg bg-white mt-2">
+                                                            <div className="mt-4">
+                                                                <textarea
+                                                                    className="w-full p-2 border rounded"
+                                                                    placeholder="Write a note..."
+                                                                    rows="3"
+                                                                    onFocus={() => setIsAddingNote(true)}
+                                                                ></textarea>
+                                                            </div>
+
+                                                            {isAddingNote && (
+                                                                <div className="flex justify-end mt-2">
+                                                                    <button
+                                                                        className="text-gray-500 py-1 px-4 rounded"
+                                                                        onClick={() => {
+                                                                            setIsAddingNote(false);
+                                                                        }}
+                                                                    >
+                                                                        Close
+                                                                    </button>
+                                                                    <button
+                                                                        className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
+                                                                        onClick={() => {
+                                                                            console.log("API for adding the note will be handled later");
+                                                                            setIsAddingNote(false);
+                                                                        }}
+                                                                    >
+                                                                        Add
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+
+                                                <div className="mt-4">
+                                                    <button
+                                                        className="flex justify-between w-full rounded"
+                                                        onClick={() => setShowBillingInfo(!showBillingInfo)}
+                                                    >
+                                                        <span className="text-xl text-[#22D3EE]">Billing Info</span>
+                                                        <ChevronDown className={`transform ${showBillingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                                                    </button>
+                                                    {showBillingInfo && (
+                                                        <div className="border rounded-lg bg-white pt-2">
+                                                            <div className="flex justify-between px-2 pt-2">
+                                                                <div>
+                                                                    <span className="font-semibold pt-4">Status: </span>
+                                                                    <span className="text-green-500">{getStatus(parseFloat(selectedAppointment?.total_amount), parseFloat(selectedAppointment?.remaining_amount))}</span>
+                                                                </div>
+
+                                                                <button
+                                                                    className="flex text-[#22D3EE] rounded"
+                                                                >
+                                                                    Add Item
+                                                                    <Plus />
+                                                                </button>
+                                                            </div>
+                                                            <hr className="my-2" />
+                                                            <div className="flex justify-between px-2">
+                                                                <div>
+                                                                    <span className="font-semibold">{selectedAppointment.treatment?.name}</span>
+                                                                </div>
+                                                                <div>
+                                                                    <span>${selectedAppointment.total_amount}</span>
+                                                                </div>
+                                                            </div>
+                                                            <hr className="m-2" />
+                                                            <div className="flex justify-between px-2">
+                                                                <div>
+                                                                    <span>Subtotal</span>
+                                                                    <br />
+                                                                    <span>Total</span>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <span>${selectedAppointment.total_amount}</span>
+                                                                    <br />
+                                                                    <span><strong>${selectedAppointment.total_amount}</strong></span>
+                                                                </div>
+                                                            </div>
+                                                            <hr className="m-2" />
+                                                            <div className="flex justify-between px-2">
+                                                                <div>
+                                                                    <span className="font-semibold">Invoice # </span>
+                                                                    {selectedAppointment?.payment_intent_id && (
+                                                                        <a 
+                                                                            href={`https://dashboard.stripe.com/payments/${selectedAppointment.payment_intent_id}`} 
+                                                                            target="_blank" 
+                                                                            rel="noopener noreferrer" 
+                                                                            className="text-blue-500 hover:underline"
+                                                                        >
+                                                                            {selectedAppointment.payment_intent_id.slice(0, 6) + '...'}
+                                                                        </a>
+                                                                    )}
+                                                                    <br />
+                                                                    <span>Total</span>
+                                                                    <br />
+                                                                    <span>Balance</span>
+                                                                    <br />
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <span className="text-[#22D3EE]">{selectedAppointment.status}</span>
+                                                                    <br />
+                                                                    <span>${selectedAppointment.total_amount}</span>
+                                                                    <br />
+                                                                    <span>${selectedAppointment.remaining_amount}</span>
+                                                                    <br />
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex p-2 gap-x-2">
+                                                                {selectedAppointment.remaining_amount > 0 && (
+                                                                    <>
+                                                                        <button
+                                                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                                                            onClick={() => console.log('Adjustment button clicked')}
+                                                                        >
+                                                                            <span>Adjustment</span>
+                                                                            <Plus />
+                                                                        </button>
+                                                                        <button
+                                                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                                                            onClick={toggleDrawer}
+                                                                        >
+                                                                            <span>Pay</span>
+                                                                            <MoveRight />
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                            <div className="bg-[#f5f5f5] min-h-8 px-6 py-2">
+                                                                <div className="flex justify-end gap-8">
+                                                                    <div>
+                                                                        <span className="font-semibold text-md">Client Total</span>
+                                                                        <br />
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="font-semibold">${selectedAppointment.total_amount}</span>
+                                                                        <br />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className={`fixed top-0 right-0 h-full overflow-y-auto w-full lg:w-1/2 z-10 bg-white shadow-lg p-6 transform transition-transform duration-300 ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                                            <div className="flex justify-end items-center mb-4 pt-20">
+                                                <button
+                                                    className="text-gray-500 hover:text-red-500 focus:outline-none"
+                                                    onClick={() => {
+                                                        setIsDrawerOpen(false);
+                                                        setClientSecret(null);
+                                                    }}
+                                                    aria-label="Close drawer"
+                                                >
+                                                    <X size={24} />
+                                                </button>
+                                            </div>
+
+                                            {clientSecret ? (
+                                                <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                                                    <EmbeddedCheckout />
+                                                </EmbeddedCheckoutProvider>
+                                            ) : (
+                                                <p>Loading payment details...</p>
+                                            )}
                                         </div>
                                     </div>
                                 )}

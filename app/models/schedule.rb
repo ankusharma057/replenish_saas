@@ -79,22 +79,30 @@ class Schedule < ApplicationRecord
                         .includes(:treatment, :client, :location, :payments)
 
     schedules.map do |schedule|
+      first_payment = schedule.payments.first
+      session_id = first_payment&.session_id
+
       {
         id: schedule.id,
         treatment: {
           name: schedule.treatment&.name
         },
         client: {
-          name: schedule.client&.name
+          name: schedule.client&.name,
+          email: schedule.client&.email,
         },
         location: {
           name: schedule.location&.name
+        },
+        employee: {
+          name: schedule.employee.name
         },
         start_time: schedule.start_time,
         end_time: schedule.end_time,
         total_amount: schedule.amount,
         paid_amount: schedule.paid_amt,
-        remaining_amount: schedule.remaining_amt
+        remaining_amount: schedule.remaining_amt,
+        payment_intent_id: session_id ? Stripe::Checkout::Session.retrieve(session_id).payment_intent : nil
       }
     end
   end
