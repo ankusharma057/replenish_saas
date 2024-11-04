@@ -113,7 +113,7 @@ const AllClientRoot = () => {
                 if (clientId) {
                     let newClient = newData.find(client => client.id == clientId)
                     if(newClient){
-                        handleSelect(newClient);
+                    handleSelect(newClient);
                     }else{
                         handleSelect(newData[0]);
                         navigate(`/customers/${newData[0].id}`)
@@ -615,8 +615,12 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
     const handleItemClick = (name, index) => {
         if(!editId){
         setEditModel({ name, index });
-        openModalFromParent(); }
-    };
+        setTimeout(() => {
+            openModalFromParent();
+        }, 0)
+    }
+    }
+
 
     useEffect(() => {
         if (selectedEmployeeData) {
@@ -1414,14 +1418,13 @@ useEffect(()=>{
                                                 {/* Note */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
+                                                >
+                                                <div className="flex justify-between items-center py-1">
+                                                    <div className="font-semibold text-[17px]"onClick={() => {
                                                     // setEditModel({ name: "initialNote", index: index });
                                                     // openModalFromParent();
                                                     handleItemClick('initialNote', index)
-                                                }}
-                                                >
-                                                <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                }}>
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&  <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1437,7 +1440,6 @@ useEffect(()=>{
                                                 <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
                                                     <textarea
                                                     className="w-full focus:outline-none"
-                                                    readOnly
                                                     required={field?.required}
                                                     value={qutionaryFields[index]?.value}
                                                     onChange={(e) => {
@@ -1453,14 +1455,15 @@ useEffect(()=>{
                                                 {/* Signature */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialSignature", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialSignature', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        // setEditModel({ name: "initialSignature", index: index });
+                                                        // openModalFromParent();
+                                                        handleItemClick('initialSignature', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1587,14 +1590,13 @@ useEffect(()=>{
                                                 {/* Heading */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialHeading", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialHeading', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialHeading', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1617,15 +1619,14 @@ useEffect(()=>{
                                                 {/* Check Boxes */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialCheckBox", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialCheckBox', index)
-                                                }}
                                                 >
                                                 <div className="flex flex-col ">
                                                     <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialCheckBox', index)
+                                                    }}
+                                                    >
                                                         {field?.label}
                                                     </div>
                                                     {!editId && <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1681,12 +1682,13 @@ useEffect(()=>{
                                                 {/* Drop down */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    handleItemClick('initialDropdown', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialDropdown', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1722,12 +1724,13 @@ useEffect(()=>{
                                                 {/* Range */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
-                                                onClick={() => {
-                                                    handleItemClick('initialRange', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialRange', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1775,16 +1778,17 @@ useEffect(()=>{
                                                 {/* Instructions */}
                                                 <div
                                                 className=" hover:bg-gray-100  rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    setEditModel({
-                                                    name: "initialInstruction",
-                                                    index: index,
-                                                    });
-                                                    openModalFromParent();
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center  py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        setEditModel({
+                                                        name: "initialInstruction",
+                                                        index: index,
+                                                        });
+                                                        openModalFromParent();
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
