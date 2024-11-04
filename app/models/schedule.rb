@@ -2,7 +2,8 @@ class Schedule < ApplicationRecord
   belongs_to :client
   belongs_to :employee
   belongs_to :product, optional: true
-  belongs_to :treatment
+  has_many :schedule_treatments, dependent: :destroy
+  has_many :treatments, through: :schedule_treatments
   has_many :payments
   belongs_to :location
 
@@ -42,7 +43,8 @@ class Schedule < ApplicationRecord
   end
 
   def amount
-    treatment&.cost.to_f
+    treatments&.sum(&:cost).to_f
+
   end
 
   def paid_amt
@@ -76,7 +78,7 @@ class Schedule < ApplicationRecord
     return [] unless client_id.present?
 
     schedules = Schedule.where(client_id: client_id)
-                        .includes(:treatment, :client, :location, :payments)
+                        .includes(:treatments, :client, :location, :payments)
 
     schedules.map do |schedule|
       first_payment = schedule.payments.first
@@ -84,9 +86,9 @@ class Schedule < ApplicationRecord
 
       {
         id: schedule.id,
-        treatment: {
-          name: schedule.treatment&.name
-        },
+        treatments: schedule.treatments.map do |treatment|
+          { name: treatment.name }
+        end,
         client: {
           name: schedule.client&.name,
           email: schedule.client&.email,
@@ -106,6 +108,7 @@ class Schedule < ApplicationRecord
       }
     end
   end
+
 
   private
 

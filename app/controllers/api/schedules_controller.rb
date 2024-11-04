@@ -27,6 +27,7 @@ class Api::SchedulesController < ApplicationController
     end
   end
 
+
   def remaining_paid
     schedule = Schedule.find_by(id: params[:id])
     render json: {error: "No inventories"}, status: :unprocessable_entity and return unless schedule.check_for_inventory
@@ -133,7 +134,7 @@ class Api::SchedulesController < ApplicationController
   private
 
   def schedule_param
-    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id, :client_id, notes: [:id, :content, :due_date, :employee_id, :updated_at])
+    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id, treatment_ids: [],  notes: [:id, :content, :due_date, :employee_id, :updated_at]))
   end
 
   def set_client

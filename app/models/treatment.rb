@@ -1,6 +1,7 @@
 class Treatment < ApplicationRecord
   belongs_to :product
-  has_many :schedules
+  has_many :schedule_treatments, dependent: :destroy
+  has_many :schedules, through: :schedule_treatments
   belongs_to :employee, class_name: 'Employee', foreign_key: :created_by
 
   has_many :treatment_intake_forms, dependent: :destroy
