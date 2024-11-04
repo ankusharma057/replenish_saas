@@ -16,7 +16,7 @@ import { X } from "lucide-react";
 
 
 const ClientBilling = ({ stripeClientId, clientId }) => {
-  const hasFetchedSession = useRef(false);
+  const stripePromise = loadStripe(config.STRIPE_PUBLIC_KEY);
   const [creditCards, setCreditCards] = useState([]);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('purchases');
@@ -25,22 +25,6 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   const [checkoutSessionUrl, setCheckoutSessionUrl] = useState("");
   const [selectedCard, setSelectedCard] = useState(null);
   const [isCardDetailDrawerOpen, setIsCardDetailDrawerOpen] = useState(false);
-  const [stripePublicKey, setStripePublicKey] = useState(null);
-  const [stripePromise, setStripePromise] = useState(null);
-
-  useEffect(() => {
-      async function loadConfig() {
-      const publicKey = await fetchConfig();
-      setStripePublicKey(publicKey);
-      }
-      loadConfig();
-  }, []);
-
-  useEffect(() => {
-      if (stripePublicKey) {
-        setStripePromise(loadStripe(stripePublicKey));
-      }
-  }, [stripePublicKey]);
   
   const fetchCreditCards = async () => {
     try {
@@ -185,27 +169,22 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   };
 
   useEffect(() => {
-    if (hasFetchedSession.current) return;
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
-
     if (sessionId) {
-      hasFetchedSession.current = true;
       fetch(`/api/client/stripe/card_success?session_id=${sessionId}`)
         .then((response) => {
           if (response.ok) {
-            toast.success('Card Added Successfully');
-            setActiveTab('creditCards');
+            toast.success('Card Added Successfully')
+            setActiveTab('creditCards')
             fetchCreditCards();
-
-            urlParams.delete('session_id');
-            navigate(`/customers/${clientId}?${urlParams.toString()}`, { replace: true });
           } else {
-            toast.error('Error adding credit card');
+            toast.error('Error adding credit card:', error);
           }
         })
         .catch((error) => toast.error('Error fetching payment details:', error));
-    }
+      }
+    navigate(`/customers/${clientId}`)
   }, [navigate]);
 
   useEffect(() => {
