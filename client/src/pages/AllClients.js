@@ -831,7 +831,6 @@ setQutionaryFields((prev) => {
 
 const handleAppointmentClick = (form) => {
     if (selectedAppointment === form) {
-        debugger
         setSelectedAppointment(null);
     } else {
     setSelectedAppointment(form);

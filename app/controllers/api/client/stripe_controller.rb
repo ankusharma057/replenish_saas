@@ -133,7 +133,7 @@ class Api::Client::StripeController < ClientApplicationController
       metadata: { user_id: client.id }
     )
 
-    client.update(stripe_id: stripe_customer.id)
+    client.update_attribute(stripe_id: stripe_customer.id)
     stripe_customer.id
   end
 

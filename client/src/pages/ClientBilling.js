@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,6 +16,7 @@ import { X } from "lucide-react";
 
 
 const ClientBilling = ({ stripeClientId, clientId }) => {
+  const hasFetchedSession = useRef(false);
   const [creditCards, setCreditCards] = useState([]);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('purchases');
@@ -179,22 +180,27 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   };
 
   useEffect(() => {
+    if (hasFetchedSession.current) return;
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
+
     if (sessionId) {
+      hasFetchedSession.current = true;
       fetch(`/api/client/stripe/card_success?session_id=${sessionId}`)
         .then((response) => {
           if (response.ok) {
-            toast.success('Card Added Successfully')
-            setActiveTab('creditCards')
+            toast.success('Card Added Successfully');
+            setActiveTab('creditCards');
             fetchCreditCards();
+
+            urlParams.delete('session_id');
+            navigate(`/customers/${clientId}?${urlParams.toString()}`, { replace: true });
           } else {
-            toast.error('Error adding credit card:', error);
+            toast.error('Error adding credit card');
           }
         })
         .catch((error) => toast.error('Error fetching payment details:', error));
-      }
-    navigate(`/customers/${clientId}`)
+    }
   }, [navigate]);
 
   useEffect(() => {
