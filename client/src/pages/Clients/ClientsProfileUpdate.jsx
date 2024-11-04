@@ -350,9 +350,9 @@ const ClientsProfileUpdate = () => {
   const handleCountryStateCity = () => {
     if(clientProfileData?.client_detail?.country !== ""){
       handleCountryChange({ target: { value: clientProfileData?.client_detail?.country } });
-    }else if(clientProfileData?.client_detail?.state !== ""){
+    } if(clientProfileData?.client_detail?.state !== ""){
       handleStateChange({ target: { value: clientProfileData?.client_detail?.state } });
-    }else if(clientProfileData?.client_detail?.city !== ""){
+    } if(clientProfileData?.client_detail?.city !== ""){
       handleCityChange({ target: { value: clientProfileData?.client_detail?.city } });
     }
   };
@@ -417,6 +417,8 @@ const ClientsProfileUpdate = () => {
       fillPhoneNumberFields();
       handlePolicy();
       handlePolicyAndPolicyPayments();
+      handleCountryStateCity();
+
     }  else {
       getClientDetails()
     } 
@@ -504,10 +506,6 @@ const ClientsProfileUpdate = () => {
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
     if (name === "dobYear") {
       if (/^\d{0,4}$/.test(value)) {
         setFormData(prevState => ({
@@ -516,7 +514,7 @@ const ClientsProfileUpdate = () => {
         }));
       }
     }
-    if (name === "dobDay") {
+    else if (name === "dobDay") {
       if (/^\d{0,2}$/.test(value)) {
         setFormData(prevState => ({
           ...prevState,
@@ -524,11 +522,17 @@ const ClientsProfileUpdate = () => {
         }));
       }
     }
-    if(name === "dobMonth"){
-      let filterValue= months.find((item)=> item.name=value)
+    else if(name === "dobMonth"){
+      let filterValue= months.find((item)=> item.name===value)
       setFormData(prevState => ({
         ...prevState,
-        [name]: filterValue.number,
+        [name]: filterValue.name,
+      }));
+    }
+    else{
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: value,
       }));
     }
   };
