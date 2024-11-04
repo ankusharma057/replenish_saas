@@ -57,7 +57,7 @@ import { TopModel } from "../components/TopModel";
 import Switch from "@mui/material/Switch";
 import { IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
-import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire } from "../Server";
+import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire, fetchConfig } from "../Server";
 import ClientProfile from "./ClientProfile";
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -65,13 +65,9 @@ import {
     EmbeddedCheckout
 } from '@stripe/react-stripe-js';
 import ClientBilling from "./ClientBilling";
-import config from '../config';
-
-
 
 const AllClientRoot = () => {
     let { clientId } = useParams();
-    const stripePromise = loadStripe(config.STRIPE_PUBLIC_KEY);
     const { authUserState } = useAuthContext();
     // const [invoiceList, setInvoiceList] = useState([]);
     // const [invModalSHow, setInvModalSHow] = useState(false);
@@ -104,6 +100,17 @@ const AllClientRoot = () => {
     const [editProfileData,setEditProfileData]=useState()
     const [searchedClients,setSearchedClients]=useState([])
     const localizer = momentLocalizer(moment);
+    const [stripePublicKey, setStripePublicKey] = useState(null);
+
+    useEffect(() => {
+        async function loadConfig() {
+        const publicKey = await fetchConfig();
+        setStripePublicKey(publicKey);
+        }
+        loadConfig();
+    }, []);
+
+    const stripePromise = loadStripe(stripePublicKey);
 
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
     try {

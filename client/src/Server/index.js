@@ -848,3 +848,16 @@ export const removeCreditCard = async (paymentMethodId) => {
     throw new Error(errorData.error.message || 'Error removing credit card');
   }
 };
+
+export  const fetchConfig = async () => {
+  try {
+    const response = await fetch('/api/config');
+    const data = await response.json();
+
+    return data.stripePublicKey;
+  } catch (error) {
+    console.error('Error fetching config:', error);
+
+    return null;
+  }
+};

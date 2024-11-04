@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import config from '../config';
 import {
   createSaveCardCheckoutSession,
   fetchCreditCards as fetchCreditCardsAPI,
-  removeCreditCard as removeCreditCardAPI
+  removeCreditCard as removeCreditCardAPI,
+  fetchConfig
 } from "../Server";
 import {
   EmbeddedCheckoutProvider,
@@ -16,7 +16,6 @@ import { X } from "lucide-react";
 
 
 const ClientBilling = ({ stripeClientId, clientId }) => {
-  const stripePromise = loadStripe(config.STRIPE_PUBLIC_KEY);
   const [creditCards, setCreditCards] = useState([]);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('purchases');
@@ -25,6 +24,17 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   const [checkoutSessionUrl, setCheckoutSessionUrl] = useState("");
   const [selectedCard, setSelectedCard] = useState(null);
   const [isCardDetailDrawerOpen, setIsCardDetailDrawerOpen] = useState(false);
+  const [stripePublicKey, setStripePublicKey] = useState(null);
+
+  useEffect(() => {
+      async function loadConfig() {
+      const publicKey = await fetchConfig();
+      setStripePublicKey(publicKey);
+      }
+      loadConfig();
+  }, []);
+
+  const stripePromise = loadStripe(stripePublicKey);
   
   const fetchCreditCards = async () => {
     try {
