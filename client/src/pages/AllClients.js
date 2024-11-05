@@ -101,6 +101,8 @@ const AllClientRoot = () => {
     const [searchedClients,setSearchedClients]=useState([])
     const localizer = momentLocalizer(moment);
     const [stripePublicKey, setStripePublicKey] = useState(null);
+    const [stripePromise, setStripePromise] = useState(null);
+
 
     useEffect(() => {
         async function loadConfig() {
@@ -110,7 +112,11 @@ const AllClientRoot = () => {
         loadConfig();
     }, []);
 
-    const stripePromise = loadStripe(stripePublicKey);
+    useEffect(() => {
+        if (stripePublicKey) {
+            setStripePromise(loadStripe(stripePublicKey));
+        }
+    }, [stripePublicKey]);
 
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
     try {
