@@ -102,7 +102,7 @@ const AllClientRoot = () => {
     const localizer = momentLocalizer(moment);
     const [stripePublicKey, setStripePublicKey] = useState(null);
     const [stripePromise, setStripePromise] = useState(null);
-
+    const [reload, setReload] = useState(false);
 
     useEffect(() => {
         async function loadConfig() {
@@ -131,7 +131,7 @@ const AllClientRoot = () => {
 
     useEffect(() => {
     getClientSchedule(selectedEmployeeData?.id, true);
-    }, [selectedEmployeeData]);
+    }, [selectedEmployeeData, reload]);
 
     const getEmployees = async (refetch = false) => {
         try {
@@ -858,15 +858,15 @@ const fetchPaymentConfirmation = async (retrievedSessionId) => {
 
         if (response.status === 'success') {
             toast.success('Payment confirmed successfully')
+            setReload(prev => !prev);
         } else {
             toast.error('Payment confirmation failed:', response);
         }
     } catch (error) {
-        console.error('Error confirming payment:', error);
+        toast.error('Error confirming payment:', error);
     }
     window.history.replaceState({}, document.title, `${window.location.pathname}?tab=Appointments`);
-    getClientSchedule(selectedEmployeeData?.id, true)
-    window.location.reload();
+
 };
 
 useEffect(() => {
