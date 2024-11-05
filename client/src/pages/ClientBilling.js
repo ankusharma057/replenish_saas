@@ -26,6 +26,7 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [isCardDetailDrawerOpen, setIsCardDetailDrawerOpen] = useState(false);
   const [stripePublicKey, setStripePublicKey] = useState(null);
+  const [stripePromise, setStripePromise] = useState(null);
 
   useEffect(() => {
       async function loadConfig() {
@@ -35,7 +36,11 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
       loadConfig();
   }, []);
 
-  const stripePromise = loadStripe(stripePublicKey);
+  useEffect(() => {
+      if (stripePublicKey) {
+        setStripePromise(loadStripe(stripePublicKey));
+      }
+  }, [stripePublicKey]);
   
   const fetchCreditCards = async () => {
     try {
