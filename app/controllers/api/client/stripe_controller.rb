@@ -25,41 +25,32 @@ class Api::Client::StripeController < ClientApplicationController
 
   def create_checkout_session
     line_items = build_line_items(params[:appointment_id], params[:amount])
-    session = Stripe::Checkout::Session.create(
-      customer: params[:stripe_id],
-      mode: 'payment',
-      ui_mode: 'embedded',
-      line_items: line_items,
-      return_url: build_return_url(params[:client_id], params[:appointment_id])
-    )
+    session = Stripe::Session.create_checkout_session(customer: params[:stripe_id], line_items: line_items, return_url: build_return_url(params[:client_id], params[:appointment_id]))
+
     render json: { clientSecret: session.client_secret }
   rescue Stripe::StripeError => e
     render_error(e)
   end
 
   def create_save_card_checkout_session
-    session = Stripe::Checkout::Session.create(
-      payment_method_types: ['card'],
-      currency: 'usd',
-      mode: 'setup',
-      ui_mode: 'embedded',
-      return_url: build_save_card_return_url(params[:client_id]),
-      setup_intent_data: { metadata: { customer_id: @customer_id } }
-    )
+    session = Stripe::Session.create_save_card_checkout_session(customer_id: @customer_id, return_url: build_save_card_return_url(params[:client_id]))
+
     render json: { clientSecret: session.client_secret }
   rescue Stripe::StripeError => e
     render_error(e)
   end
 
   def session_status
-    session = Stripe::Checkout::Session.retrieve(params[:session_id])
+    session = Stripe::Session.retrieve_checkout_session(params[:session_id])
+
     render json: { status: session.status }
   rescue Stripe::StripeError => e
     render_error(e)
   end
 
   def list_attached_cards
-    payment_methods = Stripe::PaymentMethod.list(customer: @customer_id, type: 'card')
+    payment_methods = Stripe::Session.list_attached_cards(@customer_id)
+
     render json: format_card_details(payment_methods.data), status: :ok
   rescue Stripe::StripeError => e
     render_error(e)
@@ -67,7 +58,8 @@ class Api::Client::StripeController < ClientApplicationController
 
   def remove_card
     payment_method_id = params[:paymentMethodId]
-    detach_payment_method(payment_method_id)
+    Stripe::Session.detach_payment_method(payment_method_id)
+    
     render json: { message: "Credit card removed successfully." }, status: :ok
   rescue Stripe::StripeError => e
     render_error(e)
@@ -75,7 +67,7 @@ class Api::Client::StripeController < ClientApplicationController
 
   def confirm_payment
     schedule = Schedule.find_by(id: params[:schedule_id])
-    session = Stripe::Checkout::Session.retrieve(params[:session_id])
+    session = Stripe::Session.retrieve_checkout_session(params[:session_id])
 
     if session.payment_status == 'paid'
       create_payment_record(schedule, session)
@@ -90,15 +82,12 @@ class Api::Client::StripeController < ClientApplicationController
   def card_success
     session_id = params[:session_id]
     begin
-      session = Stripe::Checkout::Session.retrieve(session_id)
+      session = Stripe::Session.retrieve_checkout_session(session_id)
       
       setup_intent = Stripe::SetupIntent.retrieve(session.setup_intent)
       payment_method = Stripe::PaymentMethod.retrieve(setup_intent.payment_method)
   
-      Stripe::PaymentMethod.attach(
-        payment_method.id,
-        { customer: setup_intent.metadata.customer_id }
-      )
+      Stripe::Session.attach_payment_method(payment_method.id, setup_intent.metadata.customer_id)
   
       render json: { message: "Payment method successfully attached to the customer." }, status: :ok
     rescue Stripe::StripeError => e
@@ -148,7 +137,7 @@ class Api::Client::StripeController < ClientApplicationController
         product_data: {
           name: Schedule.find_by(id: appointment_id).treatment.name
         },
-        unit_amount: price.to_i * 100 # Convert price to cents
+        unit_amount: price.to_i * 100
       },
       quantity: 1
     }]
@@ -160,10 +149,6 @@ class Api::Client::StripeController < ClientApplicationController
 
   def build_save_card_return_url(client_id)
     "#{request.base_url}/customers/#{client_id}?session_id={CHECKOUT_SESSION_ID}"
-  end
-
-  def detach_payment_method(payment_method_id)
-    Stripe::PaymentMethod.detach(payment_method_id)
   end
 
   def format_card_details(payment_methods)
