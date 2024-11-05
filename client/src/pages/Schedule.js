@@ -601,13 +601,12 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
 
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
-    delete copyAppointMent.selectedTimeSlot;
-    console.log("@@@@@@@@",appointmentModal);
+    delete copyAppointMent.selectedTimeSlot;    
     let payload={
       "schedule": {
         "product_type": "treatment_for_client",
-        "start_time": appointmentModal.selectedTimeSlot.start,
-        "end_time": appointmentModal.selectedTimeSlot.end,
+        "start_time": appointmentModal.start_time,
+        "end_time": appointmentModal.end_time,
         "date": appointmentModal.date,
         "employee_id": selectedEmployeeData.id,
         "product_ids": productIds,
