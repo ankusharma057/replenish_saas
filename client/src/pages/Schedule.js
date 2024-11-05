@@ -96,10 +96,9 @@ function Schedule() {
   const [serviceLocation, setServiceLocation] = useState([]);
   const [employeeLocations, setEmployeeLocations] = useState([]);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
-  const [appointmentModal, setAppointmentModal] = useState(
-    initialAppointmentModal
-  );
-
+  const [appointmentModal, setAppointmentModal] = useState([]);
+const [availableTime,setAvailableTime]=useState(0);
+const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
   const [addLocationModal, setAddLocationModal] = useState(
     initialAddLocationModal
   );
@@ -507,7 +506,12 @@ function Schedule() {
     }
   };
 
-  const handleAddAppointmentSelect = ({ start_time, end_time, ...rest }, readOnly) => {
+  const handleAddAppointmentSelect = async({ start_time, end_time, ...rest }, readOnly) => {
+    let startTime= new Date(start_time)
+    let endTime= new Date(end_time)
+    const differenceInMilliseconds =await endTime - startTime;
+    const differenceInMinutes =await differenceInMilliseconds / 60000;
+    setAvailableTime(differenceInMinutes)
     let formateData = {
       show: true,
       start_time: start_time,
@@ -576,26 +580,43 @@ function Schedule() {
     if (!appointmentModal?.client_name) {
       toast.error("Please select a client");
       return;
-    } else if (!appointmentModal?.treatment) {
+    } else if (!appointmentModal?.treatments) {
       toast.error("Please select a treatment");
       return;
     } else if (!appointmentModal?.selectedTimeSlot) {
       toast.error("Please select a timeslot");
       return;
     }
-
+    let treatmentIds=appointmentModal.treatments.map(treatment => treatment.treatment_id);
+    let productIds=appointmentModal.treatments.map(treatment => treatment.product_id);
+    
     const copyAppointMent = {
       ...appointmentModal,
       employee_id: selectedEmployeeData.id,
       start_time: appointmentModal.selectedTimeSlot.start,
       end_time: appointmentModal.selectedTimeSlot.end,
+      treatment_ids:treatmentIds,
+      product_id:productIds
     };
 
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
     delete copyAppointMent.selectedTimeSlot;
-
-    const { data } = await createSchedule(copyAppointMent);
+    console.log("@@@@@@@@",appointmentModal);
+    let payload={
+      "schedule": {
+        "product_type": "treatment_for_client",
+        "start_time": appointmentModal.selectedTimeSlot.start,
+        "end_time": appointmentModal.selectedTimeSlot.end,
+        "date": appointmentModal.date,
+        "employee_id": selectedEmployeeData.id,
+        "product_ids": productIds,
+        "location_id": appointmentModal.location_id,
+        "client_id": appointmentModal.client_id,
+        "treatment_ids": treatmentIds
+      }
+    }
+    const { data } = await createSchedule(payload);
     let newCopyAppointMent = {
       ...copyAppointMent,
       id: data?.id,
@@ -610,13 +631,13 @@ function Schedule() {
       end_date: calenderCurrentRange.end_date,
       location_id: selectedLocation?.id
     });
-    // setEmployeeScheduleEventsData((pre) => {
-    //   const prevData = pre[selectedEmployeeData.id] || [];
-    //   return {
-    //     ...pre,
-    //     [selectedEmployeeData.id]: [...prevData, newCopyAppointMent],
-    //   };
-    // });
+    setEmployeeScheduleEventsData((pre) => {
+      const prevData = pre[selectedEmployeeData.id] || [];
+      return {
+        ...pre,
+        [selectedEmployeeData.id]: [...prevData, newCopyAppointMent],
+      };
+    });
     setAppointmentModal(initialAppointmentModal);
     toast.success("Appointment added successfully.");
     try {
@@ -892,7 +913,7 @@ function Schedule() {
     });
   };
 
-  const filteredTimeSlots = appointmentModal?.timeSlots?.filter((slot) => {
+  const filteredTimeSlots = appointmentModal?.timeSlots?.filter((slot) => {    
     const isWithinAvailableTime = employeeScheduleEventsData[selectedEmployeeData?.id]?.some(
       (schedule) => schedule.available &&
         moment(slot.start).isSameOrAfter(schedule.start_time) &&
@@ -904,9 +925,33 @@ function Schedule() {
         moment(slot.start).isBefore(schedule.end_time) &&
         moment(slot.end).isAfter(schedule.start_time)
     );
-
     return isWithinAvailableTime && !overlapWithBooking;
   });
+
+  const calculateTime = () => {
+    if (Array.isArray(appointmentModal.treatments)) {
+      const totalDuration = appointmentModal.treatments.reduce((total, item) => {
+        return total + Number(item.duration);
+      }, 0);
+      const startDate = new Date(appointmentModal.start_time);
+      const endDate = new Date(startDate.getTime() + totalDuration * 60000); // Convert minutes to milliseconds
+      return {
+        start: startDate,
+        end: endDate,
+      };
+    }
+  }
+  useEffect(() => {
+    if (Array.isArray(appointmentModal.treatments)) {
+      const totalDuration = appointmentModal.treatments.reduce((total, item) => {
+        return total + Number(item.duration);
+      }, 0);
+      if(availableTime<totalDuration){
+        toast.warning("Total time duration is more than time availability of doctor")
+      }
+    }
+  }, [appointmentModal.treatments]);
+
 
   return (
     <>
@@ -1157,10 +1202,13 @@ function Schedule() {
                 ) : (
                   <>
                     <label htmlFor="treatment">Treatment</label>
-                    <Select
+                    {/* <Select
                       inputId="treatment"
                       isClearable
+                      isMulti
                       onChange={(selectedOption) => {
+                        console.log("@@@@@@@selectedOption",selectedOption);
+                        
                         setChanges(true);
                         var timeSlots = getTimeSlots(
                           selectedOption?.duration,
@@ -1197,7 +1245,53 @@ function Schedule() {
                       options={selectedEmployeeData.treatmentOption}
                       placeholder="Select a Treatment"
                       required
+                    /> */}
+                    <Select
+                      inputId="treatment"
+                      isClearable
+                      isMulti
+                      onChange={(selectedOptions) => {
+                        // Set flag to indicate changes
+                        setChanges(true);
+                        // Loop over selected options to calculate and filter time slots
+                        const updatedTimeSlots = selectedOptions.flatMap((selectedOption) => {
+                          var timeSlots = getTimeSlots(
+                            selectedOption.duration,
+                            appointmentModal.start_time,
+                            employeeScheduleEventsData[selectedEmployeeData.id],
+                            appointmentModal.end_time,
+                            appointmentModal.readOnly
+                          );
+
+                          // Filter time slots according to the given conditions
+                          return timeSlots?.filter((slot) => {
+                            let slotTime = moment(slot.start);
+                            let slotEndTime = moment(slot.end);
+                            return (
+                              (slotTime.hour() < 20 || (slotTime.hour() === 20 && slotTime.minute() === 0)) &&
+                              (slotEndTime.hour() < 20 || (slotEndTime.hour() === 20 && slotEndTime.minute() === 0))
+                            );
+                          });
+                        });
+
+                        // Update the appointmentModal state
+                        setAppointmentModal((pre) => ({
+                          ...pre,
+                          treatments: selectedOptions.map((option) => ({
+                            treatment_id: option.value,
+                            treatment: option.label,
+                            product_type: option.product_type,
+                            product_id: option.product_id,
+                            duration: option.duration
+                          })),
+                          timeSlots: updatedTimeSlots,
+                        }));
+                      }}
+                      options={selectedEmployeeData.treatmentOption}
+                      placeholder="Select a Treatment"
+                      required
                     />
+
                   </>
                 )}
               </div>
@@ -1273,28 +1367,16 @@ function Schedule() {
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              (filteredTimeSlots?.length !==0)?
-              filteredTimeSlots?.map((slot) => {
-                  return (
-                    <Form.Check
-                      type="radio"
-                      checked={
-                        appointmentModal?.selectedTimeSlot &&
-                        appointmentModal.selectedTimeSlot === slot
-                      }
-                      label={`${moment(slot.start).format(
-                        "hh:mm A"
-                      )} - ${moment(slot.end).format("hh:mm A")}`}
-                      id={slot}
-                      onChange={(selectedOption) =>
-                        setAppointmentModal((pre) => ({
-                          ...pre,
-                          selectedTimeSlot: slot,
-                        }))
-                      }
-                    />
-                  );
-                }):<p>Slot is Not available for this Treatment</p>
+              calculateTime()?.start ? <Form.Check
+                  type="radio"
+                  label={`${moment(calculateTime()?.start).format("hh:mm A")} - ${moment(calculateTime()?.end).format("hh:mm A")}`}
+                  onChange={(selectedOption) =>
+                    setAppointmentModal((pre) => ({
+                      ...pre,
+                      selectedTimeSlot: `${moment(calculateTime().start).format("hh:mm A")} - ${moment(calculateTime().end).format("hh:mm A")}`,
+                    }))
+                  }
+                />:<p>Slot is Not available for this Treatment</p>
             )}
             {appointmentModal.readOnly && (
               <div className="flex flex-col gap-2">
