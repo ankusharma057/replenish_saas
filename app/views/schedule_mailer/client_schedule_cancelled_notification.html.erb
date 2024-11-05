@@ -7,7 +7,13 @@
 </head>
 <body>
   <p>Dear <%= @client.name %>,</p>
-  <p>We regret to inform you that your schedule for the <%= @schedule.treatment.name %> on <%= @schedule.date.strftime('%d-%m-%Y') %> has been cancelled.</p>
+  <p>We regret to inform you that your schedule for the 
+    <ul>
+      <% @schedule.treatments.each do |treatment| %>
+        <li><%= treatment.name %></li>
+      <% end %>
+    </ul> on <%= @schedule.date.strftime('%d-%m-%Y') %> has been cancelled.
+  </p>
   <p>If you have any questions or would like to reschedule, please contact us.</p>
   <p>Thank you for your understanding.</p>
 </body>

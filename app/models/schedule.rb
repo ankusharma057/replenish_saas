@@ -1,7 +1,8 @@
 class Schedule < ApplicationRecord
   belongs_to :client
   belongs_to :employee
-  belongs_to :product, optional: true
+  has_many :schedule_products, dependent: :destroy
+  has_many :products, through: :schedule_products
   has_many :schedule_treatments, dependent: :destroy
   has_many :treatments, through: :schedule_treatments
   has_many :payments

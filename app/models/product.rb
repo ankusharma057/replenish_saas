@@ -5,7 +5,8 @@ class Product < ApplicationRecord
   has_one  :inventory, class_name: 'Inventory', dependent: :destroy
   has_many :inventory_prompts, class_name: 'InventoryPrompt', dependent: :destroy
   has_many :employees_inventories, class_name: 'EmployeeInventory', dependent: :destroy
-  has_many :schedules
+  has_many :schedule_products, dependent: :destroy
+  has_many :schedules, through: :schedule_products
   has_many :treatments
 
   def create_or_update_inventory(quantity: nil)
