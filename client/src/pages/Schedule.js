@@ -1287,7 +1287,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                         }));
                       }}
                       options={selectedEmployeeData.treatmentOption}
-                      placeholder="Select a Treatment"
+                      placeholder="Select a treatment"
                       required
                     />
 
@@ -1375,7 +1375,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                       selectedTimeSlot: `${moment(calculateTime().start).format("hh:mm A")} - ${moment(calculateTime().end).format("hh:mm A")}`,
                     }))
                   }
-                />:<p>Slot is Not available for this Treatment</p>
+                />:<p>-</p>
             )}
             {appointmentModal.readOnly && (
               <div className="flex flex-col gap-2">
