@@ -134,7 +134,8 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     end_date: "",
   });
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
-
+  const [disableCreateAppointment,setDisableCreateAppointment]=useState(false)
+  const [startEndTime,setStartEndTime]=useState({start:"",end:""})
   const getEmployees = async (refetch = true,remove = false ) => {
     try {
       let data = [];
@@ -260,7 +261,8 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         location_id: emp?.location_id || selectedLocation?.id
       };
       const resp = await fetchAvailability(availabilityPayload, refetch);
-
+      console.log("@@@@@resp",resp);
+      
       function convertToDate(dateString, timeString) {
         // Combine date and time strings
         const combinedDateTimeString = `${dateString} ${timeString}`;
@@ -285,6 +287,8 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         }
         return {}
       });
+      console.log("@@@@@availabilityData",availabilityData);
+      
       const everyWeekUnavailabilities = availabilityData.filter(
         (item) => item.every_week
       );
@@ -307,6 +311,8 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       const transformedData = availabilityData.flatMap(item => Object.values(item));
       const arr = newData.concat(transformedData);
       const arr1 = arr.concat(unavailabilityNewData);
+      console.log("@@@@@@@arr1",arr1);
+      
       setEmployeeScheduleEventsData((pre) => {
         return {
           ...pre,
@@ -601,12 +607,34 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
 
     delete copyAppointMent.show;
     delete copyAppointMent.timeSlots;
-    delete copyAppointMent.selectedTimeSlot;    
+    delete copyAppointMent.selectedTimeSlot; 
+    function convertToDateTimeRange(dateStr, timeRangeStr) {
+      const [day, month, year] = dateStr.split("/").map(Number);
+      const [startTime, endTime] = timeRangeStr.split(" - ").map(time => time.trim());
+
+      // Function to convert a single time string (like "01:00 PM") to a Date object
+      function convertSingleTime(time) {
+        let [hours, minutes] = time.slice(0, -2).split(":").map(Number);
+        const isPM = time.slice(-2).toLowerCase() === "pm";
+
+        if (isPM && hours !== 12) hours += 12;
+        if (!isPM && hours === 12) hours = 0;
+
+        return new Date(year, month - 1, day, hours, minutes);
+      }
+      const startDateTime = convertSingleTime(startTime);
+      const endDateTime = convertSingleTime(endTime);
+      return {
+        start: startDateTime.toString(),
+        end: endDateTime.toString()
+      };
+    }
+    let { start, end } = await convertToDateTimeRange(appointmentModal?.date, appointmentModal?.selectedTimeSlot)
     let payload={
       "schedule": {
         "product_type": "treatment_for_client",
-        "start_time": appointmentModal.start_time,
-        "end_time": appointmentModal.end_time,
+        "start_time": start,
+        "end_time": end,
         "date": appointmentModal.date,
         "employee_id": selectedEmployeeData.id,
         "product_ids": productIds,
@@ -615,6 +643,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         "treatment_ids": treatmentIds
       }
     }
+    console.log("@@@@@@@payload",payload);
     const { data } = await createSchedule(payload);
     let newCopyAppointMent = {
       ...copyAppointMent,
@@ -648,30 +677,58 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         "Failed to add appointment."
       ); // handle error
     }
+    setStartEndTime("")
   };
 
+  // const onCalenderRangeChange = (date) => {
+  //   let formattedStartDate;
+  //   let formattedEndDate;
+  //   if (date?.start && date.end) {
+  //     formattedStartDate = moment(date.start).format("MM/DD/YYYY");
+  //     formattedEndDate = moment(date.end).format("MM/DD/YYYY");
+  //   } else if (date.length > 0) {
+  //     formattedStartDate = moment(date[0]).format("MM/DD/YYYY");
+  //     formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
+  //   }
+
+  //   setCalenderCurrentRange({
+  //     start_date: formattedStartDate,
+  //     end_date: formattedEndDate,
+  //   });
+    
+  //   getEmployeeSchedule({
+  //     id: selectedEmployeeData.id,
+  //     start_date: formattedStartDate,
+  //     end_date: formattedEndDate,
+  //     location_id: selectedLocation?.id
+  //   });
+  // };
   const onCalenderRangeChange = (date) => {
-    let formattedStartDate;
-    let formattedEndDate;
+    let formattedStartDate = "";
+    let formattedEndDate = "";
+  
     if (date?.start && date.end) {
+      // Format for single range (e.g., month or week)
       formattedStartDate = moment(date.start).format("MM/DD/YYYY");
       formattedEndDate = moment(date.end).format("MM/DD/YYYY");
-    } else if (date.length > 0) {
+    } else if (Array.isArray(date) && date.length > 0) {
       formattedStartDate = moment(date[0]).format("MM/DD/YYYY");
       formattedEndDate = moment(date[date.length - 1]).format("MM/DD/YYYY");
     }
-
+  
     setCalenderCurrentRange({
       start_date: formattedStartDate,
       end_date: formattedEndDate,
     });
-    
-    getEmployeeSchedule({
-      id: selectedEmployeeData.id,
-      start_date: formattedStartDate,
-      end_date: formattedEndDate,
-      location_id: selectedLocation?.id
-    });
+  
+    if (selectedEmployeeData?.id && selectedLocation?.id) {
+      getEmployeeSchedule({
+        id: selectedEmployeeData.id,
+        start_date: formattedStartDate,
+        end_date: formattedEndDate,
+        location_id: selectedLocation.id,
+      });
+    }
   };
 
   const onLocationChange = async (selectedOption) => {
@@ -934,19 +991,23 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       }, 0);
       const startDate = new Date(appointmentModal.start_time);
       const endDate = new Date(startDate.getTime() + totalDuration * 60000); // Convert minutes to milliseconds
-      return {
+      setStartEndTime({
         start: startDate,
         end: endDate,
-      };
+      })
+      }
     }
-  }
   useEffect(() => {
     if (Array.isArray(appointmentModal.treatments)) {
       const totalDuration = appointmentModal.treatments.reduce((total, item) => {
         return total + Number(item.duration);
       }, 0);
-      if(availableTime<totalDuration){
+      if (availableTime < totalDuration) {
+        setDisableCreateAppointment(true)
         toast.warning("Total time duration is more than time availability of doctor")
+      } else {
+        calculateTime()
+        setDisableCreateAppointment(false)
       }
     }
   }, [appointmentModal.treatments]);
@@ -1047,38 +1108,78 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
           </div>
 
           {selectedEmployeeData && (
+            // <ScheduleCalender
+            // events={(employeeScheduleEventsData[selectedEmployeeData?.id] || []).flatMap((data) => {
+            //   if (data.available) {
+            //     const start_time = new Date(data?.start_time);
+            //     const end_time = new Date(data?.end_time);
+            
+            //     const events = [];
+            //     let currentTime = start_time;
+            
+            //     while (currentTime < end_time) {
+            //       const nextTime = new Date(currentTime);
+            //       nextTime.setHours(currentTime.getHours() + 1);
+            
+            //       events.push({
+            //         ...data,
+            //         start_time: currentTime,
+            //         end_time: nextTime >= end_time ? end_time : nextTime,
+            //       });
+            
+            //       currentTime = nextTime;
+            //     }
+            
+            //     return events;
+            //   }
+            //   return [data];
+            // })}
+            //   onSelectEvent={(event) => {
+            //     showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
+            //   }}
+            //   onRangeChange={onCalenderRangeChange}
+            //   eventPropGetter={(event) => {
+            //     const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
+            //     return { style: { backgroundColor } };
+            //   }}
+            // />
             <ScheduleCalender
-            events={(employeeScheduleEventsData[selectedEmployeeData?.id] || []).flatMap((data) => {
-              if (data.available) {
-                const start_time = new Date(data?.start_time);
-                const end_time = new Date(data?.end_time);
-            
-                const events = [];
-                let currentTime = start_time;
-            
-                while (currentTime < end_time) {
-                  const nextTime = new Date(currentTime);
-                  nextTime.setHours(currentTime.getHours() + 1);
-            
-                  events.push({
-                    ...data,
-                    start_time: currentTime,
-                    end_time: nextTime >= end_time ? end_time : nextTime,
+              events={(employeeScheduleEventsData[selectedEmployeeData?.id] || []).flatMap((data) => {
+                if (data.available) {
+                  const currentHour = moment(data.start_time).format("YYYY-MM-DD H")
+                  const newItem = employeeScheduleEventsData[selectedEmployeeData?.id]?.filter((item) => (moment(item?.start_time).format("YYYY-MM-DD H") === currentHour && !item?.available))
+                  let updateEndTime = null
+                  newItem?.map((item) => {
+                    if ((new Date(item.end_time) > new Date(updateEndTime)) || !updateEndTime) {
+                      updateEndTime = new Date(item.end_time)
+                    }
                   });
-            
-                  currentTime = nextTime;
+                  const events = [];
+                  if (updateEndTime < new Date(data.end_time) || !updateEndTime) {
+                    events.push({
+                      ...data,
+                      start_time: updateEndTime === null ? new Date(data.start_time) : updateEndTime,
+                      end_time: new Date(data.end_time),
+                    });
+                  }
+                  return events;
                 }
-            
-                return events;
-              }
-              return [data];
-            })}
+                let treatmentName = ""
+                data?.treatments?.map((item) => {
+                  treatmentName += item.name + ", "
+                })
+                let newData = {
+                  ...data,
+                  title: treatmentName
+                }
+                return [newData];
+              })}
               onSelectEvent={(event) => {
                 showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
               }}
               onRangeChange={onCalenderRangeChange}
               eventPropGetter={(event) => {
-                const backgroundColor = ( "available" in event && event.available ) ? "" :"#299db9";
+                const backgroundColor = ("available" in event && event.available) ? "" : "#299db9";
                 return { style: { backgroundColor } };
               }}
             />
@@ -1166,11 +1267,19 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
               </Button>
             ) : null}
             {appointmentModal.readOnly ? null : (
-              <Button type="submit" form="appointmentForm">
+              <Button type="submit" form="appointmentForm"
+              disabled={disableCreateAppointment}
+              style={{
+                opacity: disableCreateAppointment ? 0.5 : 1,
+                backgroundColor:"#22D3EE",
+                borderColor:"#22D3EE",
+                cursor: disableCreateAppointment ? "not-allowed" : "pointer",
+              }}
+              >
                 Save
               </Button>
             )}
-            {parseInt(appointmentModal?.remaining_amount) > 0 && (
+            {!authUserState.user.is_admin && parseInt(appointmentModal?.remaining_amount) > 0 ? (
               <Button
                 onClick={() => {
                   setShowConfirmPayment(true);
@@ -1179,7 +1288,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
               >
                 Pay Remaining Amount
               </Button>
-            )}
+            ):""}
             {/* <Button>+ Add</Button> */}
           </div>
         }
@@ -1272,7 +1381,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                             );
                           });
                         });
-
+                          
                         // Update the appointmentModal state
                         setAppointmentModal((pre) => ({
                           ...pre,
@@ -1284,6 +1393,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                             duration: option.duration
                           })),
                           timeSlots: updatedTimeSlots,
+                          selectedTimeSlot:""
                         }));
                       }}
                       options={selectedEmployeeData.treatmentOption}
@@ -1366,13 +1476,14 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              calculateTime()?.start ? <Form.Check
+              startEndTime?.start ? <Form.Check
                   type="radio"
-                  label={`${moment(calculateTime()?.start).format("hh:mm A")} - ${moment(calculateTime()?.end).format("hh:mm A")}`}
+                  label={`${moment(startEndTime?.start).format("hh:mm A")} - ${moment(startEndTime?.end).format("hh:mm A")}`}
+                  checked={appointmentModal.selectedTimeSlot}
                   onChange={(selectedOption) =>
                     setAppointmentModal((pre) => ({
                       ...pre,
-                      selectedTimeSlot: `${moment(calculateTime().start).format("hh:mm A")} - ${moment(calculateTime().end).format("hh:mm A")}`,
+                      selectedTimeSlot: `${moment(startEndTime.start).format("hh:mm A")} - ${moment(startEndTime.end).format("hh:mm A")}`,
                     }))
                   }
                 />:<p>-</p>

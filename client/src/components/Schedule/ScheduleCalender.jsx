@@ -9,19 +9,21 @@ import './calendar.css'
 const localizer = momentLocalizer(moment);
 
 const ScheduleCalender = ({ ...rest }) => {
+  console.log("@@@rest",rest);
+  
   const [timeSlots, setTimeSlots] = useState(1);
   const today = new Date();
   useEffect(() => {
   }, [])
   return (
     <Calendar
+      dayLayoutAlgorithm="no-overlap"
       className="sm:max-h-[90%]"
       views={[Views.MONTH, Views.WEEK, Views.DAY]}
       selectable
       startAccessor="start_time"
       endAccessor="end_time"
-      titleAccessor="treatment"
-      tooltipAccessor={"treatment"}
+      tooltipAccessor={"title"}
       localizer={localizer}
       defaultDate={new Date()}
       defaultView="week"
