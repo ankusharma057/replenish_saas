@@ -73,8 +73,21 @@ class Api::SchedulesController < ApplicationController
     end
   end
 
-  def add_note
+  def update
     schedule = Schedule.find(params[:id])
+    if schedule
+      if schedule.update(schedule_param)
+        render json: schedule, status: :ok
+      else
+        render json: {error: "Schedule not updated"}, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end
+
+  def add_note
+    schedule = Schedule.find(params[:schedule_id])
     schedule.notes ||= []
     next_id = schedule.notes.size + 1
 
@@ -95,7 +108,7 @@ class Api::SchedulesController < ApplicationController
   end
 
   def update_note
-    schedule = Schedule.find(params[:id])
+    schedule = Schedule.find(params[:schedule_id])
     note = schedule.notes.find { |n| n["id"].to_s == params[:note_id] }
 
     if note
@@ -127,7 +140,7 @@ class Api::SchedulesController < ApplicationController
   private
 
   def schedule_param
-    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id)
+    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id, :client_id, notes: [:id, :content, :due_date, :employee_id, :updated_at])
   end
 
   def set_client
