@@ -56,7 +56,7 @@ module PdfGroupDownloadable
                   <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
                   <div style="text-align: right;">  Provider Purchased: '"#{invoice.provider_purchased ? 'Yes' : 'No'}"'</div>  
 
-                  <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+                  <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
                   <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
 
                   <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
@@ -156,7 +156,7 @@ module PdfGroupDownloadable
                 <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
                 <div style="text-align: right;">  Provider Purchased: '"#{invoice.provider_purchased ? 'Yes' : 'No'}"'</div>
 
-                <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+                <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
                 <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
 
                 <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
