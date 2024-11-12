@@ -37,8 +37,10 @@ mount Sidekiq::Web => '/sidekiq'
     resources :treatments
     resources :unavailabilities
     resources :locations, only: [ :index, :create]
-    resources :schedules, only: [:index, :create, :destroy] do
+    resources :schedules, only: [:index, :create, :destroy, :show] do
       post :remaining_paid, on: :member 
+      patch 'update_note/:note_id', to: 'schedules#update_note'
+      delete 'delete_note/:note_id', to: 'schedules#delete_note'
     end
 
     resources :clients do
@@ -135,6 +137,7 @@ mount Sidekiq::Web => '/sidekiq'
     get '/locations/:id/employees', to: 'employee_schedules#employees'
     get '/employee_invoices', to: 'invoice_lists#employee_invoices'
     get 'client_schedules_only', to: 'schedules#get_client_schedule_only'
+    post 'add_note', to: 'schedules#add_note'
 
   
   end
