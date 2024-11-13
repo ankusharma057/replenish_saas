@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { createEmployee, getEmployeesList } from "../../Server";
-
+import {Image} from "lucide-react";
 const formInitialState = {
   name: "",
   email: "",
@@ -20,10 +20,15 @@ const formInitialState = {
 export default function CreateStaffCard({ show, onHide }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(formInitialState);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
+      formData={
+        ...formData,
+        profile_photo:selectedFiles
+      }
       await createEmployee(formData);
       toast.success("User created successfully");
       //   setFormData(formInitialState);
@@ -61,10 +66,22 @@ export default function CreateStaffCard({ show, onHide }) {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    setSelectedFiles(files);
+  };
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+  const handleFileSelect = (event) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+    setSelectedFiles(files);
+  };
 
   return (
     show && (
-      <div className="hover:shadow-lg border-2 px-2 sm:px-10 py-5 border-black/15 m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
+      <div className="h-[68vh] overflow-scroll hover:shadow-lg border-2 px-2 sm:px-10 py-5 border-black/15 m-auto transition-all flex flex-col bg-white rounded-lg shadow-md ">
         <h3 className=" text-3xl font-semibold my-3">Create an employee</h3>
         <Form
           onSubmit={onSubmit}
@@ -206,13 +223,70 @@ export default function CreateStaffCard({ show, onHide }) {
               className="p-2 mt-1 border-gray-300 rounded-md focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
             />
           </div>
+          <div>
+            <div>
+              <div>
+              <label
+              htmlFor="is_mentor"
+              className="text-base me-3 font-medium text-cyan-800 mb-2"
+            >
+              Profile Photo
+            </label>
+              </div>
+              <div
+                className="dotted-border border-secondary d-flex justify-content-center align-items-center flex-column rounded w-[120px] p-2 h-[120px]"
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                style={{ textAlign: "center", cursor: "pointer", borderStyle: "dashed", border: "1px dashed" }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-arrow-up"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
+                <span>Drag & Drop to upload</span>
+                <input
+                  type="file"
+                  id="fileUpload"
+                  multiple
+                  className="d-none"
+                  onChange={handleFileSelect}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="fileUpload"
+                  className="btn w-[150px] mt-1 btn-outline-secondary d-flex justif"
+                >
+                  <Image />Select Photo
+                </label>
+                <input
+                  type="file"
+                  id="fileUpload"
+                  multiple
+                  className="d-none"
+                  onChange={handleFileSelect}
+                />
+              </div>
 
+              {selectedFiles.length > 0 && (
+                <div className="mt-3">
+                  <h6>Selected Files:</h6>
+                  <ul className="list-group">
+                    {selectedFiles.map((file, index) => (
+                      <li key={index} className="list-group-item">
+                        {file.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+              <div></div>
+              <div></div>
           <Loadingbutton
             isLoading={loading}
             title="Sign up"
             loadingText={"Creating User..."}
             type="submit"
-            className="!bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="mt-3 !bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           />
         </Form>
       </div>

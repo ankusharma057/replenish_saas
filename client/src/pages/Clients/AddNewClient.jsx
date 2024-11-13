@@ -425,6 +425,7 @@ const ClientsProfileUpdate = () => {
     formDataPayload.append('client[how_heard_about_us]', formData?.how_heard_about_us);
 
     //profile photo
+    formDataPayload.append('client[profile_photo]',selectedFiles);
   
     let response = await CreateClient(params.id, true, formDataPayload)
     if (response.status === 200) {

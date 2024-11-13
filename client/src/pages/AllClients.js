@@ -65,6 +65,9 @@ import {
     EmbeddedCheckout
 } from '@stripe/react-stripe-js';
 import ClientBilling from "./ClientBilling";
+import Image from 'react-bootstrap/Image';
+
+
 
 const AllClientRoot = () => {
     let { clientId } = useParams();
@@ -1125,7 +1128,15 @@ useEffect(()=>{
         setIsDrawerOpen(false);
         setSelectedAppointment(null);
     };
-
+    function getInitials(str) {
+        const words = str.split(" ");
+        if (words.length >= 2) {
+          return words[0][0] +"." + words[1][0]+".";
+        }else if (words.length === 1) {
+            return words[0][0]; 
+          }
+        return "";
+      }
     const EmployeeItem = ({ index, style }) => {
         const employee = filteredEmployeeList[index];
         return (
@@ -1138,11 +1149,21 @@ useEffect(()=>{
                             collapse();
                         }
                     }}
-                    className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 ${selectedEmployeeData?.id === employee.id
-                        ? "pointer-events-none bg-gray-200 "
-                        : "cursor-pointer "
+                    className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 d-flex justify-content-start align-items-center gap-[3px] ${selectedEmployeeData?.id === employee.id
+                        ? "pointer-events-none bg-gray-200 d-flex justify-content-start align-items-center gap-[3px]"
+                        : "cursor-pointer d-flex justify-content-start align-items-center gap-[3px]"
                         } `}
                 >
+                    {employee.profile_photo ?
+                        <Image
+                            roundedCircle
+                            src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            style={{ width: "35px", height: "35px" }}
+                        /> :
+                        <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
+                            <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
+                        </div>
+                    }
                     {employee.name || ""}
                 </div>
             )
