@@ -880,3 +880,21 @@ export const UpdateAppointment = async (id,refetch,payload) =>{
   });
   return res;
 }
+export const DeleteAppointmentNote = async (id,refetch,payload) =>{
+  let url = `/api/schedules/:schedule_id/update_note/${payload.note_id}`;
+  const res = await api.delete(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+export const UpdateAppointmentNote = async (id,refetch,payload) =>{
+  let url = `/api/schedules/:schedule_id/update_note/${payload.note_id}`;
+  const res = await api.patch(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
