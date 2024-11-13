@@ -53,6 +53,8 @@ import AvailabilityModal from "../components/Modals/AvailabilityModal";
 import RemoveAvailability from "../components/Schedule/RemoveAvailability";
 import { confirmAlert } from "react-confirm-alert";
 import Image from 'react-bootstrap/Image';
+import AppointmentDetails from "./Clients/AppointmentDetails";
+
 const localizer = momentLocalizer(moment);
 
 const initialAppointmentModal = {
@@ -136,6 +138,9 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
   const [showConfirmPayment, setShowConfirmPayment] = useState(false);
   const [disableCreateAppointment,setDisableCreateAppointment]=useState(false)
   const [startEndTime,setStartEndTime]=useState({start:"",end:""})
+  const [showAppointmentSidebar, setShowAppointmentSidebar] = useState(false);
+  const [appointmentDetails, setAppointmentDetails] = useState({});
+
   const getEmployees = async (refetch = true,remove = false ) => {
     try {
       let data = [];
@@ -548,7 +553,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     const differenceInMinutes =await differenceInMilliseconds / 60000;
     setAvailableTime(differenceInMinutes)
     let formateData = {
-      show: true,
+      show: false,
       start_time: start_time,
       end_time: end_time,
       date: moment(start_time).format("DD/MM/YYYY"),
@@ -561,9 +566,17 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         readOnly: true,
       };
     }
+    setTimeout(() => {
+      console.log("@@@@@@formateData",formateData);
+    }, 2000);
     if (!rest.hasOwnProperty("available")) {
       setRemoveAvailabilityData(formateData);
       setAppointmentModal(formateData);
+      handleShowAppointmentSidebar();
+      setAppointmentDetails(formateData)
+      setTimeout(() => {
+        console.log("@@@@@@appointmentModal",appointmentModal);
+      }, 2000);
       // setRemoveAvailabilityModal(true);
     }
     // formateData.timeSlots =
@@ -1012,6 +1025,9 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     );
     return isWithinAvailableTime && !overlapWithBooking;
   });
+  const handleShowAppointmentSidebar = () => {
+    setShowAppointmentSidebar((prev => !prev))
+  };
 
   const calculateTime = () => {
     if (Array.isArray(appointmentModal.treatments)) {
@@ -1828,6 +1844,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       </form>
       </ModalWraper>
 
+     <AppointmentDetails appointmentDetails={appointmentDetails} showAppointmentSidebar={showAppointmentSidebar} handleShowAppointmentSidebar={handleShowAppointmentSidebar}/>
     </>
   );
 }

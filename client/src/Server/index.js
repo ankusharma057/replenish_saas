@@ -861,3 +861,22 @@ export  const fetchConfig = async () => {
     return null;
   }
 };
+export const AddNoteToAppointment = async (id,refetch,payload) =>{
+  let url = '/api/clients';
+  const res = await api.post(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+
+export const UpdateAppointment = async (id,refetch,payload) =>{
+  let url = ` /api/schedules/${payload.appointmentId}`;
+  const res = await api.post(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
