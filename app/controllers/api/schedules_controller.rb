@@ -64,9 +64,76 @@ class Api::SchedulesController < ApplicationController
     end
   end
 
+  def update
+    schedule = Schedule.find(params[:id])
+    if schedule
+      if schedule.update(schedule_param)
+        render json: schedule, status: :ok
+      else
+        render json: {error: "Schedule not updated"}, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end
+
+  def add_note
+    schedule = Schedule.find(params[:schedule_id])
+    schedule.notes ||= []
+    next_id = schedule.notes.size + 1
+
+    note = {
+      id: next_id,
+      content: params[:content],
+      due_date: params[:due_date],
+      employee_id: params[:employee_id],
+      favorite: params[:favorite] || false,
+      updated_at: nil
+    }
+    
+    schedule.notes << note
+    if schedule.save
+      render json: { message: "Note added successfully", note: note }, status: :created
+    else
+      render json: { error: "Failed to add note" }, status: :unprocessable_entity
+    end
+  end
+
+  def update_note
+    schedule = Schedule.find(params[:schedule_id])
+    note = schedule.notes.find { |n| n["id"].to_s == params[:note_id] }
+
+    if note
+      note["content"] = params[:content] if params[:content].present?
+      note["due_date"] = params[:due_date] if params[:due_date].present?
+      note["employee_id"] = params[:employee_id] if params[:employee_id].present?
+      note["favorite"] = params[:favorite] unless params[:favorite].nil?
+      note["updated_at"] = params[:updated_at] if params[:updated_at].present?
+
+      if schedule.save
+        render json: { message: "Note updated successfully", note: note }, status: :ok
+      else
+        render json: { error: "Failed to update note" }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Note not found" }, status: :not_found
+    end
+  end
+
+  def delete_note
+    schedule = Schedule.find(params[:schedule_id])
+    if schedule.notes.reject! { |n| n["id"].to_s == params[:note_id] }
+      schedule.save
+      render json: { message: "Note deleted successfully" }, status: :ok
+    else
+      render json: { error: "Note not found" }, status: :not_found
+    end
+  end
+
   private
+
   def schedule_param
-    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id)
+    params.require(:schedule).permit(:product_type, :treatment_id, :start_time, :end_time, :date, :employee_id, :product_id, :location_id, :client_id, notes: [:id, :content, :due_date, :employee_id, :updated_at])
   end
 
   def set_client
