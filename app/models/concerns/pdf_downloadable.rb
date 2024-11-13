@@ -51,7 +51,7 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
             
-            <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div> 
 
             <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
@@ -145,7 +145,7 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
 
-            <div style="text-align: left;">  Semaglitude Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
+            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
 
             <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  

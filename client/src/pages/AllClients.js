@@ -29,7 +29,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown, Plus, MoveRight, X } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Row, Col } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -55,7 +55,7 @@ import { RxDropdownMenu } from "react-icons/rx";
 import { PiColumnsFill, PiGridNineLight, PiWarningCircleBold } from "react-icons/pi";
 import { TopModel } from "../components/TopModel";
 import Switch from "@mui/material/Switch";
-import { IoMdAdd } from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowUp, IoMdAdd } from "react-icons/io";
 import { add, set, template } from "lodash";
 import { createIntakeForm, getIntakeForm, updateIntakeForm, getQuestionnaires, getQuestionnaire, fetchConfig } from "../Server";
 import ClientProfile from "./ClientProfile";
@@ -118,6 +118,9 @@ const AllClientRoot = () => {
         }
     }, [stripePublicKey]);
 
+    const symbols = ['↑', '↓', '←', '→', '↩', '↪', '↻', '↷', '℗', 'ℓ', '®', 'ℬ', '∅', '•'];
+    const [showSymbol,setShowSymbol] = useState(null)
+    const [cursorPosition, setCursorPosition] = useState(0);
   const getClientSchedule = async (selectedEmployeeData, refetch = true) => {
     try {
       if (selectedEmployeeData) {
@@ -142,7 +145,7 @@ const AllClientRoot = () => {
                 if (clientId) {
                     let newClient = newData.find(client => client.id == clientId)
                     if(newClient){
-                        handleSelect(newClient);
+                    handleSelect(newClient);
                     }else{
                         handleSelect(newData[0]);
                         navigate(`/customers/${newData[0].id}`)
@@ -645,8 +648,12 @@ const initialConsent =  { name: "", text: "",type:"must agree", declaration : ""
     const handleItemClick = (name, index) => {
         if(!editId){
         setEditModel({ name, index });
-        openModalFromParent(); }
-    };
+        setTimeout(() => {
+            openModalFromParent();
+        }, 0)
+    }
+    }
+
 
     useEffect(() => {
         if (selectedEmployeeData) {
@@ -1756,14 +1763,13 @@ useEffect(()=>{
                                                 {/* Note */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
+                                                >
+                                                <div className="flex justify-between items-center py-1">
+                                                    <div className="font-semibold text-[17px]"onClick={() => {
                                                     // setEditModel({ name: "initialNote", index: index });
                                                     // openModalFromParent();
                                                     handleItemClick('initialNote', index)
-                                                }}
-                                                >
-                                                <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                }}>
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&  <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1779,14 +1785,47 @@ useEffect(()=>{
                                                 <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
                                                     <textarea
                                                     className="w-full focus:outline-none"
-                                                    readOnly
                                                     required={field?.required}
                                                     value={qutionaryFields[index]?.value}
                                                     onChange={(e) => {
                                                         handleChange("value", e?.target?.value, index);
                                                     }}
+                                                    style={{resize:"none"}}
                                                     rows="3"
-                                                    ></textarea>
+                                                    onSelect={(event) => {
+                                                        const { selectionStart } = event.target;
+                                                        setCursorPosition(selectionStart);
+                                                      }}
+                                                            ></textarea>
+                                                            <div className="d-flex justify-content-end align-items-center cursor-pointer pr-3" >
+                                                                {
+                                                                     showSymbol === index ?
+                                                                     <h6 style={{gap:"10px",color:"rgb(13 202 240)"}} className="d-flex justify-content-center align-items-center " onClick={()=>{setShowSymbol(null)}}><IoIosArrowUp />Hide Symbol</h6>:
+                                                                     <h6 style={{gap:"10px",color:"rgb(13 202 240)"}} className="d-flex justify-content-center align-items-center" onClick={()=>{setShowSymbol(index)}}><IoIosArrowDown />Show Symbol</h6>
+                                                                }
+                                                            </div>
+                                                            {
+                                                                showSymbol === index &&
+                                                                <div className="bg-light">
+                                                                    <div className="mt-2 d-flex gap-[25px] px-4">
+                                                                            {symbols.map((symbol, i) => (
+                                                                                <div xs="auto" key={i} className="mb-2 cursor-pointer">
+                                                                                    <div style={{ fontSize: "22px" }} onClick={() => {
+
+                                                                                        const newText =
+                                                                                            qutionaryFields[index]?.value.substring(0, cursorPosition) +
+                                                                                            symbol +
+                                                                                            qutionaryFields[index]?.value.substring(cursorPosition);
+                                                                                    handleChange("value", newText, index);
+                                                                                    
+                                                                                    }}>
+                                                                                    {symbol}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            }
                                                 </div>
                                                 </div>
                                             </span>
@@ -1795,14 +1834,15 @@ useEffect(()=>{
                                                 {/* Signature */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialSignature", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialSignature', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        // setEditModel({ name: "initialSignature", index: index });
+                                                        // openModalFromParent();
+                                                        handleItemClick('initialSignature', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1929,14 +1969,13 @@ useEffect(()=>{
                                                 {/* Heading */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialHeading", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialHeading', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialHeading', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -1959,15 +1998,14 @@ useEffect(()=>{
                                                 {/* Check Boxes */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    // setEditModel({ name: "initialCheckBox", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialCheckBox', index)
-                                                }}
                                                 >
                                                 <div className="flex flex-col ">
                                                     <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialCheckBox', index)
+                                                    }}
+                                                    >
                                                         {field?.label}
                                                     </div>
                                                     {!editId && <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -2023,12 +2061,13 @@ useEffect(()=>{
                                                 {/* Drop down */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    handleItemClick('initialDropdown', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialDropdown', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -2064,12 +2103,13 @@ useEffect(()=>{
                                                 {/* Range */}
                                                 <div
                                                 className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
-                                                onClick={() => {
-                                                    handleItemClick('initialRange', index)
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        handleItemClick('initialRange', index)
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
@@ -2117,16 +2157,17 @@ useEffect(()=>{
                                                 {/* Instructions */}
                                                 <div
                                                 className=" hover:bg-gray-100  rounded-md p-[6px] flex flex-col gap-1"
-                                                onClick={() => {
-                                                    setEditModel({
-                                                    name: "initialInstruction",
-                                                    index: index,
-                                                    });
-                                                    openModalFromParent();
-                                                }}
                                                 >
                                                 <div className="flex justify-between items-center  py-1">
-                                                    <div className="font-semibold text-[17px]">
+                                                    <div className="font-semibold text-[17px]"
+                                                    onClick={() => {
+                                                        setEditModel({
+                                                        name: "initialInstruction",
+                                                        index: index,
+                                                        });
+                                                        openModalFromParent();
+                                                    }}
+                                                    >
                                                     {field?.label}
                                                     </div>
                                                     {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
