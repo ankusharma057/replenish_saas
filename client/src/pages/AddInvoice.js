@@ -1063,7 +1063,7 @@ const [dateOfService,setDateOfService]=useState("")
                     />
                   </label>
                   <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Semaglitude:
+                    Semaglutide:
                     <input
                       type="checkbox"
                       name="semaglitudeConsultation"
