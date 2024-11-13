@@ -564,6 +564,9 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         readOnly: true,
       };
     }
+    setTimeout(() => {
+      console.log("@@@@@@formateData",formateData);
+    }, 2000);
     if (!rest.hasOwnProperty("available")) {
       setRemoveAvailabilityData(formateData);
       setAppointmentModal(formateData);

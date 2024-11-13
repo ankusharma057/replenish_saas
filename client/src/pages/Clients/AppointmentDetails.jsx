@@ -1,9 +1,16 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, Form, InputGroup, ListGroup, Offcanvas, Row } from 'react-bootstrap';
+<<<<<<< HEAD
 import { ChevronDown, MoreHorizontal, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, XCircle, PlusCircle, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
 import moment from 'moment';
 import { Collapse, Select } from '@mui/material';
 import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote, GetAppointmentDetails } from "../../Server/index"
+=======
+import { ChevronDown, Ellipsis, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, CircleX, CirclePlus, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
+import moment from 'moment';
+import { Collapse, Select } from '@mui/material';
+import { AddNoteToAppointment, getEmployeesList, UpdateAppointment } from "../../Server/index"
+>>>>>>> worked on add notes api integration
 import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa6";
@@ -127,6 +134,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             if ((apiResponse.status === 201 || apiResponse.status === 200) && appointmentDetails?.id) {
                 getAppointmentDetails(appointmentDetails?.id);
             }
+
             toast.success("Note added successfully")
         } else {
             toast.error("Something gone wrong")
@@ -289,6 +297,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                 <div className='d-flex justify-content-between align-center'>
                                                     <div>
                                                         <div className="text-dark" style={{ fontSize: "13px" }}>{renderProductNames}{" "}${appointmentDetailsResponse?.products?.reduce((sum, product) => sum + product.cost_price, 0)}</div>
+
                                                         <div className="text-dark" style={{ fontSize: "13px" }}>{appointmentDetails?.employee?.name}</div>
                                                     </div>
                                                     <div>
@@ -531,6 +540,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             addItem ?
                                                                 <XCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} /> :
                                                                 <PlusCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} />
+
                                                         }
                                                     </div>
 
@@ -723,6 +733,7 @@ const BillingInfoCard = ({ addAdjustment, handleAddAdjustment, index }) => {
 }
 
 const EditAppointment = ({ handleEditAppointment, noteValue, handleNoteChange, addNoteToAppointment }) => {
+
     return <div className='mt-2'>
         <div className='d-flex justify-content-end align-items-center gap-[10px]'>
             <Button className='h-[38px]' variant='outline-secondary' onClick={handleEditAppointment}>Cancel</Button>
