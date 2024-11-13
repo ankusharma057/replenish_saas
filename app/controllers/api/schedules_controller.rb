@@ -64,15 +64,6 @@ class Api::SchedulesController < ApplicationController
     end
   end
 
-  def show
-    schedule = Schedule.find(params[:id])
-    if schedule
-      render json: schedule, status: :ok
-    else
-      render json: { error: "Schedule not found" }, status: :not_found
-    end
-  end
-
   def update
     schedule = Schedule.find(params[:id])
     if schedule
@@ -96,6 +87,7 @@ class Api::SchedulesController < ApplicationController
       content: params[:content],
       due_date: params[:due_date],
       employee_id: params[:employee_id],
+      favorite: params[:favorite] || false,
       updated_at: nil
     }
     
@@ -115,6 +107,7 @@ class Api::SchedulesController < ApplicationController
       note["content"] = params[:content] if params[:content].present?
       note["due_date"] = params[:due_date] if params[:due_date].present?
       note["employee_id"] = params[:employee_id] if params[:employee_id].present?
+      note["favorite"] = params[:favorite] unless params[:favorite].nil?
       note["updated_at"] = params[:updated_at] if params[:updated_at].present?
 
       if schedule.save
