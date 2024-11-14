@@ -25,6 +25,7 @@ const ProductsTab = ({
     cost_price: "",
     provider_purchased:"",
     retail_price: "",
+    mentorship_purchased: "",
   });
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,25 @@ const ProductsTab = ({
       setUpdateProductInput((prev)=>({...prev,["provider_purchased"]:false}))
     }
   };
+
+  const handleUpdateCheckboxChange = (event, type) => {
+    const { checked } = event.target;
+  
+    if (type === "provider") {
+      setUpdateProductInput((prev) => ({
+        ...prev,
+        provider_purchased: checked,
+        mentorship_purchased: checked ? false : prev.mentorship_purchased,
+      }));
+    } else if (type === "mentorship") {
+      setUpdateProductInput((prev) => ({
+        ...prev,
+        mentorship_purchased: checked,
+        provider_purchased: checked ? false : prev.provider_purchased,
+      }));
+    }
+  };
+  
 
   const handleDelete = (product) => {
     confirmAlert({
@@ -91,6 +111,7 @@ const ProductsTab = ({
       product_type: updateProductInput.product_type,
       cost_price: updateProductInput.cost_price,
       provider_purchased:updateProductInput.provider_purchased,
+      mentorship_purchased:updateProductInput.mentorship_purchased,
       retail_price: updateProductInput.retail_price,
     };
     try {
@@ -174,13 +195,23 @@ const ProductsTab = ({
             required={true}
             type="number"
           />
-          <label className="flex justify-between font-  py-2 rounded-md transition duration-500">
+          <label className="flex justify-between font-semibold py-2 rounded-md transition duration-500">
+            Mentorship Purchased
+            <input
+              type="checkbox"
+              name="mentorship_purchased"
+              checked={updateProductInput?.mentorship_purchased}
+              onChange={(event) => handleUpdateCheckboxChange(event, "mentorship")}
+              className="mr-5"
+            />
+          </label>
+          <label className="flex justify-between font-semibold py-2 rounded-md transition duration-500">
             Provider Purchased
             <input
               type="checkbox"
               name="provider_purchased"
               checked={updateProductInput?.provider_purchased}
-              onChange={handleProductChange}
+              onChange={(event) => handleUpdateCheckboxChange(event, "provider")}
               className="mr-5"
             />
           </label>
