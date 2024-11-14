@@ -6,7 +6,7 @@ class Employee < ApplicationRecord
   validates_uniqueness_of :name
   validates_uniqueness_of :email, case_sensitive: false
   validate :verify_employee_mentors
-
+  has_one_attached :profile_photo
   has_many :invoices
   has_many :products
   has_many :schedules

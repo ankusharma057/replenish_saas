@@ -108,6 +108,7 @@ class Api::ClientsController < ApplicationController
       :online_Booking_Payment_Policy,
       :how_heard_about_us,
       :referred_employee_id,
+      :profile_photo,
       notification_settings: [
         :email_reminder_2_days, 
         :sms_reminder_2_days, 

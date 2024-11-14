@@ -2,7 +2,7 @@ class EmployeeSerializer < ActiveModel::Serializer
    attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
-             :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations
+             :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url
 
 
   has_many :invoices
@@ -42,5 +42,13 @@ class EmployeeSerializer < ActiveModel::Serializer
 
   def is_mentor
     object.is_mentor?
+  end
+
+  def profile_photo_url
+    if object.profile_photo.attached?
+      Rails.application.routes.url_helpers.rails_blob_url(object.profile_photo, only_path: true)
+    else
+      nil
+    end
   end
 end
