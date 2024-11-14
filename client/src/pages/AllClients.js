@@ -1319,7 +1319,7 @@ useEffect(()=>{
                     {selectedEmployeeData && (
                         <div className=" p-3 sm:p-10">
                             <h1 className="text-3xl font-bold">
-                                {selectedEmployeeData?.name}
+                                {selectedEmployeeData?.name}{" "}{selectedEmployeeData?.last_name}
                             </h1>
                             <ButtonGroup className="w-full mb-4 md:w-auto">
                                 {radioTabs.map((tab) => {

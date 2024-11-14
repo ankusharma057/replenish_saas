@@ -20,6 +20,7 @@ import { RxCross2 } from "react-icons/rx";
 import Select from "react-select";
 import DatePicker from "react-multi-date-picker";
 import { SlCalender } from "react-icons/sl";
+import {useNavigate} from "react-router-dom"
 
 const initialFormState = {
   clientName: "",
@@ -92,6 +93,7 @@ const [dateOfService,setDateOfService]=useState("")
   })
   const [createClient,setCreateClient]=useState(false)
   const [showClientList,setShowClientList]=useState(false)
+  const Navigate=useNavigate();
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getClients();
@@ -957,9 +959,7 @@ const [dateOfService,setDateOfService]=useState("")
           <form className=" bg-white md:p-4 rounded-md" onSubmit={handleSubmit}>
             <div className="flex justify-end  mr-4 my-2 ">
               <Button
-                onClick={() => {
-                  addMoreInvoice(true);
-                }}
+                onClick={()=>Navigate("/add-new-client")}
                 className="!bg-cyan-400 !border-cyan-500 hover:!bg-cyan-500 focus:!bg-cyan-500"
                 disabled={invoiceArray?.length >= 4}
               >
