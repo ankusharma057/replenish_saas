@@ -29,6 +29,7 @@ module ReplenishMdApp
     config.action_dispatch.cookies_same_site_protection = :strict
 
     config.public_file_server.enabled = true
+    config.time_zone = 'Kolkata'
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
