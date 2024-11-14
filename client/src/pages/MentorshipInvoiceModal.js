@@ -102,12 +102,12 @@ const MentorshipInvoiceModal = ({ invoice, showModal, handleCloseModal }) => {
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-gray-700 font-medium">Paid By Client Credit:</span>
-                <span className="text-green-600 font-semibold">${((invoice?.paid_by_client_credit || 0) * (1 + 0.03))}</span>
+                <span className="text-green-600 font-semibold">${(invoice?.paid_by_client_credit || 0)}</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-gray-700 font-medium text-lg">Total Paid by Client:</span>
                 <span className="text-green-700 text-xl font-semibold">
-                  ${Number((invoice?.paid_by_client_cash || 0) + ((invoice?.paid_by_client_credit || 0) * (1 + 0.03))).toFixed(2)}
+                  ${Number((invoice?.paid_by_client_cash || 0) + ((invoice?.paid_by_client_credit || 0) * (1 - 0.03))).toFixed(2)}
                 </span>
               </div>
             </div>
