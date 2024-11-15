@@ -29,7 +29,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown, Plus, MoveRight, X } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Row, Col } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -1131,41 +1131,51 @@ useEffect(()=>{
     function getInitials(str) {
         const words = str.split(" ");
         if (words.length >= 2) {
-          return words[0][0] +"." + words[1][0]+".";
+          return words[0][0] + words[1][0];
         }else if (words.length === 1) {
             return words[0][0]; 
           }
         return "";
       }
+      useEffect(()=>{},[selectedEmployeeData])
     const EmployeeItem = ({ index, style }) => {
         const employee = filteredEmployeeList[index];
+        let name=employee?.name+ " "
+        if(employee?.last_name){
+            name += employee?.last_name
+        }
         return (
             employee && (
-                <div
-                    style={style}
-                    onClick={() => {
-                        selectedEmployeeData?.id !== employee.id && handleSelect(employee);
-                        if (window.innerWidth < 1024) {
-                            collapse();
-                        }
-                    }}
-                    className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 d-flex justify-content-start align-items-center gap-[3px] ${selectedEmployeeData?.id === employee.id
-                        ? "pointer-events-none bg-gray-200 d-flex justify-content-start align-items-center gap-[3px]"
-                        : "cursor-pointer d-flex justify-content-start align-items-center gap-[3px]"
-                        } `}
+                <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip id="tooltip-top">{name}</Tooltip>}
                 >
-                    {employee.profile_photo ?
-                        <Image
-                            roundedCircle
-                            src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                            style={{ width: "35px", height: "35px" }}
-                        /> :
-                        <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
-                            <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
-                        </div>
-                    }
-                    {employee.name || ""}
-                </div>
+                    <div
+                        style={style}
+                        onClick={() => {
+                            selectedEmployeeData?.id !== employee.id && handleSelect(employee);
+                            if (window.innerWidth < 1024) {
+                                collapse();
+                            }
+                        }}
+                    className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 d-flex justify-content-start align-items-center gap-[3px] ${selectedEmployeeData?.id === employee.id
+                        ? " bg-gray-200 d-flex justify-content-start align-items-center gap-[3px]"
+                        : "cursor-pointer d-flex justify-content-start align-items-center gap-[3px]"
+                            } `}
+                    >
+                        {employee.profile_photo ?
+                            <Image
+                                roundedCircle
+                                src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                style={{ width: "35px", height: "35px" }}
+                            /> :
+                            <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
+                                <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
+                            </div>
+                        }
+                        {name?.length>19? name?.slice(0,19)+"...":name}
+                    </div>
+                </OverlayTrigger>
             )
         );
     };
@@ -1321,7 +1331,7 @@ useEffect(()=>{
                                         itemSize={45}
                                         width={"100%"}
                                     >
-                                        {EmployeeItem}
+                                            {EmployeeItem}
                                     </List>
                                 )}
                             </div>

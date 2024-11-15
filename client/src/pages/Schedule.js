@@ -42,7 +42,7 @@ import { ChevronDown } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { useAsideLayoutContext } from "../context/AsideLayoutContext";
 import ModalWraper from "../components/Modals/ModalWraper";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../components/Input/LabelInput";
 import { useAuthContext } from "../context/AuthUserContext";
@@ -427,7 +427,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
   function getInitials(str) {
     const words = str.split(" ");
     if (words.length >= 2) {
-      return words[0][0] + "." + words[1][0] + ".";
+      return words[0][0] + words[1][0];
     } else if (words.length === 1) {
       return words[0][0];
     }
@@ -435,36 +435,45 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
   }
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
+    let name=employee?.name+ " "
+    if(employee?.last_name){
+      name += employee?.last_name
+    }
     return (
       employee && (
-        <div
-          style={style}
-          onClick={() => {
-            selectedEmployeeData?.id !== employee.id &&
-              handleSelectEmployee(employee);
-            if (window.innerWidth < 1024) {
-              collapse();
-            }
-          }}
-          className={`p-[5px] border-b transition-all duration-700 ${selectedEmployeeData?.id === employee.id
-            ? "pointer-events-none bg-gray-200 rounded-md "
-            : "cursor-pointer "
-            } `}
+        <OverlayTrigger
+          placement="top"
+          overlay={<Tooltip id="tooltip-top">{name}</Tooltip>}
         >
-          <div className="d-flex justify-content-start align-items-center gap-[3px]">
-            {employee.profile_photo?
-            <Image
-              roundedCircle
-              src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              style={{width:"35px",height:"35px"}}
-              />:
-              <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
-                <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
-              </div>
-            }
-          {employee.name || ""}
+          <div
+            style={style}
+            onClick={() => {
+              selectedEmployeeData?.id !== employee.id &&
+                handleSelectEmployee(employee);
+              if (window.innerWidth < 1024) {
+                collapse();
+              }
+            }}
+            className={`p-[5px] border-b transition-all duration-700 ${selectedEmployeeData?.id === employee.id
+              ? " bg-gray-200 rounded-md "
+              : "cursor-pointer "
+              } `}
+          >
+            <div className="d-flex justify-content-start align-items-center gap-[5px]">
+              {employee.profile_photo ?
+                <Image
+                  roundedCircle
+                  src="https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  style={{ width: "35px", height: "35px" }}
+                /> :
+                <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
+                  <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
+                </div>
+              }
+              {name?.length > 19 ? name?.slice(0, 19) + "..." : name}
+            </div>
           </div>
-        </div>
+        </OverlayTrigger>
       )
     );
   };
