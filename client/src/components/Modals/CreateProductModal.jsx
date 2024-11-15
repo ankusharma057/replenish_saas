@@ -1,29 +1,31 @@
 import React, { useState } from "react";
+import Select from "react-select"; // Import react-select
 import { Form } from "react-bootstrap";
 import LabelInput from "../Input/LabelInput";
 import Loadingbutton from "../Buttons/Loadingbutton";
 import { toast } from "react-toastify";
 import ModalWraper from "./ModalWraper";
-import { createProduct, loginUser } from "../../Server";
+import { createProduct } from "../../Server";
 
-const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
+const CreateProductModal = ({ show, onHide, getProducts }) => {
   const initialFormData = {
     name: "",
     product_type: "",
     cost_price: "",
-    provider_purchased:"",
     retail_price: "",
+    purchased_type: { value: "replenish_purchased", label: "Replenish Purchased" },
   };
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
 
   const handleChange = (e) => {
-    const {name, value, type, checked} = e.target
-    setFormData((pre) => ({ ...pre, [name]:(type === "checkbox") ? checked :  value }));
-    if(name === "name" && value.length === 0){
-      setFormData((prev) => ({ ...prev, provider_purchased: false, mentorship_purchased: false }));
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDropdownChange = (selectedOption) => {
+    setFormData((prev) => ({ ...prev, purchased_type: selectedOption }));
   };
 
   const handleSubmit = async (e) => {
@@ -31,7 +33,10 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
 
     try {
       setLoading(true);
-      await createProduct(formData);
+      await createProduct({
+        ...formData,
+        purchased_type: formData.purchased_type.value,
+      });
       toast.success(`Product Created Successfully.`);
       await getProducts(true);
       setFormData(initialFormData);
@@ -47,25 +52,12 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
     }
   };
 
-  const handleCheckboxChange = (event, type) => {
-    const { checked } = event.target;
-
-    if (type === "provider") {
-      setFormData({
-        ...formData,
-        provider_purchased: checked,
-        mentorship_purchased: checked ? false : formData.mentorship_purchased,
-      });
-    } else if (type === "mentorship") {
-      setFormData({
-        ...formData,
-        mentorship_purchased: checked,
-        provider_purchased: checked ? false : formData.provider_purchased,
-      });
-    }
-  };
-
-
+  // Options for the dropdown
+  const purchasedTypeOptions = [
+    { value: "replenish_purchased", label: "Replenish Purchased" },
+    { value: "provider_purchased", label: "Provider Purchased" },
+    { value: "mentorship_purchased", label: "Mentorship Purchased" },
+  ];
 
   return (
     <ModalWraper
@@ -143,27 +135,14 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
           step="any"
         />
 
-        <label className="flex justify-between font-semibold  py-2 rounded-md  transition duration-500">
-          Provider Purchased
-          <input
-            type="checkbox"
-            name="provider_purchased"
-            checked={formData?.provider_purchased} 
-            onChange={(event) => handleCheckboxChange(event, "provider")}
-            className="mr-5"
+        <div className="mb-3">
+          <label className="font-bold text-gray-700">Purchased Type</label>
+          <Select
+            options={purchasedTypeOptions}
+            value={formData.purchased_type}
+            onChange={handleDropdownChange}
           />
-        </label>
-
-        <label className="flex justify-between font-semibold  py-2 rounded-md  transition duration-500">
-          Mentorship Purchased
-          <input
-            type="checkbox"
-            name="mentorship_purchased"
-            checked={formData?.mentorship_purchased} 
-            onChange={(event) => handleCheckboxChange(event, "mentorship")}
-            className="mr-5"
-          />
-        </label>
+        </div>
       </Form>
     </ModalWraper>
   );

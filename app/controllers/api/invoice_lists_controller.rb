@@ -21,8 +21,12 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def mentorship_invoices
-    invoices = params[:is_admin] == "true" ? Invoice.where.not(mentor_id: nil) || [] : Invoice.where(employee_id: params[:employee_id]).where.not(mentor_id: nil)
-  
+    invoices = if params[:is_admin] == "true"
+      Invoice.where.not(mentor_id: nil).order(created_at: :desc)
+    else
+      Invoice.where(employee_id: params[:employee_id]).where.not(mentor_id: nil).order(created_at: :desc)
+    end
+
     render json: invoices, each_serializer: MentorInvoiceSerializer, status: :ok
   end
 end

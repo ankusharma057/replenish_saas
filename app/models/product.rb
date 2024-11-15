@@ -9,6 +9,12 @@ class Product < ApplicationRecord
   has_many :schedules, through: :schedule_products
   has_many :treatments
 
+  enum purchased_type: {
+    replenish_purchased: 0,
+    provider_purchased: 1,
+    mentorship_purchased: 2
+  }
+
   def create_or_update_inventory(quantity: nil)
     inventory.nil? ? create_inventory(quantity: quantity.to_f) : 
       inventory.update!(quantity: (inventory.quantity.to_f + quantity.to_f))

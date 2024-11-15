@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import ProductTable from "../Tables/ProductTable";
 import { useAuthContext } from "../../context/AuthUserContext";
 import { deleteProduct, getProductsList, updateProduct } from "../../Server";
@@ -23,56 +24,42 @@ const ProductsTab = ({
     name: "",
     product_type: "",
     cost_price: "",
-    provider_purchased:"",
     retail_price: "",
-    mentorship_purchased: "",
+    purchased_type: "",
   });
   const [showUpdateProductModal, setShowUpdateProductModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // added
-   const getProducts = async (refetch = false) => {
-     try {
-       const { data } = await getProductsList(refetch);
-       setProductList(data);
-     } catch (error) {
-       console.log(error);
-     }
-   };
+  const purchaseTypeOptions = [
+    { value: "replenish_purchased", label: "Replenish Purchased" },
+    { value: "provider_purchased", label: "Provider Purchased" },
+    { value: "mentorship_purchased", label: "Mentorship Purchased" },
+  ];
+
+  const getProducts = async (refetch = false) => {
+    try {
+      const { data } = await getProductsList(refetch);
+      setProductList(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     setProductList(filteredInventory);
     return () => {};
   }, [filteredInventory]);
 
   const handleProductChange = (e) => {
-    const {name, value, type, checked} = e.target
-    setUpdateProductInput((pre) => ({
-      ...pre,
-      [name]:(type === "checkbox") ? checked :  value,
-    }));
-    if(name === "name" && value.length === 0){
-      setUpdateProductInput((prev)=>({...prev,["provider_purchased"]:false}))
-    }
+    const { name, value } = e.target;
+    setUpdateProductInput((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdateCheckboxChange = (event, type) => {
-    const { checked } = event.target;
-  
-    if (type === "provider") {
-      setUpdateProductInput((prev) => ({
-        ...prev,
-        provider_purchased: checked,
-        mentorship_purchased: checked ? false : prev.mentorship_purchased,
-      }));
-    } else if (type === "mentorship") {
-      setUpdateProductInput((prev) => ({
-        ...prev,
-        mentorship_purchased: checked,
-        provider_purchased: checked ? false : prev.provider_purchased,
-      }));
-    }
+  const handlePurchaseTypeChange = (selectedOption) => {
+    setUpdateProductInput((prev) => ({
+      ...prev,
+      purchased_type: selectedOption?.value || "",
+    }));
   };
-  
 
   const handleDelete = (product) => {
     confirmAlert({
@@ -110,9 +97,8 @@ const ProductsTab = ({
       name: updateProductInput.name,
       product_type: updateProductInput.product_type,
       cost_price: updateProductInput.cost_price,
-      provider_purchased:updateProductInput.provider_purchased,
-      mentorship_purchased:updateProductInput.mentorship_purchased,
       retail_price: updateProductInput.retail_price,
+      purchased_type: updateProductInput.purchased_type,
     };
     try {
       setLoading(true);
@@ -195,27 +181,18 @@ const ProductsTab = ({
             required={true}
             type="number"
           />
-          <label className="flex justify-between font-semibold py-2 rounded-md transition duration-500">
-            Mentorship Purchased
-            <input
-              type="checkbox"
-              name="mentorship_purchased"
-              checked={updateProductInput?.mentorship_purchased}
-              onChange={(event) => handleUpdateCheckboxChange(event, "mentorship")}
-              className="mr-5"
-            />
-          </label>
-          <label className="flex justify-between font-semibold py-2 rounded-md transition duration-500">
-            Provider Purchased
-            <input
-              type="checkbox"
-              name="provider_purchased"
-              checked={updateProductInput?.provider_purchased}
-              onChange={(event) => handleUpdateCheckboxChange(event, "provider")}
-              className="mr-5"
-            />
-          </label>
-          <br></br>
+
+          <label className="font-semibold py-2">Purchased Type</label>
+          <Select
+            options={purchaseTypeOptions}
+            value={purchaseTypeOptions.find(
+              (option) => option.value === updateProductInput.purchased_type
+            )}
+            onChange={handlePurchaseTypeChange}
+            placeholder="Select Purchased Type"
+          />
+
+          <br />
           <Loadingbutton
             isLoading={loading}
             title="Save your changes"

@@ -114,7 +114,7 @@ const MPInvoice = () => {
         inventory?.product !== "" &&
         inventory?.product?.product_type !== undefined
       ) {
-        if (inventory?.product.mentorship_purchased == true) {
+        if (inventory?.product.purchased_type == "mentorship_purchased") {
           newMPProductList.push({ ...inventory?.product, label: inventory?.product.name, value: index });
         }
       }
