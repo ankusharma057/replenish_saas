@@ -861,8 +861,8 @@ export  const fetchConfig = async () => {
     return null;
   }
 };
-export const AddNoteToAppointment = async (id,refetch,payload) =>{
-  let url = '/api/clients';
+export const AddNoteToAppointment = async (payload,id,refetch) =>{
+  let url = '/api/add_note';
   const res = await api.post(url, payload,{
     cache: {
       ignoreCache: refetch,
@@ -871,17 +871,17 @@ export const AddNoteToAppointment = async (id,refetch,payload) =>{
   return res;
 }
 
-export const UpdateAppointment = async (id,refetch,payload) =>{
-  let url = ` /api/schedules/${payload.appointmentId}`;
-  const res = await api.post(url, payload,{
+export const UpdateAppointment = async (payload,id,refetch,) =>{
+  let url = `/api/schedules/${payload.appointmentId}`;
+  const res = await api.patch(url, payload,{
     cache: {
       ignoreCache: refetch,
     },
   });
   return res;
 }
-export const DeleteAppointmentNote = async (id,refetch,payload) =>{
-  let url = `/api/schedules/:schedule_id/update_note/${payload.note_id}`;
+export const DeleteAppointmentNote = async (payload,id,refetch) =>{
+  let url = `/api/schedules/${payload.schedule_id}/update_note/${payload.note_id}`;
   const res = await api.delete(url, payload,{
     cache: {
       ignoreCache: refetch,
@@ -889,7 +889,7 @@ export const DeleteAppointmentNote = async (id,refetch,payload) =>{
   });
   return res;
 }
-export const UpdateAppointmentNote = async (id,refetch,payload) =>{
+export const UpdateAppointmentNote = async (payload,id,refetch) =>{
   let url = `/api/schedules/:schedule_id/update_note/${payload.note_id}`;
   const res = await api.patch(url, payload,{
     cache: {

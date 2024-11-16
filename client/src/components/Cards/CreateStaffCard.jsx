@@ -27,7 +27,7 @@ export default function CreateStaffCard({ show, onHide }) {
       setLoading(true);
       formData={
         ...formData,
-        profile_photo:selectedFiles
+        profile_photo:selectedFiles[0]
       }
       await createEmployee(formData);
       toast.success("User created successfully");

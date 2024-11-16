@@ -31,7 +31,7 @@ import { FixedSizeList as List } from "react-window";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import Select from "react-select";
 import { RxCross2 } from "react-icons/rx";
-
+import Image from 'react-bootstrap/Image';
 const Treatment = () => {
   const { collapse } = useAsideLayoutContext();
   const { authUserState } = useAuthContext();
@@ -402,8 +402,23 @@ const Treatment = () => {
     employee?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
   );
 
+  function getInitials(str) {
+    const words = str.split(" ");
+    if (words.length >= 2) {
+      return words[0][0] + words[1][0];
+    } else if (words.length === 1) {
+      return words[0][0];
+    }
+    return "";
+  }
+
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
+    
+    let name=employee?.name+ " "
+    if(employee?.last_name){
+      name += employee?.last_name
+    }
     return (
       employee && (
         <div
@@ -419,7 +434,19 @@ const Treatment = () => {
             : "cursor-pointer "
             } `}
         >
-          {employee.name || ""}
+          <div className="d-flex justify-content-start align-items-center gap-[5px]">
+            {employee.profile_photo_url ?
+              <Image
+                roundedCircle
+                src={employee.profile_photo_url}
+                style={{ width: "35px", height: "35px" }}
+              /> :
+              <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
+                <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
+              </div>
+            }
+            {name.length > 19 ? `${name?.slice(0, 19)}...` : name}
+          </div>
         </div>
       )
     );

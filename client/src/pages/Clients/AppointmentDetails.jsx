@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, Form, InputGroup, ListGroup, Offcanvas, Row } from 'react-bootstrap';
-import { ChevronDown, Ellipsis, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, CircleX, CirclePlus, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
+import { ChevronDown, MoreHorizontal, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, XCircle, PlusCircle, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
 import moment from 'moment';
 import { Collapse, Select } from '@mui/material';
 import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote } from "../../Server/index"
@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa6";
 
-const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar, selectedEmployeeData }) => {
+const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar, selectedEmployeeData }) => {    
     const [bookingInfo, setBookingInfo] = useState(true);
     const [notesInfo, setNotesInfo] = useState(false);
     const [appointmentDone, setAppointmentDone] = useState(false);
@@ -28,6 +28,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const [employeeId, setEmployeeId] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [enableEdit, setEnableEdit] = useState(false);
+    const [appointmentResponse, setAppointmentResponse] = useState(false);
 
 
     useEffect(() => {
@@ -118,7 +119,8 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             "content": noteValue,
             "schedule_id": appointmentDetails?.schedule?.id,
             "favorite": favorite,
-            "appointmentId": appointmentDetails?.id
+            "appointmentId": appointmentDetails?.id,
+            "note_id": payload.noteId
         }
         let apiResponse
         if (type === "delete") {
@@ -387,7 +389,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             </div>
                                                             <div style={{ position: "relative" }}>
                                                                 <div className={showNotesMenu ? "bg-light rounded w-[35px] h-[35px] d-flex justify-content-center align-items-center" : "w-[35px] h-[35px] d-flex justify-content-center align-items-center"}>
-                                                                    <Ellipsis size={20} onClick={handleNotesMenu} />
+                                                                    <MoreHorizontal size={20} onClick={handleNotesMenu} />
                                                                 </div>
                                                                 {showNotesMenu &&
                                                                     <Card style={{ position: "absolute", right: "10px", width: "200px" }}>
@@ -445,8 +447,8 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                         <p className='mb-0' style={{ fontSize: "16px", fontWeight: 700, color: "#22d3ee" }}>Add Item</p>
                                                         {
                                                             addItem ?
-                                                                <CircleX size={15} style={{ color: "#22d3ee" }} strokeWidth={3} /> :
-                                                                <CirclePlus size={15} style={{ color: "#22d3ee" }} strokeWidth={3} />
+                                                                <XCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} /> :
+                                                                <PlusCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} />
                                                         }
                                                     </div>
 
@@ -625,8 +627,8 @@ const BillingInfoCard = ({ addAdjustment, handleAddAdjustment, index }) => {
                 Adjustment
                 {
                     addAdjustment ?
-                        <CircleX size={15} style={{ color: "#fff" }} strokeWidth={3} /> :
-                        <CirclePlus size={15} style={{ color: "#fff" }} strokeWidth={3} />
+                        <XCircle size={15} style={{ color: "#fff" }} strokeWidth={3} /> :
+                        <PlusCircle size={15} style={{ color: "#fff" }} strokeWidth={3} />
                 }
             </Button>
             <Button className='d-flex justify-content-center align-items-center gap-[5px]'>
@@ -711,7 +713,7 @@ const EditAppointment = ({ handleEditAppointment, noteValue, handleNoteChange, a
             </div>
             <div className='d-flex justify-content-end align-items-center gap-[10px]'>
                 <Button className='h-[38px]' variant='outline-secondary' onClick={handleEditAppointment}>Cancel</Button>
-                <Button className='h-[38px]' onClick={() => addNoteToAppointment("appointmentUpdate")}>Update Appointment</Button>
+                <Button className='h-[38px]' onClick={() => addNoteToAppointment("createNote")}>Update Appointment</Button>
             </div>
         </div>
     </div>

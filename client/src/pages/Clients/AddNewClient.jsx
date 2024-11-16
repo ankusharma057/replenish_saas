@@ -17,7 +17,6 @@ import {
   ThumbsUp,
   Settings,
   Megaphone,
-  Image,
   CreditCard,
   Cloud,
   HelpCircle,
@@ -32,6 +31,7 @@ import { Country, State, City } from 'country-state-city';
 import { toast } from "react-toastify";
 import { useAuthContext } from "../../context/AuthUserContext";
 import { useNavigate, useParams } from "react-router-dom";
+import Image from 'react-bootstrap/Image';
 
 const ClientsProfileUpdate = () => {
   const params = useParams();
@@ -238,6 +238,16 @@ const ClientsProfileUpdate = () => {
     Navigate(`/customers/${customerId}`)
   };
 
+  function getInitials(str) {
+    const words = str.split(" ");
+    if (words.length >= 2) {
+      return words[0][0] + words[1][0];
+    } else if (words.length === 1) {
+      return words[0][0];
+    }
+    return "";
+  }
+
   const EmployeeItem = ({ index, style }) => {
     const employee = filteredEmployeeList[index];
     return (
@@ -253,7 +263,19 @@ const ClientsProfileUpdate = () => {
           }}
           className={`p-2 border-b transition-all hover:bg-gray-200 rounded-md duration-700 cursor-pointer"`}
         >
-          {employee.name || ""}
+          <div className="d-flex justify-content-start align-items-center gap-[5px]">
+            {employee.profile_photo_url ?
+              <Image
+                roundedCircle
+                src={employee.profile_photo_url}
+                style={{ width: "35px", height: "35px" }}
+              /> :
+              <div className="w-[35px] h-[35px] rounded-circle d-flex justify-content-center align-items-center border bg-white">
+                <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
+              </div>
+            }
+            {employee.name || ""}
+          </div>
         </div>
       )
     );
@@ -425,7 +447,7 @@ const ClientsProfileUpdate = () => {
     formDataPayload.append('client[how_heard_about_us]', formData?.how_heard_about_us);
 
     //profile photo
-    formDataPayload.append('client[profile_photo]',selectedFiles);
+    formDataPayload.append('client[profile_photo]',selectedFiles[0]);
   
     let response = await CreateClient(params.id, true, formDataPayload)
     if (response.status === 200) {
