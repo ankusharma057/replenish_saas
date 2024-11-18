@@ -27,6 +27,15 @@ class Api::SchedulesController < ApplicationController
     end
   end
 
+  def show
+    schedule = Schedule.find(params[:id])
+    if schedule
+      render json: schedule, status: :ok
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end
+
 
   def remaining_paid
     schedule = Schedule.find_by(id: params[:id])
