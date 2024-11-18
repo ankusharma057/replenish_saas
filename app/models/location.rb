@@ -3,7 +3,6 @@ class Location < ApplicationRecord
   has_many :employees, through: :employee_locations
   has_many :invoices, dependent: :destroy
 
-
   validates :name, presence: true, uniqueness: true
 
   def employees_with_associations
