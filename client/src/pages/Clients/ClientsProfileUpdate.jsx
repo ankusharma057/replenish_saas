@@ -134,7 +134,7 @@ const ClientsProfileUpdate = () => {
     { name: 'October', number: '10' },
     { name: 'November', number: '11' },
     { name: 'December', number: '12' },
-  ];
+  ];  
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -777,7 +777,7 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData?.how_heard_about_us);
 
     //profile photo
-    // appendIfChanged('client[profile_photo]', selectedFiles, clientProfileData?.profile_pic);
+    appendIfChanged('client[profile_photo]', selectedFiles[0], clientProfileData?.profile_pic);
     const isEmpty = !Array.from(formDataPayload.entries()).length;
     if (!isEmpty) {
       let response = await UpdateClient(params.id, true, formDataPayload)

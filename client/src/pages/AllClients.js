@@ -129,8 +129,6 @@ const AllClientRoot = () => {
       if (selectedEmployeeData) {
         const { data } = await getClientSchedulesOnly(selectedEmployeeData, refetch);
         setSelectedClientSchedules(data);
-        console.log("@@@@@@@@",data);
-        
       }
     } catch (error) {
       toast.error(error.message)

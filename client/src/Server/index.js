@@ -881,7 +881,7 @@ export const UpdateAppointment = async (payload,id,refetch,) =>{
   return res;
 }
 export const DeleteAppointmentNote = async (payload,id,refetch) =>{
-  let url = `/api/schedules/${payload.schedule_id}/update_note/${payload.note_id}`;
+  let url = `/api/schedules/${payload.schedule_id}/delete_note/${payload.note_id}`;
   const res = await api.delete(url, payload,{
     cache: {
       ignoreCache: refetch,
@@ -890,8 +890,17 @@ export const DeleteAppointmentNote = async (payload,id,refetch) =>{
   return res;
 }
 export const UpdateAppointmentNote = async (payload,id,refetch) =>{
-  let url = `/api/schedules/:schedule_id/update_note/${payload.note_id}`;
+  let url = `/api/schedules/${payload.schedule_id}/update_note/${payload.note_id}`;
   const res = await api.patch(url, payload,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+export const GetAppointmentDetails = async (payload,refetch) =>{
+  let url = `/api/schedules/${payload}`;
+  const res = await api.get(url,{
     cache: {
       ignoreCache: refetch,
     },

@@ -266,7 +266,6 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         location_id: emp?.location_id || selectedLocation?.id
       };
       const resp = await fetchAvailability(availabilityPayload, refetch);
-      console.log("@@@@@resp",resp);
       
       function convertToDate(dateString, timeString) {
         // Combine date and time strings
@@ -292,7 +291,6 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         }
         return {}
       });
-      console.log("@@@@@availabilityData",availabilityData);
       
       const everyWeekUnavailabilities = availabilityData.filter(
         (item) => item.every_week
@@ -316,7 +314,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       const transformedData = availabilityData.flatMap(item => Object.values(item));
       const arr = newData.concat(transformedData);
       const arr1 = arr.concat(unavailabilityNewData);
-      console.log("@@@@@@@arr1",arr1);
+
       
       setEmployeeScheduleEventsData((pre) => {
         return {
@@ -679,7 +677,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         "treatment_ids": treatmentIds
       }
     }
-    console.log("@@@@@@@payload",payload);
+
     const { data } = await createSchedule(payload);
     let newCopyAppointMent = {
       ...copyAppointMent,

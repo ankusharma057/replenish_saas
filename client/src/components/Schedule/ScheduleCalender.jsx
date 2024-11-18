@@ -9,8 +9,6 @@ import './calendar.css'
 const localizer = momentLocalizer(moment);
 
 const ScheduleCalender = ({ ...rest }) => {
-  console.log("@@@rest",rest);
-  
   const [timeSlots, setTimeSlots] = useState(1);
   const today = new Date();
   useEffect(() => {

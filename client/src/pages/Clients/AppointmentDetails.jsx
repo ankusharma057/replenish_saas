@@ -3,16 +3,17 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, Form, Input
 import { ChevronDown, MoreHorizontal, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, XCircle, PlusCircle, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
 import moment from 'moment';
 import { Collapse, Select } from '@mui/material';
-import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote } from "../../Server/index"
+import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote, GetAppointmentDetails } from "../../Server/index"
 import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa6";
 
-const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar, selectedEmployeeData }) => {    
+const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar }) => {
     const [bookingInfo, setBookingInfo] = useState(true);
     const [notesInfo, setNotesInfo] = useState(false);
     const [appointmentDone, setAppointmentDone] = useState(false);
     const [showNotesMenu, setShowNotesMenu] = useState(false);
+    const [showNotesMenuId, setShowNotesMenuId] = useState(null);
     const [billingInfo, setBillingInfo] = useState(false);
     const [addItem, setAddItem] = useState(false);
     const [addAdjustment, setAddAdjustment] = useState(false);
@@ -28,12 +29,24 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const [employeeId, setEmployeeId] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [enableEdit, setEnableEdit] = useState(false);
-    const [appointmentResponse, setAppointmentResponse] = useState(false);
-
+    const [noteList, setNoteList] = useState();
+    const [appointmentDetailsResponse, setAppointmentDetailsResponse] = useState();
+    const [showEditNoteForm, setShowEditNoteForm] = useState(false);
+    const [apiResponseStatus, setApiResponseStatus] = useState(false);
 
     useEffect(() => {
-        getEmployeeList()
-    }, [])
+        getEmployeeList();
+        if (appointmentDetails?.id) {
+            getAppointmentDetails(appointmentDetails?.id);
+        }
+    }, [appointmentDetails.id,apiResponseStatus])
+    const getAppointmentDetails = async (appointmentDetailsId) => {
+        let response = await GetAppointmentDetails(`${appointmentDetailsId}`, true);
+        if (response?.data?.notes !== noteList || response?.data !== appointmentDetailsResponse) {
+            setNoteList(response?.data?.notes);
+            setAppointmentDetailsResponse(response?.data);            
+        }
+    };
     const getEmployeeList = async () => {
         let employees = await getEmployeesList();
         setEmployeeList(employees.data);
@@ -47,8 +60,9 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const handleAppointmentDone = () => {
         setAppointmentDone((prev) => !prev);
     };
-    const handleNotesMenu = () => {
+    const handleNotesMenu = (noteId) => {
         setShowNotesMenu((prev) => !prev);
+        setShowNotesMenuId(noteId);
     };
     const handleBillingInfo = () => {
         setBillingInfo((prev) => !prev);
@@ -81,8 +95,8 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const handleEmployeeChange = async (event) => {
         let employee = await employeeList.find((item) => item.name === event.target.value);
         if (employee) {
-            setEmployeeName(event.target.value)
-            setEmployeeId(employee.id);
+            setEmployeeName(employee?.name)
+            setEmployeeId(employee?.id);
         }
     };
     const addNoteToAppointment = async (type) => {
@@ -92,7 +106,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             "content": noteValue,
             "schedule_id": appointmentDetails?.schedule?.id,
             "favorite": favorite,
-            "appointmentId": appointmentDetails?.id
+            "appointmentId": appointmentDetails?.id,
         }
         let apiResponse
         if (type === "appointmentUpdate") {
@@ -102,40 +116,98 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             let response = await AddNoteToAppointment(payload);
             apiResponse = response;
         }
-        if (apiResponse.status === 200) {
+        if (apiResponse.status === 201 || apiResponse.status === 200) {
             setDueDate("");
             setNoteValue("");
             setFavorite(false);
             setEmployeeId("");
+            setEditAppointment(false);
+            setNoteSwitch(false);
+            setApiResponseStatus(true);
+            if ((apiResponse.status === 201 || apiResponse.status === 200) && appointmentDetails?.id) {
+                getAppointmentDetails(appointmentDetails?.id);
+            }
             toast.success("Note added successfully")
         } else {
             toast.error("Something gone wrong")
         }
     };
-    const handleNoteOperation = async (type, noteId) => {
+    const handleUpdateNote = async (newEmployeeId, newDueDate, newNoteValue, newFavorite, newNoteId) => {
         let payload = {
-            "employee_id": employeeId,
-            "due_date": dueDate,
-            "content": noteValue,
-            "schedule_id": appointmentDetails?.schedule?.id,
-            "favorite": favorite,
+            "employee_id": newEmployeeId,
+            "due_date": newDueDate,
+            "content": newNoteValue,
+            "schedule_id": appointmentDetails.schedule.id,
+            "favorite": newFavorite,
             "appointmentId": appointmentDetails?.id,
-            "note_id": payload.noteId
+            "note_id": newNoteId
         }
         let apiResponse
-        if (type === "delete") {
-            let response = await DeleteAppointmentNote(payload);
-            apiResponse = response;
-        } else if (type === "update") {
-            let response = await UpdateAppointmentNote(payload);
-            apiResponse = response;
-        }
+        let response = await UpdateAppointmentNote(payload);
+        apiResponse = response;
         console.log("apiResponse", apiResponse);
         if (apiResponse.status === 200) {
+            setShowNotesMenuId(null);
+            setShowEditNoteForm(false);
+            if (appointmentDetails?.id) {
+                await getAppointmentDetails(appointmentDetails?.id);
+                toast.success(response.data.message);
+            }
             toast.success(apiResponse.data.message)
         } else {
             toast.error(apiResponse.data.message)
         }
+    };
+    const handleEditNoteForm = () => {
+        setShowEditNoteForm(true)
+    };
+    const handleCloseEditNoteForm = () => {
+        setShowEditNoteForm(false);
+        setShowNotesMenuId(null);
+    };
+    const handleNoteOperations = async (type, newFavorite, note_id) => {
+        let payload = {
+            "favorite": newFavorite,
+            "schedule_id": appointmentDetails?.schedule.id,
+            "note_id": note_id
+        }
+            let response;
+            if (type === "favorite") {
+                response = await UpdateAppointmentNote(payload);
+            } else if (type === "delete") {
+                response = await DeleteAppointmentNote(payload)
+            } else if (type === "done" || type === "Nill") {
+                console.log("@@@@@@type",type);
+                
+                payload = {
+                    ...payload,
+                    updated_at: type === "done" ? new Date() : type === "Nill"&&null
+                }
+                response = await UpdateAppointmentNote(payload);
+            }
+            if (response.status === 200 || response.status === 201) {
+                setShowNotesMenu(false)
+                setShowNotesMenuId(null)
+                setApiResponseStatus(true);
+                if (appointmentDetails?.id) {
+                    await getAppointmentDetails(appointmentDetails?.id);
+                    toast.success(response.data.message);
+                }
+            } else {
+                toast.error(response.data.message)
+            }
+    };
+    const formatDateTime=(dateString) => {
+        const date = new Date(dateString);
+        const options = { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+        return new Intl.DateTimeFormat('en-US', options).format(date).replace(',', ' -');
+    };
+    const renderProductNames = (products) => {
+        return products.map((product, index) => (
+            <span key={product.id}>
+                {product.name}{index < products.length - 1 ? ', ' : ''}
+            </span>
+        ));
     };
     return (
         <div>
@@ -179,15 +251,14 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                         <Collapse in={bookingInfo}>
                                             <div className='  p-3' in={bookingInfo}>
                                                 <div>
-                                                    <div className="text-dark" style={{ fontSize: "13px", fontWeight: 700 }}>Test Account User</div>
+                                                    <div className="text-dark" style={{ fontSize: "13px", fontWeight: 700 }}>{appointmentDetailsResponse?.client?.name}{" "}{appointmentDetailsResponse?.client?.last_name}</div>
                                                     <div className="text-dark d-flex align-items-center" style={{ fontSize: "13px" }}>
-                                                        <Smartphone size={14} />1234567890
+                                                        <Smartphone size={14} />{appointmentDetailsResponse?.client?.phone_number}
                                                     </div>
-                                                    <div className='' style={{ color: '#22d3ee', fontSize: "13px" }}>abc@gmail.com</div>
+                                                    <div className='' style={{ color: '#22d3ee', fontSize: "13px" }}>{appointmentDetailsResponse?.client?.email}</div>
                                                     <div className='d-flex align-items-center'>
                                                         <div><CreditCard size={14} /></div>
                                                         <div className='text-dark' style={{ fontSize: "13px" }}>Booking Info</div>
-
                                                     </div>
                                                     <div>
                                                         <Container>
@@ -196,13 +267,13 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                     <div className="" style={{ fontSize: "13px" }}>Account Owing</div>
                                                                 </Col>
                                                                 <Col xs={12} sm={6} md={6} lg={6} className="p-0  d-flex justify-content-end">
-                                                                    <div className="" style={{ fontSize: "13px" }}>$10040.00</div>
+                                                                    <div className="" style={{ fontSize: "13px" }}>${appointmentDetailsResponse?.remaining_amount}</div>
                                                                 </Col>
                                                                 <Col xs={12} sm={6} md={6} lg={6} className="p-0">
                                                                     <div className="" style={{ fontSize: "13px" }}>Account Credit</div>
                                                                 </Col>
                                                                 <Col xs={12} sm={6} md={6} lg={6} className="p-0 d-flex justify-content-end">
-                                                                    <div className="" style={{ fontSize: "13px" }}>$10040.00</div>
+                                                                    <div className="" style={{ fontSize: "13px" }}>${appointmentDetailsResponse?.paid_amount}</div>
                                                                 </Col>
                                                             </Row>
                                                         </Container>
@@ -217,7 +288,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                 <hr className='my-1' />
                                                 <div className='d-flex justify-content-between align-center'>
                                                     <div>
-                                                        <div className="text-dark" style={{ fontSize: "13px" }}>Nuerotoxin treatment ($343)</div>
+                                                        <div className="text-dark" style={{ fontSize: "13px" }}>{renderProductNames}{" "}${appointmentDetailsResponse?.products?.reduce((sum, product) => sum + product.cost_price, 0)}</div>
                                                         <div className="text-dark" style={{ fontSize: "13px" }}>{appointmentDetails?.employee?.name}</div>
                                                     </div>
                                                     <div>
@@ -271,7 +342,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                             </p>
                                         </div>
                                         <Collapse in={notesInfo}>
-                                            <div in={bookingInfo}>
+                                            <div in={notesInfo}>
                                                 {noteValueButtons &&
                                                     <div className='d-flex justify-content-end align-items-center mb-3 gap-[10px]'>
                                                         {
@@ -299,11 +370,11 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                 <CalendarRange style={{ color: '#888' }} />
                                                             </InputGroup.Text>
                                                             <Form.Control
-                                                                type="text"
+                                                                type="date"
                                                                 placeholder="Due Date..."
                                                                 value={dueDate}
-                                                                onFocus={(e) => (e.target.type = "date")}
-                                                                onBlur={(e) => (e.target.type = "text")}
+                                                                // onFocus={(e) => (e.target.type = "date")}
+                                                                // onBlur={(e) => (e.target.type = "text")}
                                                                 onChange={handleDueDate}
                                                             />
                                                         </InputGroup>
@@ -311,7 +382,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             <option>Select a employee</option>
                                                             {
                                                                 employeeList.map((item) => {
-                                                                    return <option>{item.name}</option>
+                                                                    return <option value={item.name}>{item.name}</option>
                                                                 })
                                                             }
                                                         </Form.Select>
@@ -352,77 +423,88 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             <option>Select a employee</option>
                                                             {
                                                                 employeeList.map((item) => {
-                                                                    return <option>{item.name}</option>
+                                                                    return <option value={item.name}>{item.name}</option>
                                                                 })
                                                             }
                                                         </Form.Select>
                                                     </div>
-                                                    :
-                                                    <div className='d-flex justify-content-between align-items-center'>
-                                                        <div className='d-flex gap-[20px] align-items-center'>
-                                                            <div>
-                                                                {
-                                                                    appointmentDone ?
-                                                                        <div className='d-flex justify-content-center align-items-center w-[30px] h-[30px] rounded-circle border border-secondary' onClick={handleAppointmentDone}>
-                                                                            <Check color={"#22d3ee"} size={16} />
-                                                                        </div> :
-                                                                        <div className='d-flex justify-content-center align-items-center w-[30px] h-[30px] rounded-circle border border-secondary' onClick={handleAppointmentDone}>
-                                                                            <Check size={16} />
-                                                                        </div>
-                                                                }
-                                                            </div>
-                                                            <div style={{ fontSize: "14px", fontWeight: 500 }}>
-                                                                New
-                                                            </div>
-                                                        </div>
-                                                        <div className='d-flex gap-[20px]  justify-content-center align-items-center'>
-                                                            <div>
-                                                                {
-                                                                    appointmentDone ?
-                                                                        <div onClick={handleAppointmentDone}>
-                                                                            <Star color={"#22d3ee"} size={16} />
-                                                                        </div> :
-                                                                        <div onClick={handleAppointmentDone}>
-                                                                            <Star size={16} />
-                                                                        </div>
-                                                                }
-                                                            </div>
-                                                            <div style={{ position: "relative" }}>
-                                                                <div className={showNotesMenu ? "bg-light rounded w-[35px] h-[35px] d-flex justify-content-center align-items-center" : "w-[35px] h-[35px] d-flex justify-content-center align-items-center"}>
-                                                                    <MoreHorizontal size={20} onClick={handleNotesMenu} />
-                                                                </div>
-                                                                {showNotesMenu &&
-                                                                    <Card style={{ position: "absolute", right: "10px", width: "200px" }}>
-                                                                        <ListGroup>
-                                                                            <ListGroup.Item className='d-flex gap-[5px] align-items-center' style={{ fontSize: "13px" }}><Pencil size={16} /> Edit Note</ListGroup.Item>
-                                                                            <ListGroup.Item className='d-flex gap-[5px] align-items-center text-danger' style={{ fontSize: "13px" }}><Trash2 size={16} /> Delete</ListGroup.Item>
-                                                                        </ListGroup>
-                                                                    </Card>
-                                                                }
-                                                            </div>
+                                                    : <>
+                                                        {Array.isArray(noteList) && noteList.map((item) => {
+                                                            return <>
+                                                                {showEditNoteForm && item?.id === showNotesMenuId ?
+                                                                    <EditAppointmentNote noteDetails={item} editEmployeeList={employeeList} handleEditNoteSubmit={handleUpdateNote} handleCloseEditNoteForm={handleCloseEditNoteForm} /> :
+                                                                    <>
+                                                                        <div className='d-flex justify-content-between align-items-center'>
+                                                                            <div className='d-flex gap-[20px] align-items-center'>
+                                                                                <div>
+                                                                                    {
+                                                                                        item?.updated_at && item?.updated_at !== null ?
+                                                                                            <div className='d-flex justify-content-center align-items-center w-[30px] h-[30px] rounded-circle border border-secondary' onClick={()=>handleNoteOperations("Nill",item.favorite,item?.id,)}>
+                                                                                                <Check color={"#22d3ee"} size={16} />
+                                                                                            </div> :
+                                                                                            <div className='d-flex justify-content-center align-items-center w-[30px] h-[30px] rounded-circle border border-secondary' onClick={()=>handleNoteOperations("done",item.favorite,item?.id,)}>
+                                                                                                <Check size={16} />
+                                                                                            </div>
+                                                                                    }
+                                                                                </div>
+                                                                                <div style={{ fontSize: "14px", fontWeight: 500 }}>
+                                                                                    {item?.content.charAt(0).toUpperCase() + item?.content.slice(1)}
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className='d-flex gap-[20px]  justify-content-center align-items-center'>
+                                                                                <div>
+                                                                                    {
+                                                                                        item?.favorite ?
+                                                                                            <div onClick={() => handleNoteOperations("favorite", !item?.favorite, item?.id)}>
+                                                                                                <FaStar color={"gold"} size={16} />
+                                                                                            </div> :
+                                                                                            <div onClick={() => handleNoteOperations("favorite", !item?.favorite, item?.id)}>
+                                                                                                <FaRegStar size={16} />
+                                                                                            </div>
+                                                                                    }
+                                                                                </div>
+                                                                                <div style={{ position: "relative" }}>
+                                                                                    <div className={showNotesMenu ? "bg-light rounded w-[35px] h-[35px] d-flex justify-content-center align-items-center" : "w-[35px] h-[35px] d-flex justify-content-center align-items-center"}>
+                                                                                        <MoreHorizontal size={20} onClick={() => handleNotesMenu(item.id)} />
+                                                                                    </div>
+                                                                                    {showNotesMenu && item.id === showNotesMenuId &&
+                                                                                        <Card style={{ position: "absolute", right: "10px", width: "200px" }}>
+                                                                                            <ListGroup>
+                                                                                                <ListGroup.Item className='d-flex gap-[5px] align-items-center' style={{ fontSize: "13px" }} onClick={() => { handleEditNoteForm() }}><Pencil size={16} /> Edit Note</ListGroup.Item>
+                                                                                                <ListGroup.Item className='d-flex gap-[5px] align-items-center text-danger' style={{ fontSize: "13px" }} onClick={() => handleNoteOperations("delete", !item?.favorite, item?.id)}><Trash2 size={16} /> Delete</ListGroup.Item>
+                                                                                            </ListGroup>
+                                                                                        </Card>
 
-                                                        </div>
-                                                    </div>}
-                                                <div className='ml-12'>
-                                                    {
-                                                        appointmentDone ?
-                                                            <div>
-                                                                <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>Completed on Friday (Nov 15, 2024)</p>
-                                                                <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>by Ashrut Dev</p>
-                                                            </div> :
-                                                            <div>
-                                                                <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Due Friday (Nov 15, 2024)</p>
-                                                                <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Assigned to Ashrut Dev</p>
-                                                            </div>
-                                                    }
-                                                    <div>
-                                                        <p className='mb-0' style={{ color: "green", fontSize: "12px" }}>by Ashrut Dev (Nov 15, 2024)</p>
-                                                        <p className='mb-0 text-dark' style={{ lineHeight: "14px" }}>
-                                                            <span style={{ fontSize: "12px" }}>Task for{" "}</span>
-                                                            <span style={{ color: "#22d3ee", fontSize: "12px" }}>Appointment: November 3, 2024 - 11:30am, Neurotoxin treatment (15 minutes)</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className='ml-12'>
+                                                                            {
+                                                                                appointmentDone ?
+                                                                                    <div>
+                                                                                        <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>Completed on {isNaN(new Date(item.due_date)) ? "-" : new Date(item.due_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' })}</p>
+                                                                                        <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>by {appointmentDetailsResponse.employee.name}</p>
+                                                                                    </div> :
+                                                                                    <div>
+                                                                                        <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Due Friday {isNaN(new Date(item.due_date)) ? "-" : new Date(item.due_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' })}</p>
+                                                                                        <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Assigned to {appointmentDetailsResponse.employee.name}</p>
+                                                                                    </div>
+                                                                            }
+                                                                            <div>
+                                                                                <p className='mb-0' style={{ color: "green", fontSize: "12px" }}>by {appointmentDetailsResponse.employee.name} {isNaN(new Date(item.due_date)) ? "-" : new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' })}</p>
+                                                                                <p className='mb-0 text-dark' style={{ lineHeight: "14px" }}>
+                                                                                    <span style={{ fontSize: "12px" }}>Task for{" "}</span>
+                                                                                    <span style={{ color: "#22d3ee", fontSize: "12px" }}>Appointment: {formatDateTime(appointmentDetailsResponse.start_time)} - {formatDateTime(appointmentDetailsResponse.end_time)}, {renderProductNames(appointmentDetailsResponse.products)} {(new Date(appointmentDetailsResponse.start_time) - new Date(appointmentDetailsResponse.end_time)) / (1000 * 60)} minutes</span>
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                }
+                                                            </>
+                                                        })}
+                                                    </>
+                                                }
                                             </div>
                                         </Collapse>
                                     </div>
@@ -717,6 +799,103 @@ const EditAppointment = ({ handleEditAppointment, noteValue, handleNoteChange, a
             </div>
         </div>
     </div>
+};
+
+const EditAppointmentNote = ({ noteDetails, editEmployeeList, handleEditNoteSubmit, handleCloseEditNoteForm }) => {
+    const [editNoteValue, setEditNoteValue] = useState("");
+    const [editNoteValueButtons, setEditNoteValueButtons] = useState(false);
+    const [editDueDate, setEditDueDate] = useState("");
+    const [editNoteSwitch, setEditNoteSwitch] = useState(true);
+    const [editEmployeeName, setEditEmployeeName] = useState("");
+    const [editEmployeeId, setEditEmployeeId] = useState("");
+    const [editFavorite, setEditFavorite] = useState(false);
+    useEffect(() => {
+        setEditNoteValue(noteDetails.content);
+        setEditDueDate(noteDetails.due_date);
+        setEditFavorite(noteDetails.favorite)
+        getEmployee();
+    }, [noteDetails])
+    const getEmployee = () => {
+        let employee = editEmployeeList.find((item) => { return item.id === noteDetails.employee_id })
+        if (employee) {
+            setEditEmployeeName(employee.name)
+            setEditEmployeeId(employee.id);
+        }
+    }
+    const handleNoteChange = (event) => {
+        setEditNoteValue(event.target.value)
+    };
+    const handleDueDate = async (event) => {
+        let date = await moment(event.target.value).format('YYYY/MM/DD')
+        setEditDueDate(date);
+    };
+    const handleEmployeeChange = async (event) => {
+        let employee = await editEmployeeList.find((item) => item.name === event.target.value);
+        if (employee) {
+            setEditEmployeeName(employee.name)
+            setEditEmployeeId(employee.id);
+        }
+    };
+    const handleFavorite = () => {
+        setEditFavorite(!editFavorite)
+    };
+
+    return <>
+        <div>
+            <div className='d-flex justify-content-end align-items-center mb-3 gap-[10px]'>
+                {
+                    editFavorite ? <FaStar onClick={handleFavorite} color='gold' /> :
+                        <FaRegStar onClick={handleFavorite} />
+                }
+                <Form.Check
+                    type="switch"
+                    id="custom-switch"
+                    onChange={(e) => {
+                        setEditNoteSwitch((prev) => !prev)
+                    }}
+                    checked={editNoteSwitch}
+                />
+            </div>
+            {editNoteSwitch ? <div className='mb-3'>
+                <Form>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Control onFocus={() => setEditNoteValueButtons(true)} as="textarea" placeholder='Add Notes' rows={3} onChange={handleNoteChange} value={editNoteValue} />
+                    </Form.Group>
+                </Form>
+                <InputGroup className="mb-3" fullWidth>
+                    <InputGroup.Text>
+                        <CalendarRange style={{ color: '#888' }} />
+                    </InputGroup.Text>
+                    <Form.Control
+                        type="text"
+                        placeholder="Due Date..."
+                        value={editDueDate}
+                        onFocus={(e) => (e.target.type = "date")}
+                        onBlur={(e) => (e.target.type = "text")}
+                        onChange={handleDueDate}
+                    />
+                </InputGroup>
+                <Form.Select aria-label="Default select example" value={editEmployeeName} fullWidth onChange={handleEmployeeChange}>
+                    <option>Select a employee</option>
+                    {
+                        editEmployeeList.map((item) => {
+                            return <option value={item.name}>{item.name}</option>
+                        })
+                    }
+                </Form.Select>
+            </div> :
+                <Form>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Control onFocus={() => setEditNoteValueButtons(true)} as="textarea" placeholder='Add Notes' rows={3} onChange={handleNoteChange} value={editNoteValue} />
+                    </Form.Group>
+                </Form>
+            }
+            <div className='d-flex justify-content-end align-items-center gap-[10px]'>
+                <Button variant='outline-secondary' onClick={handleCloseEditNoteForm}>Cancel</Button>
+                <Button style={{ backgroundColor: "#22d3ee", opacity: !editNoteValue && 0.2 }} disabled={editNoteValue ? false : true} onClick={() => handleEditNoteSubmit(editEmployeeId, editDueDate, editNoteValue, editFavorite, noteDetails.id)}>Save</Button>
+            </div>
+        </div>
+    </>
 };
 
 export default AppointmentDetails;
