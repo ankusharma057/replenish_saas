@@ -8,11 +8,7 @@ import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa6";
 
-<<<<<<< HEAD
 const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar }) => {
-=======
-const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar, selectedEmployeeData }) => {    
->>>>>>> worked on appointment details integration
     const [bookingInfo, setBookingInfo] = useState(true);
     const [notesInfo, setNotesInfo] = useState(false);
     const [appointmentDone, setAppointmentDone] = useState(false);
@@ -33,15 +29,11 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const [employeeId, setEmployeeId] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [enableEdit, setEnableEdit] = useState(false);
-<<<<<<< HEAD
     const [noteList, setNoteList] = useState();
     const [appointmentDetailsResponse, setAppointmentDetailsResponse] = useState();
     const [showEditNoteForm, setShowEditNoteForm] = useState(false);
     const [apiResponseStatus, setApiResponseStatus] = useState(false);
-=======
     const [appointmentResponse, setAppointmentResponse] = useState(false);
-
->>>>>>> worked on appointment details integration
 
     useEffect(() => {
         getEmployeeList();
@@ -136,7 +128,6 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             if ((apiResponse.status === 201 || apiResponse.status === 200) && appointmentDetails?.id) {
                 getAppointmentDetails(appointmentDetails?.id);
             }
-
             toast.success("Note added successfully")
         } else {
             toast.error("Something gone wrong")
@@ -144,7 +135,6 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     };
     const handleUpdateNote = async (newEmployeeId, newDueDate, newNoteValue, newFavorite, newNoteId) => {
         let payload = {
-<<<<<<< HEAD
             "employee_id": newEmployeeId,
             "due_date": newDueDate,
             "content": newNoteValue,
@@ -152,15 +142,6 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
             "favorite": newFavorite,
             "appointmentId": appointmentDetails?.id,
             "note_id": newNoteId
-=======
-            "employee_id": employeeId,
-            "due_date": dueDate,
-            "content": noteValue,
-            "schedule_id": appointmentDetails?.schedule?.id,
-            "favorite": favorite,
-            "appointmentId": appointmentDetails?.id,
-            "note_id": payload.noteId
->>>>>>> worked on appointment details integration
         }
         let apiResponse
         let response = await UpdateAppointmentNote(payload);
@@ -522,50 +503,12 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                         </div>
                                                                     </>
                                                                 }
-<<<<<<< HEAD
+
                                                             </>
                                                         })}
                                                     </>
                                                 }
-=======
-                                                            </div>
-                                                            <div style={{ position: "relative" }}>
-                                                                <div className={showNotesMenu ? "bg-light rounded w-[35px] h-[35px] d-flex justify-content-center align-items-center" : "w-[35px] h-[35px] d-flex justify-content-center align-items-center"}>
-                                                                    <MoreHorizontal size={20} onClick={handleNotesMenu} />
-                                                                </div>
-                                                                {showNotesMenu &&
-                                                                    <Card style={{ position: "absolute", right: "10px", width: "200px" }}>
-                                                                        <ListGroup>
-                                                                            <ListGroup.Item className='d-flex gap-[5px] align-items-center' style={{ fontSize: "13px" }}><Pencil size={16} /> Edit Note</ListGroup.Item>
-                                                                            <ListGroup.Item className='d-flex gap-[5px] align-items-center text-danger' style={{ fontSize: "13px" }}><Trash2 size={16} /> Delete</ListGroup.Item>
-                                                                        </ListGroup>
-                                                                    </Card>
-                                                                }
-                                                            </div>
 
-                                                        </div>
-                                                    </div>}
-                                                <div className='ml-12'>
-                                                    {
-                                                        appointmentDone ?
-                                                            <div>
-                                                                <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>Completed on Friday (Nov 15, 2024)</p>
-                                                                <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>by Ashrut Dev</p>
-                                                            </div> :
-                                                            <div>
-                                                                <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Due Friday (Nov 15, 2024)</p>
-                                                                <p className='m-0' style={{ color: "#696977", fontSize: "14px", fontWeight: 700 }}>Assigned to Ashrut Dev</p>
-                                                            </div>
-                                                    }
-                                                    <div>
-                                                        <p className='mb-0' style={{ color: "green", fontSize: "12px" }}>by Ashrut Dev (Nov 15, 2024)</p>
-                                                        <p className='mb-0 text-dark' style={{ lineHeight: "14px" }}>
-                                                            <span style={{ fontSize: "12px" }}>Task for{" "}</span>
-                                                            <span style={{ color: "#22d3ee", fontSize: "12px" }}>Appointment: November 3, 2024 - 11:30am, Neurotoxin treatment (15 minutes)</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
->>>>>>> worked on appointment details integration
                                             </div>
                                         </Collapse>
                                     </div>
@@ -592,10 +535,6 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             addItem ?
                                                                 <XCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} /> :
                                                                 <PlusCircle size={15} style={{ color: "#22d3ee" }} strokeWidth={3} />
-<<<<<<< HEAD
-
-=======
->>>>>>> worked on appointment details integration
                                                         }
                                                     </div>
 
