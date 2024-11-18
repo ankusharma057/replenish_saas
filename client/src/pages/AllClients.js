@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { momentLocalizer } from "react-big-calendar";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa"; 
 import moment from "moment";
 // import EmployeeInvoiceCard from "../components/Cards/EmployeeInvoiceCard";
 import {
@@ -66,6 +67,15 @@ import {
 } from '@stripe/react-stripe-js';
 import ClientBilling from "./ClientBilling";
 import Image from 'react-bootstrap/Image';
+import Canvas from "../components/ChartItems/Canvas";
+import BodyChart from "../components/ChartItems/BodyChart.jsx";
+import Spine from "../components/ChartItems/Spine";
+import SOAP from "../components/ChartTemplates/SOAP";
+import COVID from "../components/ChartTemplates/COVID";
+import FileImageUpload from "../components/ChartItems/FileImageUpload";
+import SideBySide from "../components/ChartItems/SideBySide";
+import Signature from "../components/ChartItems/Signature";
+import Checkboxes from "../components/ChartItems/Checkboxes.jsx";
 
 
 
@@ -1304,6 +1314,573 @@ useEffect(()=>{
         if(remainingAmount === 0) return 'Paid'
         return 'Partially Paid'
     }
+    
+    const toggleDischargeDropdown = () => {
+        setIsDischargeDropdownOpen(prev => !prev);
+    };
+
+    const handleDischarge = () => {
+        console.log("Discharge option selected");
+        setIsDischargeDropdownOpen(false); 
+    };
+
+
+
+    const templates = [
+        { label: "Chief Complaint", value: "chief_complaint", description: "Record the Chief Complaint or Diagnosis" },
+        { label: "Vitals", value: "vitals", description: "Record Weight, Height, Blood Pressure, Respiratory Rate, And Calculate BMI" },
+        { label: "Note", value: "note", description: "A Plain Text Area To Type Notes" },
+        { label: "Body Chart", value: "body_chart", description: "Draw Or Type Notes on the provided Body Chart or any image of your choosing" },
+        { label: "Side By Side", value: "side_by_side", description: "Upload Two photos and draw or type notes on them" },
+        { label: "Sketch", value: "sketch", description: "A Blank Canvas to draw, sketch or write ideally with a stylus on a touch screen" },
+        { label: "File/Image", value: "file_image", description: "Upload any type of file with a preview of most common file types." },
+        { label: "Signature", value: "signature", description: "Add A Signature By Drawing or Typing" },
+        { label: "Spine", value: "spine", description: "Checkboxes for each Joint, Sketch on a spine diagram, and notes" },
+        { label: "Heading", value: "heading", description: "A Simple Heading" },
+        { label: "Check Boxes", value: "checkboxes", description: "Select one or more checkboxes and optimally add a note to each." },
+        { label: "Drop Down", value: "drop_down", description: "Select one option from a list of options in a drop down menu." },
+        { label: "Smart Options & Narrative", value: "smart_options", description: "Select a choice from a list of subjects and optimally display a sentence." },
+        { label: "Range/Scale", value: "range_scale", description: "A customizable range/scale/slider allows you to choose from a range of values." },
+        { label: "Optical Measurements", value: "optical_measurements", description: "Optical Measurements" },
+        { label: "SOAP", value: "soap", description: "Chart Template ReplenishMD" },
+        { label: "COVID", value: "covid", description: "Single Client Survey ReplenishMD" },
+    ];
+
+  
+    const [expandedSections, setExpandedSections] = useState({});
+    const [elements, setElements] = useState([]);
+    const [vitalsText, setVitalsText] = useState('');
+   
+  
+    console.log("here");
+    const toggleDropdown = (sectionId) => {
+        setIsDropdownOpen((prevState) => ({
+          ...prevState,
+          [sectionId]: !prevState[sectionId],
+        }));
+      };
+      const handleAddItem = (sectionId, itemType) => {
+        setCreatedSections((prevSections) =>
+            prevSections.map((section) =>
+                section.id === sectionId
+                    ? {
+                        ...section,
+                        items: Array.isArray(section.items)
+                            ? [
+                                ...section.items,
+                                { type: itemType, id: Date.now() } 
+                            ]
+                            : [{ type: itemType, id: Date.now() }] 
+                    }
+                    : section
+            )
+        );
+    };
+    
+    
+  const [createdSections, setCreatedSections] = useState([]);
+  const handleOptionClick = (templateValue) => {
+    setCreatedSections((prevSections) => [
+      ...prevSections,
+      { type: templateValue, id: Date.now() }
+    ]);
+    setChartTab(null);
+  };
+
+
+const handleSign = (sectionId) => {
+    console.log(`Signing section with ID: ${sectionId}`);
+  };
+  const ChiefComplaint = ({ item }) => {
+    return (
+        <div>
+            <h3 className="text-base">Chief Complaint</h3>
+            <textarea
+                key={item.id}
+                placeholder="Enter details for Chief Complaint"
+                className="border p-2 w-full rounded-md mt-2 h-24"
+            />
+        </div>
+    );
+};
+
+  const VitalsSection = ({ vitalsText, setVitalsText }) => {
+    return (
+      <div className="p-4 mt-4 bg-gray-50">
+        <h3 className="font-semibold text-lg flex justify-between items-center">
+          Vitals
+        </h3>
+        <textarea
+          value={vitalsText}
+          onChange={(e) => setVitalsText(e.target.value)}
+          placeholder="Enter Vitals information"
+          className="border p-2 w-full rounded-md mt-2 h-24"
+        ></textarea>
+      </div>
+    );
+  };
+ 
+
+const EditableHeading = ({ initialText }) => {
+  const [headingText, setHeadingText] = useState(initialText);
+
+  const handleChange = (event) => {
+    setHeadingText(event.target.innerText); 
+  };
+
+  const headingStyle = {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: '10px',
+    borderBottom: '2px solid #ccc',
+    marginBottom: '20px',
+    cursor: 'text', 
+    direction: 'ltr', 
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word', 
+  };
+
+  return (
+    <div
+      contentEditable
+      style={headingStyle}
+      onInput={handleChange}
+      suppressContentEditableWarning={true}
+    >
+      {headingText} 
+    </div>
+  );
+};
+
+
+const FooterWithDropdown = ({
+    section,
+    isDropdownOpen,
+    toggleDropdown,
+    templates,
+    handleAddItem,
+    handleSign,
+  }) => {
+    return (
+      <div className="flex justify-between items-center mt-4 border-t pt-4">
+        <div className="relative">
+          <button
+            className="flex items-center border rounded-md p-2 bg-white text-gray-500 text-sm"
+            onClick={() => toggleDropdown(section.id)}
+          >
+            <FaCaretDown className="mr-1" />
+            Add
+          </button>
+          {isDropdownOpen[section.id] && (
+            <div className="absolute mt-1 w-48 bg-white border rounded-md shadow-lg">
+              {templates.map((template) => (
+                <div
+                  key={template.value}
+                  onClick={() => handleAddItem(section.id, template.value)}
+                  className="px-4 py-2 hover:bg-gray-100"
+                >
+                  {template.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+  
+        <button
+          onClick={() => handleSign(section.id)} 
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Sign
+        </button>
+      </div>
+    );
+  };
+
+  const toggleExpand = (sectionId) => {
+    setExpandedSections((prevState) => ({
+      ...prevState,
+      [sectionId]: !prevState[sectionId], 
+    }));
+  };
+
+  const togglePin = (sectionId) => {
+    console.log(`Pin clicked for section ${sectionId}`);
+  };
+  
+  
+  const renderSection = (section) => {
+    const clientName = "John Doe";
+    const dateTime = new Date().toLocaleString();
+    const isPinned = false;
+    const renderHeader = () => (
+      <div
+        className="flex justify-between items-center bg-gray-200 p-4 rounded-t-md cursor-pointer"
+        onClick={() => toggleExpand(section.id)}
+      >
+        <div className="flex items-center space-x-4">
+          <button onClick={() => togglePin(section.id)} className="text-yellow-500">
+            <FaStar />
+          </button>
+          <span className="text-sm text-gray-600">{dateTime}</span>
+          <span className="font-semibold text-lg text-gray-800">{section.title}</span>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">{clientName}</span>
+          <button className="text-gray-500">
+            <FaCaretDown />
+          </button>
+        </div>
+      </div>
+    );
+
+    const isExpanded = expandedSections[section.id] || true;
+
+    const items = Array.isArray(section.items) ? section.items : [];
+    switch (section.type) {
+      case "chief_complaint":
+        return (
+            <div key={section.id} className="section-container bg-gray-50 p-4 mt-4">
+              {renderHeader(section)}
+              {isExpanded && (
+                <div>
+  <div className="p-4 mt-4">
+  <h3 className="text-base">Chief Complaint</h3>
+    <textarea
+      placeholder="Enter details for Chief Complaint - inbuilt"
+      className="border p-2 w-full rounded-md mt-2 h-24"
+    />
+  </div>
+
+            <div className="p-4 mt-4">
+                {items.map((item,index) => {
+                    switch (item.type) {
+                        case "chief_complaint":
+                            return <ChiefComplaint item={item} />;
+                        case "vitals":
+                            return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
+                        case "file_image":
+                            return <FileImageUpload sectionId={section.id} />;  
+                        case "note":
+                            return (
+                                <div key={item.id} className="mt-2">
+                                <h3 className="text-base">Note</h3>
+                                    <textarea
+                                        placeholder="Enter details for Note"
+                                        className="border p-2 w-full rounded-md mt-2 h-24"
+                                    />
+                                </div>
+                            );
+                            case "sketch":
+                                return (
+                                  <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                                    <h3 className="font-semibold text-lg flex justify-between items-center">
+                                      Sketch
+                                    </h3>
+                                    <div className="mt-2 border p-4">
+                                      <Canvas />
+                                    </div>
+                                  </div>
+                                );
+                            case "body_chart":
+                                    return (
+                                      <div className="p-4 mt-4 bg-gray-50">
+                                        <h3 className="font-semibold text-lg flex justify-between items-center">
+                                          Body Chart
+                                        </h3>
+                                        <div className="mt-2 border p-4">
+                                          <BodyChart 
+                                        //  key={`bodyChart_${index}`}
+                                        //  imageSrc={'/9298141.jpg'} 
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                            case "side_by_side":
+                                return (
+                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                                      <h3 className="font-semibold text-lg flex justify-between items-center">
+                                        Side by Side
+                                      </h3>
+                                      <div className="mt-2 border p-4">
+                                        <SideBySide />
+                                      </div>
+                                    </div>
+                                  ); 
+                            case "signature":
+                                return (
+                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                                      <h3 className="font-semibold text-lg flex justify-between items-center">
+                                        Signature
+                                      </h3>
+                                      <div className="mt-2 border p-4">
+                                        <Signature />
+                                      </div>
+                                    </div>
+                                  ); 
+                            case "spine":
+                                return (
+                                    <div className="p-4 mt-4 bg-gray-50">
+                                      <h3 className="font-semibold text-lg flex justify-between items-center">
+                                        Spine
+                                      </h3>
+                                      <div className="mt-2 border p-4">
+                                        <Spine 
+                                         key={`spine_${index}`}
+                                         imageSrc={'/shutterstock_442112374_edited.png'} 
+                                        />
+                                      </div>
+                                    </div>
+                                  ); 
+                            case "heading":
+                                return (
+                                    <div>
+      <EditableHeading initialText="Click here to edit this heading" />
+    </div>
+                                );
+                            case "checkboxes":
+                                  return (
+                                    <div>
+                                      <Checkboxes />
+                                    </div>
+                                  )
+                            case "dropdown":
+                            case "smartOptions":
+                            case "rangeScale":
+                            case "optical":
+                        default:
+                            return null;
+                    }
+                })}
+            </div>
+                </div>
+              )}
+              {isExpanded &&(
+            <FooterWithDropdown
+        section={section}
+        isDropdownOpen={isDropdownOpen}
+        toggleDropdown={toggleDropdown}
+        templates={templates}
+        handleAddItem={handleAddItem}
+        handleSign={handleSign}
+      />
+              )}
+        </div>
+        );
+
+        case "vitals":
+            return (
+              <>
+                <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />
+                
+                {/* Footer with Dropdown */}
+                <FooterWithDropdown
+                  section={section}
+                  isDropdownOpen={isDropdownOpen}
+                  toggleDropdown={toggleDropdown}
+                  templates={templates}
+                  handleAddItem={handleAddItem}
+                  handleSign={handleSign}
+                />
+              </>
+            );
+          
+     
+    case "sketch":
+        return (
+          <div key={section.id} className="p-4 mt-4 bg-gray-50">
+            <h3 className="font-semibold text-lg flex justify-between items-center">
+              Sketch
+            </h3>
+            <div className="mt-2 border p-4">
+              <Canvas />
+            </div>
+          </div>
+        );
+      
+        case "file_image":
+            return <FileImageUpload sectionId={section.id} />;
+
+        case "body_chart":
+            return (
+              <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                <h3 className="font-semibold text-lg flex justify-between items-center">
+                  Body Chart
+                </h3>
+                <div className="mt-2 border p-4">
+                  {/* Use the Canvas component here */}
+                  <BodyChart />
+                </div>
+              </div>
+            );
+
+            case "spine":
+                return (
+                  <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                    <h3 className="font-semibold text-lg flex justify-between items-center">
+                      Spine
+                    </h3>
+                    <div className="mt-2 border p-4">
+                      {/* Use the Canvas component here */}
+                      <Spine />
+                    </div>
+                  </div>
+                );
+
+            case "soap":
+                return (
+                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                      {/* Header */}
+                      <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-md cursor-pointer" onClick={toggleExpand}>
+                        <div className="flex items-center space-x-4">
+                          {/* Pin Icon */}
+                          <button onClick={togglePin} className="text-yellow-500">
+                            <FaStar />
+                          </button>
+                          
+                          {/* Creation Date and Title */}
+                          <span className="text-sm text-gray-600">{dateTime}</span>
+                          <span className="font-semibold text-lg text-gray-800">SOAP</span>
+                        </div>
+                
+                        {/* Right side - Client Name and Dropdown */}
+                        <div className="flex items-center space-x-4">
+                          <span className="text-sm text-gray-600">{clientName}</span>
+                
+                          {/* Dropdown for header */}
+                          <button className="text-gray-500">
+                            <FaCaretDown />
+                          </button>
+                        </div>
+                      </div>
+                
+                      {/* Collapsible Content */}
+                      {isExpanded && (
+                        <div className="mt-2 border p-4">
+                          <SOAP />
+                        </div>
+                      )}
+                
+                      {/* Footer */}
+                      {isExpanded && (
+                      <div className="flex justify-between items-center bg-gray-200 p-4 rounded-b-md mt-4">
+                        <div className="flex items-center space-x-4">
+                          {/* Settings Dropdown */}
+                          <div className="relative">
+                            <button className="text-gray-500">
+                              <FaCog />
+                            </button>
+                            {/* Dropdown Content */}
+                            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md">
+                              {/* <div className="p-2 text-sm">Settings Option 1</div>
+                              <div className="p-2 text-sm">Settings Option 2</div> */}
+                            </div>
+                          </div>
+                
+                          {/* Viewable by Everyone Dropdown */}
+                          <div className="relative">
+                            <button className="text-gray-500">
+                              <FaEye />
+                            </button>
+                            {/* Dropdown Content */}
+                            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md">
+                              {/* <div className="p-2 text-sm">Viewable Option 1</div>
+                              <div className="p-2 text-sm">Viewable Option 2</div> */}
+                            </div>
+                          </div>
+                        </div>
+                
+                        {/* Buttons */}
+                        <div className="flex space-x-4">
+                          <button className="px-4 py-2 bg-red-500 text-white rounded-md">Not Visible to Client</button>
+                          <button className="px-4 py-2 bg-gray-500 text-white rounded-md">Close</button>
+                          <button className="px-4 py-2 bg-blue-500 text-white rounded-md">Sign</button>
+                        </div>
+                      </div>
+                      )}
+                    </div>
+                  );
+            case "covid":
+                return (
+                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
+                      {/* Header */}
+                      <div className="flex justify-between items-center bg-gray-200 p-4 rounded-t-md cursor-pointer" onClick={toggleExpand}>
+                        <div className="flex items-center space-x-4">
+                          {/* Pin Icon */}
+                          <button onClick={togglePin} className="text-yellow-500">
+                            <FaStar />
+                          </button>
+                          
+                          {/* Creation Date and Title */}
+                          <span className="text-sm text-gray-600">{dateTime}</span>
+                          <span className="font-semibold text-lg text-gray-800">Covid-19 Screening Survey</span>
+                        </div>
+                
+                        {/* Right side - Client Name and Dropdown */}
+                        <div className="flex items-center space-x-4">
+                          <span className="text-sm text-gray-600">{clientName}</span>
+                
+                          {/* Dropdown for header */}
+                          <button className="text-gray-500">
+                            <FaCaretDown />
+                          </button>
+                        </div>
+                      </div>
+                
+                      {/* Collapsible Content */}
+                      {isExpanded && (
+                        <div className="mt-2 border p-4">
+                          <COVID />
+                        </div>
+                      )}
+                
+                      {/* Footer */}
+                      {isExpanded && (
+                      <div className="flex justify-between items-center bg-gray-200 p-4 rounded-b-md mt-4">
+                        <div className="flex items-center space-x-4">
+                          {/* Settings Dropdown */}
+                          <div className="relative">
+                            <button className="text-gray-500">
+                              <FaCog />
+                            </button>
+                            {/* Dropdown Content */}
+                            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md">
+                              {/* <div className="p-2 text-sm">Settings Option 1</div>
+                              <div className="p-2 text-sm">Settings Option 2</div> */}
+                            </div>
+                          </div>
+                
+                          {/* Viewable by Everyone Dropdown */}
+                          <div className="relative">
+                            <button className="text-gray-500">
+                              <FaEye />
+                            </button>
+                            {/* Dropdown Content */}
+                            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md">
+                              {/* <div className="p-2 text-sm">Viewable Option 1</div>
+                              <div className="p-2 text-sm">Viewable Option 2</div> */}
+                            </div>
+                          </div>
+                        </div>
+                
+                        {/* Buttons */}
+                        <div className="flex space-x-4">
+                          <button className="px-4 py-2 bg-red-500 text-white rounded-md">Not Visible to Client</button>
+                          <button className="px-4 py-2 bg-gray-500 text-white rounded-md">Close</button>
+                          <button className="px-4 py-2 bg-blue-500 text-white rounded-md">Sign</button>
+                        </div>
+                      </div>
+                      )}
+                    </div>
+                  );
+          
+        
+
+      default:
+        return null;
+    }
+  };
 
     return (
         <>
@@ -1671,1580 +2248,145 @@ useEffect(()=>{
                                     // navigate("/submited-intake-forms-preview")
                                     <SubmitedClientIntakeForm clientId={selectedEmployeeData?.id}/>
                                 )}
-                                {currentTab === "chart_entries" && (
-                            <div className="">
-                                {/* ---------- */}
-                                <div className=" rounded-md  flex justify-center">
-                                <div className="w-100 bg-white">
-                                {chartTab === "chart_entries_list" && 
-                                <div className=" p-4 pt-2">
-                                    <div className="bg-white rounded-lg">
-                                    <div className="flex justify-between items-center py-3">
-                                        <h2 className="text-gray-500">Chart Entries List</h2>
-                                        <div><div onClick={() => {setChartTab("create_new_chart_entries");}} className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md">Create New Chart Entry</div></div>
-                                    </div>
-                                    <div className=" flex flex-col gap-1 border p-3 rounded-lg ">
-                                        <div className={`flex justify-between p-3 border-b `}>
-                                            <div>Name</div>
-                                            <div className="text-right">Client Name</div>
-                                        </div>
-                                        {Array.isArray(chartEntriesData) && chartEntriesData.map((template, i) => (
-                                        <div onClick={()=>{setChartTab("create_new_chart_entries"); setEditId(template?.id); setChanges(false)}}  key={i} className={`grid grid-cols-[1fr] gap-4 border rounded-md`}>
-                                            <div className="flex flex-col w-full">
-                                                <div className="flex justify-between p-3 border-b bg-[#f3f4f6]">
-                                                    <div className="flex items-center">
-                                                    <div>
-                                                        <div className="text-[20px]">{template?.name}</div>
-                                                    </div>
-                                                    </div>
-                                                    <div className="self-center grid grid-cols-[1fr] gap-1 pt-1 text-[15px] text-right">
-                                                        {template?.client?.name}
-                                                    {/* <Link className="text-black" to="#"><button className="bg-white border border-gray-900 px-2 py-1  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Duplicate</button></Link>
-                                                    {((authUserState?.user?.is_admin) === true || (authUserState?.user?.id === template?.employee?.id)) && (
-                                                    <button className="bg-[#22d3ee] px-2 py-1 text-white  rounded-md" onClick={() => {setChartTab("create_new_chart_entries");}}>Edit</button>
-                                                    )} */}
-                                                    </div>
-                                                </div>
-                                                <div className="p-3 line-clamp-3 max-h-[90px]">
-                                                    {template?.chart_histroy?.formData.find(field => field.type === "textarea")?.value}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        ))}
-                                    </div>
-                                    </div>
-                                </div>}
-                                {chartTab === "create_new_chart_entries" &&
-                                    <div className="p-3 flex flex-col gap-2">
-                                    <div className="text-gray-500 flex justify-between">
-                                    <div>
-                                        <div className={`flex gap-3 items-center ${edittitle ? "hidden": "block"}`}>
-                                        <h2>{title}</h2>
-                                        {!editId && <div onClick={()=>{setEditTitle(true)}}><FaRegEdit /></div>}
-                                        </div>
-                                        {!editId && <div  className={`flex gap-3 items-center ${!edittitle ? "hidden": "block"}`}>
-                                        <input type="text" value={title} onBlur={()=>{setEditTitle(false)}} onChange={(e)=>{setTitle(e?.target?.value); setChanges(true)} } placeholder="Title " className="text-[30px] focus:outline-none border-b" />
-                                        </div>}
-                                    </div>
-                                        <div className="flex items-center">
-                                        <div className="flex gap-2">
-                                        <div className="relative">
-                                            {optionModel && (
-                                            <div className="bg-gray-100 duration-200 rounded-md absolute z-10 top-[42px] right-[0px] w-[200px] h-[200px] overflow-y-auto">
-                                                <div className="py-1">
-                                                {Array.isArray(qutionaryInputOption) &&
-                                                    qutionaryInputOption.map((option, index) => (
-                                                    <div
-                                                        key={index}
-                                                        onClick={() => {
-                                                        createQutionaryFields(option?.field);
-                                                        setChanges(true)
-                                                        setOptionModel(false);
-                                                        }}
-                                                        className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]"
-                                                    >
-                                                        <div className="text-[15px]">{option?.label}</div>
-                                                        <div className="text-[18px]">{option?.icon}</div>
-                                                    </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            )}
-                                            {!editId &&<div className="flex justify-between items-center w-full">
-                                            <div className="flex bg-[#0dcaf0] text-white rounded-md">                    
-                                            <button
-                                                type="button"
-                                                className="whitespace-nowrap flex gap-2 justify-center items-center  px-4 py-[8px] rounded-md"
-                                                onClick={() => {
-                                                    setOptionModel(!optionModel);
-                                                }}
-                                                >
-                                                Add Item
-                                                </button>
-                                            </div>
-                                            </div>}
-                                        </div>
-                                        <div
-                                            onClick={() => {
-                                                if (editId) {
-                                                setChartTab("chart_entries_list");
-                                                setQutionaryFields([]);
-                                                setEditId(null);
-                                                } else {
-                                                handleUndoField();
-                                                }
-                                            }}
-                                            className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 flex items-center bg-white rounded-md"
-                                            >
-                                            Return to Chart Entries List
-                                            </div>
+                               {currentTab === "chart_entries" && (
+  <div>
+    {/* Navbar Section */}
+    <div className="bg-white shadow">
+      <div className="rounded-md flex justify-between items-center p-3">
+        <h2 className="text-gray-500">Chart Entries List</h2>
+        <div>
+          <div
+            onClick={() => setChartTab("create_new_chart_entries")}
+            className="border-[2px] cursor-pointer text-gray-500 border-gray-300 px-2 py-1 bg-white rounded-md"
+          >
+            Create New Chart Entry
+          </div>
+        </div>
+      </div>
+      {/* Navbar Items */}
+      <div className="flex items-center justify-between p-3 border-t">
+        <div className="flex flex-grow">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border rounded-md p-2 w-3/4"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          {/* Dropdown for Discharge */}
+          <div className="relative">
+            <button
+              className="flex items-center border rounded-md p-1 bg-white text-gray-500 text-sm"
+              onClick={toggleDischargeDropdown}
+            >
+              <FaCaretDown className="mr-1" /> {/* Down arrow icon */}
+            </button>
+            {isDischargeDropdownOpen && (
+              <div className="absolute right-0 mt-1 w-48 bg-white border rounded-md shadow-lg">
+                <div className="px-4 py-2 hover:bg-gray-100" onClick={handleDischarge}>
+                  Discharge
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Additional Navbar Items */}
+          <button
+            className="border rounded-md p-1 bg-white text-gray-500 text-sm"
+            onClick={() => console.log("Pinned Entries")}
+          >
+            Pinned Entries
+          </button>
+          <button
+            className="border rounded-md p-1 bg-white text-gray-500 text-sm"
+            onClick={() => console.log("Medical Alert")}
+          >
+            Medical Alert
+          </button>
+          <button
+            className="border rounded-md p-1 bg-white text-gray-500 text-sm"
+            onClick={() => console.log("Filter/Export")}
+          >
+            Filter/Export
+          </button>
+          {/* Expand/Collapse All Button */}
+          <button
+            className="border rounded-md p-1 bg-white text-gray-500 text-sm"
+            onClick={() => console.log("Toggle Expand/Collapse")}
+          >
+            Expand/Collapse All
+          </button>
+        </div>
+      </div>
+    </div>
 
-                                        </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        {/* ------------------------------------------- */}
-                                        <div className=" ">
-                                    <div className="bg-white  px-3 py-2">
-                                    <div className=" py-3 flex flex-col gap-4">
-                                        {Array.isArray(qutionaryFields) &&
-                                        qutionaryFields.map((field, index) =>
-                                            field?.type === "textarea" ? (
-                                            <span key={index}>
-                                                {/* Note */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]"onClick={() => {
-                                                    // setEditModel({ name: "initialNote", index: index });
-                                                    // openModalFromParent();
-                                                    handleItemClick('initialNote', index)
-                                                }}>
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&  <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialNote',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div className="border rounded-md overflow-hidden border-black p-1 bg-white ">
-                                                    <textarea
-                                                    className="w-full focus:outline-none"
-                                                    required={field?.required}
-                                                    value={qutionaryFields[index]?.value}
-                                                    onChange={(e) => {
-                                                        handleChange("value", e?.target?.value, index);
-                                                    }}
-                                                    style={{resize:"none"}}
-                                                    rows="3"
-                                                    onSelect={(event) => {
-                                                        const { selectionStart } = event.target;
-                                                        setCursorPosition(selectionStart);
-                                                      }}
-                                                            ></textarea>
-                                                            <div className="d-flex justify-content-end align-items-center cursor-pointer pr-3" >
-                                                                {
-                                                                     showSymbol === index ?
-                                                                     <h6 style={{gap:"10px",color:"rgb(13 202 240)"}} className="d-flex justify-content-center align-items-center " onClick={()=>{setShowSymbol(null)}}><IoIosArrowUp />Hide Symbol</h6>:
-                                                                     <h6 style={{gap:"10px",color:"rgb(13 202 240)"}} className="d-flex justify-content-center align-items-center" onClick={()=>{setShowSymbol(index)}}><IoIosArrowDown />Show Symbol</h6>
-                                                                }
-                                                            </div>
-                                                            {
-                                                                showSymbol === index &&
-                                                                <div className="bg-light">
-                                                                    <div className="mt-2 d-flex gap-[25px] px-4">
-                                                                            {symbols.map((symbol, i) => (
-                                                                                <div xs="auto" key={i} className="mb-2 cursor-pointer">
-                                                                                    <div style={{ fontSize: "22px" }} onClick={() => {
+    {/* Create New Chart Entry Popup */}
+    {/* {chartTab === "create_new_chart_entries" && (
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white border border-gray-300 rounded-md shadow-lg p-6 max-w-lg w-full">
+            <h2 className="text-lg font-semibold mb-4">Select a Template</h2>
+            {templates.map((template) => (
+              <div
+                key={template.value}
+                onClick={() => handleOptionClick(template.value)} // Add template to created sections
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              >
+                {template.label}
+              </div>
+            ))}
+            <button
+              onClick={() => setChartTab(null)} // Close the popup
+              className="mt-4 w-full bg-gray-300 text-white p-2 rounded-md hover:bg-gray-400"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )} */}
+    {chartTab === "create_new_chart_entries" && (
+  <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white border border-gray-300 rounded-md shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <h2 className="text-lg font-semibold mb-4">Select a Template</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {templates.map((template) => (
+          <div
+            key={template.value}
+            onClick={() => handleOptionClick(template.value)} // Add template to created sections
+            className="cursor-pointer flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg shadow-sm transition duration-300"
+          >
+            {/* Template image or icon (if applicable, can be replaced with an actual image) */}
+            <div className="w-16 h-16 bg-gray-200 rounded-md mr-4 flex items-center justify-center">
+              {/* Placeholder for icon */}
+              <span className="text-lg text-gray-600">{template.icon}</span>
+            </div>
 
-                                                                                        const newText =
-                                                                                            qutionaryFields[index]?.value.substring(0, cursorPosition) +
-                                                                                            symbol +
-                                                                                            qutionaryFields[index]?.value.substring(cursorPosition);
-                                                                                    handleChange("value", newText, index);
-                                                                                    
-                                                                                    }}>
-                                                                                    {symbol}
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                </div>
-                                                </div>
-                                            </span>
-                                            ) : field?.type === "signature" ? (
-                                            <>
-                                                {/* Signature */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md  p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex justify-between items-center">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        // setEditModel({ name: "initialSignature", index: index });
-                                                        // openModalFromParent();
-                                                        handleItemClick('initialSignature', index)
-                                                    }}
-                                                    >
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialSignature',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div>
-                                                    <div className="flex justify-between py-1">
-                                                    <div className="flex gap-3">
-                                                        <div className="flex gap-2">
-                                                        <input
-                                                            type="radio"
-                                                            name={`sign${index}`}
-                                                            readOnly={editId ? true : false}
-                                                            checked={field?.sign_type === "draw"}
-                                                            id="draw"
-                                                            onChange={(e) => {handleChange("sign_type","draw",index)}}
-                                                        />
-                                                        <label htmlFor="draw" className="flex items-center">
-                                                            Draw
-                                                        </label>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                        <input
-                                                            type="radio"
-                                                            name={`sign${index}`}
-                                                            readOnly={editId ? true : false}
-                                                            checked={field?.sign_type === "type"}
-                                                            id="type"
-                                                            onChange={(e) => {handleChange("sign_type","type",index)}}
-                                                        />
-                                                        <label htmlFor="type" className="flex items-center">
-                                                            Type
-                                                        </label>
-                                                        </div>
-                                                    </div>
-                                                    {field?.sign_type === "type" && (
-                                                        <div className="w-[300px]">
-                                                        <DropDown
-                                                            placeholder={"Select Font Style"}
-                                                            options={fonts}
-                                                            readonly={editId ? true : false}
-                                                            onChange={(value) => {}}
-                                                        />
-                                                        </div>
-                                                    )}
-                                                    </div>
-                                                    <div className="">
-                                                    {field?.sign_type === "draw" ? (
-                                                        <div className="flex gap-3 ">
-                                                        <div className="border-b-[2px]">
-                                                            <SignatureCanvas
-                                                            penColor="black"
-                                                            readOnly={editId ? true : false}
-                                                            throttle={10}
-                                                            maxWidth={2.2}
-                                                            onEnd={() => {
-                                                                saveSignature();
-                                                                handleChange("sign", drawSignarure, index);
-                                                            }}
-                                                            ref={sigCanvasRef}
-                                                            canvasProps={{
-                                                                width: 400,
-                                                                height: 70,
-                                                                className: "sigCanvas",
-                                                            }}
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-end">
-                                                            <div className="flex gap-2 items-center text-[14px] text-[#0dcaf0]">
-                                                            <div
-                                                                className="cursor-pointer"
-                                                                onClick={() => {}}
-                                                                disabled={false}
-                                                            >
-                                                                <FaUndo />
-                                                            </div>
-                                                            <div className="text-gray-400">|</div>
-                                                            <div
-                                                                className="cursor-pointer"
-                                                                onClick={() => {
-                                                                sigCanvasRef.current.clear();
-                                                                }}
-                                                            >
-                                                                Clear
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                        <div className="flex h-[70px]  gap-4">
-                                                            <div className="flex items-end ">
-                                                            <div className="border-b-[2px] w-[300px]">
-                                                                <input
-                                                                type="text"
-                                                                placeholder="Enter your Signature"
-                                                                className={` p-2 focus:outline-none w-full  px-2 h-[50px]`}
-                                                                onChange={(e) => {}}
-                                                                />
-                                                            </div>
-                                                            </div>
-                                                            <canvas
-                                                            ref={canvasRef}
-                                                            width="500"
-                                                            height="100"
-                                                            style={{ display: "none" }}
-                                                            ></canvas>
-                                                        </div>
-                                                        </>
-                                                    )}
-                                                    </div>
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : field?.type === "heading" ? (
-                                            <>
-                                                {/* Heading */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        handleItemClick('initialHeading', index)
-                                                    }}
-                                                    >
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialHeading',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div className="text-[22px] py-2 font-medium">
-                                                    {field?.value}
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : field?.type === "checkbox" ? (
-                                            <>
-                                                {/* Check Boxes */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex flex-col ">
-                                                    <div className="flex justify-between items-center py-1">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        handleItemClick('initialCheckBox', index)
-                                                    }}
-                                                    >
-                                                        {field?.label}
-                                                    </div>
-                                                    {!editId && <div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialCheckBox',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                    </div>
+            {/* Text content */}
+            <div className="flex flex-col">
+              <h3 className="font-medium text-sm text-gray-700">{template.label}</h3>
+              <p className="text-xs text-gray-500 mt-1">{template.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => setChartTab(null)} // Close the popup
+        className="mt-4 w-full bg-gray-300 text-white p-2 rounded-md hover:bg-gray-400"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
 
-                                                    <div
-                                                    className={`${
-                                                        field?.layout === "horizontal"
-                                                        ? "grid grid-cols-5"
-                                                        : field?.layout === "vertical"
-                                                        ? "grid grid-cols-1"
-                                                        : "grid grid-cols-3"
-                                                    }`}
-                                                    >
-                                                    {Array.isArray(field.value) &&
-                                                        field.value.map((checkbox, i) => (
-                                                        <div key={i} className="flex gap-2  items-center">
-                                                            <input
-                                                            readOnly={true}
-                                                            disabled={editId ? true : false}
-                                                            id={checkbox?.label}
-                                                            required={field?.required}
-                                                            checked={checkbox?.value}
-                                                            onChange={(e) => {
-                                                                handleOptionsChange(
-                                                                index,
-                                                                i,
-                                                                "value",
-                                                                e.target.checked
-                                                                );
-                                                            }}
-                                                            type="checkbox"
-                                                            />
-                                                            <label htmlFor={checkbox?.label}>
-                                                            {checkbox?.label}
-                                                            </label>
-                                                        </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : field?.type === "dropdown" ? (
-                                            <>
-                                                {/* Drop down */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        handleItemClick('initialDropdown', index)
-                                                    }}
-                                                    >
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialDropdown',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div className="py-3">
-                                                    <div className="w-[300px]">
-                                                    <Select
-                                                        inputId="availableEmployee"
-                                                        isClearable
-                                                        readOnly={editId ? true : false}
-                                                        options={field?.value}
-                                                        value={field?.value.find((option)=>option?.label === field?.values?.value )}
-                                                        // onChange={(e) => {
-                                                        //   handleChange("values",{value: e?.label}, index);
-                                                        // }}
-                                                        // readOnly={field?.read_only}
-                                                        required={field?.required}
-                                                    />
-                                                    </div>
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : field?.type === "range" ? (
-                                            <>
-                                                {/* Range */}
-                                                <div
-                                                className="hover:bg-gray-100 rounded-md p-[6px] pb-6 flex flex-col gap-1 "
-                                                >
-                                                <div className="flex justify-between items-center ">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        handleItemClick('initialRange', index)
-                                                    }}
-                                                    >
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField('initialRange',index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div className="relative">
-                                                    <input
-                                                    type="range"
-                                                    readOnly={editId ? true : false}
-                                                    min={0}
-                                                    max={field.value.length}
-                                                    className="w-full"
-                                                    value={field?.values?.value }
-                                                    // onChange={(e) => {
-                                                    //   handleChange("values", {value: field?.value[e.target.value]}, index
-                                                    //   );
-                                                    // }}
-                                                    />
-                                                    <div className=" grid grid-flow-col ">
-                                                    {Array.isArray(field.value) &&
-                                                        field?.value.map((option, i) => (
-                                                        <div className="justify-self-end " key={i}>
-                                                            <div className="flex justify-end">|</div>
-                                                            <div className="relative">
-                                                            <div className="absolute -top-[3px] -right-[2px]">
-                                                                {" "}
-                                                                {option?.label}
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : field?.type === "instruction" ? (
-                                            <>
-                                                {/* Instructions */}
-                                                <div
-                                                className=" hover:bg-gray-100  rounded-md p-[6px] flex flex-col gap-1"
-                                                >
-                                                <div className="flex justify-between items-center  py-1">
-                                                    <div className="font-semibold text-[17px]"
-                                                    onClick={() => {
-                                                        setEditModel({
-                                                        name: "initialInstruction",
-                                                        index: index,
-                                                        });
-                                                        openModalFromParent();
-                                                    }}
-                                                    >
-                                                    {field?.label}
-                                                    </div>
-                                                    {!editId &&<div className="text-[20px] cursor-pointer flex gap-2 items-center group relative group">
-                                                    <div className="bg-white flex gap-[25px] text-[16px] py-[4px] hidden px-[14px] rounded-[14px] group-hover:inline-flex ">
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleEditField(index)}}><FaRegEdit /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleRemoveField(index);}}><MdDelete /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e) => {e.stopPropagation();handleUpField(index,qutionaryFields.length);}}><FaLongArrowAltUp /></div>
-                                                        <div className="hover:bg-slate-300 hover:text-white p-1 rounded-[50%]" onClick={(e)=>{e.stopPropagation();handleDownField(index,qutionaryFields.length)}}><FaLongArrowAltDown /></div>
-                                                    </div>
-                                                    <BsThreeDotsVertical />
-                                                    </div>}
-                                                </div>
-                                                <div className="text-[18px] bg-white  rounded-lg pl-3 font-medium py-3">
-                                                    <em>{field?.value}</em>
-                                                </div>
-                                                </div>
-                                            </>
-                                            ) : null
-                                        )}
-                                    </div>
-                                        <div className="h-[calc(100%-50px)] overflow-y-auto">
-                                        <div className="flex flex-col justify-between items-center h-[40vh]">
-                                            <div className="flex justify-between gap-4">
 
-                                            {!editId && <div className="flex bg-[#0dcaf0] text-white rounded-md">
-                                                
-                                                <button
-                                                type="button"
-                                                className="whitespace-nowrap flex gap-2 justify-center items-center  px-3 py-[8.5px] rounded-md"
-                                                onClick={() => {
-                                                    handleCreateChartEntries()
-                                                }}
-                                                >
-                                                Save
-                                                </button>
-                                            </div>}
-                                            {/* <div className="relative">
-                                            {optionModel && (
-                                            <div className="bg-gray-100 duration-200 rounded-md absolute z-10 -top-[200px] left-[30px] w-[200px] h-[200px] overflow-y-auto">
-                                                <div className="py-1">
-                                                {Array.isArray(qutionaryInputOption) &&
-                                                    qutionaryInputOption.map((option, index) => (
-                                                    <div
-                                                        key={index}
-                                                        onClick={() => {
-                                                        createQutionaryFields(option?.field);
-                                                        setOptionModel(false);
-                                                        }}
-                                                        className="grid grid-cols-[1fr,auto] px-2 hover:bg-white duration-300 py-[5px]"
-                                                    >
-                                                        <div className="text-[15px]">{option?.label}</div>
-                                                        <div className="text-[18px]">{option?.icon}</div>
-                                                    </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            )}
-                                            <div className="flex justify-between items-center w-full">
-                                            <div className="flex bg-[#0dcaf0] text-white rounded-md">
-                                                
-                                                <button
-                                                type="button"
-                                                className="whitespace-nowrap flex gap-2 justify-center items-center  px-3 py-[8.5px] rounded-md"
-                                                onClick={() => {
-                                                    setOptionModel(!optionModel);
-                                                }}
-                                                >
-                                                Add Item
-                                                </button>
-                                            </div>
-                                            </div>
-                                        </div> */}
-                                            </div>
-                                        </div>
-                                        </div> 
-                                    </div>
-                                    {editModel?.name === "initialNote" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialNote");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div className="w-[400px] flex flex-col gap-3">
-                                        <h3>Edit Note</h3>
-                                        <div className="flex flex-col gap-2">
-                                            <div>
-                                            <label>Label</label>
-                                            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                type="text"
-                                                className="w-full focus:outline-none"
-                                                value={qutionaryFields[editModel?.index]?.label}
-                                                onChange={(e) => {
-                                                    handleChange("label", e?.target?.value, editModel?.index);
-                                                }}
-                                                />
-                                            </div>
-                                            </div>
-                                            <div className="border-[2px] overflow-hidden  rounded-md px-2">
-                                            <textarea
-                                                className="w-full focus:outline-none resize-y"
-                                                value={qutionaryFields[editModel?.index]?.value}
-                                                onChange={(e) => {
-                                                    handleChange("value", e.target.value, editModel?.index);
-                                                }}
-                                                rows="3"
-                                            ></textarea>
 
-                                            </div>
-                                            <div className="flex justify-between py-1">
-                                            <div>Required</div>
-                                            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                            <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                );
-                                                }}
-                                                defaultChecked
-                                            />
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
+      {/* Render Created Sections */}
+      {createdSections.map((section) => renderSection(section))}
+    
 
-                                    {editModel?.name === "initialSignature" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialSignature");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div>
-                                        <div className="w-[400px]">
-                                            <h3>Edit Signature</h3>
-                                            <div className="flex flex-col gap-2">
-                                            <div>
-                                                <label>Label</label>
-                                                <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                    type="text"
-                                                    className="w-full focus:outline-none"
-                                                    value={qutionaryFields[editModel?.index]?.label}
-                                                    onChange={(e) => {
-                                                    handleChange(
-                                                        "label",
-                                                        e?.target?.value,
-                                                        editModel?.index
-                                                    );
-                                                    }}
-                                                />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between py-1">
-                                                <div>Required</div>
-                                                {/* <div><input type="radio" onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                                <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                    handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                    );
-                                                }}
-                                                defaultChecked
-                                                />
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
+{/* Handle other template sections as needed... */}
 
-                                    {editModel?.name === "initialHeading" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialHeading");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div>
-                                        <div className="w-[400px]">
-                                            <h3>Edit Heading</h3>
-                                            <div className="flex flex-col gap-2">
-                                            <div>
-                                                <label>Label</label>
-                                                <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                    type="text"
-                                                    className="w-full focus:outline-none"
-                                                    value={qutionaryFields[editModel?.index]?.label}
-                                                    onChange={(e) => {
-                                                    handleChange(
-                                                        "label",
-                                                        e?.target?.value,
-                                                        editModel?.index
-                                                    );
-                                                    }}
-                                                />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between py-1">
-                                                <div>Required</div>
-                                                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}} /></div> */}
-                                                <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                    handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                    );
-                                                }}
-                                                defaultChecked
-                                                />
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-
-                                    {editModel?.name === "initialCheckBox" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialCheckBox");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div className="w-[400px]">
-                                        <h3>Edit Check Boxes</h3>
-                                        <div className="flex flex-col gap-2">
-                                            <div>
-                                            <label>Label</label>
-                                            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                type="text"
-                                                className="w-full focus:outline-none"
-                                                value={qutionaryFields[editModel?.index]?.label}
-                                                onChange={(e) => {
-                                                    handleChange("label", e?.target?.value, editModel?.index);
-                                                }}
-                                                />
-                                            </div>
-                                            </div>
-                                            <div>
-                                            <label>Checkbox Layout</label>
-                                            <div className="flex gap-4">
-                                                <div className="flex gap-1">
-                                                <input
-                                                    type="radio"
-                                                    id="horizontal"
-                                                    name="Layout"
-                                                    checked={
-                                                    qutionaryFields[editModel?.index]?.layout ===
-                                                    "horizontal"
-                                                    }
-                                                    onChange={(e) => {
-                                                    handleChange("layout", "horizontal", editModel?.index);
-                                                    }}
-                                                />
-                                                <label htmlFor="horizontal">Horizontal</label>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                <input
-                                                    type="radio"
-                                                    id="vertical"
-                                                    name="Layout"
-                                                    checked={
-                                                    qutionaryFields[editModel?.index]?.layout === "vertical"
-                                                    }
-                                                    onChange={(e) => {
-                                                    handleChange("layout", "vertical", editModel?.index);
-                                                    }}
-                                                />
-                                                <label htmlFor="vertical">Vertical</label>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                <input
-                                                    type="radio"
-                                                    id="column"
-                                                    name="Layout"
-                                                    checked={
-                                                    qutionaryFields[editModel?.index]?.layout === "column"
-                                                    }
-                                                    onChange={(e) => {
-                                                    handleChange("layout", "column", editModel?.index);
-                                                    }}
-                                                />
-                                                <label htmlFor="column">Column</label>
-                                                </div>
-                                            </div>
-                                            </div>
-                                            <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-                                            <div className="grid grid-cols-[15%,1fr,20%] items-center py-1 bg-gray-200">
-                                                <div>Input</div>
-                                                <div className="pl-4">Value</div>
-                                                <div className="flex justify-center">Action</div>
-                                            </div>
-                                            <div className="top-model-table">
-                                                {Array.isArray(qutionaryFields[editModel?.index]?.value) &&
-                                                qutionaryFields[editModel?.index]?.value.map(
-                                                    (option, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="grid grid-cols-[15%,1fr,20%] items-center hover:bg-gray-100 py-[2px] group"
-                                                    >
-                                                        <div className="">
-                                                        <input
-                                                            type="checkbox"
-                                                            id={option?.label}
-                                                            checked={option?.value}
-                                                            onChange={(e) => {
-                                                            handleOptionsChange(
-                                                                editModel?.index,
-                                                                i,
-                                                                "value",
-                                                                e.target.checked
-                                                            );
-                                                            }}
-                                                            className="w-[20%]"
-                                                        />
-                                                        </div>
-
-                                                        <div
-                                                        onMouseEnter={() => {
-                                                            setInputHover(i);
-                                                        }}
-                                                        className=" py-[2px]  flex items-center"
-                                                        onMouseLeave={() => {
-                                                            setInputHover("");
-                                                        }}
-                                                        >
-                                                        {inputHover === i ? (
-                                                            <div className="flex items-center ">
-                                                            <input
-                                                                className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
-                                                                type="text"
-                                                                value={option?.label}
-                                                                onChange={(e) => {
-                                                                handleOptionsChange(
-                                                                    editModel?.index,
-                                                                    i,
-                                                                    "label",
-                                                                    e.target.value
-                                                                );
-                                                                }}
-                                                            />
-                                                            </div>
-                                                        ) : (
-                                                            <div htmlFor={option?.label}>{option?.label}</div>
-                                                        )}
-                                                        </div>
-
-                                                        <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex ">
-                                                        <div
-                                                            className="cursor-pointer"
-                                                            onClick={() => {
-                                                            addOption("checkbox", editModel?.index, i + 1);
-                                                            }}
-                                                        >
-                                                            <IoMdAdd />
-                                                        </div>
-                                                        <div
-                                                            className="cursor-pointer"
-                                                            onClick={() => {
-                                                            deleteOption(editModel?.index, i);
-                                                            }}
-                                                        >
-                                                            <MdDelete />
-                                                        </div>
-                                                        <div className="cursor-pointer">
-                                                            <PiColumnsFill />
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    )
-                                                )}
-                                            </div>
-                                            </div>
-                                            <div className="flex justify-between">
-                                            <div>Required</div>
-                                            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                            <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                );
-                                                }}
-                                                defaultChecked
-                                            />
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-
-                                    {editModel?.name === "initialDropdown" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialDropdown");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div className="w-[400px]">
-                                        <h3>Edit Dropdown</h3>
-                                        <div className="flex flex-col gap-2">
-                                            <div>
-                                            <label>Label</label>
-                                            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                type="text"
-                                                className="w-full focus:outline-none"
-                                                value={qutionaryFields[editModel?.index]?.label}
-                                                onChange={(e) => {
-                                                    handleChange("label", e?.target?.value, editModel?.index);
-                                                }}
-                                                />
-                                            </div>
-                                            </div>
-                                            <div>
-                                            <label>Default Value</label>
-                                                <Select
-                                                inputId="availableEmployee"
-                                                isClearable
-                                                options={qutionaryFields[editModel?.index]?.value}
-                                                value={qutionaryFields[editModel?.index]?.value.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
-                                                onChange={(e) => {
-                                                    handleChange("values", {value:e?.label}, editModel?.index);
-                                                }}
-                                                readOnly={qutionaryFields[editModel?.index]?.read_only}
-                                                required={qutionaryFields[editModel?.index]?.required}
-                                                />
-                                            </div>
-                                            <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-                                            <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
-                                                <div className="pl-4">Options</div>
-                                                <div className="flex justify-center">Action</div>
-                                            </div>
-                                            <div className="top-model-table">
-                                                {Array.isArray(qutionaryFields) &&
-                                                qutionaryFields[editModel?.index]?.value.map(
-                                                    (option, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"
-                                                    >
-                                                        <div
-                                                        onMouseEnter={() => {
-                                                            setInputHover(i);
-                                                        }}
-                                                        className=" py-[2px]  flex items-center"
-                                                        onMouseLeave={() => {
-                                                            setInputHover("");
-                                                        }}
-                                                        >
-                                                        {inputHover === i ? (
-                                                            <div className="flex items-center ">
-                                                            <input
-                                                                className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
-                                                                type="text"
-                                                                value={option?.label}
-                                                                onChange={(e) => {
-                                                                handleOptionsChange(
-                                                                    editModel?.index,
-                                                                    i,
-                                                                    "label",
-                                                                    e.target.value
-                                                                );
-                                                                }}
-                                                            />
-                                                            </div>
-                                                        ) : (
-                                                            <div htmlFor={option?.label}>{option?.label}</div>
-                                                        )}
-                                                        </div>
-                                                        <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
-                                                        <div
-                                                            className="cursor-pointer"
-                                                            onClick={() => {
-                                                            addOption("dropdown", editModel?.index, i + 1);
-                                                            }}
-                                                        >
-                                                            <IoMdAdd />
-                                                        </div>
-                                                        <div className="cursor-pointer">
-                                                            <MdDelete
-                                                            onClick={() => {
-                                                                deleteOption(editModel?.index, i);
-                                                            }}
-                                                            />
-                                                        </div>
-                                                        <div className="cursor-pointer">
-                                                            <PiColumnsFill />
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    )
-                                                )}
-                                            </div>
-                                            </div>
-                                            <div className="flex justify-between py-2">
-                                            <div>Required</div>
-                                            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                            <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                );
-                                                }}
-                                                defaultChecked
-                                            />
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-
-                                    {editModel?.name === "initialRange" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialRange");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div className="w-[400px]">
-                                        <h3>Edit Range</h3>
-                                        <div className="flex flex-col gap-2">
-                                            <div>
-                                            <label>Label</label>
-                                            <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                type="text"
-                                                className="w-full focus:outline-none"
-                                                value={qutionaryFields[editModel?.index]?.label}
-                                                onChange={(e) => {
-                                                    handleChange("label", e?.target?.value, editModel?.index);
-                                                }}
-                                                />
-                                            </div>
-                                            </div>
-                                            <div>
-                                            <label>Default Value</label>
-                                            <Select
-                                                inputId="availableEmployee"
-                                                isClearable
-                                                options={qutionaryFields[editModel?.index]?.value}
-                                                value={Array.isArray(qutionaryFields[editModel?.index]?.value) && qutionaryFields[editModel?.index]?.value?.find((option)=>option?.label === qutionaryFields[editModel?.index]?.values?.value)}
-                                                onChange={(e) => {
-                                                handleChange("values", {value:e?.label}, editModel?.index);
-                                                }}
-                                                readOnly={qutionaryFields[editModel?.index]?.read_only}
-                                                required={qutionaryFields[editModel?.index]?.required}
-                                            />
-                                            </div>
-                                            <div className=" overflow-hidden  rounded-md px-2 flex flex-col gap-1">
-                                            <div className="grid grid-cols-[1fr,25%] items-center py-1 bg-gray-200">
-                                                <div className="pl-4">Options</div>
-                                                <div className="flex justify-center">Action</div>
-                                            </div>
-                                            <div className="top-model-table">
-                                                {Array.isArray(qutionaryFields) &&
-                                                qutionaryFields[editModel?.index]?.value.map((option, i) => (
-                                                    <div
-                                                    key={i}
-                                                    className="grid grid-cols-[1fr,25%] items-center hover:bg-gray-100 py-[2px] group"
-                                                    >
-                                                    <div
-                                                        onMouseEnter={() => {
-                                                        setInputHover(i);
-                                                        }}
-                                                        className=" py-[2px]  flex items-center"
-                                                        onMouseLeave={() => {
-                                                        setInputHover("");
-                                                        }}
-                                                    >
-                                                        {inputHover === i ? (
-                                                        <div className="flex items-center ">
-                                                            <input
-                                                            className="w-full box-border bg-white  focus:outline-none  rounded-[2px] border-gray-100"
-                                                            type="text"
-                                                            value={option?.label}
-                                                            onChange={(e) => {
-                                                                handleOptionsChange(
-                                                                editModel?.index,
-                                                                i,
-                                                                "label",
-                                                                e.target.value
-                                                                );
-                                                            }}
-                                                            />
-                                                        </div>
-                                                        ) : (
-                                                        <div htmlFor={option?.label}>{option?.label}</div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex text-[18px] justify-evenly hidden group-hover:inline-flex">
-                                                        <div
-                                                        className="cursor-pointer"
-                                                        onClick={() => {
-                                                            addOption("range", editModel?.index, i + 1);
-                                                        }}
-                                                        >
-                                                        <IoMdAdd />
-                                                        </div>
-                                                        <div className="cursor-pointer">
-                                                        <MdDelete
-                                                            onClick={() => {
-                                                            deleteOption(editModel?.index, i);
-                                                            }}
-                                                        />
-                                                        </div>
-                                                        <div className="cursor-pointer">
-                                                        <PiColumnsFill />
-                                                        </div>
-                                                    </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            </div>
-                                            <div className="flex justify-between py-2">
-                                            <div>Required</div>
-                                            {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                            <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                );
-                                                }}
-                                                defaultChecked
-                                            />
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-
-                                    {editModel?.name === "initialInstruction" && (
-                                    <TopModel
-                                        onSave={handleSave}
-                                        ref={topModelRef}
-                                        footer={
-                                        <div className="flex justify-between gap-2">
-                                            <button
-                                            type="button"
-                                            className="bg-red-500 px-2 py-[3px] text-[18px] rounded-md text-white"
-                                            onClick={() => {
-                                                handleDeleteField(editModel?.index);
-                                            }}
-                                            >
-                                            <MdDelete />
-                                            </button>
-                                            <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModalFromParent("initialInstruction");
-                                                }}
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="bg-[#0dcaf0] px-2 py-[3px] text-[16px] rounded-md text-white"
-                                                onClick={() => {
-                                                closeModel();
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            </div>
-                                        </div>
-                                        }
-                                    >
-                                        <div>
-                                        <div className="w-[400px]">
-                                            <h3>Edit Instructions</h3>
-                                            <div className="flex flex-col gap-2">
-                                            <div>
-                                                <label>Label</label>
-                                                <div className="border-[2px] overflow-hidden py-1 rounded-md px-2">
-                                                <input
-                                                    type="text"
-                                                    className="w-full focus:outline-none"
-                                                    value={qutionaryFields[editModel?.index]?.value}
-                                                    onChange={(e) => {
-                                                    handleChange(
-                                                        "value",
-                                                        e?.target?.value,
-                                                        editModel?.index
-                                                    );
-                                                    }}
-                                                />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <div>Required</div>
-                                                {/* <div><input type="radio" checked={qutionaryFields[editModel?.index]?.required} onChange={(e)=>{handleChange("required", e?.target?.checked, editModel?.index)}}/></div> */}
-                                                <Switch
-                                                checked={qutionaryFields[editModel?.index]?.required}
-                                                onChange={(e) => {
-                                                    handleChange(
-                                                    "required",
-                                                    e?.target?.checked,
-                                                    editModel?.index
-                                                    );
-                                                }}
-                                                defaultChecked
-                                                />
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-
-                                    {editModel?.name === "gridModel" && (
-                                    <TopModel ref={topModelRef}>
-                                        <div className="w-[700px] flex flex-col">
-                                        <div className="pb-2 border-b">
-                                            <h4>Add Form Template Library</h4>
-                                        </div>
-                                        <div>
-                                            <div className="h-[55px] flex items-end border-b-[2px] relative mt-2">
-                                            <div className="flex w-full absolute bottom-[-2px]">
-                                                {questionnaireTabs.map((tab, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={` tabs cursor-pointer ${
-                                                    templateTabsPopup === tab.value
-                                                        ? "selected-tab "
-                                                        : "border-0"
-                                                    }`}
-                                                    onClick={() => {
-                                                    setTemplateTabsPopup(tab.value);
-                                                    }}
-                                                >
-                                                    <span>{tab.tab_name}</span>
-                                                </div>
-                                                ))}
-                                            </div>
-                                            </div>
-                                            {templateTabsPopup === 0 && (
-                                            <>
-                                                <div className="h-[calc(100%-55px)] pb-3 border-b">
-                                                <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2">
-                                                    {Array.isArray(qutionaryInputOption) &&
-                                                    qutionaryInputOption.map((option, i) => (
-                                                        <div
-                                                        key={i}
-                                                        className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
-                                                        onClick={() => {
-                                                            createQutionaryFields(option?.field);
-                                                            setEditModel({
-                                                            name: template?.field,
-                                                            index: null,
-                                                            });
-                                                        }}
-                                                        >
-                                                        <div className="self-start pt-1">
-                                                            <div className="text-[#0dcaf0] rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                                            {option?.icon}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-start">
-                                                            <div>
-                                                            <div className="text-[15px] text-gray-500 font-semibold pb-1">
-                                                                {option?.label}
-                                                            </div>
-                                                            <div className="text-[11px] text-gray-400 pb-1 font-medium">
-                                                                {option?.description}
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                </div>
-                                                <div className="flex w-full justify-end py-2">
-                                                <button
-                                                    type="button"
-                                                    className=" px-4 py-2 text-black text-[16px] border-[1px] border-[#cccccc] shadow-md rounded-md"
-                                                    onClick={() => {
-                                                    closeModel();
-                                                    }}
-                                                >
-                                                    Close
-                                                </button>
-                                                </div>
-                                            </>
-                                            )}
-                                            {templateTabsPopup === 1 && (
-                                            <div className="h-[calc(100%-55px)]">
-                                                <div className="grid grid-cols-3 gap-2 w-full px-3 pt-4 pb-2 top-model-table">
-                                                {Array.isArray(questionnaireForms) &&
-                                                    questionnaireForms.map((template, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className={`grid grid-cols-[auto,1fr] shadow-sm rounded-md gap-4  p-[8px]`}
-                                                        onClick={() => {
-                                                        setEditModel({
-                                                            name: template?.field,
-                                                            index: null,
-                                                        });
-                                                        confirmToAddTemplate(template?.id);
-                                                        }}
-                                                    >
-                                                        <div className="self-start pt-1">
-                                                        <div className="rounded-[50%] bg-slate-200 h-[45px] w-[45px] flex justify-center items-center">
-                                                            <IoDocumentText />
-                                                        </div>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                        <div>
-                                                            <div className="text-[15px] text-gray-500 font-semibold pb-1">
-                                                            {template?.name}
-                                                            </div>
-                                                            <div className="text-[13px] text-gray-400 pb-1 font-medium">
-                                                            Chart Template
-                                                            </div>
-                                                            <div className="text-[12px] text-gray-400 pb-1 font-medium">
-                                                            {template?.employee?.name}
-                                                            </div>
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            )}
-                                        </div>
-                                        </div>
-                                    </TopModel>
-                                    )}
-                                </div>
-                                        {/* ------------------------------------------- */}
-                                    </div>
-                                    </div>}
-                                    </div>
-                                </div>
-                                {/* ------------------- */}
-                            </div>
-                                )}
+  </div>
+)}
                                 {currentTab === "inventory" && (
                                     <InventoryTab
                                         inventoryList={selectedEmployeeData}
