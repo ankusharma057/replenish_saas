@@ -14,6 +14,7 @@ class Invoice < ApplicationRecord
   has_one_attached :document, dependent: :purge
   has_many_attached :before_images
   has_many_attached :after_images
+  has_one :location
   
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 

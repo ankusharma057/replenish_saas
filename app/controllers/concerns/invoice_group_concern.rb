@@ -48,6 +48,7 @@ module InvoiceGroupConcern
 
   def create_invoice_for_employee(employee, invoice_param, client, source_invoice_id = nil, source_employee = nil)
     invoice = Invoice.new(employee: employee, source_invoice_id: source_invoice_id)
+    invoice.location_id = invoice_param[:location_id] if invoice_param[:location_id].present?
 
     inventory_columns = source_invoice_id.blank? ? Invoice.column_names : (Invoice.column_names - MENTOR_INVOICE_EXCLUDE_COLUMNS)
 
