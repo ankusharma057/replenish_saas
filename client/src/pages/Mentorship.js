@@ -35,30 +35,32 @@ const Mentorship = ({employee}) => {
     }
     setSortConfig({ key, direction });
   
+    const getNestedValue = (obj, key) => {
+      return key.split('.').reduce((nestedObj, keyPart) => nestedObj?.[keyPart], obj);
+    };
+  
     const sortedInvoices = [...invoices].sort((a, b) => {
-      const aValue = a[key];
-      const bValue = b[key];
+      const aValue = getNestedValue(a, key);
+      const bValue = getNestedValue(b, key);
   
       const isDate = !isNaN(Date.parse(aValue)) && !isNaN(Date.parse(bValue));
-  
       if (isDate) {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
         return direction === 'asc' ? dateA - dateB : dateB - dateA;
-      } else {
-        if (aValue < bValue) {
-          return direction === 'asc' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return direction === 'asc' ? 1 : -1;
-        }
-        return 0;
       }
+  
+      if (aValue < bValue) {
+        return direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
     });
   
     setInvoices(sortedInvoices);
   };
-  
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
