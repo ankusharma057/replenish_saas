@@ -1,7 +1,8 @@
 class Location < ApplicationRecord
   has_many :employee_locations, dependent: :destroy
   has_many :employees, through: :employee_locations
-  belongs_to :invoice
+  has_many :invoices, dependent: :destroy
+
 
   validates :name, presence: true, uniqueness: true
 
