@@ -114,6 +114,12 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def mentors
+    mentors = Employee.select(&:is_mentor?)
+
+    render json: mentors, only: [:id, :name]
+  end
+
   private
 
   def employee_params

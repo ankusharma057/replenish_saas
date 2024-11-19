@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_11_103914) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_08_103036) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -210,6 +210,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_11_103914) do
     t.integer "source_invoice_id"
     t.boolean "provider_purchased"
     t.boolean "is_paid", default: false, null: false
+    t.boolean "service_experience", default: false
+    t.boolean "comfort_with_modality", default: false
+    t.boolean "mentor_value_provided", default: false
+    t.text "service_experience_reason", default: ""
+    t.text "comfort_with_modality_reason", default: ""
+    t.text "mentor_value_provided_reason", default: ""
+    t.integer "mentor_id"
     t.string "stripe_account_id"
   end
 
@@ -239,6 +246,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_11_103914) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "provider_purchased", default: false
+    t.boolean "mentorship_purchased", default: false
   end
 
   create_table "products_invoices", force: :cascade do |t|

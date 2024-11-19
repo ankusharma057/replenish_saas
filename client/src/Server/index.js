@@ -130,6 +130,22 @@ export const getEmployeeInvoicesOnly = async (employee_id, refetch) =>
     },
   });
 
+export const getEmployeeMentorshipInvoicesOnly = async (employee, refetch = false) => {
+  try {
+    const response = await api.get(`/api/mentorship_invoices`, {
+      params: { is_admin: employee?.is_admin, employee_id: employee?.id },
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching mentorship invoices:', error);
+    throw error;
+  }
+};
+
 export const getAllInvoiceList = async (data, refetch) =>
   api.get("/api/invoice_lists", {
     cache: {
@@ -907,3 +923,15 @@ export const GetAppointmentDetails = async (payload,refetch) =>{
   });
   return res;
 }
+export const fetchMentors = async () => {
+  try {
+    const response = await api.get('/api/mentors');
+    return response.data.map((mentor) => ({
+      value: mentor.id,
+      label: mentor.name,
+    }));
+  } catch (error) {
+    console.error('Error fetching mentors:', error);
+    throw error;
+  }
+};

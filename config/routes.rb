@@ -148,9 +148,9 @@ mount Sidekiq::Web => '/sidekiq'
     get '/locations/:id/employees', to: 'employee_schedules#employees'
     get '/employee_invoices', to: 'invoice_lists#employee_invoices'
     get 'client_schedules_only', to: 'schedules#get_client_schedule_only'
+    get '/mentorship_invoices', to: 'invoice_lists#mentorship_invoices'
+    get '/mentors', to: 'employees#mentors'
     post 'add_note', to: 'schedules#add_note'
-
-  
   end
   get '*path', to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html?}
 end

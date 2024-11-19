@@ -19,6 +19,7 @@ import {
   GitPullRequestArrow,
   ChevronRight,
   ChevronLeft,
+  Receipt,
   CalendarCheck,
 } from "lucide-react";
 import { ImProfile } from "react-icons/im";
@@ -47,6 +48,8 @@ import MySchedule from "./MySchedule";
 import Questionnaires from "./Questionnaires";
 import { RiQuestionnaireLine } from "react-icons/ri";
 import { FaRegEdit } from "react-icons/fa";
+import Mentorship from "./Mentorship";
+import MPInvoice from "./MPInvoice";
 
 
 const MyProfile = () => {
@@ -340,7 +343,7 @@ const MyProfile = () => {
   };
 
   const currentInvoices =
-    (authUserState.user?.invoices || [])?.slice(startIndex, endIndex) || [];
+    (authUserState.user?.invoices.filter(invoice => !invoice.mentor_id) || [])?.slice(startIndex, endIndex) || [];
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -505,6 +508,38 @@ const MyProfile = () => {
               } `}
             >
               <RiQuestionnaireLine className="text-[24px]" /> Templates
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "mp_invoice" && setCurrentTab("mp_invoice");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${
+                currentTab === "mp_invoice" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <Receipt />
+              Submit Mentorship Eval
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "mp" && setCurrentTab("mp");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md  ${
+                currentTab === "mp" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <FileText />
+              Mentorship Evaluations
             </div>
 
             <div
@@ -1036,6 +1071,15 @@ const MyProfile = () => {
               <InviteClientsTab employee={authUserState.user} />
             </div>
           )}
+
+          {currentTab === "mp" && (
+            <Mentorship employee={authUserState.user} />
+          )}
+
+          {currentTab === "mp_invoice" && (
+            <MPInvoice />
+          )}
+
           {currentTab === "mySchedule" && (
             <div className="flex justify-center">
             <div className="bg-white rounded-md w-[65rem]">

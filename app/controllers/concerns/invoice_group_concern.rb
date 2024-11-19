@@ -62,10 +62,12 @@ module InvoiceGroupConcern
 
     products = invoice_param['products']&.pluck("name", "quantity", "retail_price")
     retail_products = invoice_param['retail_products']&.pluck("name", "quantity", "retail_price")
+    mp_products = invoice_param['mp_products']&.pluck("name", "quantity", "retail_price")
 
     invoice.products_hash = {
       "products" => products,
-      "retail_products" => retail_products
+      "retail_products" => retail_products,
+      "mp_products" => mp_products
     }
 
     if invoice.source_invoice_id.blank? && invoice.products_hash && invoice.products_hash.any?

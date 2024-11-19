@@ -22,7 +22,7 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
     const {name, value, type, checked} = e.target
     setFormData((pre) => ({ ...pre, [name]:(type === "checkbox") ? checked :  value }));
     if(name === "name" && value.length === 0){
-      setFormData((prev)=>({...prev,["provider_purchased"]:false}))
+      setFormData((prev) => ({ ...prev, provider_purchased: false, mentorship_purchased: false }));
     }
   };
 
@@ -44,6 +44,24 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCheckboxChange = (event, type) => {
+    const { checked } = event.target;
+
+    if (type === "provider") {
+      setFormData({
+        ...formData,
+        provider_purchased: checked,
+        mentorship_purchased: checked ? false : formData.mentorship_purchased,
+      });
+    } else if (type === "mentorship") {
+      setFormData({
+        ...formData,
+        mentorship_purchased: checked,
+        provider_purchased: checked ? false : formData.provider_purchased,
+      });
     }
   };
 
@@ -131,7 +149,18 @@ const CreateProductModal = ({ show, onHide, getProducts,productList }) => {
             type="checkbox"
             name="provider_purchased"
             checked={formData?.provider_purchased} 
-            onChange={(event) => handleChange(event)}
+            onChange={(event) => handleCheckboxChange(event, "provider")}
+            className="mr-5"
+          />
+        </label>
+
+        <label className="flex justify-between font-semibold  py-2 rounded-md  transition duration-500">
+          Mentorship Purchased
+          <input
+            type="checkbox"
+            name="mentorship_purchased"
+            checked={formData?.mentorship_purchased} 
+            onChange={(event) => handleCheckboxChange(event, "mentorship")}
             className="mr-5"
           />
         </label>

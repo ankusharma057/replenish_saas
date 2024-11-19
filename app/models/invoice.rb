@@ -4,6 +4,7 @@ class Invoice < ApplicationRecord
   include PdfDownloadable
 
   belongs_to :employee
+  belongs_to :mentor, class_name: "Employee", optional: true
   belongs_to :client
   belongs_to :invoice_group
   belongs_to :source_invoice, class_name: 'Invoice', foreign_key: 'source_invoice_id', optional: true
