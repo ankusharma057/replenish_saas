@@ -63,10 +63,13 @@ export default function AddInvoices() {
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
   const [retailProductList, setRetailProductList] = useState([]);
-const [dateOfService,setDateOfService]=useState("")
+  const [dateOfService, setDateOfService] = useState("")
+  const [locationName, setLocationName] = useState("")
+  const [locationId, setLocationId] = useState("")
   const [formData, setFormData] = useState({
     ...initialFormState,
-    dateOfService:Date.now()
+    dateOfService:Date.now(),
+    location_id:""
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
   const totalRef = useRef();
@@ -76,6 +79,7 @@ const [dateOfService,setDateOfService]=useState("")
     message: "",
     isClient: false,
     maxInvoice: false,
+    location:false
   });
   const [showModal, setShowModal] = useState(false);
   const [beforeImages, setBeforeImages] = useState([]);
@@ -778,10 +782,24 @@ const [dateOfService,setDateOfService]=useState("")
       });
       return;
     }
-    if (!formData.dateOfService) {
+    else if (!formData.dateOfService) {
       setIsAlert({
         isClient: true,
         message: "Please Add Date of service",
+      });
+      return;
+    }
+    else if (formData?.location_id==="") {
+      setIsAlert({
+        location: true,
+        message: "Please select location",
+      });
+      return;
+    }
+    else if (formData?.products?.length == 0) {
+      setIsAlert({
+        productUsedShow: true,
+        message: "Please select product",
       });
       return;
     }
@@ -811,7 +829,8 @@ const [dateOfService,setDateOfService]=useState("")
       income_flag: replenishIncomeFlag(),
       get_total_price_by_client: getTotalPaidByClient(),
       total_consumable_cost: getConsumableRetailPrice(),
-    };
+      location_id:locationId
+    };    
     const invoiceList = [
       ...invoiceArray,
       {
@@ -890,6 +909,11 @@ const [dateOfService,setDateOfService]=useState("")
                 setBeforeImages([]);
                 setBlobForAfter([]);
                 setBlobForBefore([]);
+                setSelectedClient(selectedClient);
+                setClientLastName("")
+                setClientEmail("")
+                setLocationId("");
+                setLocationName("");
               } catch (error) {
                 toast.error(
                   error?.response?.data?.exception ||
@@ -928,11 +952,10 @@ const [dateOfService,setDateOfService]=useState("")
 
   const handleClientChange = (event) => {
     setClient(event.target.value);
-    let selectedClient = employeeList.find((client) => client.name === event.target.value);
-    setSelectedClient(selectedClient);
-    setClientName(selectedClient?.name)
-    setClientLastName(selectedClient?.last_name)
-    setClientEmail(selectedClient?.email)
+      setSelectedClient("");
+      setClientName("")
+      setClientLastName("")
+      setClientEmail("")
   };
 
   const handleCreateClientCheckbox = (event) => {
@@ -943,13 +966,33 @@ const [dateOfService,setDateOfService]=useState("")
     setShowClientList(true)
     setClient(clientName)
     let selectedClient = employeeList.find((client) => client.name === clientName);
-    if(selectedClient){
+    if(selectedClient){      
     setSelectedClient(selectedClient);
     setClientName(selectedClient?.name)
     setClientLastName(selectedClient?.last_name)
     setClientEmail(selectedClient?.email)
+      setIsAlert((prev) => ({
+        ...prev,
+        isClient: false,
+        message: ""
+      }))
   }
   }
+  const handleInvoiceLocationSelect = (event) => {
+    let location = authUserState.user.employee_locations.find((item) => { return item.location.name === event.target.value })
+    if (location) {
+      setLocationName(location.name)
+      setLocationId(location.id)
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        location_id: location?.id
+      }));
+      setIsAlert({
+        location: false,
+        message: "",
+      });
+    }
+  };
 
   return (
     <>
@@ -992,7 +1035,18 @@ const [dateOfService,setDateOfService]=useState("")
                     required
                   />
                 </label> */}
-
+                <label className="mb-2 block d-flex flex-column">
+                  Location
+                  <div className="w-full d-flex align-items-center">
+                    <Form.Select value={locationName} onChange={handleInvoiceLocationSelect} required className="h-[34px]">
+                      <option >Select location</option>
+                      {authUserState.user.employee_locations?.length >= 0 && authUserState.user.employee_locations.map((item) => (
+                        <option value={item.location.name}>{item.location.name}</option>
+                      ))}
+                    </Form.Select>
+                  </div>
+                  {isAlert.location && <span className="text-danger">Please select location</span>}
+                </label>
                 <label className="mb-2 block d-flex flex-column">
                   Date of Service:
                   <div className="w-full d-flex p-1 border align-items-center rounded border-gray-300">
@@ -1216,7 +1270,6 @@ const [dateOfService,setDateOfService]=useState("")
                       onFocus={() => setShowClientList(true)}
                       placeholder="Type to search client"
                       onBlur={() => {
-                        // Delay hiding the list to allow click events to register
                         setTimeout(() => setShowClientList(false), 150);
                       }}
                     />
@@ -1250,6 +1303,7 @@ const [dateOfService,setDateOfService]=useState("")
                           ))}
                       </ListGroup>
                     ):""}
+                    {isAlert.isClient && <span className="text-danger">{isAlert.message}</span>}
                   </div>
                 )}
 
@@ -1476,7 +1530,7 @@ const [dateOfService,setDateOfService]=useState("")
                     </tbody>
                   </table>
                   {isAlert.productUsedShow && (
-                    <span className="text-sm">{isAlert?.message}</span>
+                    <span className="text-danger">{isAlert?.message}</span>
                   )}
                 </div>
                 <div className="border rounded-lg p-2 mb-4 retail-products">
@@ -1688,6 +1742,7 @@ const [dateOfService,setDateOfService]=useState("")
           {invoiceArray?.length > 0 &&
             invoiceArray?.map((invoice) => {
               return (
+                <>ASDFASDFADFADSFSFS
                 <AddInvoiceTemplate
                   key={invoice.id}
                   id={invoice.id}
@@ -1714,6 +1769,7 @@ const [dateOfService,setDateOfService]=useState("")
                   expected_income={invoice.expected_income}
                   handleDeleteInvoice={handleDeleteInvoice}
                 />
+                </>
               );
             })}
         </div>
