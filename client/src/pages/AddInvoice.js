@@ -892,7 +892,6 @@ export default function AddInvoices() {
             onClick: async () => {
               try {
                 setLoading(true);
-                console.log('ADADADAD', invoiceData);
                 await createGroupInvoices(invoiceData);
                 toast.success("Invoice created successfully.");
                 await getInvoiceList(true);
@@ -914,6 +913,7 @@ export default function AddInvoices() {
                 setClientEmail("")
                 setLocationId("");
                 setLocationName("");
+                setClient("");
               } catch (error) {
                 toast.error(
                   error?.response?.data?.exception ||
