@@ -68,7 +68,7 @@ export default function AddInvoices() {
   const [locationId, setLocationId] = useState("")
   const [formData, setFormData] = useState({
     ...initialFormState,
-    dateOfService:Date.now(),
+    dateOfService:new Date(),
     location_id:""
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
@@ -788,7 +788,7 @@ export default function AddInvoices() {
         message: "Please Add Date of service",
       });
       return;
-    }
+    } 
     else if (formData?.location_id==="") {
       setIsAlert({
         location: true,
@@ -912,6 +912,7 @@ export default function AddInvoices() {
                 setClientLastName("")
                 setClientEmail("")
                 setLocationId("");
+                setClient("");
                 setLocationName("");
                 setClient("");
               } catch (error) {

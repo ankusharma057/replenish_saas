@@ -10,9 +10,7 @@ module InvoiceGroupConcern
 
   def create_invoice_group
     @invoice_group = InvoiceGroup.create!
-
     params['_json'].each do |invoice_param|
-      invoice_param['date_of_service'] = Time.at(invoice_param['date_of_service']/1000).to_date
       client = @employee.clients.find_by(name: invoice_param['clientname']) ||
          @employee.clients.create(
            name: invoice_param['clientname'],
@@ -33,7 +31,6 @@ module InvoiceGroupConcern
 
     text = "An invoice group with Invoice IDs: #{@invoice_group.source_invoices.ids} has been recently created by #{@invoice_group.source_invoices.first.employee&.name}"
     send_message(text: text)
-
     render json: @invoice_group, status: :created
   rescue StandardError => e
     render json: { error: e.message }, status: :unprocessable_entity
