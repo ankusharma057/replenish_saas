@@ -9,7 +9,7 @@ import { getClientProfile, getUpdatedUserProfile } from "./Server";
 import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
-
+import "./App.css"
 const ConfirmPayment = lazy(() =>
   import("./pages/Clients/payment/ConfirmPayment")
 );

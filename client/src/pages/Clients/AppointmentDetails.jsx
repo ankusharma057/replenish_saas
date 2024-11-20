@@ -3,10 +3,12 @@ import { Badge, Button, ButtonGroup, Card, Col, Container, Dropdown, Form, Input
 import { ChevronDown, MoreHorizontal, Pencil, Check, Smartphone, Trash2, Star, CreditCard, ChevronUp, Plus, XCircle, PlusCircle, Search, UserRound, ChevronRight, ChevronsRight, Mail, Phone, CalendarRange } from "lucide-react";
 import moment from 'moment';
 import { Collapse, Select } from '@mui/material';
-import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote, GetAppointmentDetails } from "../../Server/index"
+import { AddNoteToAppointment, DeleteAppointmentNote, getEmployeesList, UpdateAppointment, UpdateAppointmentNote, GetAppointmentDetails, deleteAppointmentEmployee } from "../../Server/index"
 import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
 import { FaRegStar } from "react-icons/fa6";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handleShowAppointmentSidebar }) => {
     const [bookingInfo, setBookingInfo] = useState(true);
@@ -89,9 +91,9 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
     const handleNoteChange = (event) => {
         setNoteValue(event.target.value)
     };
-    const handleDueDate = async (event) => {
-        let date = await moment(event.target.value).format('YYYY/MM/DD')
-        setDueDate(date);
+    const handleDueDate = (date) => {
+        const selectedDate = date
+        setDueDate(selectedDate);
     };
     const handleEmployeeChange = async (event) => {
         let employee = await employeeList.find((item) => item.name === event.target.value);
@@ -182,7 +184,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                 
                 payload = {
                     ...payload,
-                    updated_at: type === "done" ? new Date() : type === "Nill"&&null
+                    updated_at: type === "done" ? new Date() : type === "Nill" && "nill"
                 }
                 response = await UpdateAppointmentNote(payload);
             }
@@ -209,6 +211,15 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                 {product.name}{index < products.length - 1 ? ', ' : ''}
             </span>
         ));
+    };
+    const handleCancelAppointment=async()=>{
+        let response = await deleteAppointmentEmployee(appointmentDetails.id);
+        if(response.status===200 || response.status===201){
+            toast.success(response.data.message);
+            handleShowAppointmentSidebar();
+        }else{
+            toast.error(response.data.message);
+        }
     };
     return (
         <div>
@@ -314,14 +325,14 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                 Cancel/Delete
                                                             </Dropdown.Toggle>
                                                             <Dropdown.Menu>
-                                                                <Dropdown.Item href="#/action-1">
+                                                                <Dropdown.Item href="#/action-1" onClick={handleCancelAppointment}>
                                                                     <p className='mb-1' style={{ color: "#A9A9A9", fontSize: "12px" }}>Cancel with Notifications</p>
                                                                     <p className='mb-0' style={{ fontSize: "14px" }}>Cancel Appointment</p>
                                                                 </Dropdown.Item>
                                                                 <Dropdown.Divider />
                                                                 <Dropdown.Item href="#/action-2">
-                                                                    <p className='mb-1' style={{ color: "#A9A9A9", fontSize: "12px" }}>Without Notifications</p>
-                                                                    <p className='mb-0 text-danger d-flex align-items-center justify-content-start' style={{ fontSize: "14px" }}><Trash2 size={15} />Delete Appointment</p>
+                                                                    <p className='cursor-pointer mb-1' style={{ color: "#A9A9A9", fontSize: "12px" }}>Without Notifications</p>
+                                                                    <p className='cursor-pointer mb-0 text-danger d-flex align-items-center justify-content-start' style={{ fontSize: "14px" }}><Trash2 size={15} />Delete Appointment</p>
                                                                 </Dropdown.Item>
                                                             </Dropdown.Menu>
                                                         </Dropdown>
@@ -371,13 +382,26 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             <InputGroup.Text>
                                                                 <CalendarRange style={{ color: '#888' }} />
                                                             </InputGroup.Text>
-                                                            <Form.Control
-                                                                type="date"
-                                                                placeholder="Due Date..."
-                                                                value={dueDate}
-                                                                // onFocus={(e) => (e.target.type = "date")}
-                                                                // onBlur={(e) => (e.target.type = "text")}
+                                                            <DatePicker
+                                                            className='w-[86%]'
+                                                                selected={dueDate}
                                                                 onChange={handleDueDate}
+                                                                dateFormat="yyyy/mm/dd"
+                                                                customInput={
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        placeholder="Select date"
+                                                                        value={
+                                                                            dueDate
+                                                                                ? `${dueDate.getDate().toString().padStart(2, "0")}/${(
+                                                                                    dueDate.getMonth() + 1
+                                                                                )
+                                                                                    .toString()
+                                                                                    .padStart(2, "0")}/${dueDate.getFullYear()}`
+                                                                                : ""
+                                                                        }
+                                                                    />
+                                                                }
                                                             />
                                                         </InputGroup>
                                                         <Form.Select aria-label="Default select example" value={employeeName} fullWidth onChange={handleEmployeeChange}>
@@ -412,13 +436,26 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                             <InputGroup.Text>
                                                                 <CalendarRange style={{ color: '#888' }} />
                                                             </InputGroup.Text>
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="Due Date..."
-                                                                value={dueDate}
-                                                                onFocus={(e) => (e.target.type = "date")}
-                                                                onBlur={(e) => (e.target.type = "text")}
+                                                            <DatePicker
+                                                            className='w-[86%]'
+                                                                selected={dueDate}
                                                                 onChange={handleDueDate}
+                                                                dateFormat="yyyy/mm/dd"
+                                                                customInput={
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        placeholder="Select date"
+                                                                        value={
+                                                                            dueDate
+                                                                                ? `${dueDate.getDate().toString().padStart(2, "0")}/${(
+                                                                                    dueDate.getMonth() + 1
+                                                                                )
+                                                                                    .toString()
+                                                                                    .padStart(2, "0")}/${dueDate.getFullYear()}`
+                                                                                : ""
+                                                                        }
+                                                                    />
+                                                                }
                                                             />
                                                         </InputGroup>
                                                         <Form.Select aria-label="Default select example" value={employeeName} fullWidth onChange={handleEmployeeChange} data-testId={"employeSelect"}>
@@ -440,7 +477,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                             <div className='d-flex gap-[20px] align-items-center'>
                                                                                 <div>
                                                                                     {
-                                                                                        item?.updated_at && item?.updated_at !== null ?
+                                                                                        item?.updated_at && item?.updated_at !== "nill" ?
                                                                                             <div className='d-flex justify-content-center align-items-center w-[30px] h-[30px] rounded-circle border border-secondary' onClick={()=>handleNoteOperations("Nill",item.favorite,item?.id,)}>
                                                                                                 <Check color={"#22d3ee"} size={16} />
                                                                                             </div> :
@@ -483,7 +520,7 @@ const AppointmentDetails = ({ appointmentDetails, showAppointmentSidebar, handle
                                                                         </div>
                                                                         <div className='ml-12'>
                                                                             {
-                                                                                appointmentDone ?
+                                                                                 item?.updated_at && item?.updated_at !== "nill" ?
                                                                                     <div>
                                                                                         <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>Completed on {isNaN(new Date(item.due_date)) ? "-" : new Date(item.due_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' })}</p>
                                                                                         <p className='m-0' style={{ color: "green", fontSize: "14px", fontWeight: 700 }}>by {appointmentDetailsResponse.employee.name}</p>
@@ -829,8 +866,7 @@ const EditAppointmentNote = ({ noteDetails, editEmployeeList, handleEditNoteSubm
     const handleNoteChange = (event) => {
         setEditNoteValue(event.target.value)
     };
-    const handleDueDate = async (event) => {
-        let date = await moment(event.target.value).format('YYYY/MM/DD')
+    const handleDueDate = async (date) => {
         setEditDueDate(date);
     };
     const handleEmployeeChange = async (event) => {
@@ -870,20 +906,25 @@ const EditAppointmentNote = ({ noteDetails, editEmployeeList, handleEditNoteSubm
                     <InputGroup.Text>
                         <CalendarRange style={{ color: '#888' }} />
                     </InputGroup.Text>
-                    <Form.Control
-                        type="text"
-                        placeholder="Due Date..."
-                        value={editDueDate}
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => (e.target.type = "text")}
+                    <DatePicker
+                        className='w-[86%]'
+                        selected={editDueDate}
                         onChange={handleDueDate}
+                        dateFormat="yyyy/mm/dd"
+                        customInput={
+                            <Form.Control
+                                type="text"
+                                placeholder="Select date"
+                                value={editDueDate}
+                            />
+                        }
                     />
                 </InputGroup>
                 <Form.Select aria-label="Default select example" value={editEmployeeName} fullWidth onChange={handleEmployeeChange}>
                     <option>Select a employee</option>
                     {
                         editEmployeeList.map((item) => {
-                            return <option value={item.name}>{item.name}</option>
+                            return <option key={item.name} value={item.name}>{item.name}</option>
                         })
                     }
                 </Form.Select>

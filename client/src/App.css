@@ -40,3 +40,6 @@
 .countrySelectContainer .react-tel-input .form-control{
   width: 100% !important;
 }
+.react-datepicker-wrapper{
+  width: 86% !important;
+}

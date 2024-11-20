@@ -231,7 +231,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
           location_id: emp?.location_id || selectedLocation?.id
         },
         refetch
-      );
+      );      
 
 
       const newData = data.map((d) => ({
@@ -316,7 +316,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       const arr1 = arr.concat(unavailabilityNewData);
 
       
-      setEmployeeScheduleEventsData((pre) => {
+      setEmployeeScheduleEventsData((pre) => {  
         return {
           ...pre,
           [emp.id]: arr1,
@@ -515,8 +515,8 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     });
 }
 
-  const showConfirmationModal = (event, readOnly, events) => {
-    if(event?.client){
+  const showConfirmationModal = (event, readOnly, events) => {    
+    if(event?.client){      
       handleAddAppointmentSelect(event, readOnly);
     }
     else{
@@ -544,14 +544,14 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     }
   };
 
-  const handleAddAppointmentSelect = async({ start_time, end_time, ...rest }, readOnly) => {
+  const handleAddAppointmentSelect = async({ start_time, end_time, ...rest }, readOnly) => {    
     let startTime= new Date(start_time)
     let endTime= new Date(end_time)
     const differenceInMilliseconds =await endTime - startTime;
     const differenceInMinutes =await differenceInMilliseconds / 60000;
     setAvailableTime(differenceInMinutes)
     let formateData = {
-      show: false,
+      show: true,
       start_time: start_time,
       end_time: end_time,
       date: moment(start_time).format("DD/MM/YYYY"),
@@ -564,7 +564,12 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
         readOnly: true,
       };
     }
-    if (!rest.hasOwnProperty("available")) {
+    if (!rest.hasOwnProperty("available")) {      
+      formateData = {
+        ...formateData,
+        ...rest,
+        show: false,
+      };
       setRemoveAvailabilityData(formateData);
       setAppointmentModal(formateData);
       handleShowAppointmentSidebar();
@@ -1018,7 +1023,13 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
     return isWithinAvailableTime && !overlapWithBooking;
   });
   const handleShowAppointmentSidebar = () => {
-    setShowAppointmentSidebar((prev => !prev))
+    setShowAppointmentSidebar((prev => !prev));
+    getEmployeeSchedule({
+      id: selectedEmployeeData.id,
+      start_date: calenderCurrentRange.start_date,
+      end_date: calenderCurrentRange.end_date,
+      location_id: selectedLocation?.id
+    });
   };
 
   const calculateTime = () => {
@@ -1048,7 +1059,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
       }
     }
   }, [appointmentModal.treatments]);
-
+ 
 
   return (
     <>
@@ -1184,7 +1195,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
               events={(employeeScheduleEventsData[selectedEmployeeData?.id] || []).flatMap((data) => {
                 if (data.available) {
                   const currentHour = moment(data.start_time).format("YYYY-MM-DD H")
-                  const newItem = employeeScheduleEventsData[selectedEmployeeData?.id]?.filter((item) => (moment(item?.start_time).format("YYYY-MM-DD H") === currentHour && !item?.available))
+                  const newItem = employeeScheduleEventsData[selectedEmployeeData?.id]?.filter((item) => (moment(item?.start_time).format("YYYY-MM-DD H") === currentHour && !item?.available))                  
                   let updateEndTime = null
                   newItem?.map((item) => {
                     if ((new Date(item.end_time) > new Date(updateEndTime)) || !updateEndTime) {
@@ -1209,7 +1220,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                   ...data,
                   title: treatmentName
                 }
-                return [newData];
+                              return [newData];
               })}
               onSelectEvent={(event) => {
                 showConfirmationModal(event, true, employeeScheduleEventsData[selectedEmployeeData.id]);
@@ -1285,25 +1296,10 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
           }
         }
 
-        title={
-          appointmentModal?.readOnly
-            ? `Appointment Details`
-            : "New Appointment"
-        }
+        title={"New Appointment"}
         footer={
           <div className="flex gap-2">
-            {appointmentModal.readOnly ? (
-              <Button
-                className="btn btn-danger"
-                onClick={() => {
-                  setShowConfirm(true);
-                  appointmentModal.show = false;
-                }}
-              >
-                Cancel Appointment
-              </Button>
-            ) : null}
-            {appointmentModal.readOnly ? null : (
+            {
               <Button type="submit" form="appointmentForm"
               disabled={disableCreateAppointment}
               style={{
@@ -1315,17 +1311,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
               >
                 Save
               </Button>
-            )}
-            {!authUserState.user.is_admin && parseInt(appointmentModal?.remaining_amount) > 0 ? (
-              <Button
-                onClick={() => {
-                  setShowConfirmPayment(true);
-                  appointmentModal.show = false;
-                }}
-              >
-                Pay Remaining Amount
-              </Button>
-            ):""}
+            }
             {/* <Button>+ Add</Button> */}
           </div>
         }
@@ -1338,13 +1324,6 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
           {selectedEmployeeData &&
             selectedEmployeeData?.treatmentOption?.length > 0 && (
               <div className="flex flex-col gap-2">
-                {appointmentModal?.readOnly ? (
-                  <div>
-                    <span>Treatment</span>
-                    <br></br>
-                    <span>{appointmentModal?.treatment || ""}</span>
-                  </div>
-                ) : (
                   <>
                     <label htmlFor="treatment">Treatment</label>
                     {/* <Select
@@ -1438,26 +1417,11 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                       required
                     />
 
-                  </>
-                )}
+                  </>   
               </div>
             )}
 
           <div className="flex flex-col gap-2">
-            {appointmentModal?.readOnly ? (
-              <div>
-                <span>Client</span>
-                <br></br>
-                <span>
-                  {/* {(clientNameOptions || []).find(
-                    (op) => op?.value === appointmentModal?.client_id
-                  )?.label || ""} */}
-                  {appointmentModal?.client?.name ||
-                    appointmentModal?.client_name ||
-                    ""}
-                </span>
-              </div>
-            ) : (
               <>
                 <label htmlFor="client">Client</label>
                 <Select
@@ -1482,37 +1446,14 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                   placeholder="Select a client"
                 />
               </>
-            )}
           </div>
 
           <div className="flex flex-col gap-2">
-            {appointmentModal?.readOnly ? (
-              <div>
-                <span>Location</span>
-                <br></br>
-                <span>
-                  {/* {(clientNameOptions || []).find(
-                    (op) => op?.value === appointmentModal?.client_id
-                  )?.label || ""} */}
-                  {appointmentModal?.location?.name ||
-                    appointmentModal?.client_name ||
-                    ""}
-                </span>
-              </div>
-            ) : (
-              <>
-              </>
-            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <span>Time</span>
-            {appointmentModal.readOnly ? (
-              <span>
-                {moment(appointmentModal.start_time).format("hh:mm A")} -{" "}
-                {moment(appointmentModal.end_time).format("hh:mm A")}
-              </span>
-            ) : (
+            {
               startEndTime?.start ? <Form.Check
                   type="radio"
                   label={`${moment(startEndTime?.start).format("hh:mm A")} - ${moment(startEndTime?.end).format("hh:mm A")}`}
@@ -1524,28 +1465,7 @@ const [totalTreatmentDuration,setTotalTreatmentDuration]=useState(0);
                     }))
                   }
                 />:<p>-</p>
-            )}
-            {appointmentModal.readOnly && (
-              <div className="flex flex-col gap-2">
-                <span>Transaction Details</span>
-                <div className="flex gap-4 text-sm">
-                  <div className="flex flex-col gap-1">
-                    <span>Total Amount</span>
-                    <span>{parseFloat(appointmentModal?.total_amount)}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span>Paid Amount</span>
-                    <span>{parseFloat(appointmentModal?.paid_amount)}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span>Remaining Amount</span>
-                    <span>
-                      {parseFloat(appointmentModal?.remaining_amount)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+            }
           </div>
         </form>
       </ModalWraper>

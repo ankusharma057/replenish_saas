@@ -32,6 +32,7 @@
     "react-card-flip": "^1.2.3",
     "react-confirm-alert": "^3.0.6",
     "react-countup": "^6.5.3",
+    "react-datepicker": "^7.5.0",
     "react-datetime": "^3.2.0",
     "react-dom": "^18.2.0",
     "react-history-router": "^1.4.1",
