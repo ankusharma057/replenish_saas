@@ -21,43 +21,95 @@ export default function CreateStaffCard({ show, onHide }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(formInitialState);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  // const onSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     setLoading(true);
+  //     formData={
+  //       ...formData,
+  //       profile_photo:selectedFiles[0]
+  //     }
+  //     await createEmployee(formData);
+  //     toast.success("User created successfully");
+  //     //   setFormData(formInitialState);
+  //     getEmployeesList(true);
+  //     e.target.reset();
+  //   } catch (error) {
+  //     let errorString = "";
+  //     Object.keys(error.response.data.error || {})?.forEach((key) => {
+  //       errorString =
+  //         errorString +
+  //         " " +
+  //         " " +
+  //         key +
+  //         " " +
+  //         error.response.data.error[key][0] +
+  //         " ";
+  //     });
+
+  //     toast.error(
+  //       errorString ||
+  //         error?.response?.data?.exception ||
+  //         error?.response?.statusText ||
+  //         error.message ||
+  //         "Failed to create user"
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      formData={
-        ...formData,
-        profile_photo:selectedFiles[0]
+  
+      if (selectedFiles.length === 0) {
+        toast.error("Please select a profile photo.");
+        return; 
       }
-      await createEmployee(formData);
+  
+      const updatedFormData = {
+        ...formData,
+        profile_photo: selectedFiles[0],
+      };
+  
+      await createEmployee(updatedFormData);
       toast.success("User created successfully");
-      //   setFormData(formInitialState);
+  
+      setFormData(formInitialState);
       getEmployeesList(true);
-      e.target.reset();
+      e.target.reset(); 
     } catch (error) {
       let errorString = "";
-      Object.keys(error.response.data.error || {})?.forEach((key) => {
-        errorString =
-          errorString +
-          " " +
-          " " +
-          key +
-          " " +
-          error.response.data.error[key][0] +
-          " ";
-      });
-
-      toast.error(
-        errorString ||
-          error?.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to create user"
-      );
+  
+      if (error?.response?.data?.error) {
+        Object.keys(error.response.data.error).forEach((key) => {
+          errorString =
+            errorString +
+            " " +
+            " " +
+            key +
+            " " +
+            error.response.data.error[key][0] +
+            " ";
+        });
+      } else if (error?.response?.data?.exception) {
+        errorString = error.response.data.exception;
+      } else if (error?.response?.statusText) {
+        errorString = error.response.statusText;
+      } else if (error?.message) {
+        errorString = error.message;
+      } else {
+        errorString = "Failed to create user";
+      }
+  
+      toast.error(errorString);
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
