@@ -1,9 +1,6 @@
 
-import { useRef, useState } from 'react'
-import {
-  ReactSketchCanvas,
-} from 'react-sketch-canvas'
-// import { Button } from '@/components/ui/button'
+import { useRef, useState, useEffect } from 'react'
+import { ReactSketchCanvas } from 'react-sketch-canvas'
 import { Button } from 'react-bootstrap'
 import { Eraser, Pen, Redo, RotateCcw, Save, Undo } from 'lucide-react'
 
@@ -14,8 +11,8 @@ export default function Canvas() {
   const [eraseMode, setEraseMode] = useState(false)
 
   function handleStrokeColorChange(event) {
-    setStrokeColor(event.target.value)
-    console.log(strokeColor)
+    const newColor = event.target.value
+    setStrokeColor(newColor)
   }
 
   function handleEraserClick() {
@@ -54,6 +51,10 @@ export default function Canvas() {
       link.remove()
     }
   }
+
+  useEffect(() => {
+    console.log('Stroke color changed:', strokeColor)
+  }, [strokeColor])
 
   return (
     <div className='mt-6 flex max-w-2xl gap-4'>

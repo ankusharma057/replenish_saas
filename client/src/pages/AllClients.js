@@ -1515,11 +1515,63 @@ const FooterWithDropdown = ({
   const togglePin = (sectionId) => {
     console.log(`Pin clicked for section ${sectionId}`);
   };
+
+const TextareaInput = ({ placeholder }) => (
+  <textarea
+    placeholder={placeholder}
+    className="border p-2 w-full rounded-md mt-2 h-24"
+  />
+);
+
+const CanvasWrapper = () => (
+  <div className="p-4 mt-4 bg-gray-50">
+    <h3 className="font-semibold text-lg flex justify-between items-center">Sketch</h3>
+    <div className="mt-2 border p-4">
+      <Canvas />
+    </div>
+  </div>
+);
+
+const BodyChartWrapper = () => (
+  <div className="p-4 mt-4 bg-gray-50">
+    <h3 className="font-semibold text-lg flex justify-between items-center">Body Chart</h3>
+    <div className="mt-2 border p-4">
+      <BodyChart />
+    </div>
+  </div>
+);
+
+const SideBySideWrapper = () => (
+  <div className="p-4 mt-4 bg-gray-50">
+    <h3 className="font-semibold text-lg flex justify-between items-center">Side by Side</h3>
+    <div className="mt-2 border p-4">
+      <SideBySide />
+    </div>
+  </div>
+);
+
+const SignatureWrapper = () => (
+  <div className="p-4 mt-4 bg-gray-50">
+    <h3 className="font-semibold text-lg flex justify-between items-center">Signature</h3>
+    <div className="mt-2 border p-4">
+      <Signature />
+    </div>
+  </div>
+);
+
+const SpineWrapper = ({ index }) => (
+  <div className="p-4 mt-4 bg-gray-50">
+    <h3 className="font-semibold text-lg flex justify-between items-center">Spine</h3>
+    <div className="mt-2 border p-4">
+      <Spine key={`spine_${index}`} imageSrc={'/shutterstock_442112374_edited.png'} />
+    </div>
+  </div>
+);
   
   
  
   const renderSection = (section) => {
-    const clientName = "John Doe";
+    const clientName = "Patrick";
     const dateTime = new Date().toLocaleString();
     const isPinned = false;
     const renderHeader = () => (
@@ -1543,6 +1595,58 @@ const FooterWithDropdown = ({
         </div>
       </div>
     );
+  //   const renderItem = (item, index) => {
+  //   const componentMap = {
+  //     chief_complaint: <ChiefComplaint item={item} />,
+  //     vitals: <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />,
+  //     file_image: <FileImageUpload sectionId={section.id} />,
+  //     note: (
+  //       <div key={item.id} className="mt-2">
+  //         <h3 className="text-base">Note</h3>
+  //         <TextareaInput placeholder="Enter details for Note" />
+  //       </div>
+  //     ),
+  //     sketch: <CanvasWrapper key={section.id} />,
+  //     body_chart: <BodyChartWrapper key={index} />,
+  //     side_by_side: <SideBySideWrapper key={section.id} />,
+  //     signature: <SignatureWrapper key={section.id} />,
+  //     spine: <SpineWrapper key={`spine_${index}`} />,
+  //     heading: <EditableHeading initialText="Click here to edit this heading" />,
+  //     checkboxes: <Checkboxes />,
+  //     dropdown: <ChartDropdown />,
+  //     smart_options: <SmartOptionsNarrative />,
+  //     range_scale: <ChartScale />,
+  //     optical_measurements: <OpticalMeasurements />,
+  //   };
+  //   return componentMap[item.type] || null;
+  // };
+  const renderItem = (item, index) => {
+    const componentMap = {
+      chief_complaint: <ChiefComplaint item={item} />,
+      vitals: <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />,
+      file_image: <FileImageUpload sectionId={section.id} />,
+      note: (
+        <div key={item.id} className="mt-2">
+          <h3 className="text-base">Note</h3>
+          <TextareaInput placeholder="Enter details for Note" />
+        </div>
+      ),
+      sketch: <CanvasWrapper key={`sketch_${section.id}_${index}`} />,
+      body_chart: <BodyChartWrapper key={`body_chart_${section.id}_${index}`} />,
+      side_by_side: <SideBySideWrapper key={`side_by_side_${section.id}_${index}`} />,
+      signature: <SignatureWrapper key={`signature_${section.id}_${index}`} />,
+      spine: <SpineWrapper key={`spine_${section.id}_${index}`} />,
+      heading: <EditableHeading initialText="Click here to edit this heading" />,
+      checkboxes: <Checkboxes />,
+      dropdown: <ChartDropdown />,
+      smart_options: <SmartOptionsNarrative />,
+      range_scale: <ChartScale />,
+      optical_measurements: <OpticalMeasurements />,
+    };
+    
+    return componentMap[item.type] || null;
+  };
+  
 
     const isExpanded = expandedSections[section.id] || false;
 
@@ -1562,127 +1666,10 @@ const FooterWithDropdown = ({
     />
   </div>
 
-            <div className="p-4 mt-4">
-                {items.map((item,index) => {
-                    switch (item.type) {
-                        case "chief_complaint":
-                            return <ChiefComplaint item={item} />;
-                        case "vitals":
-                            return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                        case "file_image":
-                            return <FileImageUpload sectionId={section.id} />;  
-                        case "note":
-                            return (
-                                <div key={item.id} className="mt-2">
-                                <h3 className="text-base">Note</h3>
-                                    <textarea
-                                        placeholder="Enter details for Note"
-                                        className="border p-2 w-full rounded-md mt-2 h-24"
-                                    />
-                                </div>
-                            );
-                            case "sketch":
-                                return (
-                                  <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                    <h3 className="font-semibold text-lg flex justify-between items-center">
-                                      Sketch
-                                    </h3>
-                                    <div className="mt-2 border p-4">
-                                      <Canvas />
-                                    </div>
-                                  </div>
-                                );
-                            case "body_chart":
-                                    return (
-                                      <div className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Body Chart
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <BodyChart 
-                                        //  key={`bodyChart_${index}`}
-                                        //  imageSrc={'/9298141.jpg'} 
-                                          />
-                                        </div>
-                                      </div>
-                                    );
-                            case "side_by_side":
-                                return (
-                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Side by Side
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <SideBySide />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "signature":
-                                return (
-                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Signature
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <Signature />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "spine":
-                                return (
-                                    <div className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Spine
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <Spine 
-                                         key={`spine_${index}`}
-                                         imageSrc={'/shutterstock_442112374_edited.png'} 
-                                        />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "heading":
-                                return (
-                                    <div>
-      <EditableHeading initialText="Click here to edit this heading" />
-    </div>
-                                );
-                            case "checkboxes":
-                                  return (
-                                    <div>
-                                      <Checkboxes />
-                                    </div>
-                                  )
-                            case "dropdown":
-                                return (
-                                    <div>
-                                      <ChartDropdown />
-                                    </div>
-                                  )
-                            case "smart_options":
-                                return (
-                                    <div>
-                                        <SmartOptionsNarrative />
-                                    </div>
-                                )
-                            case "range_scale":
-                                return (
-                                    <div>
-                                        <ChartScale />
-                                    </div>
-                                )
-                            case "optical_measurements":
-                                return (
-                                    <div>
-                                        <OpticalMeasurements />
-                                    </div>
-                                )
-                        default:
-                            return null;
-                    }
-                })}
-            </div>
+  <div className="p-4 mt-4">
+            {/* {section.items.map((item, index) => renderItem(item, index))} */}
+            {items.map((item, index) => renderItem(item, index))}
+          </div>
                 </div>
               )}
               {isExpanded &&(
@@ -1708,125 +1695,8 @@ const FooterWithDropdown = ({
       
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -1845,16 +1715,6 @@ const FooterWithDropdown = ({
           
      
     case "sketch":
-        // return (
-        //   <div key={section.id} className="p-4 mt-4 bg-gray-50">
-        //     <h3 className="font-semibold text-lg flex justify-between items-center">
-        //       Sketch
-        //     </h3>
-        //     <div className="mt-2 border p-4">
-        //       <Canvas />
-        //     </div>
-        //   </div>
-        // );
         return (
             <div key={section.id} className="section-container bg-gray-50 p-4 mt-4">
               {renderHeader(section)}
@@ -1868,125 +1728,8 @@ const FooterWithDropdown = ({
             </div>
 
             <div className="p-4 mt-4">
-                {items.map((item,index) => {
-                    switch (item.type) {
-                        case "chief_complaint":
-                            return <ChiefComplaint item={item} />;
-                        case "vitals":
-                            return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                        case "file_image":
-                            return <FileImageUpload sectionId={section.id} />;  
-                        case "note":
-                            return (
-                                <div key={item.id} className="mt-2">
-                                <h3 className="text-base">Note</h3>
-                                    <textarea
-                                        placeholder="Enter details for Note"
-                                        className="border p-2 w-full rounded-md mt-2 h-24"
-                                    />
-                                </div>
-                            );
-                            case "sketch":
-                                return (
-                                  <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                    <h3 className="font-semibold text-lg flex justify-between items-center">
-                                      Sketch
-                                    </h3>
-                                    <div className="mt-2 border p-4">
-                                      <Canvas />
-                                    </div>
-                                  </div>
-                                );
-                            case "body_chart":
-                                    return (
-                                      <div className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Body Chart
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <BodyChart 
-                                        //  key={`bodyChart_${index}`}
-                                        //  imageSrc={'/9298141.jpg'} 
-                                          />
-                                        </div>
-                                      </div>
-                                    );
-                            case "side_by_side":
-                                return (
-                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Side by Side
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <SideBySide />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "signature":
-                                return (
-                                    <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Signature
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <Signature />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "spine":
-                                return (
-                                    <div className="p-4 mt-4 bg-gray-50">
-                                      <h3 className="font-semibold text-lg flex justify-between items-center">
-                                        Spine
-                                      </h3>
-                                      <div className="mt-2 border p-4">
-                                        <Spine 
-                                         key={`spine_${index}`}
-                                         imageSrc={'/shutterstock_442112374_edited.png'} 
-                                        />
-                                      </div>
-                                    </div>
-                                  ); 
-                            case "heading":
-                                return (
-                                    <div>
-      <EditableHeading initialText="Click here to edit this heading" />
-    </div>
-                                );
-                            case "checkboxes":
-                                  return (
-                                    <div>
-                                      <Checkboxes />
-                                    </div>
-                                  )
-                            case "dropdown":
-                                return (
-                                    <div>
-                                      <ChartDropdown />
-                                    </div>
-                                  )
-                            case "smart_options":
-                                return (
-                                    <div>
-                                        <SmartOptionsNarrative />
-                                    </div>
-                                )
-                            case "range_scale":
-                                return (
-                                    <div>
-                                        <ChartScale />
-                                    </div>
-                                )
-                            case "optical_measurements":
-                                return (
-                                    <div>
-                                        <OpticalMeasurements />
-                                    </div>
-                                )
-                        default:
-                            return null;
-                    }
-                })}
+                
+            {items.map((item, index) => renderItem(item, index))}
             </div>
                 </div>
               )}
@@ -2018,125 +1761,8 @@ const FooterWithDropdown = ({
                                     </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                    
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2164,125 +1790,8 @@ const FooterWithDropdown = ({
                         <FileImageUpload sectionId={section.id} />;
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                    
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2300,17 +1809,6 @@ const FooterWithDropdown = ({
             );
 
         case "body_chart":
-            // return (
-            //   <div key={section.id} className="p-4 mt-4 bg-gray-50">
-            //     <h3 className="font-semibold text-lg flex justify-between items-center">
-            //       Body Chart
-            //     </h3>
-            //     <div className="mt-2 border p-4">
-            //       {/* Use the Canvas component here */}
-            //       <BodyChart />
-            //     </div>
-            //   </div>
-            // );
             return (
                 <div key={section.id} className="section-container bg-gray-50 p-4 mt-4">
                   {renderHeader(section)}
@@ -2325,125 +1823,8 @@ const FooterWithDropdown = ({
                 </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                    
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2476,125 +1857,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                    
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2627,125 +1891,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2778,125 +1925,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -2914,17 +1944,6 @@ const FooterWithDropdown = ({
             );
 
         case "spine":
-                // return (
-                //   <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                //     <h3 className="font-semibold text-lg flex justify-between items-center">
-                //       Spine
-                //     </h3>
-                //     <div className="mt-2 border p-4">
-                //       {/* Use the Canvas component here */}
-                //       <Spine />
-                //     </div>
-                //   </div>
-                // );
                 return (
                     <div key={section.id} className="section-container bg-gray-50 p-4 mt-4">
                       {renderHeader(section)}
@@ -2935,130 +1954,13 @@ const FooterWithDropdown = ({
                       Spine
                     </h3>
                     <div className="mt-2 border p-4">
-                      <Spine />
+                      <Spine key={`spine_`} imageSrc={'/shutterstock_442112374_edited.png'}/>
                     </div>
           </div>
         
                     <div className="p-4 mt-4">
-                        {items.map((item,index) => {
-                            switch (item.type) {
-                                case "chief_complaint":
-                                    return <ChiefComplaint item={item} />;
-                                case "vitals":
-                                    return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                                case "file_image":
-                                    return <FileImageUpload sectionId={section.id} />;  
-                                case "note":
-                                    return (
-                                        <div key={item.id} className="mt-2">
-                                        <h3 className="text-base">Note</h3>
-                                            <textarea
-                                                placeholder="Enter details for Note"
-                                                className="border p-2 w-full rounded-md mt-2 h-24"
-                                            />
-                                        </div>
-                                    );
-                                    case "sketch":
-                                        return (
-                                          <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Sketch
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <Canvas />
-                                            </div>
-                                          </div>
-                                        );
-                                    case "body_chart":
-                                            return (
-                                              <div className="p-4 mt-4 bg-gray-50">
-                                                <h3 className="font-semibold text-lg flex justify-between items-center">
-                                                  Body Chart
-                                                </h3>
-                                                <div className="mt-2 border p-4">
-                                                  <BodyChart 
-                                                //  key={`bodyChart_${index}`}
-                                                //  imageSrc={'/9298141.jpg'} 
-                                                  />
-                                                </div>
-                                              </div>
-                                            );
-                                    case "side_by_side":
-                                        return (
-                                            <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                              <h3 className="font-semibold text-lg flex justify-between items-center">
-                                                Side by Side
-                                              </h3>
-                                              <div className="mt-2 border p-4">
-                                                <SideBySide />
-                                              </div>
-                                            </div>
-                                          ); 
-                                    case "signature":
-                                        return (
-                                            <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                              <h3 className="font-semibold text-lg flex justify-between items-center">
-                                                Signature
-                                              </h3>
-                                              <div className="mt-2 border p-4">
-                                                <Signature />
-                                              </div>
-                                            </div>
-                                          ); 
-                                    case "spine":
-                                        return (
-                                            <div className="p-4 mt-4 bg-gray-50">
-                                              <h3 className="font-semibold text-lg flex justify-between items-center">
-                                                Spine
-                                              </h3>
-                                              <div className="mt-2 border p-4">
-                                                <Spine 
-                                                 key={`spine_${index}`}
-                                                 imageSrc={'/shutterstock_442112374_edited.png'} 
-                                                />
-                                              </div>
-                                            </div>
-                                          ); 
-                                    case "heading":
-                                        return (
-                                            <div>
-              <EditableHeading initialText="Click here to edit this heading" />
-            </div>
-                                        );
-                                    case "checkboxes":
-                                          return (
-                                            <div>
-                                              <Checkboxes />
-                                            </div>
-                                          )
-                                    case "dropdown":
-                                        return (
-                                            <div>
-                                              <ChartDropdown />
-                                            </div>
-                                          )
-                                    case "smart_options":
-                                        return (
-                                            <div>
-                                                <SmartOptionsNarrative />
-                                            </div>
-                                        )
-                                    case "range_scale":
-                                        return (
-                                            <div>
-                                                <ChartScale />
-                                            </div>
-                                        )
-                                    case "optical_measurements":
-                                        return (
-                                            <div>
-                                                <OpticalMeasurements />
-                                            </div>
-                                        )
-                                default:
-                                    return null;
-                            }
-                        })}
+                       
+            {items.map((item, index) => renderItem(item, index))}
                     </div>
                         </div>
                       )}
@@ -3086,125 +1988,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -3232,125 +2017,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                    
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -3378,125 +2046,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -3524,125 +2075,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -3670,125 +2104,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}
@@ -3816,125 +2133,8 @@ const FooterWithDropdown = ({
       </div>
     
                 <div className="p-4 mt-4">
-                    {items.map((item,index) => {
-                        switch (item.type) {
-                            case "chief_complaint":
-                                return <ChiefComplaint item={item} />;
-                            case "vitals":
-                                return <VitalsSection vitalsText={vitalsText} setVitalsText={setVitalsText} />                                  
-                            case "file_image":
-                                return <FileImageUpload sectionId={section.id} />;  
-                            case "note":
-                                return (
-                                    <div key={item.id} className="mt-2">
-                                    <h3 className="text-base">Note</h3>
-                                        <textarea
-                                            placeholder="Enter details for Note"
-                                            className="border p-2 w-full rounded-md mt-2 h-24"
-                                        />
-                                    </div>
-                                );
-                                case "sketch":
-                                    return (
-                                      <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                        <h3 className="font-semibold text-lg flex justify-between items-center">
-                                          Sketch
-                                        </h3>
-                                        <div className="mt-2 border p-4">
-                                          <Canvas />
-                                        </div>
-                                      </div>
-                                    );
-                                case "body_chart":
-                                        return (
-                                          <div className="p-4 mt-4 bg-gray-50">
-                                            <h3 className="font-semibold text-lg flex justify-between items-center">
-                                              Body Chart
-                                            </h3>
-                                            <div className="mt-2 border p-4">
-                                              <BodyChart 
-                                            //  key={`bodyChart_${index}`}
-                                            //  imageSrc={'/9298141.jpg'} 
-                                              />
-                                            </div>
-                                          </div>
-                                        );
-                                case "side_by_side":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Side by Side
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <SideBySide />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "signature":
-                                    return (
-                                        <div key={section.id} className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Signature
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Signature />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "spine":
-                                    return (
-                                        <div className="p-4 mt-4 bg-gray-50">
-                                          <h3 className="font-semibold text-lg flex justify-between items-center">
-                                            Spine
-                                          </h3>
-                                          <div className="mt-2 border p-4">
-                                            <Spine 
-                                             key={`spine_${index}`}
-                                             imageSrc={'/shutterstock_442112374_edited.png'} 
-                                            />
-                                          </div>
-                                        </div>
-                                      ); 
-                                case "heading":
-                                    return (
-                                        <div>
-          <EditableHeading initialText="Click here to edit this heading" />
-        </div>
-                                    );
-                                case "checkboxes":
-                                      return (
-                                        <div>
-                                          <Checkboxes />
-                                        </div>
-                                      )
-                                case "dropdown":
-                                    return (
-                                        <div>
-                                          <ChartDropdown />
-                                        </div>
-                                      )
-                                case "smart_options":
-                                    return (
-                                        <div>
-                                            <SmartOptionsNarrative />
-                                        </div>
-                                    )
-                                case "range_scale":
-                                    return (
-                                        <div>
-                                            <ChartScale />
-                                        </div>
-                                    )
-                                case "optical_measurements":
-                                    return (
-                                        <div>
-                                            <OpticalMeasurements />
-                                        </div>
-                                    )
-                            default:
-                                return null;
-                        }
-                    })}
+                   
+            {items.map((item, index) => renderItem(item, index))}
                 </div>
                     </div>
                   )}

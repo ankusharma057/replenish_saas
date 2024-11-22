@@ -70,6 +70,37 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.index ["employee_id"], name: "index_chart_entries_on_employee_id"
   end
 
+  create_table "client_details", force: :cascade do |t|
+    t.bigint "client_id", null: false
+    t.string "city"
+    t.string "state"
+    t.string "zip_code"
+    t.string "country"
+    t.string "gender"
+    t.date "date_of_birth"
+    t.string "personal_health_number"
+    t.string "family_doctor"
+    t.string "family_doctor_phone"
+    t.string "family_doctor_email"
+    t.string "referring_professional"
+    t.string "referring_professional_phone"
+    t.string "referring_professional_email"
+    t.string "emergency_contact"
+    t.string "emergency_contact_phone"
+    t.string "emergency_contact_relationship"
+    t.string "parent_guardian"
+    t.string "occupation"
+    t.string "employer"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "home_phone"
+    t.string "mobile_phone"
+    t.string "work_phone"
+    t.string "fax_phone"
+    t.string "sex"
+    t.index ["client_id"], name: "index_client_details_on_client_id"
+  end
+
   create_table "clients", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -79,6 +110,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.string "password_digest"
     t.string "stripe_id"
     t.string "timezone", default: "UTC"
+    t.string "address"
+    t.string "phone_number"
+    t.string "last_name"
+    t.string "preferred_name"
+    t.string "pronouns"
+    t.string "prefix"
+    t.string "middle_name"
+    t.jsonb "notification_settings"
+    t.jsonb "online_booking_policy"
+    t.jsonb "online_booking_payment_policy"
+    t.string "how_heard_about_us"
+    t.integer "referred_employee_id"
   end
 
   create_table "employee_clients", force: :cascade do |t|
@@ -210,6 +253,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.integer "source_invoice_id"
     t.boolean "provider_purchased"
     t.boolean "is_paid", default: false, null: false
+    t.string "stripe_account_id"
     t.boolean "service_experience", default: false
     t.boolean "comfort_with_modality", default: false
     t.boolean "mentor_value_provided", default: false
@@ -217,7 +261,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.text "comfort_with_modality_reason", default: ""
     t.text "mentor_value_provided_reason", default: ""
     t.integer "mentor_id"
-    t.string "stripe_account_id"
   end
 
   create_table "locations", force: :cascade do |t|
@@ -282,13 +325,31 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
   end
 
+  create_table "schedule_products", force: :cascade do |t|
+    t.bigint "schedule_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_schedule_products_on_product_id"
+    t.index ["schedule_id"], name: "index_schedule_products_on_schedule_id"
+  end
+
+  create_table "schedule_treatments", force: :cascade do |t|
+    t.bigint "schedule_id", null: false
+    t.bigint "treatment_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["schedule_id"], name: "index_schedule_treatments_on_schedule_id"
+    t.index ["treatment_id"], name: "index_schedule_treatments_on_treatment_id"
+  end
+
   create_table "schedules", force: :cascade do |t|
     t.string "product_type"
     t.datetime "start_time"
     t.datetime "end_time"
     t.datetime "date"
     t.bigint "employee_id", null: false
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.bigint "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -298,6 +359,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.integer "cancelled_by"
     t.datetime "cancelled_at"
     t.boolean "is_cancelled", default: false
+    t.jsonb "notification_settings"
+    t.jsonb "notes"
     t.index ["client_id"], name: "index_schedules_on_client_id"
     t.index ["employee_id"], name: "index_schedules_on_employee_id"
     t.index ["product_id"], name: "index_schedules_on_product_id"
@@ -343,12 +406,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
   add_foreign_key "availability_timings", "availabilities", column: "availabilities_id"
   add_foreign_key "chart_entries", "clients"
   add_foreign_key "chart_entries", "employees"
+  add_foreign_key "client_details", "clients"
   add_foreign_key "employee_clients", "clients"
   add_foreign_key "employee_clients", "employees"
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "intake_forms", "employees"
   add_foreign_key "questionnaires", "employees"
+  add_foreign_key "schedule_products", "products"
+  add_foreign_key "schedule_products", "schedules"
+  add_foreign_key "schedule_treatments", "schedules"
+  add_foreign_key "schedule_treatments", "treatments"
   add_foreign_key "schedules", "clients"
   add_foreign_key "schedules", "employees"
   add_foreign_key "schedules", "products"

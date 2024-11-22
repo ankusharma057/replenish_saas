@@ -473,7 +473,7 @@ export default function BodyChart() {
   const [pointers, setPointers] = useState([]); 
   const [notes, setNotes] = useState([]); 
 
-  const bodyChartImage = '/bodyChartImage.png';
+  const bodyChartImage = '/shutterstock_1855173277_edited.jpeg';
 
   const handleCanvasClick = (event) => {
     if (pointerMode) {
