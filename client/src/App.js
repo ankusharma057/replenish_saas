@@ -40,7 +40,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AddInvoices = lazy(() => import("./pages/AddInvoice"));
 const Invoice = lazy(() => import("./pages/Invoice"));
-// const Signup = lazy(() => import("./pages/Auth/SignUp"));
+const SignUp = lazy(() => import("./pages/Auth/SignUp"));
 const AddProduct = lazy(() => import("./pages/AddProduct"));
 const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const Employee = lazy(() => import("./pages/Employee"));
@@ -70,18 +70,31 @@ function App() {
     } catch (error) {}
   };
   const getMyProfile = async () => {
-    if(location.pathname === "/healthz"){
-      navigate("/healthz");
-    }
-    else{
+    try {
+      if (location.pathname === "/healthz") {
+        return navigate("/healthz");
+      }
+  
+      if (location.pathname === "/signup") {
+        return;
+      }
+  
       const { data } = await getUpdatedUserProfile();
+  
       if (data) {
         authUserDispatch({ type: LOGIN, payload: data });
       } else {
-        if (!location.pathname.includes("clients")) navigate("/");
+        if (!location.pathname.includes("clients")) {
+          navigate("/");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+  
+      if (!location.pathname.includes("clients")) {
+        navigate("/");
       }
     }
-
   };
 
   useEffect(() => {
@@ -170,6 +183,7 @@ function App() {
         <Routes>
           <Route path="/healthz" element={<Health />} />
           <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />
           <Route path="/clients/signin" element={<ClientSignIn />} />

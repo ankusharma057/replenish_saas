@@ -92,12 +92,21 @@ function Login() {
               required={true}
             />
 
-            <Loadingbutton
-              isLoading={isLoading}
-              loadingText="Login..."
-              title="Login"
-              type="submit"
-            />
+            <div className="flex justify-between items-center mt-4">
+              <Loadingbutton
+                isLoading={isLoading}
+                loadingText="Login..."
+                title="Login"
+                type="submit"
+              />
+              <button
+                type="button"
+                className="text-sm font-medium text-cyan-500 hover:underline"
+                onClick={() => navigate('/signup')}
+              >
+                Sign Up
+              </button>
+            </div>
           </Form>
         </div>
       </div>

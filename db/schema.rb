@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_20_225222) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -164,6 +164,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_15_115813) do
     t.string "vendor_name"
     t.string "reference_number"
     t.boolean "pay_50", default: false
+    t.string "plan"
+    t.string "stripe_customer_id"
+    t.string "subscription_status"
+    t.datetime "subscription_ends_at"
   end
 
   create_table "employees_inventories", force: :cascade do |t|

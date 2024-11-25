@@ -1,4 +1,6 @@
 class Employee < ApplicationRecord
+  after_create :create_stripe_customer
+
   rolify
 
   attr_accessor :is_admin, :is_inv_manager, :is_mentor
@@ -183,5 +185,20 @@ class Employee < ApplicationRecord
       employee_mentors: :mentor,
       inventory_requests: []
     ).find(employee_id)
+  end
+
+  private
+
+  def create_stripe_customer
+    begin
+      customer = Stripe::Customer.create(
+        email: self.email,
+        name: self.name
+      )
+
+      update(stripe_customer_id: customer.id)
+    rescue Stripe::StripeError => e
+      Rails.logger.error("Stripe customer creation failed: #{e.message}")
+    end
   end
 end

@@ -2,7 +2,8 @@ class EmployeeSerializer < ActiveModel::Serializer
    attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
-             :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url
+             :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url,
+             :plan, :stripe_customer_id, :subscription_status, :subscription_ends_at
 
 
   has_many :invoices
