@@ -863,6 +863,7 @@ const [dateOfService,setDateOfService]=useState("")
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
+    if(invoiceData && Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0){
       confirmAlert({
         title: "Confirm to submit",
         message: `Are you sure add ${invoiceData?.length} Invoices `,
@@ -907,6 +908,9 @@ const [dateOfService,setDateOfService]=useState("")
           },
         ],
       });
+    }else{
+      toast.error("Please select product or client to generate invoice")
+    }
   };
   function findProductQuantity(data, productId) {
     let quantity = 0;
