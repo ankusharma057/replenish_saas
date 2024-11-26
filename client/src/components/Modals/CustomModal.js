@@ -43,6 +43,7 @@ function CustomModal({
   const comments = invoiceData.comments;
   const overheadFeeType = invoiceData.overhead_fee_type;
   const overheadFeeValue = invoiceData.overhead_fee_value;
+  const locationName = invoiceData.location.name
 
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -383,6 +384,11 @@ function CustomModal({
                 <div className="flex flex-col">
                   <span className="text-gray-700">Date of Service:</span>
                   <span>{dateOfService}</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-gray-700">Location:</span>
+                  <span>{locationName}</span>
                 </div>
               </div>
 
