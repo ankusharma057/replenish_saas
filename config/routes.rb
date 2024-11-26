@@ -67,6 +67,7 @@ mount Sidekiq::Web => '/sidekiq'
     resources :employees, only: %i(index show create destroy update) do
       member do
         patch :update_inventories
+        patch :update_plan
         get :locations
       end
     end

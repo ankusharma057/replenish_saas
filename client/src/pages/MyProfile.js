@@ -50,6 +50,7 @@ import { RiQuestionnaireLine } from "react-icons/ri";
 import { FaRegEdit } from "react-icons/fa";
 import Mentorship from "./Mentorship";
 import MPInvoice from "./MPInvoice";
+import PlanSubscription from "./PlanSubscription";
 
 
 const MyProfile = () => {
@@ -58,7 +59,7 @@ const MyProfile = () => {
   const [loading, setLoading] = useState(false);
   const { collapse } = useAsideLayoutContext();
   const [modalShow, setModalShow] = useState(false);
-  const [currentTab, setCurrentTab] = useState("products");
+  const [currentTab, setCurrentTab] = useState("subscription");
   const [invoiceData, setinvoiceData] = useState(null);
   const [showAssignMadal, setShowAssignMadal] = useState(false);
   const [assigninventory_object, setAssigninventory_object] = useState({});
@@ -540,6 +541,21 @@ const MyProfile = () => {
             >
               <FileText />
               Mentorship Evaluations
+            </div>
+
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "subscription" && setCurrentTab("subscription");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "subscription" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <Receipt /> Subscription Plans
             </div>
 
             <div
@@ -1078,6 +1094,10 @@ const MyProfile = () => {
 
           {currentTab === "mp_invoice" && (
             <MPInvoice />
+          )}
+
+          {currentTab === "subscription" && (
+            <PlanSubscription />
           )}
 
           {currentTab === "mySchedule" && (

@@ -120,6 +120,16 @@ class Api::EmployeesController < ApplicationController
     render json: mentors, only: [:id, :name]
   end
 
+  def update_plan
+    @employee = Employee.find_by(id: params[:id])
+
+    if @employee.update(plan: params[:plan])
+      render json: { success: true, plan: @employee.plan }
+    else
+      render json: { success: false, error: @employee.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def employee_params
