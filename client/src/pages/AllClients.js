@@ -1353,14 +1353,10 @@ useEffect(()=>{
         { label: "SOAP", value: "soap", description: "Chart Template ReplenishMD" },
         { label: "COVID", value: "covid", description: "Single Client Survey ReplenishMD" },
     ];
-
-  
     const [expandedSections, setExpandedSections] = useState({});
     const [elements, setElements] = useState([]);
     const [vitalsText, setVitalsText] = useState('');
-   
-  
-    console.log("here");
+
     const toggleDropdown = (sectionId) => {
         setIsDropdownOpen((prevState) => ({
           ...prevState,

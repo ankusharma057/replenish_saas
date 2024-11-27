@@ -43,8 +43,7 @@ function CustomModal({
   const comments = invoiceData.comments;
   const overheadFeeType = invoiceData.overhead_fee_type;
   const overheadFeeValue = invoiceData.overhead_fee_value;
-  const locationName = invoiceData.location.name
-
+  const locationName = invoiceData?.location?.name
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [nestedInputModal, setNestedInputModal] = useState({
