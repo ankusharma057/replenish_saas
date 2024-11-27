@@ -5,6 +5,13 @@ mount Sidekiq::Web => '/sidekiq'
   namespace :api do
     get 'health_check', to: 'health_check#index'
     get 'config', to: 'config#index'
+    
+    namespace :stripe do
+      get '/pricing', to: 'checkout#pricing'
+      post '/checkout', to: 'checkout#checkout'
+      post '/billing_portal', to: 'billing_portal#create'
+    end
+    
     namespace :client do
       post '/sign_up', to: 'registrations#sign_up'
       post '/log_in', to: 'sessions#create'

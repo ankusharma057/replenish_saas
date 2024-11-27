@@ -935,3 +935,43 @@ export const fetchMentors = async () => {
     throw error;
   }
 };
+
+export const fetchBillingPortal = async () => {
+  try {
+    const response = await api.post("/api/stripe/billing_portal");
+    return response.data;
+  } catch (error) {
+    console.error("Error opening billing portal:", error);
+    throw error;
+  }
+};
+
+export const fetchPricingPlans = async () => {
+  try {
+    const response = await api.get("/api/stripe/pricing");
+    return response.data;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+
+export const createSubscriptionCheckoutSession = async (priceId) => {
+  try {
+    const response = await api.post("/api/stripe/checkout", { price_id: priceId });
+    return response.data;
+  } catch (error) {
+    console.error("Unable to initiate checkout:", error);
+    throw error;
+  }
+};
+
+export const subscribeToFreePlan = async (employeeId) => {
+  try {
+    const response = await api.patch(`/api/employees/${employeeId}/update_plan`, { plan: "free" });
+    return response.data;
+  } catch (error) {
+    console.error("There was an error subscribing to the Free Plan:", error);
+    throw error;
+  }
+};

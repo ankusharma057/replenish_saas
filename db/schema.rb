@@ -166,8 +166,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_20_225222) do
     t.boolean "pay_50", default: false
     t.string "plan"
     t.string "stripe_customer_id"
-    t.string "subscription_status"
-    t.datetime "subscription_ends_at"
   end
 
   create_table "employees_inventories", force: :cascade do |t|

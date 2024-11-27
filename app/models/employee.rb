@@ -5,8 +5,11 @@ class Employee < ApplicationRecord
 
   attr_accessor :is_admin, :is_inv_manager, :is_mentor
 
+  enum plan: { free: 'free', paid: 'paid' }
+
   validates_uniqueness_of :name
   validates_uniqueness_of :email, case_sensitive: false
+  validates :plan, inclusion: { in: plans.keys }, allow_nil: true
   validate :verify_employee_mentors
   has_one_attached :profile_photo
   has_many :invoices
