@@ -189,12 +189,28 @@ const PlanSubscription = () => {
               </div>
               <div className="space-y-4 mb-2">
                 <div className="text-lg text-gray-700">
-                  <strong>Subscription Ends At:</strong>{" "}
-                  <span className="font-normal">
-                    {subscriptionDetails.endsAt
-                      ? new Date(subscriptionDetails.endsAt).toLocaleDateString()
-                      : "N/A"}
-                  </span>
+                  {setSubscriptionDetails.cancelAtPeriodEnd === true ? (
+                    <>
+                      <strong>Subscription Ends At: </strong>
+                      <span className="font-normal">
+                        {
+                          <span className="font-normal">
+                            {subscriptionDetails.endsAt
+                              ? new Date(subscriptionDetails.endsAt).toLocaleDateString()
+                              : "N/A"
+                            }
+                          </span>
+                        }
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>Subscription Renewal Date: </strong>
+                      <span className="font-normal">
+                        {new Date(subscriptionDetails.endsAt).toLocaleDateString()} - Will be renewed after this date.
+                      </span>
+                    </>
+                  )}
                 </div>
                 <div className="text-lg text-gray-700">
                   <strong>Status:</strong>{" "}
