@@ -15,6 +15,12 @@ class Invoice < ApplicationRecord
   has_many_attached :before_images
   has_many_attached :after_images
   belongs_to :location, optional: true
+
+  scope :filter_by_location, ->(location_id) { where(location_id: location_id) if location_id.present? }
+  scope :filter_by_date, ->(start_date, end_date) { where(date_of_service: start_date..end_date) if start_date.present? && end_date.present? }
+  scope :filter_by_employee, ->(employee_id) { where(employee_id: employee_id) if employee_id.present? }
+
+
   
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 
