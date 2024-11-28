@@ -1,4 +1,6 @@
 class Api::InvoiceListsController < ApplicationController
+  require 'axlsx'
+
   def index
     invoices = Invoice.includes(:location).where(mentor_id: nil).paginated_invoices(params)
     render json: {
@@ -199,6 +201,8 @@ class Api::InvoiceListsController < ApplicationController
 
     (invoices.size.to_f / total_invoices * 100).round(2)
   end
+
+  private
 
   def calculate_percentage_invoiced(invoices)
     total_invoices = Invoice.count
