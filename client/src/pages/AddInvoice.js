@@ -980,13 +980,14 @@ export default function AddInvoices() {
   }
   }
   const handleInvoiceLocationSelect = (event) => {
-    let location = authUserState.user.employee_locations.find((item) => { return item.location.name === event.target.value })
-    if (location) {
-      setLocationName(location.name)
-      setLocationId(location.id)
+    let employeeLocation = authUserState.user.employee_locations.find((item) => { return item.location.name === event.target.value })
+    if (employeeLocation) {
+      const locationId = employeeLocation.location.id;
+      setLocationName(employeeLocation.location.name)
+      setLocationId(locationId)
       setFormData((prevFormData) => ({
         ...prevFormData,
-        location_id: location?.id
+        location_id: locationId
       }));
       setIsAlert({
         location: false,
@@ -994,6 +995,8 @@ export default function AddInvoices() {
       });
     }
   };
+
+
 
   return (
     <>
