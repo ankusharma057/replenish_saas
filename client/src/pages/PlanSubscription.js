@@ -189,7 +189,7 @@ const PlanSubscription = () => {
               </div>
               <div className="space-y-4 mb-2">
                 <div className="text-lg text-gray-700">
-                  {setSubscriptionDetails.cancelAtPeriodEnd === true ? (
+                  {subscriptionDetails.cancelAtPeriodEnd === true ? (
                     <>
                       <strong>Subscription Ends At: </strong>
                       <span className="font-normal">
