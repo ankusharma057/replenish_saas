@@ -777,7 +777,9 @@ const ClientsProfileUpdate = () => {
     appendIfChanged('client[how_heard_about_us]', formData.how_heard_about_us, clientProfileData?.how_heard_about_us);
 
     //profile photo
+    if(selectedFiles.length>0 && Array.isArray(selectedFiles)){
     appendIfChanged('client[profile_photo]', selectedFiles[0], clientProfileData?.profile_pic);
+  }
     const isEmpty = !Array.from(formDataPayload.entries()).length;
     if (!isEmpty) {
       let response = await UpdateClient(params.id, true, formDataPayload)
