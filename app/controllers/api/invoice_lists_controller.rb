@@ -71,6 +71,7 @@ class Api::InvoiceListsController < ApplicationController
     }, status: :ok
   end
 
+
   def export_invoices
     invoices = filtered_invoices_with_date_range
     summary_data = calculate_summary_data(invoices)
