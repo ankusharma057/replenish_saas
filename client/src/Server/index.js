@@ -995,11 +995,31 @@ export const GetLocationDetails = async (locationId,refetch) =>{
   });
   return res;
 }
+export const GetAllSummaryInvoices = async (payload,refetch) =>{
+  let url = `/api/summary`;
+  const res = await api.get(url,{
+    body: payload,
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
 export const UpdateLocation = async (locationId,payload) =>{
   let url = `/api/locations/${locationId}`;
   const res = await api.patch(url,payload,{
     cache: {
       ignoreCache: true,
+    },
+  });
+  return res;
+}
+export const GenerateExcelForInvoices = async (payload,refetch) =>{
+  let url = `/api/export_invoices`;
+  const res = await api.get(url,{
+    body: payload,
+    cache: {
+      ignoreCache: refetch,
     },
   });
   return res;

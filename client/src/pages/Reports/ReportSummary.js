@@ -1,29 +1,45 @@
-import { SearchIcon, SlidersHorizontal, MoreHorizontal } from 'lucide-react'
+import { SlidersHorizontal, MoreHorizontal, SearchIcon } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
-import { ListGroup, Nav, NavDropdown, Overlay, OverlayTrigger, Popover, Table } from 'react-bootstrap'
-import { getEmployeesList, getLocations } from '../../Server'
+import { Dropdown, Form, ListGroup, Nav, NavDropdown, Overlay, OverlayTrigger, Popover, Table } from 'react-bootstrap'
+import { GenerateExcelForInvoices, GetAllSummaryInvoices, getEmployeesList, getLocations } from '../../Server'
 import { BiSolidDownArrow } from 'react-icons/bi'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuthContext } from '../../context/AuthUserContext'
+import moment from 'moment'
 
 const ReportSummary = () => {
+  const [key, setKey] = useState(0);
+
+  const reloadComponent = () => {
+    setKey(prevKey => prevKey + 1);
+  };
   const { authUserState } = useAuthContext();
   const [locationSearchQuery, setLocationSearchQuery] = useState("")
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState("")
-  const [allLocations, setAllLocations] = useState("")
-  const [selectedLocationId, setSelectedLocationsId] = useState("")
-  const [allEmployees, setAllEmployees] = useState("")
-  const [selectedEmployeeId, setSelectedEmployeesId] = useState("")
+  const [allLocations, setAllLocations] = useState([])
+  const [selectedLocationName, setSelectedLocationsName] = useState("")
+  const [allEmployees, setAllEmployees] = useState([])
+  const [allEmployeesIds, setAllEmployeesIds] = useState([])
+  const [selectedEmployeeName, setSelectedEmployeesName] = useState("")
   const [show, setShow] = useState(false);
   const [target, setTarget] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const buttonRef = useRef(null);
-
+  const [salesByLocationData, setSalesByLocationData] = useState([]);
+  const [payload, setPayload] = useState(
+    {
+      "location_id": [],
+      "employee_id": [],
+      "start_date": "",
+      "end_date": ""
+    }
+  )
   useEffect(() => {
     GetAllLocations();
     GetAllEmployees();
+    GetAllSummaryReport()
   }, [])
   const handleToggle = (event) => {
     setShow(!show);
@@ -36,7 +52,13 @@ const ReportSummary = () => {
   const GetAllEmployees = async () => {
     let response = await getEmployeesList();
     setAllEmployees(response.data)
+    let allIds = response.data.map((item) => { return item.id })
+    setAllEmployeesIds(allIds)
   }
+  const GetAllSummaryReport = async () => {
+    let response = await GetAllSummaryInvoices()
+    setSalesByLocationData(response.data.data)
+  };
   const getNextDay = (date) => {
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
@@ -48,23 +70,66 @@ const ReportSummary = () => {
     }
     return null;
   };
-  const selectLocation = (locationName) => {
+  const selectLocation = async (locationName) => {
     let location = filteredLocation.find((item) => { return item.name === locationName });
     if (location) {
-      setSelectedLocationsId(location.id);
+      setSelectedLocationsName(location.name);
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        location_id: [location.id],
+      }));
+      let response = await GetAllSummaryInvoices(payload, true)
+      setSalesByLocationData(response.data.data)
     }
   };
-  const selectEmployee = (locationName) => {
-    let employee = filteredEmployee.find((item) => { return item.name === locationName });
+  const selectEmployee = async (employeeName) => {
+    let employee = filteredEmployee.find((item) => { return item.name === employeeName });
     if (employee) {
-      setSelectedEmployeesId(employee.id)
+      setSelectedEmployeesName(employee.name)
+      setAllEmployeesIds([employee.id])
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        employee_id: [employee.id]
+      }));
+      let response = await GetAllSummaryInvoices(payload, true)
+      setSalesByLocationData(response.data.data)
     }
   };
-
+  const handleEmployeeCheckbox = async (event, employeeId) => {
+    if (!allEmployeesIds.includes(employeeId)) {
+      allEmployeesIds.push(employeeId);
+      setAllEmployeesIds((prev) => [...prev, employeeId])
+    } else {
+      let updatedAllEmployeesIds = await allEmployeesIds.filter((id) => { return id !== employeeId })
+      setAllEmployeesIds(updatedAllEmployeesIds)
+    }
+    const updatedPayload = {
+      ...payload,
+      employee_id: allEmployeesIds
+    };
+    GetAllSummaryReport(updatedPayload);
+  };
+  const handleExcel = async () => {
+    await GenerateExcelForInvoices(payload)
+  }
+  const handleSelectAllEmployees = (e) => {
+    e.stopPropagation();
+    let allIds = allEmployees.map((item) => { return item.id })
+    setAllEmployeesIds(allIds)
+  };
+  const areAllEmployeesSelected = () => {
+    const employeeIds = allEmployees.map((employee) => employee.id);
+    return employeeIds.every((id) => allEmployeesIds.includes(id));
+  };
+  const hasValue = Object.values(payload).some(value => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === "string") return value.trim() !== "";
+    return Boolean(value);
+  });
   const popover = (
     <Popover id="popover-basic">
       <ListGroup>
-        <ListGroup.Item>Export To Excel</ListGroup.Item>
+        <ListGroup.Item onClick={handleExcel}>Export To Excel</ListGroup.Item>
       </ListGroup>
     </Popover>
   );
@@ -75,23 +140,20 @@ const ReportSummary = () => {
     location.name.toLowerCase().startsWith(employeeSearchQuery.toLowerCase())
   );
   return (
-    <div className='p-3 w-full'>
+    <div className='p-3 w-full' key={key}>
 
       <h1 className='text-black-50 font-weight-semibold mt-4'>Billing Summary Report</h1>
-      <div className='p-2 bg-white px-2 w-100 rounded'>
+      <div className='p-3 bg-white px-3 w-100 rounded mt-3'>
         <div className='d-flex justify-content-between align-items-center'>
           <div className='d-flex justify-content-start align-items-center bg-gray'>
             <div className='d-flex justify-content-start align-items-center'>
               <SlidersHorizontal size={20} color='#696977' />
-              <Nav>
-                <NavDropdown
-                  id="nav-dropdown-dark-example"
-                  title="All Locations"
-                  menuVariant="light"
-                  className='text-secondary report-section'
-                  style={{ color: "red" }}
-                >
-                  <div className="relative  w-[90%] m-auto h-[30px] flex items-center">
+              <Dropdown className="d-inline mx-2" onSelect={selectLocation}>
+                <Dropdown.Toggle id="dropdown-autoclose-true" variant='outline' style={{ color: "#696977" }}>
+                  {selectedLocationName ? selectedLocationName : "All Locations"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <div className="relative  w-[85%] m-auto h-[30px] flex items-center">
                     <input
                       autoFocus
                       className="w-full h-[30px] border pl-9 py-2 border-2 rounded-md focus:outline-blue-500 !border-gray-400"
@@ -100,22 +162,21 @@ const ReportSummary = () => {
                     />
                     <SearchIcon className="absolute left-2 pointer-events-none text-gray-400" size={15} />
                   </div>
-                  {Array.isArray(filteredLocation) && filteredLocation?.map((item, index) => {
-                    return <NavDropdown.Item key={index} onClick={()=>selectLocation(item?.name)} >{item.name}</NavDropdown.Item>
+                  {Array.isArray(filteredLocation) && filteredLocation.map((item, index) => {
+                    return <Dropdown.Item eventKey={item?.name}>
+                      {item?.name}
+                    </Dropdown.Item>
                   })}
-                </NavDropdown>
-              </Nav>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
             <div className='d-flex justify-content-start align-items-center'>
-              <Nav>
-                <NavDropdown
-                  id="nav-dropdown-dark-example"
-                  title="All Staff Members"
-                  menuVariant="light"
-                  className='text-secondary report-section'
-                  style={{ color: "red" }}
-                >
-                  <div className="relative  w-[90%] m-auto h-[30px] flex items-center">
+              <Dropdown className="d-inline mx-2">
+                <Dropdown.Toggle id="dropdown-autoclose-true" variant='outline' style={{ color: "#696977" }}>
+                  All Staff Members
+                </Dropdown.Toggle>
+                <Dropdown.Menu className='w-[300px] px-3'>
+                  <div className="relative  w-[100%] m-auto h-[30px] flex items-center">
                     <input
                       autoFocus
                       className="w-full h-[30px] border pl-9 py-2 border-2 rounded-md focus:outline-blue-500 !border-gray-400"
@@ -124,11 +185,21 @@ const ReportSummary = () => {
                     />
                     <SearchIcon className="absolute left-2 pointer-events-none text-gray-400" size={15} />
                   </div>
+                  <div className='d-flex justify-content-between align-items-center' >
+                    <Dropdown.Item className='d-flex justify-content-between px-0' onClick={handleSelectAllEmployees}><span>Select All</span></Dropdown.Item>
+                    <Form.Check checked={areAllEmployeesSelected()} onChange={handleSelectAllEmployees} />
+                  </div>
+                  <hr />
                   {Array.isArray(filteredEmployee) && filteredEmployee?.map((item, index) => {
-                    return <NavDropdown.Item key={index}  onClick={()=>selectEmployee(item?.name)}>{item?.name}</NavDropdown.Item>
+                    return <div className='d-flex justify-content-between align-items-center' >
+                      <Dropdown.Item onClick={(e) => e.stopPropagation()} className='px-0'>
+                        <span onClick={() => selectEmployee(item?.name)}>{item?.name} </span>
+                      </Dropdown.Item>
+                      <Form.Check className='z-10' checked={allEmployeesIds.includes(item.id)} onChange={(event) => handleEmployeeCheckbox(event, item.id)} />
+                    </div>
                   })}
-                </NavDropdown>
-              </Nav>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
             <div className='d-flex justify-content-start align-items-center'>
               <div style={{ padding: '20px' }}>
@@ -143,31 +214,31 @@ const ReportSummary = () => {
                   container={buttonRef.current}
                   rootClose
                   onHide={() => setShow(false)}
-                  style={{width:"auto"}}
+                  style={{ width: "auto" }}
                 >
                   <Popover id="date-picker-popover">
                     <Popover.Body >
                       <div className='d-flex justify-content-between gap-[20px] align-items-center'>
-                      <div>
-                        <label>Start Date:</label>
-                        <DatePicker
-                          selected={startDate}
-                          onChange={(date) => setStartDate(date)}
-                          dateFormat="yyyy/MM/dd"
-                          inline
-                        />
-                      </div>
-                      <div>
-                        <label>End Date:</label>
-                        <DatePicker
-                          selected={endDate}
-                          onChange={(date) => setEndDate(date)}
-                          dateFormat="yyyy/MM/dd"
-                          inline
-                          minDate={getEndDateMinDate()}
-                          disabled={!startDate || !endDate}
-                        />
-                      </div>
+                        <div>
+                          <label>Start Date:</label>
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(moment(date).format('YYYY/MM/DD'))}
+                            dateFormat="yyyy/MM/dd"
+                            inline
+                          />
+                        </div>
+                        <div>
+                          <label>End Date:</label>
+                          <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(moment(date).format('YYYY/MM/DD'))}
+                            dateFormat="yyyy/MM/dd"
+                            inline
+                            minDate={getEndDateMinDate()}
+                            disabled={!startDate || !endDate}
+                          />
+                        </div>
                       </div>
                     </Popover.Body>
                   </Popover>
@@ -189,18 +260,32 @@ const ReportSummary = () => {
                 </NavDropdown>
               </Nav>
             </div>
+            {
+              hasValue &&
+              <div className='d-flex justify-content-start align-items-center'>
+                <span className='' style={{ color: "#696977", cursor: "pointer" }} onClick={() => {
+                  setPayload({
+                    "location_id": [],
+                    "employee_id": [],
+                    "start_date": "",
+                    "end_date": ""
+                  })
+                  setSelectedLocationsName("")
+                }}>Reset</span>
+              </div>
+            }
           </div>
           <div>
-            {authUserState.user.is_admin && 
-            <OverlayTrigger trigger="click" placement="bottom" overlay={popover}>
-              <MoreHorizontal />
-            </OverlayTrigger>
+            {authUserState.user.is_admin &&
+              <OverlayTrigger trigger="click" placement="bottom" overlay={popover}>
+                <MoreHorizontal />
+              </OverlayTrigger>
             }
           </div>
         </div>
         <div>
-          <p className='my-2'>This report was generated on Thursday November 28, 2024 at 1:47am. Load a fresh copy</p>
-          <p className='my-2 fs-5'>November 1, 2024 to November 30, 2024</p>
+          <p className='my-2' style={{ fontSize: "0.8rem" }}>This report was generated on {moment().format('dddd MMMM D, YYYY [at] h:mma')}. <span style={{ color: "rgb(34 211 238)", cursor: "pointer" }} onClick={reloadComponent}>Load a fresh copy</span></p>
+          <p className='my-2 fs-6 text-black-50 mt-3'>November 1, 2024 to November 30, 2024</p>
         </div>
         <hr className='w-[100%] h-[1px] bg-secondary' />
         <div>
@@ -217,12 +302,14 @@ const ReportSummary = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-              </tr>
+              {Array.isArray(salesByLocationData) && salesByLocationData.map((item, index) => {
+                return <tr key={index}>
+                  <td>{item.location_name}</td>
+                  <td>{item.percentage_invoiced}%</td>
+                  <td>{item.total_invoiced}</td>
+                  <td>{item.total_applied}</td>
+                </tr>
+              })}
             </tbody>
           </Table>
         </div>
