@@ -31,13 +31,15 @@ class Api::InvoiceListsController < ApplicationController
     render json: invoices, each_serializer: MentorInvoiceSerializer, status: :ok
   end
 
-
   def summary
     invoices = Invoice.includes(:location)
 
-    invoices = invoices.filter_by_location(params[:location_id]) if params[:location_id].present?
+    location_ids = params[:location_id].is_a?(String) ? params[:location_id].split(',') : params[:location_id]
+    employee_ids = params[:employee_id].is_a?(String) ? params[:employee_id].split(',') : params[:employee_id]
+
+    invoices = invoices.filter_by_location(location_ids) if location_ids.present?
     invoices = invoices.filter_by_date(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
-    invoices = invoices.filter_by_employee(params[:employee_id]) if params[:employee_id].present?
+    invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
 
     summary_data = invoices.group_by(&:location_id).map do |location_id, invoices|
       location_name = location_id ? Location.find(location_id).name : "Unknown Location"
@@ -49,8 +51,34 @@ class Api::InvoiceListsController < ApplicationController
       }
     end
 
-    render json: { data: summary_data }, status: :ok
+    total_invoiced_sum = summary_data.sum { |data| data[:total_invoiced] }
+    total_applied_sum = summary_data.sum { |data| data[:total_applied] }
+
+    schedules = Schedule.where(is_cancelled: false).includes(treatments: :product)
+
+    product_income = schedules.sum do |schedule|
+      schedule.treatments.sum do |treatment|
+        treatment.product.retail_price * treatment.quantity
+      end
+    end
+
+    treatment_income = schedules.sum do |schedule|
+      schedule.treatments.sum(&:cost)
+    end
+
+    render json: {
+      data: summary_data,
+      total_summary: {
+        total_invoiced: total_invoiced_sum,
+        total_applied: total_applied_sum
+      },
+      sales_breakdown: {
+        product_income: product_income,
+        treatment_income: treatment_income
+      }
+    }, status: :ok
   end
+
 
   def export_invoices
     invoices = Invoice.all
