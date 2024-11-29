@@ -158,7 +158,7 @@ mount Sidekiq::Web => '/sidekiq'
     get 'client_schedules_only', to: 'schedules#get_client_schedule_only'
     get '/mentorship_invoices', to: 'invoice_lists#mentorship_invoices'
     get '/export_invoices', to: 'invoice_lists#export_invoices'
-    
+    get '/summary', to: 'invoice_lists#summary'    
     get '/mentors', to: 'employees#mentors'
     post 'add_note', to: 'schedules#add_note'
   end
