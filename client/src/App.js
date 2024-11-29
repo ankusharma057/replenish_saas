@@ -57,6 +57,8 @@ const SubmitedClientIntakeForm = lazy(() => import("./pages/SubmitedClientIntake
 const Health = lazy(() => import("./pages/Health"));
 const ClientProfileUpdate= lazy(()=>import("./pages/Clients/ClientsProfileUpdate"))
 const AddNewClient= lazy(()=>import("./pages/Clients/AddNewClient"))
+const Reports= lazy(()=>import("./pages/Reports/Reports"))
+const ReportSummary= lazy(()=>import("./pages/Reports/ReportSummary"))
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -200,6 +202,9 @@ function App() {
           <Route path="/clients/submited-intake-forms-preview" element={<SubmitedClientIntakeForm />} />
           <Route path="/clients/payment/success" element={<ClientPaymentSuccess />}/>
           <Route path="/submitted-intake-form-preview/:id?" element={<IntakeFormPreview />} />
+          <Route path="/reports" element={<Reports />} >
+            <Route path="report-Summary" element={<ReportSummary />} />
+          </Route>
 
           {authUserState.client && (
             <>

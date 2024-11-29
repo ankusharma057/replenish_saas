@@ -43,3 +43,13 @@
 .react-datepicker-wrapper{
   width: 86% !important;
 }
+.report-section .nav-link{
+color: #696977 !important;
+}
+.popover{
+  max-width: fit-content;
+  display: flex;
+  justify-content: start;
+  gap: 20px;
+  align-items: center;
+}

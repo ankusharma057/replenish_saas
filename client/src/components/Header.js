@@ -108,6 +108,17 @@ export default memo(function Header() {
                 </Link>
                 </button>
                 <button
+                  onClick={handleMenuSHow}
+                  className={`${location.pathname === "/reports" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                >
+                <Link
+                  className={`no-underline text-white py-[1rem] inline-block `}
+                  to="/reports"
+                >
+                  Reports
+                </Link>
+                </button>
+                <button
                     onClick={handleMenuSHow}
                     className={`${(location.pathname === "/intake-forms" || location.pathname === "/new-intake-form") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
                   >
