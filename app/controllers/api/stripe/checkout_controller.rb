@@ -2,7 +2,7 @@ class Api::Stripe::CheckoutController < ApplicationController
   def pricing
     lookup_keys = %w[monthly yearly]
     @prices = Stripe::Price.list(lookup_keys: lookup_keys, active: true, expand: ['data.product']).data.sort_by(&:unit_amount)
-    employee = current_employee.stripe_customer_id
+    employee = current_employee.stripe_customer_id || create_stripe_customer_id(current_employee)
 
     if employee
       active_subscription = Stripe::Subscription.list(customer: employee).data.first
@@ -34,5 +34,17 @@ class Api::Stripe::CheckoutController < ApplicationController
     render json: { url: session.url }, status: :ok
   rescue Stripe::StripeError => e
     render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  private
+
+  def create_stripe_customer_id(employee)
+    stripe_customer = Stripe::Customer.create(
+      email: employee.email,
+      name: employee.name
+    )
+
+    employee.update_attribute(:stripe_customer_id, stripe_customer.id)
+    stripe_customer.id
   end
 end
