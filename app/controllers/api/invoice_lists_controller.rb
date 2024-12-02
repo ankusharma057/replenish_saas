@@ -31,8 +31,8 @@ class Api::InvoiceListsController < ApplicationController
 
   def summary
     if params[:start_date].present? && params[:end_date].present?
-      start_of_month = Date.strptime(params[:start_date], "%Y-%d-%m")
-      end_of_month = Date.strptime(params[:end_date], "%Y-%d-%m")
+      start_of_month = Date.strptime(params[:start_date], "%Y-%m-%d")
+      end_of_month = Date.strptime(params[:end_date], "%Y-%m-%d")
     else
       current_date = Date.today
       start_of_month = current_date.beginning_of_month
