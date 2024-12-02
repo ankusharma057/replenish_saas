@@ -97,6 +97,11 @@ const ReportSummary = () => {
         return updatedIds;
     });
     }
+    const updatedPayload = {
+      ...payload,
+      employee_id: allEmployeesIds
+    };
+    GetAllSummaryReport(updatedPayload);
   };
   const handleExcel = async () => {
     let response = await GenerateExcelForInvoices(payload,true)
