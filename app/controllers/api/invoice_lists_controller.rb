@@ -1,6 +1,4 @@
 class Api::InvoiceListsController < ApplicationController
-  require 'axlsx'
-
   def index
     invoices = Invoice.includes(:location).where(mentor_id: nil).paginated_invoices(params)
     render json: {
