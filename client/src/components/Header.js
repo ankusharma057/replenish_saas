@@ -187,6 +187,18 @@ export default memo(function Header() {
                     </Link>
                 </button>
 
+                <button
+                    onClick={handleMenuSHow}
+                    className={`${(location.pathname === "/settings" || location.pathname === "/settings") &&  "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
+                  >
+                    <Link
+                      className={`no-underline text-white py-[1rem] inline-block `}
+                      to="/settings"
+                    >
+                      Settings
+                    </Link>
+                </button>
+
                 <div className="hidden xl:!ml-0 xl:flex xl:items-center xl:pl-[340px]">
                   <a href="/addInvoice">
                     <Image
