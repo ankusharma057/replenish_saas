@@ -69,11 +69,11 @@ class Api::InvoiceListsController < ApplicationController
     }, status: :ok
   end
 
-
   def export_invoices
     invoices = filtered_invoices_with_date_range
     summary_data = calculate_summary_data(invoices)
 
+    # Generate Excel file as a package
     package = generate_excel_file(summary_data)
     timestamp = Time.now.strftime('%Y%m%d%H%M%S')
     send_data package.to_stream.read,
@@ -187,6 +187,8 @@ class Api::InvoiceListsController < ApplicationController
             "$#{'%.2f' % data[:total_applied]}"
           ]
         end
+
+        # Add totals row
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
