@@ -30,22 +30,38 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def summary
+    if params[:start_date].present? && params[:end_date].present?
+      start_of_month = Date.strptime(params[:start_date], "%Y-%d-%m")
+      end_of_month = Date.strptime(params[:end_date], "%Y-%d-%m")
+    else
+      current_date = Date.today
+      start_of_month = current_date.beginning_of_month
+      end_of_month = current_date.end_of_month
+    end
+    formatted_start_date = start_of_month.strftime('%Y-%d-%m')
+    formatted_end_date = end_of_month.strftime('%Y-%d-%m')
     invoices = Invoice.all
     location_ids = params[:location_id].is_a?(String) ? params[:location_id].split(',') : params[:location_id]
     employee_ids = params[:employee_id].is_a?(String) ? params[:employee_id].split(',') : params[:employee_id]
 
     invoices = invoices.filter_by_location(location_ids) if location_ids.present?
-    invoices = invoices.filter_by_date(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
     invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
+    if params[:start_date].blank? || params[:end_date].blank?
+      invoices = invoices.where(date_of_service: start_of_month..end_of_month)
+    else
+      invoices = invoices.filter_by_date(params[:start_date], params[:end_date])
+    end
 
     summary_data = invoices.group_by(&:location_id).map do |location_id, invoices|
       location_name = location_id ? Location.find(location_id).name : "Unknown Location"
+      
       total_invoiced = invoices.sum do |invoice|
         cash = invoice.paid_by_client_cash || 0
         credit = invoice.paid_by_client_credit || 0
-        credit_after_charges = credit - (credit * 0.03)
+        credit_after_charges = credit - (credit * 0.03) 
         cash + credit_after_charges
       end
+      
       {
         location_name: location_name,
         percentage_invoiced: calculate_percentage_invoiced(invoices),
@@ -57,7 +73,7 @@ class Api::InvoiceListsController < ApplicationController
     total_invoiced_sum = summary_data.sum { |data| data[:total_invoiced] }
     total_applied_sum = summary_data.sum { |data| data[:total_applied] }
 
-    schedules = Schedule.where(is_cancelled: false).includes(treatments: :product)
+    schedules = Schedule.where(is_cancelled: false).where(created_at: start_of_month..end_of_month).includes(treatments: :product)
 
     product_income = schedules.sum do |schedule|
       schedule.treatments.sum do |treatment|
@@ -78,17 +94,24 @@ class Api::InvoiceListsController < ApplicationController
       sales_breakdown: {
         product_income: product_income,
         treatment_income: treatment_income
+      },
+      current_month_dates: {
+        start_date: formatted_start_date,
+        end_date: formatted_end_date
       }
     }, status: :ok
   end
 
-
   def export_invoices
+    # Fetch and prepare data
     invoices = filtered_invoices
     summary_data = prepare_summary_data(invoices)
     timestamp = Time.now.strftime('%Y%m%d%H%M%S')
 
+    # Generate Excel file as a package
     package = generate_excel_file(summary_data)
+
+    # Send the file directly as a stream
     send_data package.to_stream.read,
               filename: "invoices_summary_#{timestamp}.xlsx",
               type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -130,8 +153,10 @@ class Api::InvoiceListsController < ApplicationController
       workbook = package.workbook
 
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
+        # Add header row
         sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
 
+        # Add data rows
         summary_data.each do |data|
           sheet.add_row [
             data[:location_name],
@@ -140,6 +165,8 @@ class Api::InvoiceListsController < ApplicationController
             "$#{'%.2f' % data[:total_applied]}"
           ]
         end
+
+        # Add totals row
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
