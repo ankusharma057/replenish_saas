@@ -186,7 +186,6 @@ class Api::InvoiceListsController < ApplicationController
             "$#{'%.2f' % data[:total_applied]}"
           ]
         end
-
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
