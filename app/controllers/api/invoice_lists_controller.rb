@@ -30,50 +30,16 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def summary
-    if params[:start_date].present? && params[:end_date].present?
-      start_of_month = Date.strptime(params[:start_date], "%Y-%m-%d")
-      end_of_month = Date.strptime(params[:end_date], "%Y-%m-%d")
-    else
-      current_date = Date.today
-      start_of_month = current_date.beginning_of_month
-      end_of_month = current_date.end_of_month
-    end
-    formatted_start_date = start_of_month.strftime('%Y-%d-%m')
-    formatted_end_date = end_of_month.strftime('%Y-%d-%m')
-    invoices = Invoice.all
-    location_ids = params[:location_id].is_a?(String) ? params[:location_id].split(',') : params[:location_id]
-    employee_ids = params[:employee_id].is_a?(String) ? params[:employee_id].split(',') : params[:employee_id]
-
-    invoices = invoices.filter_by_location(location_ids) if location_ids.present?
-    invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
-    if params[:start_date].blank? || params[:end_date].blank?
-      invoices = invoices.where(date_of_service: start_of_month..end_of_month)
-    else
-      invoices = invoices.filter_by_date(params[:start_date], params[:end_date])
-    end
-
-    summary_data = invoices.group_by(&:location_id).map do |location_id, invoices|
-      location_name = location_id ? Location.find(location_id).name : "Unknown Location"
-      
-      total_invoiced = invoices.sum do |invoice|
-        cash = invoice.paid_by_client_cash || 0
-        credit = invoice.paid_by_client_credit || 0
-        credit_after_charges = credit - (credit * 0.03) 
-        cash + credit_after_charges
-      end
-      
-      {
-        location_name: location_name,
-        percentage_invoiced: calculate_percentage_invoiced(invoices),
-        total_invoiced: total_invoiced,
-        total_applied: calculate_total_applied(invoices)
-      }
-    end
+    invoices = filtered_invoices_with_date_range
+    summary_data = calculate_summary_data(invoices)
 
     total_invoiced_sum = summary_data.sum { |data| data[:total_invoiced] }
     total_applied_sum = summary_data.sum { |data| data[:total_applied] }
 
-    schedules = Schedule.where(is_cancelled: false).where(created_at: start_of_month..end_of_month).includes(treatments: :product)
+    start_date = params[:start_date].present? ? Date.strptime(params[:start_date], "%Y-%m-%d") : Date.today.beginning_of_month
+    end_date = params[:end_date].present? ? Date.strptime(params[:end_date], "%Y-%m-%d") : Date.today.end_of_month
+
+    schedules = Schedule.where(is_cancelled: false).where(created_at: start_date..end_date).includes(treatments: :product)
 
     product_income = schedules.sum do |schedule|
       schedule.treatments.sum do |treatment|
@@ -85,6 +51,8 @@ class Api::InvoiceListsController < ApplicationController
       schedule.treatments.sum(&:cost)
     end
 
+    mentor_income = invoices.sum { |invoice| calculate_charge(invoice) }
+
     render json: {
       data: summary_data,
       total_summary: {
@@ -93,25 +61,22 @@ class Api::InvoiceListsController < ApplicationController
       },
       sales_breakdown: {
         product_income: product_income,
-        treatment_income: treatment_income
+        treatment_income: treatment_income,
+        mentor_income: mentor_income
       },
       current_month_dates: {
-        start_date: formatted_start_date,
-        end_date: formatted_end_date
+        start_date: start_date.strftime('%Y-%m-%d'),
+        end_date: end_date.strftime('%Y-%m-%d')
       }
     }, status: :ok
   end
 
   def export_invoices
-    # Fetch and prepare data
-    invoices = filtered_invoices
-    summary_data = prepare_summary_data(invoices)
-    timestamp = Time.now.strftime('%Y%m%d%H%M%S')
+    invoices = filtered_invoices_with_date_range
+    summary_data = calculate_summary_data(invoices)
 
-    # Generate Excel file as a package
     package = generate_excel_file(summary_data)
-
-    # Send the file directly as a stream
+    timestamp = Time.now.strftime('%Y%m%d%H%M%S')
     send_data package.to_stream.read,
               filename: "invoices_summary_#{timestamp}.xlsx",
               type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -120,32 +85,47 @@ class Api::InvoiceListsController < ApplicationController
 
   private
 
-  def filtered_invoices
-    invoices = Invoice.all
-    invoices = invoices.filter_by_location(params[:location_id]) if params[:location_id].present?
-    invoices = invoices.filter_by_date(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
-    invoices = invoices.filter_by_employee(params[:employee_id]) if params[:employee_id].present?
-    invoices
-  end
+  def calculate_summary_data(invoices)
+    invoices.group_by(&:location_id).map do |location_id, grouped_invoices|
+      location_name = location_id ? Location.find(location_id).name : "Unknown Location"
 
-  def prepare_summary_data(invoices)
-    invoices.group_by(&:location_id).map do |location_id, invoices_by_location|
-      location_name = fetch_location_name(location_id)
+      total_invoiced = grouped_invoices.sum { |invoice| calculate_charge(invoice) }
+
       {
         location_name: location_name,
-        percentage_invoiced: calculate_percentage_invoiced(invoices_by_location),
-        total_invoiced: invoices_by_location.sum(&:charge),
-        total_applied: calculate_total_applied(invoices_by_location)
+        percentage_invoiced: calculate_percentage_invoiced(grouped_invoices),
+        total_invoiced: total_invoiced,
+        total_applied: calculate_total_applied(grouped_invoices)
       }
     end
   end
 
-  def fetch_location_name(location_id)
-    if location_id && Location.exists?(location_id)
-      Location.find(location_id).name
+  def calculate_charge(invoice)
+    cash = invoice.paid_by_client_cash.to_f
+    credit = invoice.paid_by_client_credit.to_f
+    adjusted_credit = credit - (credit * 0.031)
+    consumable_cost = invoice.total_consumable_cost.to_f
+    total_payment = cash + adjusted_credit - consumable_cost
+  end
+
+  def filtered_invoices_with_date_range
+    if params[:start_date].present? && params[:end_date].present?
+      start_date = Date.strptime(params[:start_date], "%Y-%m-%d")
+      end_date = Date.strptime(params[:end_date], "%Y-%m-%d")
     else
-      "Unknown Location"
+      current_date = Date.today
+      start_date = current_date.beginning_of_month
+      end_date = current_date.end_of_month
     end
+
+    invoices = Invoice.all
+    location_ids = params[:location_id].is_a?(String) ? params[:location_id].split(',') : params[:location_id]
+    employee_ids = params[:employee_id].is_a?(String) ? params[:employee_id].split(',') : params[:employee_id]
+
+    invoices = invoices.filter_by_location(location_ids) if location_ids.present?
+    invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
+    invoices = invoices.where(date_of_service: start_date..end_date)
+    invoices
   end
 
   def generate_excel_file(summary_data)
@@ -153,10 +133,7 @@ class Api::InvoiceListsController < ApplicationController
       workbook = package.workbook
 
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
-        # Add header row
-        sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
 
-        # Add data rows
         summary_data.each do |data|
           sheet.add_row [
             data[:location_name],
@@ -166,7 +143,6 @@ class Api::InvoiceListsController < ApplicationController
           ]
         end
 
-        # Add totals row
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
