@@ -50,9 +50,7 @@ class Api::InvoiceListsController < ApplicationController
     treatment_income = schedules.sum do |schedule|
       schedule.treatments.sum(&:cost)
     end
-
     mentor_income = invoices.sum { |invoice| calculate_charge(invoice) }
-
     render json: {
       data: summary_data,
       total_summary: {
@@ -67,7 +65,7 @@ class Api::InvoiceListsController < ApplicationController
       current_month_dates: {
         start_date: start_date.strftime('%Y-%m-%d'),
         end_date: end_date.strftime('%Y-%m-%d')
-      }
+      },
     }, status: :ok
   end
 
@@ -133,7 +131,7 @@ class Api::InvoiceListsController < ApplicationController
       workbook = package.workbook
 
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
-
+        sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
         summary_data.each do |data|
           sheet.add_row [
             data[:location_name],
@@ -142,7 +140,6 @@ class Api::InvoiceListsController < ApplicationController
             "$#{'%.2f' % data[:total_applied]}"
           ]
         end
-
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
