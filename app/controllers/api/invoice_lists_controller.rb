@@ -176,7 +176,7 @@ class Api::InvoiceListsController < ApplicationController
       workbook = package.workbook
 
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
-        # Add header row
+
         sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
         summary_data.each do |data|
           sheet.add_row [
@@ -186,7 +186,6 @@ class Api::InvoiceListsController < ApplicationController
             "$#{'%.2f' % data[:total_applied]}"
           ]
         end
-
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
