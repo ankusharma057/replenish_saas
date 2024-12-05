@@ -30,11 +30,11 @@ class InvoiceGroup < ApplicationRecord
     pdf_string = get_html_for_group
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-    File.open("public/#{source_invoices.first.employee.name}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|
+    File.open("public/#{source_invoices.first.employee&.name}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|
       file << pdf
     end
 
-    document.attach(io: File.open("public/#{source_invoices.first.employee.name}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf"), filename: "#{source_invoices.first.employee.name.capitalize}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", content_type: "application/pdf")
+    document.attach(io: File.open("public/#{source_invoices.first.employee&.name}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf"), filename: "#{source_invoices.first.employee&.name.capitalize}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", content_type: "application/pdf")
 
     save!
 
@@ -45,11 +45,11 @@ class InvoiceGroup < ApplicationRecord
     pdf_string = get_mentor_html_for_group
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-    File.open("public/#{mentor_invoices.first.employee.name}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", 'wb') do |file|
+    File.open("public/#{mentor_invoices.first.employee&.name}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", 'wb') do |file|
       file << pdf
     end
 
-    document.attach(io: File.open("public/#{mentor_invoices.first.employee.name}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf"), filename: "#{mentor_invoices.first.employee.name.capitalize}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", content_type: "application/pdf")
+    document.attach(io: File.open("public/#{mentor_invoices.first.employee&.name}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf"), filename: "#{mentor_invoices.first.employee&.name.capitalize}-Non-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", content_type: "application/pdf")
 
     save!
 
@@ -68,12 +68,12 @@ class InvoiceGroup < ApplicationRecord
     pdf_string = get_html_for_group_finalized
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-    File.open("public/#{source_invoices.first.employee.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|
+    File.open("public/#{source_invoices.first.employee&.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|
       file << pdf
     end
 
     document.purge # To remove the non-finalized document
-    document.attach(io: File.open("public/#{source_invoices.first.employee.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf"), filename: "#{source_invoices.first.employee.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", content_type: "application/pdf")
+    document.attach(io: File.open("public/#{source_invoices.first.employee&.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf"), filename: "#{source_invoices.first.employee&.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", content_type: "application/pdf")
 
     update!(finalized_totally: true)
     SendPdfToInvoiceMailer.with(group: self, invoices: source_invoices).send_mail.deliver
@@ -83,12 +83,12 @@ class InvoiceGroup < ApplicationRecord
     pdf_string = get_mentor_html_for_group_finalized
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
-    File.open("public/#{mentor_invoices.first.employee.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", 'wb') do |file|
+    File.open("public/#{mentor_invoices.first.employee&.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", 'wb') do |file|
       file << pdf
     end
 
     document.purge # To remove the non-finalized document
-    document.attach(io: File.open("public/#{mentor_invoices.first.employee.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf"), filename: "#{mentor_invoices.first.employee.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", content_type: "application/pdf")
+    document.attach(io: File.open("public/#{mentor_invoices.first.employee&.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf"), filename: "#{mentor_invoices.first.employee&.name}-Finalized-Invoice-Group-#{mentor_invoices.ids}.pdf", content_type: "application/pdf")
 
     update!(finalized_totally: true)
     SendMentorPdfToInvoiceMailer.with(group: self, invoices: mentor_invoices).send_mail.deliver
