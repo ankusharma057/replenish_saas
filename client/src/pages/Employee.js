@@ -382,7 +382,7 @@ const Employee = () => {
     setCurrSelectedMentor(null);
     setRadioTabs([]);
     setUpdateEmployeeInput({});
-  setCurrentTab(emp.is_admin ? "invoice" : "profile");
+    setCurrentTab("profile");
     let addTabs = [
       { name: "Profile", value: "profile" },
       {
@@ -439,7 +439,7 @@ const Employee = () => {
                 <p className="mb-0 fs-6 d-flex justify-content-center align-items-center">{getInitials(employee?.name)}</p>
               </div>
             }
-          {employee.name|| ""}
+          {employee.name?.length>18? employee.name?.slice(0,18)+"...":employee.name}
         </div>
       )
     );
@@ -715,7 +715,7 @@ setTitle(title)
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="border-t-2  py-2 bg-white h-[70vh]">
+            <div className="border-t-2  py-2 bg-white h-[68vh]">
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
