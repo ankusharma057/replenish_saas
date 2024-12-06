@@ -333,6 +333,7 @@ const Treatment = () => {
           {authUserState.user?.is_admin && (
             <div className="flex justify-center space-x-2">
               <Button
+              className="text-white"
                 variant="info"
                 onClick={() =>{ onTreatmentUpdate(row.original); getIntakeForm(row.original?.id); getAllTreatmentIntakeForms(row.original?.id, true)}}
               >
@@ -515,14 +516,14 @@ const Treatment = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="border-t-2  py-2 bg-white">
+            <div className="border-t-2  py-2 bg-white h-[76vh] overflow-scroll">
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
-              <div className="flex pb-24 flex-col pl-2 gap-4 overflow-y-auto">
+              <div className="flex pb-1 flex-col pl-2 gap-4 overflow-y-auto h-[71vh]" style={{}}>
                 {(employeeList || []).length > 0 && (
                   <List
-                    height={window.innerHeight - 450}
+                    height={window.innerHeight - 300}
                     itemCount={employeeList.length}
                     itemSize={45}
                     width={"100%"}
@@ -544,8 +545,8 @@ const Treatment = () => {
             </Button> */}
           </>
         }>
-        <div className="flex py-10 px-6 flex-1 items-center flex-col">
-          <div className="mb-2">
+        <div className="flex py-10 px-6 flex-1 items-center flex-col h-[88vh] overflow-scroll">
+          <div className="mb-2" >
             <ButtonGroup className="w-full md:w-auto">
               {radioTabs.map((tab) => {
                 return (
