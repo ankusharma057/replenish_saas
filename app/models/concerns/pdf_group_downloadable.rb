@@ -40,11 +40,11 @@ module PdfGroupDownloadable
       source_invoices.each do |invoice| 
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                  <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
+                  <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee&.vendor_name}"'  </h3> 
                   <br>
-                  <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
+                  <div style="text-align: right;">  Name: '"#{invoice.employee&.name}"'  </div>
 
-                  <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
+                  <div style="text-align: left;">  Email: '"#{invoice.employee&.email}"'  </div>
                   <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
 
                   <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
@@ -140,11 +140,11 @@ module PdfGroupDownloadable
       source_invoices.includes(:employee, :client).each do |invoice|
         complete_table_str = ''
         complete_table_str += '<div class="container" style="color: blue;">
-                <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee.vendor_name}"'  </h3> 
+                <h3 style="text-align: left;">  Vendor Name: '"#{invoice.employee&.vendor_name}"'  </h3> 
                 <br>
-                <div style="text-align: right;">  Name: '"#{invoice.employee.name}"'  </div>
+                <div style="text-align: right;">  Name: '"#{invoice.employee&.name}"'  </div>
 
-                <div style="text-align: left;">  Email: '"#{invoice.employee.email}"'  </div>
+                <div style="text-align: left;">  Email: '"#{invoice.employee&.email}"'  </div>
                 <div style="text-align: right;"> Invoice: '"#{invoice.id}"' </div>  
                 
                 <div style="text-align: left;"> Charge: '"#{invoice.charge&.round(2)}"' </div>
