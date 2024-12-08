@@ -12,10 +12,11 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
-import { X } from "lucide-react";
-
-
-const ClientBilling = ({ stripeClientId, clientId }) => {
+import { Mail, Printer, Settings, X } from "lucide-react";
+import { Button, ButtonGroup, Col, Placeholder, Row } from 'react-bootstrap';
+import ReactCardFlip from 'react-card-flip';
+import CountUp from 'react-countup';
+const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const hasFetchedSession = useRef(false);
   const [creditCards, setCreditCards] = useState([]);
   const [error, setError] = useState(null);
@@ -27,6 +28,67 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
   const [isCardDetailDrawerOpen, setIsCardDetailDrawerOpen] = useState(false);
   const [stripePublicKey, setStripePublicKey] = useState(null);
   const [stripePromise, setStripePromise] = useState(null);
+  const [flipLeftCardIndex, setflipLeftCardIndex] = useState(null)
+  const [flipRightCardIndex, setFlipRightCardIndex] = useState(null)
+  const topleftCardsData = [
+    {
+      id: 1,
+      count: 6,
+      label: "Total Booking",
+      backLabel: "View Appointments",
+      targetTab: "Appointments"
+    },
+    {
+      id: 2,
+      count: 0,
+      label: "Upcomming appointment",
+      backLabel: "View Appointments",
+      targetTab: "Appointments"
+    },
+    {
+      id: 3,
+      count: 1,
+      label: "No Shows",
+      backLabel: "View Appointments",
+      targetTab: "Appointments"
+    },
+    {
+      id: 4,
+      count: 5,
+      label: "Month since last visit",
+      backLabel: "View Appointments",
+      targetTab: "Appointments"
+    },
+  ];
+  const topRightCardsData = [
+    {
+      id: 1,
+      count: 685.00,
+      label: "Total Booking",
+      backLabel: "Recieve Payments",
+      targetTab: "Appointments"
+    },
+    {
+      id: 2,
+      count: 0.00,
+      label: "Upcomming appointment",
+      backLabel: "View Credit",
+      targetTab: "Billing"
+    },
+    {
+      id: 3,
+      count: 833.000,
+      label: "No Shows",
+      backLabel: "View Purchases",
+      targetTab: "Billing"
+    },
+  ];
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDrawerHandler = () => {
+    setIsOpen(!isOpen);
+  };
+
 
   useEffect(() => {
       async function loadConfig() {
@@ -103,9 +165,66 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
     { id: 'creditCards', label: 'Credit Cards' },
     { id: 'packagesMemberships', label: 'Packages & Memberships' },
   ];
+  const drawerStyles = {
+    position: "absolute",
+    top: "50px", // Adjust this to align with the button
+    left: "0",
+    width: "100%",
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #dee2e6",
+    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+    transform: isOpen ? "translateY(0)" : "translateY(-100%)",
+    transition: "transform 0.3s ease-in-out",
+    zIndex: "10",
+    padding: "10px",
+  };
+  const Purchases=()=>{
+    return<div>
+      <div  >
+        <div className={"w-100 py-3 rounded"} style={{ backgroundColor: "rgb(247 245 245)" }}>
+          <Row>
+            <Col xs={6} sm={6} md={6} lg={6}>
+              <div>
+                <ButtonGroup style={{ border: "none" }}>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }} onClick={toggleDrawerHandler}><Settings size={20} />Filter</Button>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }}>0 Purchase Selected</Button>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }}>Select All</Button>
+                </ButtonGroup>
+              </div>
+            </Col>
+            <Col xs={6} sm={6} md={6} lg={6}>
+              <div className='d-flex justify-content-end align-items-center gap-[10px] pr-3'>
+                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Mail size={20} color='black' />Pay Balance</Button>
+                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Printer size={20} color='#111' />Statement</Button>
+              </div>
+            </Col>
+          </Row>
+        </div>
+        <div className={"w-100 py-3 rounded"} style={{ backgroundColor: "rgb(247 245 245)" }}>
+          <Row>
+            <Col xs={6} sm={6} md={6} lg={6}>
+              <div>
+                <ButtonGroup style={{ border: "none" }}>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }} onClick={toggleDrawerHandler}><Settings size={20} />Filter</Button>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }}>0 Purchase Selected</Button>
+                  <Button className='bg-none d-flex align-items-center text-secondary gap-[5px]' style={{ backgroundColor: "transparent", border: "none" }}>Select All</Button>
+                </ButtonGroup>
+              </div>
+            </Col>
+            <Col xs={6} sm={6} md={6} lg={6}>
+              <div className='d-flex justify-content-end align-items-center gap-[10px] pr-3'>
+                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Mail size={20} color='black' />Pay Balance</Button>
+                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Printer size={20} color='#111' />Statement</Button>
+              </div>
+            </Col>
+          </Row>
+        </div>
+      </div>
+    </div>
+  }
 
   const tabContent = {
-    purchases: <div>Purchases Content</div>,
+    purchases: <div><Purchases/></div>,
     payments: <div>Payments Content</div>,
     receipts: <div>Receipts Content</div>,
     creditMemos: <div>Credit Memos Content</div>,
@@ -213,28 +332,98 @@ const ClientBilling = ({ stripeClientId, clientId }) => {
       window.location.href = checkoutSessionUrl;
     }
   }, [checkoutSessionUrl]);
+  const handleLeftCardClick = (index) => {
+    setflipLeftCardIndex(index)
+};
+const handleLeftCardOut = () => {
+    setflipLeftCardIndex(null)
+};
+const handleRightCardClick = (index) => {
+    setFlipRightCardIndex(index)
+};
+const handleRightCardOut = () => {
+    setFlipRightCardIndex(null)
+};
+const handleClientProfileFlipCard=()=>{
+  setCurrentTab("Appointments");
+};
+const formatAmount = (amount) => {
+  const amountString = Number(amount).toFixed(2);
+  const decimalPart = amountString.slice(-3);
+  const mainAmount = amountString.slice(0, -3);
+  return { mainAmount, decimalPart };
+};
+
 
   return (
-    <div className="py-8">
-      <div className="flex space-x-4 border-b">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
-            className={`py-2 px-4 font-medium ${activeTab === tab.id
-              ? 'border-b-2 border-cyan-500 text-cyan-500'
-              : 'text-gray-500'
-              }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-4">
-        {tabContent[activeTab]}
-      </div>
-
+    <div className="">
+      <Row xs={6} sm={6} md={6} lg={6} className="bg-white p-3 rounded">
+        <Col className="w-50">
+          <div className="d-flex justify-content-between align-items-center">
+            {topleftCardsData.map((item, index) => {
+              return <div onMouseOver={() => handleLeftCardClick(index)} onMouseOut={handleLeftCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                <ReactCardFlip isFlipped={flipLeftCardIndex === index} flipDirection="horizontal">
+                  <div className="d-flex flex-column justify-content-between align-items-center">
+                    <div className="h2 text-secondary">
+                      <CountUp end={item.count} />
+                    </div>
+                    <div className="h6 text-center text-muted">{item.label}</div>
+                  </div>
+                  <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                    <p className=" fs-6 mb-0 text-center text-white">{item.backLabel}</p>
+                  </div>
+                </ReactCardFlip>
+              </div>
+            })}
+          </div>
+        </Col>
+        <Col className="w-50">
+          <div className="d-flex justify-content-end align-items-center gap-[40px]">
+            {topRightCardsData.map((item, index) => {
+              const { mainAmount, decimalPart } = formatAmount(item.count);
+              return <div onMouseOver={() => handleRightCardClick(index)} onMouseOut={handleRightCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                <ReactCardFlip isFlipped={flipRightCardIndex === index} flipDirection="horizontal">
+                  <div className="d-flex flex-column justify-content-between align-items-center">
+                    <div className="h2 text-secondary d-flex justify-content-start">
+                      <span className="fs-6 mt-[4px]">$</span>
+                      <span className="large"> <CountUp end={mainAmount} />{ }</span>
+                      <span className="fs-6  mt-[4px]">{decimalPart}</span>
+                    </div>
+                    <div className="h6 text-center text-muted">{item.label}</div>
+                  </div>
+                  <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                    <p className="w-100 fs-6 mb-0 text-center text-white">{item.backLabel}</p>
+                  </div>
+                </ReactCardFlip>
+              </div>
+            })}
+          </div>
+        </Col>
+      </Row>
+      <Row xs={6} sm={6} md={6} lg={6} className="bg-white p-3 rounded mt-2">
+        <Col xs={12} sm={12} md={12} lg={12}>
+          <div className='d-flex justify-content-between align-items-center'>
+            <div className="flex space-x-4 w-100" >
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabClick(tab.id)}
+                  className={`w-auto p-1 font-medium ${activeTab === tab.id
+                    ? 'border-b-2 border-cyan-500 text-cyan-500'
+                    : 'text-gray-500'
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <Button size='sm' className='w-[130px] h-[35px]'>New Purchase</Button>
+          </div>
+          <div className="mt-4 w-100">
+            {tabContent[activeTab]}
+          </div>
+        </Col>
+      </Row>
       <div className={`fixed top-0 right-0 h-full overflow-y-auto w-full lg:w-3/4 z-10 bg-[#EDEDED] shadow-lg p-6 transform transition-transform duration-300 ${isCardDetailDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex justify-end items-center mb-4 pt-20">
           <button

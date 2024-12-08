@@ -2377,7 +2377,7 @@ const SpineWrapper = ({ index }) => (
                                 )}
 
                                 {currentTab === "Billing" && (
-                                    <ClientBilling stripeClientId={selectedEmployeeData?.stripe_id} clientId={selectedEmployeeData?.id} />
+                                    <ClientBilling stripeClientId={selectedEmployeeData?.stripe_id} clientId={selectedEmployeeData?.id} setCurrentTab={setCurrentTab}/>
                                 )}
 
                                 {currentTab === "Appointments" && (
