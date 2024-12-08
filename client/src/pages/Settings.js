@@ -11,6 +11,7 @@ import Vendors from './Vendors';
 import Payments from './Payments'; 
 import Approvals from './Approvals';
 import { Box } from "lucide-react";
+import MapComponent from '../components/MapComponent';
 
 const Settings = () => {
   const { authUserState } = useAuthContext();
@@ -253,6 +254,10 @@ const Settings = () => {
                             value={newLocation.postalCode}
                             onChange={(e) => setNewLocation({ ...newLocation, postalCode: e.target.value })}
                           />
+                        </Form.Group>
+                        <Form.Group controlId="map">
+                          <Form.Label>Map</Form.Label>
+                          <MapComponent newLocation={newLocation} setNewLocation={setNewLocation} />
                         </Form.Group>
 
                         <h5 className="mt-4">Billing Information</h5>
