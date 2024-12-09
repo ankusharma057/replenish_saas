@@ -789,14 +789,15 @@ export default function AddInvoices() {
       });
       return;
     } 
-    else if (formData?.location_id==="") {
-      setIsAlert({
-        location: true,
-        message: "Please select location",
-      });
-      return;
-    }
-    else if (formData?.products?.length == 0) {
+    // else if (formData?.location_id==="") {
+    //   setIsAlert({
+    //     location: true,
+    //     message: "Please select location",
+    //   });
+    //   return;
+    // }
+
+    else if (formData?.products?.length == 0 && !formData?.semaglitudeConsultation) {
       setIsAlert({
         productUsedShow: true,
         message: "Please select product",
@@ -882,7 +883,7 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-    if(invoiceData && Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0){
+    if(invoiceData && (!Array.isArray(invoiceData[0].semag_consult_fee) || (Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0))){
       confirmAlert({
         title: "Confirm to submit",
         message: `Are you sure add ${invoiceData?.length} Invoices `,
