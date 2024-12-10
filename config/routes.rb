@@ -74,6 +74,12 @@ mount Sidekiq::Web => '/sidekiq'
         get :profile
         patch :update
       end
+
+      member do
+        get :list_files
+        post :upload_files
+        delete :delete_file
+      end
     end
 
     resources :employees, only: %i(index show create destroy update) do
@@ -134,7 +140,11 @@ mount Sidekiq::Web => '/sidekiq'
     resources :schedule_locations, only: [:index]
     resources :schedule_clients, only: [:index]
     resources :schedule_treatments, only: [:index]
-    resources :appointments, only: [:index]
+    resources :appointments, only: [:index] do
+      collection do
+        get :client_appointments
+      end
+    end
     resources :employees_only, only: [:index]
 
 

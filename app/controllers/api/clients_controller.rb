@@ -87,6 +87,57 @@ class Api::ClientsController < ApplicationController
     end
   end
 
+  def list_files
+    @client = Client.find_by(id: params[:id])
+    
+    if @client.nil?
+      render json: { error: 'Client not found' }, status: :not_found and return
+    end
+
+    file_uploads = @client.file_uploads 
+    if file_uploads.any?
+      files = file_uploads.map do |file_upload|
+        if file_upload.file_data.attached?
+          {
+            file_url: url_for(file_upload.file_data),
+            description: file_upload.description
+          }
+        else
+          {
+            description: file_upload.description,
+            error: 'No file attached'
+          }
+        end
+      end
+      render json: { files: files }, status: :ok
+    else
+      render json: { message: 'No files uploaded for this client' }, status: :ok
+    end
+  end
+
+
+  def upload_files
+    @client = Client.find_by(id: params[:id])
+    uploaded_file = params[:files]
+    description = params[:descriptions] || "" 
+    if uploaded_file.present?
+      file_upload = @client.file_uploads.create(description: description)
+      file_upload.file_data.attach(io: uploaded_file.tempfile, filename: uploaded_file.original_filename)
+      if file_upload.save
+        render json: { success: 'File uploaded successfully' }, status: :ok
+      else
+        render json: { error: 'Failed to upload file', details: file_upload.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'No file uploaded' }, status: :unprocessable_entity
+    end
+  end
+
+  def delete_file
+    file = @client.file_uploads.find(params[:file_id])
+    file.purge
+    render json: { message: 'File deleted successfully' }, status: :ok
+  end
 
   private
 

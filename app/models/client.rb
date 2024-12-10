@@ -7,6 +7,7 @@ class Client < ApplicationRecord
   has_many :employees, through: :employee_clients
   has_many :response_intake_forms, dependent: :destroy
   has_many :chart_entries, dependent: :destroy
+  has_many :file_uploads, dependent: :destroy
   has_one :client_detail, dependent: :destroy
   has_one_attached :profile_photo
   belongs_to :referred_employee, class_name: 'Employee', optional: true
@@ -46,6 +47,16 @@ class Client < ApplicationRecord
       false
     else
       true
+    end
+  end
+
+  def files_with_descriptions
+    file_uploads.map do |file|
+      {
+        file_name: file.filename.to_s,
+        file_url: Rails.application.routes.url_helpers.rails_blob_url(file, only_path: true),
+        description: file.metadata[:description]
+      }
     end
   end
 
