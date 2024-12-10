@@ -70,3 +70,6 @@ color: #696977 !important;
   color: white;
   border-radius: 0 50% 50% 0;
 }
+.collapseContainer .collapse{
+visibility: visible;
+}
