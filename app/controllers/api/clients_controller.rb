@@ -139,6 +139,71 @@ class Api::ClientsController < ApplicationController
     render json: { message: 'File deleted successfully' }, status: :ok
   end
 
+  def add_group
+    @client = Client.find(params[:id])  
+    if @client.nil?
+      render json: { error: 'Client not found' }, status: :not_found
+      return
+    end
+    group_name = params[:group_name]
+    @client.groups ||= {}
+    @client.groups[group_name] ||= []
+    @client.groups[group_name] << params[:client_ids] unless @client.groups[group_name].include?(params[:client_ids])
+    if @client.save
+      render json: { message: "Client added to group #{group_name}", client: @client }, status: :ok
+    else
+      render json: { error: 'Failed to add client to group' }, status: :unprocessable_entity
+    end
+  end
+
+  def update_group
+    @client = Client.find(params[:id])
+    if @client.nil?
+      render json: { error: 'Client not found' }, status: :not_found
+      return
+    end
+    group_name = params[:group_name]
+    new_group_name = params[:new_group_name]
+    unless @client.groups&.key?(group_name)
+      render json: { error: "Group #{group_name} not found" }, status: :not_found
+      return
+    end
+
+    @client.groups[new_group_name] = @client.groups.delete(group_name) if new_group_name.present?
+    if params[:client_ids].present?
+      @client.groups[new_group_name || group_name] = params[:client_ids]
+    end
+
+    if @client.save
+      render json: { message: "Group updated successfully", groups: @client.groups }, status: :ok
+    else
+      render json: { error: 'Failed to update group' }, status: :unprocessable_entity
+    end
+  end
+
+  def delete_group
+    @client = Client.find(params[:id])
+    if @client.nil?
+      render json: { error: 'Client not found' }, status: :not_found
+      return
+    end
+
+    group_name = params[:group_name]
+
+    unless @client.groups&.key?(group_name)
+      render json: { error: "Group #{group_name} not found" }, status: :not_found
+      return
+    end
+
+    @client.groups.delete(group_name)
+
+    if @client.save
+      render json: { message: "Group #{group_name} deleted successfully", groups: @client.groups }, status: :ok
+    else
+      render json: { error: 'Failed to delete group' }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def client_params

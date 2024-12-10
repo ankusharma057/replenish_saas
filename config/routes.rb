@@ -79,6 +79,9 @@ mount Sidekiq::Web => '/sidekiq'
         get :list_files
         post :upload_files
         delete :delete_file
+        post :add_group
+        patch :update_group
+        delete :delete_group
       end
     end
 
