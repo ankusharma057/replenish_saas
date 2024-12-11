@@ -143,11 +143,7 @@ mount Sidekiq::Web => '/sidekiq'
     resources :schedule_locations, only: [:index]
     resources :schedule_clients, only: [:index]
     resources :schedule_treatments, only: [:index]
-    resources :appointments, only: [:index] do
-      collection do
-        get :client_appointments
-      end
-    end
+    resources :appointments, only: [:index]
     resources :employees_only, only: [:index]
 
 
