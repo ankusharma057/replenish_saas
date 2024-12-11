@@ -12,6 +12,8 @@ module MessagingService
     end
 
     def send_message(text: , send_to_inv_manager: false)
+      # commenting for now to diable the send-message-functionality
+      return true
       @client.messages.create(
         from: phone_number,
         to: RECEIVER_NUMBER,

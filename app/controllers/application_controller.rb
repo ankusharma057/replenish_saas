@@ -19,6 +19,8 @@ class ApplicationController < ActionController::API
   end
 
   def send_message(text)
+    # commenting for now to diable the send-message-functionality
+    return true
     MessagingService::Client.new.send_message(text)
   end
 end
