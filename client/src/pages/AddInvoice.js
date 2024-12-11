@@ -21,10 +21,11 @@ import Select from "react-select";
 import DatePicker from "react-multi-date-picker";
 import { SlCalender } from "react-icons/sl";
 import {useNavigate} from "react-router-dom"
+import dayjs from 'dayjs';
 
 const initialFormState = {
   clientName: "",
-  dateOfService: new Date(),
+  dateOfService: dayjs().format('MM-DD-YYYY'),
   conciergeFeePaid: false,
   gfe: false,
   semaglitudeConsultation: false,
@@ -68,7 +69,7 @@ export default function AddInvoices() {
   const [locationId, setLocationId] = useState("")
   const [formData, setFormData] = useState({
     ...initialFormState,
-    dateOfService:new Date(),
+    dateOfService: dayjs().format('MM-DD-YYYY'),
     location_id:""
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
@@ -1058,7 +1059,13 @@ export default function AddInvoices() {
                   <DatePicker
                     format="MM/DD/YYYY"
                     value={formData.dateOfService}
-                    onChange={(value) => setFormData((prevstate) => ({ ...prevstate, dateOfService: value?.toDate().getTime() }))}
+                    onChange={(value) => {
+                      const formattedDate = dayjs(value).format('MM-DD-YYYY');
+                      setFormData((prevState) => ({
+                        ...prevState,
+                        dateOfService: formattedDate,
+                      }));
+                    }}
                     multiple={false}
                     style={{
                       width:"100%",
@@ -1747,7 +1754,7 @@ export default function AddInvoices() {
           {invoiceArray?.length > 0 &&
             invoiceArray?.map((invoice) => {
               return (
-                <>ASDFASDFADFADSFSFS
+                <>
                 <AddInvoiceTemplate
                   key={invoice.id}
                   id={invoice.id}

@@ -74,6 +74,11 @@ module InvoiceGroupConcern
         emp_inventory&.update(quantity: (emp_inventory.quantity - product_quantity.values.first.to_f))
       end
     end
+
+    if invoice_param[:date_of_service].present?
+      invoice.date_of_service = Date.strptime(invoice_param[:date_of_service], '%m-%d-%Y')
+    end
+    
     invoice.is_finalized = false
     invoice.is_paid ||= false
     invoice.save!
