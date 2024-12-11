@@ -1,4 +1,4 @@
-# Add configuration values here, as shown below.
+ # Add configuration values here, as shown below.
 #
 # pusher_app_id: "2954"
 # pusher_key: 7381a978f7dd7f9a1117
@@ -15,5 +15,5 @@ gmail_password: qsmlmxdiewwidgpf
 twillio_account_sid: AC34f653b329a03e27979dd8685408aa6a
 twillio_auth_token: 8f05bc29270d971bd10dfac0e59d062f
 twillio_phone_number: +18446024147
-stripe_api_key: sk_test_51OQ5MVLxW1p4QOiqYhbySiea22zVDqSozN4fOpLIChybVjRv0nYRuwLYNr0XkbKGE3RbMudWzeaUo3xo973WJrUd00bzRcgjeW
-stripe_publishable_key: pk_test_51OQ5MVLxW1p4QOiqQYtAaOGDjRE6tmTDubQ96TCGOztTaOi7shnRdBTezsKzFFilqd6O12XdLb5wbOVWHBHY3aAU00iVaOZYNV
+stripe_api_key: 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
+stripe_publishable_key: pk_live_51LB9bEBZZntSWQ9m8OiXWCOxMcabAM2O3BfsNbXxYqeFVSOWMrf87AUDnfHk0Fm40MllAuR6feavPheYVKaGVt6N00gEn5IIEg
