@@ -17,7 +17,8 @@ import {
     getClientSchedulesOnly,
     UpdateClient,
     createCheckoutSession,
-    confirmPayment
+    confirmPayment,
+    getLocationsWithoutEmployee
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -27,10 +28,10 @@ import { toast } from "react-toastify";
 // import { Form, Popover } from "react-bootstrap";
 // import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { ChevronDown, Plus, MoveRight, X } from "lucide-react";
+import { ChevronDown, Plus, MoveRight, X, SlidersHorizontal, CalendarDays, Trash2 } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -81,8 +82,11 @@ import ChartScale from "../components/ChartItems/ChartScale.jsx";
 import SmartOptionsNarrative from "../components/ChartItems/SmartOptionsNarrative.jsx";
 import ChartDropdown from "../components/ChartItems/ChartDropdown.jsx";
 import OpticalMeasurements from "../components/ChartItems/OpticalMeasurements.jsx";
-
-
+import ReactCardFlip from 'react-card-flip';
+import CountUp from 'react-countup';
+import DatePicker from "react-datepicker";
+import { TiTick } from "react-icons/ti";
+import { MdModeEditOutline } from "react-icons/md";
 
 const AllClientRoot = () => {
     let { clientId } = useParams();
@@ -121,6 +125,68 @@ const AllClientRoot = () => {
     const [stripePublicKey, setStripePublicKey] = useState(null);
     const [stripePromise, setStripePromise] = useState(null);
     const [reload, setReload] = useState(false);
+    const [flipLeftCardIndex, setFlipLeftCardIndex] = useState(null)
+    const [flipRightCardIndex, setFlipRightCardIndex] = useState(null)
+    const [appointmentTab,setAppointmentTab] = useState("Appointment");
+    const [searchLocation, setSearchLocation] = useState("");
+    const [searchEmployee, setSearchEmployee] = useState("");
+    const [serviceLocation, setServiceLocation] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [showEditAppointmentSection, setShowEditAppointmentSection] = useState(false);
+    const topleftCardsData = [
+      {
+          id: 1,
+          count: 6,
+          label: "Total Booking",
+          backLable: "View Appointments",
+          targetTab: "Appointments"
+      },
+      {
+          id: 2,
+          count: 0,
+          label: "Upcomming appointment",
+          backLable: "View Appointments",
+          targetTab: "Appointments"
+      },
+      {
+          id: 3,
+          count: 1,
+          label: "No Shows",
+          backLable: "View Appointments",
+          targetTab: "Appointments"
+      },
+      {
+          id: 4,
+          count: 5,
+          label: "Month since last visit",
+          backLable: "View Appointments",
+          targetTab: "Appointments"
+      },
+  ];
+  const topRightCardsData = [
+      {
+          id: 1,
+          count: 685.00,
+          label: "Total Booking",
+          backLable: "Recieve Payments",
+          targetTab: "Appointments"
+      },
+      {
+          id: 2,
+          count: 0.00,
+          label: "Upcomming appointment",
+          backLable: "View Credit",
+          targetTab: "Billing"
+      },
+      {
+          id: 3,
+          count: 833.000,
+          label: "No Shows",
+          backLable: "View Purchases",
+          targetTab: "Billing"
+      },
+  ];
 
     useEffect(() => {
         async function loadConfig() {
@@ -128,6 +194,7 @@ const AllClientRoot = () => {
         setStripePublicKey(publicKey);
         }
         loadConfig();
+        getAllEmployeeLocation();
     }, []);
 
     useEffect(() => {
@@ -135,6 +202,14 @@ const AllClientRoot = () => {
             setStripePromise(loadStripe(stripePublicKey));
         }
     }, [stripePublicKey]);
+    const getAllEmployeeLocation = async (employeeId, refetch = false) => {
+      const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
+      if (data?.length > 0) {
+        setServiceLocation(
+          data?.map((loc) => ({ ...loc, label: loc.name, value: loc.id }))
+        );
+      }
+    };
 
     const symbols = ['↑', '↓', '←', '→', '↩', '↪', '↻', '↷', '℗', 'ℓ', '®', 'ℬ', '∅', '•'];
     const [showSymbol,setShowSymbol] = useState(null)
@@ -143,6 +218,8 @@ const AllClientRoot = () => {
     try {
       if (selectedEmployeeData) {
         const { data } = await getClientSchedulesOnly(selectedEmployeeData, refetch);
+        console.log("@@@data",data);
+        
         setSelectedClientSchedules(data);
       }
     } catch (error) {
@@ -157,8 +234,9 @@ const AllClientRoot = () => {
     const getEmployees = async (refetch = false) => {
         try {
             const { data } = await getClients();
+            
             if (data?.length > 0) {
-                const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
+              const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
                 setEmployeeList(newData);
                 if (clientId) {
                     let newClient = newData.find(client => client.id == clientId)
@@ -1095,6 +1173,9 @@ useEffect(()=>{
     const filteredEmployeeList = employeeList?.filter((employee) =>
         employee?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
     );
+    const filteredEmployeeListNew = employeeList?.filter((employee) =>
+        employee?.name?.toLowerCase()?.includes(searchEmployee?.toLowerCase())
+    );
 
     const handleSelect = (emp) => {
         navigate(`/customers/${emp.id}?${queryParams?.toString()}`);
@@ -1127,7 +1208,7 @@ useEffect(()=>{
         }
         if (!emp.is_admin) {
             addTabs.splice(0, 0, { name: "Profile", value: "profile" });
-            addTabs.push({ name: "Edit/Settings", value: "settings" });
+            // addTabs.push({ name: "Edit/Settings", value: "settings" });
             addTabs.push({ name: "Forms", value: "Forms" });
             addTabs.push({ name: "Appointments", value: "Appointments" });
             addTabs.push({ name: "Billing", value: "Billing" });
@@ -1390,8 +1471,24 @@ useEffect(()=>{
     ]);
     setChartTab(null);
   };
-
-
+  const handleLeftCardClick = (index) => {
+    setFlipLeftCardIndex(index)
+};
+const handleLeftCardOut = () => {
+    setFlipLeftCardIndex(null)
+};
+const handleRightCardClick = (index) => {
+    setFlipRightCardIndex(index)
+};
+const handleRightCardOut = () => {
+    setFlipRightCardIndex(null)
+};
+const formatAmount = (amount) => {
+  const amountString = Number(amount).toFixed(2);
+  const decimalPart = amountString.slice(-3);
+  const mainAmount = amountString.slice(0, -3);
+  return { mainAmount, decimalPart };
+};
 const handleSign = (sectionId) => {
     console.log(`Signing section with ID: ${sectionId}`);
   };
@@ -2300,7 +2397,23 @@ const SpineWrapper = ({ index }) => (
         return null;
     }
   };
-
+const handleAppointmentTabs=(tab)=>{
+  setAppointmentTab(tab);
+};
+const filteredLocationItems = serviceLocation.filter((item) =>
+  item.label.toLowerCase().includes(searchLocation.toLowerCase())
+);
+const getEndDateMinDate = () => {
+  if (startDate) {
+    return getNextDay(startDate);
+  }
+  return null;
+};
+const getNextDay = (date) => {
+  const nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  return nextDay;
+};
     return (
         <>
             <AsideLayout
@@ -2380,288 +2493,578 @@ const SpineWrapper = ({ index }) => (
                                     <ClientBilling stripeClientId={selectedEmployeeData?.stripe_id} clientId={selectedEmployeeData?.id} setCurrentTab={setCurrentTab}/>
                                 )}
 
-                                {currentTab === "Appointments" && (
-                                    <div className="flex bg-white min-h-screen">
-                                        <div className="flex-grow bg-gray-200 p-3 px-4">
-                                            <div className="w-full mx-auto h-full bg-white rounded-md px-6 py-1 pb-4 lg:px-16">
-                                                <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
-                                                    <h2><span>Appointment Details</span></h2>
-                                                </div>
-                                                <div className="border rounded-lg p-4">
-                                                    <div className="flex flex-col gap-3">
-                                                        {Array.isArray(selectedClientSchedules) && selectedClientSchedules.map((form, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className="flex flex-col gap-2 border rounded-lg overflow-hidden"
-                                                                onClick={() => handleAppointmentClick(form)}
-                                                            >
-                                                                <div className="p-1 flex flex-col justify-start py-2 px-3 bg-slate-50 hover:bg-blue-50 duration-300">
-                                                                    <div className="flex justify-between p-3">
-                                                                        <div>Treatment: <span className="text-blue-500">{form?.treatment?.name}</span></div>
-                                                                        <div>Client: <span className="text-blue-500">{form?.client?.name}</span></div>
-                                                                    </div>
-                                                                    <div className="flex justify-between p-3">
-                                                                        <div>Location: <span className="text-blue-500">{form?.location?.name}</span></div>
-                                                                        <div>
-                                                                            Time:
-                                                                            <span className="text-blue-500">
-                                                                                {new Date(form?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
-                                                                                {new Date(form?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-2 p-3">
-                                                                        <span>Transaction Details</span>
-                                                                        <div className="flex gap-4">
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <span>Total Amount</span>
-                                                                                <span className="text-blue-500">{parseFloat(form?.total_amount)}</span>
-                                                                            </div>
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <span>Paid Amount</span>
-                                                                                <span className="text-blue-500">{parseFloat(form?.paid_amount)}</span>
-                                                                            </div>
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <span>Remaining Amount</span>
-                                                                                <span className="text-blue-500">{parseFloat(form?.remaining_amount)}</span>
-                                                                            </div>
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <span>Status</span>
-                                                                                <span className="text-blue-500">{getStatus(parseFloat(form?.total_amount), parseFloat(form?.remaining_amount))}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
+                  {currentTab === "Appointments" && (
+                    <div className="flex bg-white min-h-screen">
+                      <div className="flex-grow bg-gray-200">
+                        <div className="bg-white p-3 rounded">
+                          <Row xs={6} sm={6} md={6} lg={6} >
+                            <Col xs={6} sm={6} md={6} lg={6}>
+                              <div className="d-flex justify-content-between align-items-center">
+                                {topleftCardsData.map((item, index) => {
+                                  return <div onMouseOver={() => handleLeftCardClick(index)} onMouseOut={handleLeftCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                                    <ReactCardFlip isFlipped={flipLeftCardIndex === index} flipDirection="horizontal">
+                                      <div className="d-flex flex-column justify-content-between align-items-center">
+                                        <div className="h2 text-secondary">
+                                          <CountUp end={item.count} />
                                         </div>
-
-                                        {selectedAppointment && (
-                                            <div className="w-full lg:w-1/4 bg-gray-100 p-4" ref={billingInfoRef}>
-                                                <div className="mt-4">
-                                                    <button
-                                                        className="flex justify-between w-full rounded"
-                                                        onClick={() => setShowBookingInfo(!showBookingInfo)}
-                                                    >
-                                                        <span className="text-xl text-[#22D3EE]">Booking Info</span>
-                                                        <ChevronDown className={`transform ${showBookingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
-                                                    </button>
-                                                    {showBookingInfo && (
-                                                        <div className="border rounded-lg bg-white mt-2 py-2">
-                                                            <span className="px-2"><strong>Client:</strong></span><br />
-                                                            <span className="px-2">{selectedAppointment?.client?.name}</span><br />
-                                                            <span className="px-2">{selectedAppointment?.client?.email}</span>
-                                                            <hr className="my-2" />
-                                                            <span className="px-2"><strong>Location:</strong></span><br />
-                                                            <span className="px-2">{selectedAppointment?.location?.name}</span>
-                                                            <hr className="my-2" />
-                                                            <span className="px-2"><strong>Time:</strong></span><br />
-                                                            <p className="px-2 font-medium">
-                                                                {new Date(selectedAppointment?.start_time).toLocaleDateString([], {
-                                                                    weekday: 'long',
-                                                                    year: 'numeric',
-                                                                    month: 'long',
-                                                                    day: 'numeric'
-                                                                })}
-                                                                <br />
-                                                                {new Date(selectedAppointment?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
-                                                                {new Date(selectedAppointment?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
-                                                            </p>
-                                                            <hr className="my-2" />
-                                                            <span className="px-2"><strong>Treatment:</strong></span>
-                                                            <br />
-                                                            <span className="px-2 ">{selectedAppointment?.treatment?.name} - <span className="font-semibold"> ${selectedAppointment?.total_amount}</span></span>
-                                                            <br />
-                                                            <span className="px-2 ">{selectedAppointment?.employee?.name}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="mt-4">
-                                                    <button
-                                                        className="flex justify-between w-full rounded"
-                                                        onClick={() => setShowNotes(!showNotes)}
-                                                    >
-                                                        <span className="text-xl text-[#22D3EE]">Notes</span>
-                                                        <ChevronDown className={`transform ${showNotes ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
-                                                    </button>
-                                                    {showNotes && (
-                                                        <div className="border p-2 rounded-lg bg-white mt-2">
-                                                            <div className="mt-4">
-                                                                <textarea
-                                                                    className="w-full p-2 border rounded"
-                                                                    placeholder="Write a note..."
-                                                                    rows="3"
-                                                                    onFocus={() => setIsAddingNote(true)}
-                                                                ></textarea>
-                                                            </div>
-
-                                                            {isAddingNote && (
-                                                                <div className="flex justify-end mt-2">
-                                                                    <button
-                                                                        className="text-gray-500 py-1 px-4 rounded"
-                                                                        onClick={() => {
-                                                                            setIsAddingNote(false);
-                                                                        }}
-                                                                    >
-                                                                        Close
-                                                                    </button>
-                                                                    <button
-                                                                        className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
-                                                                        onClick={() => {
-                                                                            console.log("API for adding the note will be handled later");
-                                                                            setIsAddingNote(false);
-                                                                        }}
-                                                                    >
-                                                                        Add
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-
-
-                                                <div className="mt-4">
-                                                    <button
-                                                        className="flex justify-between w-full rounded"
-                                                        onClick={() => setShowBillingInfo(!showBillingInfo)}
-                                                    >
-                                                        <span className="text-xl text-[#22D3EE]">Billing Info</span>
-                                                        <ChevronDown className={`transform ${showBillingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
-                                                    </button>
-                                                    {showBillingInfo && (
-                                                        <div className="border rounded-lg bg-white pt-2">
-                                                            <div className="flex justify-between px-2 pt-2">
-                                                                <div>
-                                                                    <span className="font-semibold pt-4">Status: </span>
-                                                                    <span className="text-green-500">{getStatus(parseFloat(selectedAppointment?.total_amount), parseFloat(selectedAppointment?.remaining_amount))}</span>
-                                                                </div>
-
-                                                                <button
-                                                                    className="flex text-[#22D3EE] rounded"
-                                                                >
-                                                                    Add Item
-                                                                    <Plus />
-                                                                </button>
-                                                            </div>
-                                                            <hr className="my-2" />
-                                                            <div className="flex justify-between px-2">
-                                                                <div>
-                                                                    <span className="font-semibold">{selectedAppointment.treatment?.name}</span>
-                                                                </div>
-                                                                <div>
-                                                                    <span>${selectedAppointment.total_amount}</span>
-                                                                </div>
-                                                            </div>
-                                                            <hr className="m-2" />
-                                                            <div className="flex justify-between px-2">
-                                                                <div>
-                                                                    <span>Subtotal</span>
-                                                                    <br />
-                                                                    <span>Total</span>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <span>${selectedAppointment.total_amount}</span>
-                                                                    <br />
-                                                                    <span><strong>${selectedAppointment.total_amount}</strong></span>
-                                                                </div>
-                                                            </div>
-                                                            <hr className="m-2" />
-                                                            <div className="flex justify-between px-2">
-                                                                <div>
-                                                                    <span className="font-semibold">Invoice # </span>
-                                                                    {selectedAppointment?.payment_intent_id && (
-                                                                        <a 
-                                                                            href={`https://dashboard.stripe.com/payments/${selectedAppointment.payment_intent_id}`} 
-                                                                            target="_blank" 
-                                                                            rel="noopener noreferrer" 
-                                                                            className="text-blue-500 hover:underline"
-                                                                        >
-                                                                            {selectedAppointment.payment_intent_id.slice(0, 6) + '...'}
-                                                                        </a>
-                                                                    )}
-                                                                    <br />
-                                                                    <span>Total</span>
-                                                                    <br />
-                                                                    <span>Balance</span>
-                                                                    <br />
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <span className="text-[#22D3EE]">{selectedAppointment.status}</span>
-                                                                    <br />
-                                                                    <span>${selectedAppointment.total_amount}</span>
-                                                                    <br />
-                                                                    <span>${selectedAppointment.remaining_amount}</span>
-                                                                    <br />
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="flex p-2 gap-x-2">
-                                                                {selectedAppointment.remaining_amount > 0 && (
-                                                                    <>
-                                                                        <button
-                                                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
-                                                                            onClick={() => console.log('Adjustment button clicked')}
-                                                                        >
-                                                                            <span>Adjustment</span>
-                                                                            <Plus />
-                                                                        </button>
-                                                                        <button
-                                                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
-                                                                            onClick={toggleDrawer}
-                                                                        >
-                                                                            <span>Pay</span>
-                                                                            <MoveRight />
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                            <div className="bg-[#f5f5f5] min-h-8 px-6 py-2">
-                                                                <div className="flex justify-end gap-8">
-                                                                    <div>
-                                                                        <span className="font-semibold text-md">Client Total</span>
-                                                                        <br />
-                                                                    </div>
-                                                                    <div>
-                                                                        <span className="font-semibold">${selectedAppointment.total_amount}</span>
-                                                                        <br />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className={`fixed top-0 right-0 h-full overflow-y-auto w-full lg:w-1/2 z-10 bg-white shadow-lg p-6 transform transition-transform duration-300 ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                                            <div className="flex justify-end items-center mb-4 pt-20">
-                                                <button
-                                                    className="text-gray-500 hover:text-red-500 focus:outline-none"
-                                                    onClick={() => {
-                                                        setIsDrawerOpen(false);
-                                                        setClientSecret(null);
-                                                    }}
-                                                    aria-label="Close drawer"
-                                                >
-                                                    <X size={24} />
-                                                </button>
-                                            </div>
-
-                                            {clientSecret ? (
-                                                <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-                                                    <EmbeddedCheckout />
-                                                </EmbeddedCheckoutProvider>
-                                            ) : (
-                                                <p>Loading payment details...</p>
-                                            )}
+                                        <div className="h6 text-center text-muted">{item.label}</div>
+                                      </div>
+                                      <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                                        <p className=" fs-6 mb-0 text-center text-white">{item.backLable}</p>
+                                      </div>
+                                    </ReactCardFlip>
+                                  </div>
+                                })}
+                              </div>
+                            </Col>
+                            <Col xs={6} sm={6} md={6} lg={6}>
+                              <div className="d-flex justify-content-end align-items-center gap-[40px]">
+                                {topRightCardsData.map((item, index) => {
+                                  const { mainAmount, decimalPart } = formatAmount(item.count);
+                                  return <div onMouseOver={() => handleRightCardClick(index)} onMouseOut={handleRightCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                                    <ReactCardFlip isFlipped={flipRightCardIndex === index} flipDirection="horizontal">
+                                      <div className="d-flex flex-column justify-content-between align-items-center">
+                                        <div className="h2 text-secondary d-flex justify-content-start">
+                                          <span className="fs-6 mt-[4px]">$</span>
+                                          <span className="large"> <CountUp end={mainAmount} />{ }</span>
+                                          <span className="fs-6  mt-[4px]">{decimalPart}</span>
                                         </div>
+                                        <div className="h6 text-center text-muted">{item.label}</div>
+                                      </div>
+                                      <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                                        <p className=" fs-6 mb-0 text-center text-white">{item.backLable}</p>
+                                      </div>
+                                    </ReactCardFlip>
+                                  </div>
+                                })}
+                              </div>
+                            </Col>
+                          </Row>
+                        </div>
+                        <div className="mt-3 bg-white rounded-md">
+                          <ButtonGroup aria-label="Basic example">
+                            <Button className="py-3" active={appointmentTab === "Appointment"} variant="outline-secondary" style={{ border: "none" }} onClick={() => handleAppointmentTabs("Appointment")}>Appointment</Button>
+                            <Button className="py-3" active={appointmentTab === "Return"} variant="outline-secondary" style={{ border: "none" }} onClick={() => handleAppointmentTabs("Return")}>Return & Visit Reminders</Button>
+                          </ButtonGroup>
+                        </div>
+                        {appointmentTab === "Appointment" && <div className="mt-3 bg-white rounded">
+                          <ButtonGroup aria-label="Basic example">
+                            <Button variant="outline-secondary" style={{ border: "none" }} > <SlidersHorizontal size={20} color={"#696977"} /></Button>
+                            <Dropdown>
+                              <Dropdown.Toggle id="dropdown-basic" style={{ backgroundColor: "#fff", border: "none" }} className="py-3 text-muted">
+                                All States
+                              </Dropdown.Toggle>
+
+                              <Dropdown.Menu>
+                                <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                                <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+                                <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+                              </Dropdown.Menu>
+                            </Dropdown>
+                            <Dropdown>
+                              <Dropdown.Toggle id="dropdown-basic" style={{ backgroundColor: "#fff", border: "none" }} className="py-3 text-muted">
+                                All Locations
+                              </Dropdown.Toggle>
+                              <Dropdown.Menu>
+                                <FormControl
+                                  type="text"
+                                  placeholder="Search..."
+                                  className="mx-3 my-2 w-auto"
+                                  onChange={(e) => setSearchLocation(e.target.value)}
+                                  value={searchLocation}
+                                />
+                                {filteredLocationItems.map((item) => (
+                                  <Dropdown.Item key={item.key} eventKey={item.key}>
+                                    {item.label}
+                                  </Dropdown.Item>
+                                ))}
+                              </Dropdown.Menu>
+                            </Dropdown>
+                            <Dropdown>
+                              <Dropdown.Toggle id="dropdown-basic" style={{ backgroundColor: "#fff", border: "none" }} className="py-3 text-muted">
+                                All Staff Members
+                              </Dropdown.Toggle>
+                              <Dropdown.Menu>
+                                <FormControl
+                                  type="text"
+                                  placeholder="Search..."
+                                  className="mx-3 my-2 w-auto"
+                                  onChange={(e) => setSearchEmployee(e.target.value)}
+                                  value={searchEmployee}
+                                />
+                                {filteredEmployeeListNew.map((item) => {
+                                  return <Dropdown.Item key={item.key} eventKey={item.key}>{item.name}</Dropdown.Item>
+                                })}
+                              </Dropdown.Menu>
+                            </Dropdown>
+                            <Dropdown>
+                              <Dropdown.Toggle id="dropdown-basic" style={{ backgroundColor: "#fff", border: "none" }} className="py-3 text-muted">
+                                All Billing States
+                              </Dropdown.Toggle>
+                              <Dropdown.Menu className="w-[200px]">
+                                <Dropdown.Item className="d-flex justify-content-between align-items">All Billing States<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Uninvoiced<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Unpaid<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Paid<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Partially Paid<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">No Charge<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Refunded<Form.Check type={"checkbox"} /></Dropdown.Item>
+                                <Dropdown.Item className="d-flex justify-content-between align-items">Partially Invoiced<Form.Check type={"checkbox"} /></Dropdown.Item>
+                              </Dropdown.Menu>
+                            </Dropdown>
+                            <OverlayTrigger
+                              trigger="click"
+                              placement="top"
+                              overlay={<Popover id="date-picker-popover" style={{ width: "550px", marginLeft: "-70px", border: "none" }}>
+                                <Popover.Body style={{ width: "550px", backgroundColor: "#fff", border: "1px solid #eee" }}>
+                                  <div className="d-flex justify-content-between gap-3 align-items-center">
+                                    <div>
+                                      <label>Start Date:</label>
+                                      <DatePicker
+                                        selected={startDate}
+                                        onChange={(date) => setStartDate(moment(date).format("YYYY/MM/DD"))}
+                                        dateFormat="yyyy/MM/dd"
+                                        inline
+                                      />
                                     </div>
+                                    <div>
+                                      <label>End Date:</label>
+                                      <DatePicker
+                                        selected={endDate}
+                                        onChange={(date) => setEndDate(moment(date).format("YYYY/MM/DD"))}
+                                        dateFormat="yyyy/MM/dd"
+                                        inline
+                                        minDate={getEndDateMinDate()}
+                                        disabled={!startDate}
+                                      />
+                                    </div>
+                                  </div>
+                                </Popover.Body>
+                              </Popover>}
+                              rootClose
+                            >
+                              <Button
+                                variant="outline-secondary"
+                                style={{
+                                  fontSize: "15px",
+                                  border: "none",
+                                  backgroundColor: "#fff",
+                                }}
+                              >
+                                Select Date Range
+                              </Button>
+                            </OverlayTrigger>
+                          </ButtonGroup>
+                        </div>}
+                        {appointmentTab === "Appointment" &&
+                          <div className="mt-3 w-full mx-auto h-full bg-white rounded-md p-3">
+                            <div className="flex justify-between items-center w-full h-[100px] text-gray-500">
+                              <h2><span>Appointment Details</span></h2>
+                            </div>
+                            <div className="border rounded-lg">
+                              <div className="flex flex-col gap-3">
+                                {Array.isArray(selectedClientSchedules) && selectedClientSchedules.map((form, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex flex-col gap-2 border rounded-lg overflow-hidden"
+                                    onClick={() => handleAppointmentClick(form)}
+                                  >
+                                    <div className=" flex flex-col justify-start py-2 px-3 bg-slate-50 hover:bg-blue-50 duration-300">
+                                      <div className="flex justify-between mb-1">
+                                        <div>Treatment: <span className="text-blue-500">
+                                          {form?.treatments.map((treatment)=>{
+                                            return <span>{treatment.name},</span>
+                                          })}
+                                          </span>
+                                          </div>
+                                        <div>Client: <span className="text-blue-500">{form?.client?.name}</span></div>
+                                      </div>
+                                      <div className="flex justify-between mb-1">
+                                        <div>Location: <span className="text-blue-500">{form?.location?.name}</span></div>
+                                        <div>
+                                          Time:
+                                          <span className="text-blue-500">
+                                            {new Date(form?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
+                                            {new Date(form?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-col gap-2">
+                                        <span>Transaction Details</span>
+                                        <div className="flex gap-4">
+                                          <div className="d-flex gap-1">
+                                            <span>Total Amount:</span>
+                                            <span className="text-blue-500">{parseFloat(form?.total_amount)}</span>
+                                          </div>
+                                          <div className="d-flex gap-1">
+                                            <span>Paid Amount:</span>
+                                            <span className="text-blue-500">{parseFloat(form?.paid_amount)}</span>
+                                          </div>
+                                          <div className="d-flex gap-1">
+                                            <span>Remaining Amount:</span>
+                                            <span className="text-blue-500">{parseFloat(form?.remaining_amount)}</span>
+                                          </div>
+                                          <div className="d-flex gap-1">
+                                            <span>Status:</span>
+                                            <span className="text-blue-500">{getStatus(parseFloat(form?.total_amount), parseFloat(form?.remaining_amount))}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>}
+                        {appointmentTab === "Return" &&
+                          <div className="mt-3">
+                            <ListGroup>
+                              <ListGroup.Item>
+                                <div className="bg-white rounded p-3">
+                                  <p style={{ fontSize: "12px" }}>No upcoming appointments</p>
+                                  <Dropdown>
+                                    <Dropdown.Toggle id="dropdown-basic" style={{ backgroundColor: "#22D3EE" }} className="w-100">
+                                      Add Return & Visit Reminders
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu style={{ maxHeight: "300px", overflow: "scroll" }}>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 1 day
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 2 days
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 3 days
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 4 days
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 5 days
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 6 days
+                                      </Dropdown.Item>
+                                      <Dropdown.Divider />
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 1 week
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 2 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 3 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 4 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 5 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 6 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 7 weeks
+                                      </Dropdown.Item>
+                                      <Dropdown.Divider />
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 8 weeks (2 months)
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 12 weeks (3 months)
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 16 weeks (4 months)
+                                      </Dropdown.Item>
+                                      <Dropdown.Divider />
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 6 months
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 1 year
+                                      </Dropdown.Item>
+                                      <Dropdown.Item className={"d-flex gap-[5px]"}>
+                                        <CalendarDays className="me-2" />
+                                        Next visit in 2 years
+                                      </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                  </Dropdown>
+                                </div>
+                              </ListGroup.Item>
+                              <ListGroup.Item>
+                                <div className="">
+                                  <Row>
+                                    <Col xs={11} sm={11} md={11} lg={11}>
+                                      <div className="p-2">
+                                        <p style={{ color: "#3c763d",fontSize:"14px" }} className="d-flex align-items-center mb-0"><TiTick color="#3c763d" size={20} />Booked for: Sunday November 17, 2024 (24 days ago)</p>
+                                        <p style={{ color: "#696977",fontSize:"12px" }} className="mb-0">Neurotoxin treatment with Ashrut Dev at Replenish- La Frontera. </p>
+                                        <Badge bg="success" style={{color:"#333333",fontSize:"10px",fontWeight:400}}>Reminded 11/13/2024 by Email (Auto)</Badge>
+                                      </div>
+                                    </Col>
+                                    <Col xs={1} sm={1} md={1} lg={1}>
+                                    <div className="p-2 border rounded w-[35px]" onClick={()=>setShowEditAppointmentSection(!showEditAppointmentSection)}>
+                                      <MdModeEditOutline />
+                                    </div>
+                                    </Col>
+                                    {showEditAppointmentSection && 
+                                    <Col xs={12} sm={12} md={12} lg={12}>
+                                    <div className="w-100 d-flex justify-content-center align-items-center flex-column">
+                                      <Link to={"/"} className="w-100 border border-secondary text-decoration-none m-auto rounded text-center py-1 text-dark">View In Schedule</Link>
+                                      <div className="d-flex justify-content-end align-items-center gap-[20px] w-100 mt-3">
+                                        <Button variant="danger"><Trash2 size={20}/></Button>
+                                        <Button variant="outline-secondary" onClick={()=>setShowEditAppointmentSection(!showEditAppointmentSection)}>Done</Button>
+                                      </div>
+                                    </div>
+                                    </Col>}
+                                  </Row>
+                                </div>
+                              </ListGroup.Item>
+                            </ListGroup>
+                          </div>}
+                      </div>
+
+                      {selectedAppointment && (
+                        <div className="w-full lg:w-1/4 bg-gray-100 p-4" ref={billingInfoRef}>
+                          <div className="mt-4">
+                            <button
+                              className="flex justify-between w-full rounded"
+                              onClick={() => setShowBookingInfo(!showBookingInfo)}
+                            >
+                              <span className="text-xl text-[#22D3EE]">Booking Info</span>
+                              <ChevronDown className={`transform ${showBookingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                            </button>
+                            {showBookingInfo && (
+                              <div className="border rounded-lg bg-white mt-2 py-2">
+                                <span className="px-2"><strong>Client:</strong></span><br />
+                                <span className="px-2">{selectedAppointment?.client?.name}</span><br />
+                                <span className="px-2">{selectedAppointment?.client?.email}</span>
+                                <hr className="my-2" />
+                                <span className="px-2"><strong>Location:</strong></span><br />
+                                <span className="px-2">{selectedAppointment?.location?.name}</span>
+                                <hr className="my-2" />
+                                <span className="px-2"><strong>Time:</strong></span><br />
+                                <p className="px-2 font-medium">
+                                  {new Date(selectedAppointment?.start_time).toLocaleDateString([], {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  })}
+                                  <br />
+                                  {new Date(selectedAppointment?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} -
+                                  {new Date(selectedAppointment?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                </p>
+                                <hr className="my-2" />
+                                <span className="px-2"><strong>Treatment:</strong></span>
+                                <br />
+                                <span className="px-2 ">{selectedAppointment?.treatment?.name} - <span className="font-semibold"> ${selectedAppointment?.total_amount}</span></span>
+                                <br />
+                                <span className="px-2 ">{selectedAppointment?.employee?.name}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4">
+                            <button
+                              className="flex justify-between w-full rounded"
+                              onClick={() => setShowNotes(!showNotes)}
+                            >
+                              <span className="text-xl text-[#22D3EE]">Notes</span>
+                              <ChevronDown className={`transform ${showNotes ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                            </button>
+                            {showNotes && (
+                              <div className="border p-2 rounded-lg bg-white mt-2">
+                                <div className="mt-4">
+                                  <textarea
+                                    className="w-full p-2 border rounded"
+                                    placeholder="Write a note..."
+                                    rows="3"
+                                    onFocus={() => setIsAddingNote(true)}
+                                  ></textarea>
+                                </div>
+
+                                {isAddingNote && (
+                                  <div className="flex justify-end mt-2">
+                                    <button
+                                      className="text-gray-500 py-1 px-4 rounded"
+                                      onClick={() => {
+                                        setIsAddingNote(false);
+                                      }}
+                                    >
+                                      Close
+                                    </button>
+                                    <button
+                                      className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
+                                      onClick={() => {
+                                        console.log("API for adding the note will be handled later");
+                                        setIsAddingNote(false);
+                                      }}
+                                    >
+                                      Add
+                                    </button>
+                                  </div>
                                 )}
+                              </div>
+                            )}
+                          </div>
+
+
+                          <div className="mt-4">
+                            <button
+                              className="flex justify-between w-full rounded"
+                              onClick={() => setShowBillingInfo(!showBillingInfo)}
+                            >
+                              <span className="text-xl text-[#22D3EE]">Billing Info</span>
+                              <ChevronDown className={`transform ${showBillingInfo ? "rotate-180" : ""}`} style={{ color: '#22D3EE' }} />
+                            </button>
+                            {showBillingInfo && (
+                              <div className="border rounded-lg bg-white pt-2">
+                                <div className="flex justify-between px-2 pt-2">
+                                  <div>
+                                    <span className="font-semibold pt-4">Status: </span>
+                                    <span className="text-green-500">{getStatus(parseFloat(selectedAppointment?.total_amount), parseFloat(selectedAppointment?.remaining_amount))}</span>
+                                  </div>
+
+                                  <button
+                                    className="flex text-[#22D3EE] rounded"
+                                  >
+                                    Add Item
+                                    <Plus />
+                                  </button>
+                                </div>
+                                <hr className="my-2" />
+                                <div className="flex justify-between px-2">
+                                  <div>
+                                    <span className="font-semibold">{selectedAppointment.treatment?.name}</span>
+                                  </div>
+                                  <div>
+                                    <span>${selectedAppointment.total_amount}</span>
+                                  </div>
+                                </div>
+                                <hr className="m-2" />
+                                <div className="flex justify-between px-2">
+                                  <div>
+                                    <span>Subtotal</span>
+                                    <br />
+                                    <span>Total</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <span>${selectedAppointment.total_amount}</span>
+                                    <br />
+                                    <span><strong>${selectedAppointment.total_amount}</strong></span>
+                                  </div>
+                                </div>
+                                <hr className="m-2" />
+                                <div className="flex justify-between px-2">
+                                  <div>
+                                    <span className="font-semibold">Invoice # </span>
+                                    {selectedAppointment?.payment_intent_id && (
+                                      <a
+                                        href={`https://dashboard.stripe.com/payments/${selectedAppointment.payment_intent_id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:underline"
+                                      >
+                                        {selectedAppointment.payment_intent_id.slice(0, 6) + '...'}
+                                      </a>
+                                    )}
+                                    <br />
+                                    <span>Total</span>
+                                    <br />
+                                    <span>Balance</span>
+                                    <br />
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="text-[#22D3EE]">{selectedAppointment.status}</span>
+                                    <br />
+                                    <span>${selectedAppointment.total_amount}</span>
+                                    <br />
+                                    <span>${selectedAppointment.remaining_amount}</span>
+                                    <br />
+                                  </div>
+                                </div>
+
+                                <div className="flex p-2 gap-x-2">
+                                  {selectedAppointment.remaining_amount > 0 && (
+                                    <>
+                                      <button
+                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                        onClick={() => console.log('Adjustment button clicked')}
+                                      >
+                                        <span>Adjustment</span>
+                                        <Plus />
+                                      </button>
+                                      <button
+                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                        onClick={toggleDrawer}
+                                      >
+                                        <span>Pay</span>
+                                        <MoveRight />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="bg-[#f5f5f5] min-h-8 px-6 py-2">
+                                  <div className="flex justify-end gap-8">
+                                    <div>
+                                      <span className="font-semibold text-md">Client Total</span>
+                                      <br />
+                                    </div>
+                                    <div>
+                                      <span className="font-semibold">${selectedAppointment.total_amount}</span>
+                                      <br />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className={`fixed top-0 right-0 h-full overflow-y-auto w-full lg:w-1/2 z-10 bg-white shadow-lg p-6 transform transition-transform duration-300 ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <div className="flex justify-end items-center mb-4 pt-20">
+                          <button
+                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            onClick={() => {
+                              setIsDrawerOpen(false);
+                              setClientSecret(null);
+                            }}
+                            aria-label="Close drawer"
+                          >
+                            <X size={24} />
+                          </button>
+                        </div>
+
+                        {clientSecret ? (
+                          <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                            <EmbeddedCheckout />
+                          </EmbeddedCheckoutProvider>
+                        ) : (
+                          <p>Loading payment details...</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                                 {currentTab === "Forms" && (
                                     // navigate("/submited-intake-forms-preview")
@@ -2843,11 +3246,11 @@ const SpineWrapper = ({ index }) => (
                                         )} */}
                                     </div>
                                 )}
-                                {currentTab === "Edit/Settings" && (
+                                {/* {currentTab === "Edit/Settings" && (
                                     <div>
                                         
                                     </div>
-                                )}
+                                )} */}
                                 {currentTab === "staff" && (
                                     <CreateStaffCard
                                         show={showCreateUserModal}

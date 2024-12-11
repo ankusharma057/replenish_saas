@@ -14,7 +14,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
-import { ChevronDown, Mail, Printer, PrinterIcon, Search, Settings, Settings2, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRightLeft, CalendarDays, ChevronDown, LogOut, Mail, Phone, Printer, PrinterIcon, Search, Settings, SlidersHorizontal, Smartphone, UserRound, X,XSquare } from "lucide-react";
 import { Badge, Button, ButtonGroup, Col, Collapse, Dropdown, DropdownButton, Form, FormControl, InputGroup, ListGroup, Offcanvas, Overlay, OverlayTrigger, Placeholder, Popover, Row, SplitButton, Table } from 'react-bootstrap';
 import ReactCardFlip from 'react-card-flip';
 import CountUp from 'react-countup';
@@ -23,6 +23,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { BiSolidDownArrow } from 'react-icons/bi';
 import moment from 'moment';
 import { IoMdArrowDropdown } from "react-icons/io";
+import { FaUser } from "react-icons/fa";
+import { FaLinkSlash, FaPencil, FaRegBuilding, FaRegCreditCard } from 'react-icons/fa6';
+import { PiCurrencyDollarSimpleBold } from "react-icons/pi";
+
 
 const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const hasFetchedSession = useRef(false);
@@ -49,7 +53,11 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const [enablePaymentSearch, setEnablePaymentSearch] = useState(false);
   const [searchLocation, setSearchLocation] = useState("");
   const [allLocations, setAllLocations] = useState([]);
-  const [purchaseDetails,setPurchaseDetails]=useState(false)
+  const [purchaseDetails,setPurchaseDetails]=useState(false);
+  const [paymentDetails,setPaymentDetails]=useState(false);
+  const [purchaseDate,setPurchaseDate]=useState(Date())
+  const [enableAppliedCalender,setEnableAppliedCalender]=useState(false)
+  const [enableAppliedHistoryCalender,setEnableAppliedHistoryCalender]=useState(false)
   const topleftCardsData = [
     {
       id: 1,
@@ -256,6 +264,15 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const handlePurchaseDetails=()=>{
     setPurchaseDetails(!purchaseDetails)
   }
+  const handlePaymentDetails=()=>{
+    setPaymentDetails(!paymentDetails)
+  };
+  const handleAppliedCalender=()=>{
+    setEnableAppliedCalender(!enableAppliedCalender)
+  };
+  const handleAppliedHistoryCalender=()=>{
+    setEnableAppliedHistoryCalender(!enableAppliedHistoryCalender)
+  };
   const Purchases = () => {
     return <div>
       <PurchaseDetails />
@@ -440,43 +457,334 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         </div>
       </div>
     </div>
-  }
+  };
   const PurchaseDetails = () => {
     return <div>
-      <Offcanvas show={purchaseDetails} onHide={handlePurchaseDetails} placement='end'>
+      <Offcanvas show={purchaseDetails} onHide={handlePurchaseDetails} placement='end' style={{ width: "80%", backgroundColor: "#ededed" }}>
         <Offcanvas.Header>
-          <div className='d-flex justify-content-between align-items-center'>
+          <div className='d-flex justify-content-between align-items-center w-100'>
             <div className='d-flex justify-content-start align-items-center'>
-              <Offcanvas.Title>Purchase</Offcanvas.Title><Badge bg="secondary" style={{backgroundColor:"#fba919",color:"black"}}>Unpaid</Badge>
+              <Offcanvas.Title style={{ fontSize: "35px" }}>Purchase</Offcanvas.Title><Badge bg="secondary" style={{ backgroundColor: "#fba919", color: "black" }}>Unpaid</Badge>
             </div>
             <div className='d-flex gap-[8px] align-items-center'>
-              <Button variant='outline-secondary'>View Sale</Button>
+              <Button variant='outline-secondary' size='sm'>View Sale</Button>
               <SplitButton
                 key={"Primary"}
-                id={`dropdown-split-variants-${variant}`}
+                id={`dropdown-split-variants`}
                 variant={"Primary"}
-                title={variant}
+                title={"Pay"}
+                style={{ background: "#22D3EE" }}
+                size='sm'
               >
-                <Dropdown.Item eventKey="1">Action</Dropdown.Item>
-                <Dropdown.Item eventKey="2">Another action</Dropdown.Item>
-                <Dropdown.Item eventKey="3" active>
-                  Active Item
-                </Dropdown.Item>
+                <Dropdown.Header>Print</Dropdown.Header>
+                <Dropdown.Item>Receipt (Quick)</Dropdown.Item>
+                <Dropdown.Item>Receipt (Options)</Dropdown.Item>
+                <Dropdown.Item>Receipt (Detailed)</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item eventKey="4">Separated link</Dropdown.Item>
+                <Dropdown.Header>Email</Dropdown.Header>
+                <Dropdown.Item>Receipt (Options)</Dropdown.Item>
+                <Dropdown.Item>Receipt (Detailed)</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Header>PDF</Dropdown.Header>
+                <Dropdown.Item>Receipt (Options)</Dropdown.Item>
+                <Dropdown.Item>Receipt (Detailed)</Dropdown.Item>
               </SplitButton>
+              <LogOut style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} />
+              <XSquare style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} onClick={handlePurchaseDetails} />
             </div>
           </div>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          Some text as placeholder. In real life you can have the elements you
-          have chosen. Like, text, images, lists, etc.
+          <p className='text-muted fs-5'>ICare Jenny - Replanish- La Frontera</p>
+          <Row>
+            <Col xs={12} sm={12} md={8} lg={8}>
+              <div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Client</p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <p className='mb-0' style={{ fontSize: "13px" }}>Test (Tester) Account</p>
+                          <p className='mb-0 d-flex justify-content-start align-items-center gap-[5px]' style={{ fontSize: "13px" }}><Smartphone size={10} />1234567890</p>
+                          <p className='mb-0' style={{ fontSize: "13px", color: "#22D3EE" }}>test@gmail.com</p>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Personal Health Number - </p>
+                          <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Birth Date</p>
+                          <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Client Number <span style={{ fontSize: "13px", fontWeight: 300 }}>389</span></p>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Purchase Details</p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div className='d-flex gap-[20px]'>
+                          <div>
+                            <p className='mb-0' style={{ fontWeight: 700, fontSize: "15px" }}>Purchase Date</p>
+                            <OverlayTrigger
+                              trigger="click"
+                              placement="top"
+                              overlay={<Popover id="date-picker-popover" style={{ marginLeft: "50px" }}>
+                                <Popover.Body >
+                                  <DatePicker
+                                    selected={startDate}
+                                    onChange={(date) => setStartDate(moment(date).format("YYYY/MM/DD"))}
+                                    dateFormat="yyyy/MM/dd"
+                                    inline
+                                  />
+                                </Popover.Body>
+                              </Popover>}
+                              rootClose
+                            >
+                              <Button
+                                variant="outline-secondary"
+                                className='d-flex justify-content-start align-items-center gap-[5px] w-[150px]'
+                                size={"sm"}
+                              >
+                                <CalendarDays />{moment(purchaseDate).format('YYYY/MM/DD')}
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                          <div className=''>
+                            <p className='mb-0' style={{ fontWeight: 700, fontSize: "15px" }}>Product</p>
+                            <p className='mb-0' style={{ fontSize: "13px" }}>ICare Jenny</p>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div className='d-flex gap-[20px]'>
+                          <div className=''>
+                            <p className='mb-0' style={{ fontWeight: 700, fontSize: "15px" }}>Quantity</p>
+                            <input className='w-[150px] border p-1 rounded' type='number' value={1} />
+                          </div>
+                          <div className=''>
+                            <p className='mb-0' style={{ fontWeight: 700, fontSize: "15px" }}>Amount</p>
+                            <p className='mb-0' style={{ fontSize: "13px" }}>$75.00</p>
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Staff Member <span style={{ fontSize: "12px" }}>receiving compensation</span></p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={12} sm={12} md={12} lg={12}>
+                        <div>
+                          <div className='d-flex justify-content-between align-items-center gap-[20px]'>
+                            <p className='text-muted mb-0' style={{ fontSize: "15px" }}>Ashrut Dev</p>
+                            <div className='d-flex align-items-center'>
+                              <Button variant='outline-secondary d-flex justify-content-start align-items-center' style={{ color: "#22D3EE", border: "none", fontSize: "13px" }}><ArrowRightLeft size={15} color={"#22D3EE"} />Change</Button>
+                              <div>|</div>
+                              <Button variant='outline-secondary d-flex justify-content-start align-items-center text-danger' style={{ color: "red", border: "none", fontSize: "13px" }}><X size={15} color={"red"} />Remove</Button>
+                            </div>
+                          </div>
+                          <p style={{ fontSize: "15px" }} className='text-muted'>This staff member will receive any applicable commissions for this purchase and will be listed on invoices, receipts and statements.</p>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Invoices</p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={12} sm={12} md={12} lg={12}>
+                        <div>
+                          <Table hover size="sm">
+                            <thead>
+                              <tr>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Invoice#</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Date</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Invoiced To</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Status</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Total</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Balance</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>6039-P01</td>
+                                <td>Nov 12, 2024</td>
+                                <td>
+                                  <div>
+                                    <p className='mb-0'>Test Account</p>
+                                    <p className='mb-0' style={{ fontSize: "11px" }}>Quantity:1</p>
+                                  </div>
+                                </td>
+                                <td><p style={{ color: "#f19a04" }}>Unpaid</p></td>
+                                <td><p>$75.00</p></td>
+                                <td><p style={{ color: "red" }}>$75.00</p></td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1 d-flex justify-content-between align-items-center w-100'>Invoices<Button variant='outline-secondary' className='bg-white'>Receive Payments</Button></p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={12} sm={12} md={12} lg={12}>
+                        <div>
+                          <Table hover size="sm">
+                            <thead>
+                              <tr>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Date Applied</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Payment Date</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Payment</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Detail</th>
+                                <th style={{ color: "#555555", fontSize: "16px" }}>Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <p style={{ color: "#555555", fontSize: "16px", fontWeight: 700 }} className='text-center mt-3'>No Payments</p>
+                              <tr>
+                                <td>Nov 12, 2024</td>
+                                <td>Nov 12, 2024</td>
+                                <td>Unpaid</td>
+                                <td>details</td>
+                                <td>$75.00</td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col xs={12} sm={12} md={4} lg={4}>
+              <div className='mt-3'>
+                <p className='text-muted fs-4 mb-1'>Summary</p>
+                <div className='bg-white p-3 rounded bg-white'>
+                  <Row>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>ICare Jenny</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <hr />
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>User Fee</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Quantity</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Sub Total</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Tax</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Total</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <hr />
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px", color: "#22D3EE" }}>Test Account #6089-P01</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Total</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Balance</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                    <hr />
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>Balance</p>
+                      </div>
+                    </Col>
+                    <Col xs={6} sm={6} md={6} lg={6}>
+                      <div className='d-flex justify-content-end'>
+                        <p className='mb-0' style={{ fontSize: "16px" }}>$75.00</p>
+                      </div>
+                    </Col>
+                  </Row>
+                </div>
+              </div>
+            </Col>
+          </Row>
         </Offcanvas.Body>
       </Offcanvas>
     </div>
   };
   const Payments = () => {
     return <div>
+      <PaymentsDetails/>
       <div className={"w-100 py-3 rounded"} style={{ backgroundColor: "rgb(247 245 245)" }}>
         <Row>
           <Col xs={6} sm={6} md={6} lg={6}>
@@ -653,6 +961,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         <Table responsive="sm">
           <thead>
             <tr>
+              <th><Form.Check type={"checkbox"}/></th>
               <th style={{ color: "#22D3EE" }}>Payment Date</th>
               <th style={{ color: "#22D3EE" }}>Method</th>
               <th style={{ color: "#22D3EE" }}>Location</th>
@@ -665,6 +974,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
           </thead>
           <tbody>
             <tr>
+              <td><Form.Check type={"checkbox"}/></td>
               <td>Nov 12 2024</td>
               <td>ICare Jenny</td>
               <td>Ashrut Dev</td>
@@ -674,7 +984,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
               <td><span style={{ color: "#22D3EE" }}>Invoice#5019-P19</span>$10</td>
               <td>
                 <div className='d-flex border rounded justify-content-between align-items-center'>
-                  <Button variant='outline-secondary' style={{ border: "none" }} size='sm' className='w-100'>View</Button>
+                  <Button variant='outline-secondary' style={{ border: "none" }} size='sm' className='w-100' onClick={handlePaymentDetails}>View</Button>
                   <OverlayTrigger
                     trigger="click"
                     key={"top"}
@@ -699,6 +1009,248 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
           </tbody>
         </Table>
       </div>
+    </div>
+  };
+  const PaymentsDetails = () => {
+    return <div>
+      <Offcanvas show={paymentDetails} onHide={handlePaymentDetails} placement='end' style={{ width: "80%", backgroundColor: "#ededed" }}>
+        <Offcanvas.Header >
+          <div className='d-flex justify-content-between align-items-center w-100'>
+            <div className='d-flex justify-content-start align-items-center'>
+              <Offcanvas.Title style={{ fontSize: "35px" }}>Payment #25659</Offcanvas.Title>
+            </div>
+            <div className='d-flex gap-[8px] align-items-center'>
+              <XSquare style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} onClick={handlePaymentDetails} />
+            </div>
+          </div>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <p className='text-muted fs-5'>ICare Jenny - Replanish- La Frontera</p>
+          <Row>
+            <Col xs={12} sm={12} md={12} lg={12}>
+              <div>
+                <div className='mt-3'>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <FaUser size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Payer</p>
+                              <p className='mb-1' style={{ color: "#22D3EE" }}>Test Account (tester)</p>
+                            </div>
+                          </div>
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <FaRegBuilding size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Location</p>
+                              <p className='mb-1'>ReplanishMD - Bellaire Conierge</p>
+                            </div>
+                          </div>
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <FaRegCreditCard size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Payment Method</p>
+                              <p className='mb-1' style={{ color: "#22D3EE" }}>Jane Payments acct_1PUBYWR60loua6ON MasterCard</p>
+                            </div>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                        <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <CalendarDays size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Payer</p>
+                              <p className='mb-1' style={{ color: "#22D3EE" }}>Oct 18, 2024</p>
+                            </div>
+                          </div>
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <PiCurrencyDollarSimpleBold size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Amount</p>
+                              <p className='mb-1'>$10.00</p>
+                            </div>
+                          </div>
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <FaRegCreditCard size={25} style={{ marginTop: "5px" }} />
+                            <div>
+                              <p className='text-muted mb-1'>Reference Number</p>
+                              <p className='mb-1' style={{ color: "#22D3EE" }}>ch_3QBKLHJnuK6juLtD15z88pCG</p>
+                            </div>
+                          </div>  
+                          <div className='d-flex justify-content-start align-items-start gap-[20px]'>
+                            <div className='w-[30px]'></div>
+                            <div>
+                              <p className='text-muted mb-1'>Replanish App Details</p>
+                              <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>Status: succeeded (authorized) on Fri, Oct 18, 2024 12:52 PM</p>
+                              <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>$10.00 on MASTERCARD ending in 6954</p>
+                              <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>Transaction ID: 2908</p>
+                              <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>Authorization: 2908</p>
+                            </div>
+                          </div>  
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Applied To</p>
+                  <div className='bg-white p-3 rounded'>
+                    <Row>
+                      <Col xs={1} sm={1} md={1} lg={1}>
+                        <div className='d-flex'>
+                          <div className='d-flex justify-content-center text-white fs-6 align-items-center bg-secondary rounded-circle  w-[50px] h-[50px]'>1</div>
+                        </div>
+                      </Col>
+                      <Col xs={7} sm={7} md={7} lg={7}>
+                        <div className=''>
+                          <p className='text-muted mb-0'><span style={{ color: "#22D3EE" }}>Invoice #5019-P01</span> -  Applied on Oct 18, 2024</p>
+                          <p className='text-muted mb-0' style={{ fontSize: "13px" }}>April 29, 2024 - 10:30am, Follow Up (30 minutes)</p>
+                          <p className='text-muted mb-0' style={{ fontSize: "13px" }}>Cintia Jimenez BSN, RN</p>
+                        </div>
+                      </Col>
+                      <Col xs={4} sm={4} md={4} lg={4}>
+                        <div className='d-flex justify-content-between align-items-center'>
+                          <div className='d-flex justify-content-start align-items-center gap-[20px]'>
+                            <div className='w-[50px] h-[50px] bg-light rounded-circle d-flex justify-content-center text-white  align-items-center'>
+                              <FaLinkSlash color='#000'/>
+                            </div>
+                            <div className='w-[50px] h-[50px] bg-light rounded-circle d-flex justify-content-center text-white  align-items-center'>
+                              <FaPencil color='#000' onClick={handleAppliedCalender}/>
+                            </div>
+                          </div>
+                          <div>
+                            <p className='text-muted'>$75.00</p>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={12} sm={12} md={12} lg={12}>
+                        {enableAppliedCalender &&
+                          <div className='border rounded p-4 bg-white mt-2'>
+                            <label style={{ color: '#696977', fontSize: "12px" }}>Applied To</label>
+                            <InputGroup className="mb-3">
+                              <InputGroup.Text id="basic-addon1"><CalendarDays /></InputGroup.Text>
+                              <Form.Control
+                                placeholder="Username"
+                                type='date'
+                                onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                                onChange={(e) => e.target.blur()}
+                              />
+                            </InputGroup>
+                            <div className='d-flex gap-[10px]'>
+                              <Button variant='outline-secondary' style={{ color: "#fff", border: "1px solid #22D3EE", backgroundColor: "#22D3EE" }}>Save</Button>
+                              <Button variant='outline-secondary' style={{ backgroundColor: "#fff" }} onClick={handleAppliedCalender}>Cancel</Button>
+                            </div>
+                          </div>}
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className='p-3 rounded d-flex justify-content-end align-items-end flex-column border'  style={{backgroundColor:"#f5f5f5"}}>
+                    <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>Total Applied: $10.00</p>
+                    <p style={{ color: "#555555", fontSize: "13px" }} className='mb-0'>Balance Remaining:  $0.00</p>
+                  </div>
+                  <div className='p-3 rounded d-flex justify-content-end align-items-end flex-column border'  style={{backgroundColor:"#f5f5f5"}}>
+                    <p style={{ color: "#555555", }} className='mb-0 fs-4'>Balance Remaining: : $0.00</p>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <div className='border p-3 rounded' style={{ backgroundColor: "#f5f5f5" }}>
+                    <Row>
+                      <Col xs={11} sm={11} md={11} lg={11}>
+                        <div>
+                          <InputGroup>
+                            <InputGroup.Text id="basic-addon1"><Search size={20} color={'#696977'} /></InputGroup.Text>
+                            <Form.Control
+                              placeholder="Search outstanding invoices by patient, invoice number, claim etc."
+                            />
+                            <InputGroup.Text id="basic-addon1"><X size={20} color={'#696977'} /></InputGroup.Text>
+                          </InputGroup>
+                        </div>
+                      </Col>
+                      <Col xs={1} sm={1} md={1} lg={1}>
+                        <div>
+                          <Button variant='outline-secondary' size='sm' className='w-100'>View All</Button>
+                        </div>
+                      </Col>
+                    </Row>
+                    <div className='mt-3'>
+                      <Row>
+                        <Col xs={1} sm={1} md={1} lg={1}>
+                          <div style={{ backgroundColor: "#eeeeee" }} className='mt-2 d-flex justify-content-center align-items-center text-dark rounded-circle w-[50px] h-[50px]'>
+                            +
+                          </div>
+                        </Col>
+                        <Col xs={6} sm={6} md={6} lg={6}>
+                          <div className=''>
+                            <p className='text-muted fs-4 mb-1'>Invoice #5971-P01<span className='' style={{ color: "#22D3EE" }}>Tester Account</span></p>
+                            <p className='text-muted mb-0' style={{ fontSize: "13px" }}>October 28, 2024 - 5:00pm, Neurotoxin treatment (15 minutes)</p>
+                            <p className='text-muted mb-0' style={{ fontSize: "13px" }}>Dr. Kelechi Azuogu</p>
+                            <p className='text-muted mb-0' style={{ fontSize: "11px" }}>Last invoiced on Oct 28, 2024</p>
+                          </div>
+                        </Col>
+                        <Col xs={5} sm={5} md={5} lg={5}>
+                          <div className='d-flex justify-content-end align-items-end gap-[20px]'>
+                            <InputGroup >
+                              <InputGroup.Text id="basic-addon1"><span className='text-secondary'>$</span></InputGroup.Text>
+                              <Form.Control
+                                placeholder="Username"
+                                value={0.00}
+                                className='text-end'
+                              />
+                              <InputGroup.Text id="basic-addon1"><span className='text-secondary'>of $6.50</span></InputGroup.Text>
+                            </InputGroup>
+                            <Button size='md' variant='outline-secondary' className='d-flex gap-[5px] align-items-center'><FaLinkSlash size={20} />Apply</Button>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </div>
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Applied History</p>
+                  <div className='border p-3 rounded bg-white'>
+                    <div className='d-flex justify-content-between align-items-center'>
+                      <div><p style={{ fontSize: "13px" }}>Oct 18, 2024 12:52 PM</p></div>
+                      <div><p style={{ fontSize: "13px" }}>Invoice #5019-P01</p></div>
+                      <div><p style={{ fontSize: "13px" }}>April 29, 2024 - 10:30am, Follow Up (30 minutes)
+                        Cintia Jimenez BSN, RN</p></div>
+                      <div><p style={{ fontSize: "13px" }} onClick={handleAppliedHistoryCalender}><FaPencil size={15} style={{ color: "#22D3EE" }} /></p></div>
+                      <div><p style={{ fontSize: "13px" }}>$78.00</p></div>
+                    </div>
+                  </div>
+                  {enableAppliedHistoryCalender &&
+                    <div className='border rounded p-4 bg-white mt-2'>
+                      <label style={{ color: '#696977', fontSize: "12px" }}>Applied To</label>
+                      <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon1"><CalendarDays /></InputGroup.Text>
+                        <Form.Control
+                          placeholder="Username"
+                          type='date'
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          onChange={(e) => e.target.blur()}
+                        />
+                      </InputGroup>
+                      <div className='d-flex gap-[10px]'>
+                        <Button variant='outline-secondary' style={{ color: "#fff", border: "1px solid #22D3EE", backgroundColor: "#22D3EE" }}>Save</Button>
+                        <Button variant='outline-secondary' style={{ backgroundColor: "#fff" }} onClick={handleAppliedHistoryCalender}>Cancel</Button>
+                      </div>
+                    </div>}
+                </div>
+                <div className='mt-3'>
+                  <p className='text-muted fs-4 mb-1'>Activity</p>
+                  <div className='border p-3 rounded bg-white'>
+                    <div className='d-flex justify-content-between align-items-center'>
+                      <div><p style={{ fontSize: "14px" }}>Payment received by Kelechi Azuogu Fri, Oct 18, 2024 12:52 PM</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   };
   const Receipts = () => {
