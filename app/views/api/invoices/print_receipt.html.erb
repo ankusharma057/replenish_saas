@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .header {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+    .header p {
+      font-size: 14px;
+      margin: 2px 0;
+    }
+    .header p:last-child {
+      font-size: 12px;
+    }
+    .customer-info {
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .customer-info p {
+      margin: 2px 0;
+    }
+    .receipt{
+      text-align: right;
+      margin-bottom: 40px;
+      margin: 2px 0;
+
+    }
+    table {
+      width: 100%;
+      border: 1px solid #000;
+      margin-bottom: 20px;
+      border-radius: 10px; /* Apply rounded corners to the table */
+      overflow: hidden; /* Ensures that any content inside the table doesn't overflow the rounded corners */
+    }
+    th {
+      padding: 8px;
+      text-align: left;
+      border-radius: 10px;
+      color: black;
+      font-size: 12px;
+      border-bottom: 1px solid;
+
+    }
+    h2 {
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 10px 0; 
+      font-size: 18px; 
+      margin-top: 30px; 
+      border-radius: 5px;
+      width: 100%; 
+      display: inline-block;
+    }
+    td {
+      padding: 8px;
+      text-align: left;
+      font-size: 12px;
+    }
+    .total-row {
+      font-weight: bold;
+      text-align: right;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+    .footer a {
+      color: #000;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ReplenishMD - Round Rock</h1>
+    <p>2711 La Frontera Blvd, Unit 100, Round Rock, TX 78681</p>
+    <p>Tel: 346-955-7943 | info@replenishmd.com</p>
+  </div>
+
+  <div class = "receipt">
+    <p>Receipt</p>
+  </div>
+
+  <div class="customer-info">
+    <p><strong><%= @invoices.first.client&.name %> <%= @invoices.first.client&.last_name %></strong></p>
+    <p><%= @invoices.first.client&.phone_number %></p>
+    <p><%= @invoices.first.client&.email %></p>
+  </div>
+
+  <table>
+    <thead>
+      <h2>Items and Payments</h1>
+      <tr>
+        <th>Items</th>
+        <th>Details</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @invoices.each do |invoice| %>
+        <tr>
+          <td>
+            <%= invoice.created_at.strftime('%B %d, %Y') %><br>
+            <%= invoice.charge || 'N/A' %><br>
+            <%= invoice.employee.name || 'N/A' %><br>
+          </td>
+          <td>
+            Invoice #<%= invoice.id %><br>
+            Quantity: <%=  1 %><br>
+          </td>
+          <td>
+            $<%= "%.2f" % invoice.charge %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" class="total-row">Subtotal</td>
+        <td>$<%= "%.2f" % @invoices.sum(&:charge) %></td>
+      </tr>
+      <tr>
+        <td colspan="2" class="total-row">Total</td>
+        <td>$<%= "%.2f" % @invoices.sum(&:charge) %></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="footer">
+    <p>ReplenishMD - Round Rock - 346-955-7943 - info@replenishmd.com</p>
+    <p>Book your next appointment at <a href="https://replenishmd.janeapp.com">replenishmd.janeapp.com</a></p>
+  </div>
+</body>
+</html>

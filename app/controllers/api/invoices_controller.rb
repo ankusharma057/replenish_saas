@@ -126,6 +126,46 @@ class Api::InvoicesController < ApplicationController
     end
   end
 
+  def client_invoices
+    invoices = Invoice.where(client_id: params[:id])
+    if invoices.present?  
+      render json: invoices, status: :ok
+    else
+      render json: { message: 'Invoice not found' }, status: :not_found 
+    end
+  end
+
+  def print_receipt
+    @invoices = Invoice.where(employee_id: params[:id],  client_id: params[:client_id])
+    if @invoices.present?
+      pdf_html = ActionController::Base.new.render_to_string(
+        template: 'api/invoices/print_receipt', 
+        assigns: { invoices: @invoices },
+        layout: 'pdf' 
+      )
+      @pdf = WickedPdf.new.pdf_from_string(pdf_html)
+      send_data @pdf, filename: "Invoices_#{params[:id]}.pdf", type: 'application/pdf', disposition: 'inline'
+    else
+      render json: { message: 'Invoice not found' }, status: :not_found 
+    end
+  end
+
+  def email_receipt
+    @invoices = Invoice.where(employee_id: params[:id], client_id: params[:client_id])
+    if @invoices.present?
+      recipient_email = @invoices.first.client.email
+      if recipient_email.present?
+        InvoiceMailer.send_invoice(@invoices, recipient_email).deliver_now
+        render json: { message: 'Invoice emailed successfully' }, status: :ok
+      else
+        render json: { message: 'Recipient email is required' }, status: :unprocessable_entity
+      end
+    else
+      render json: { message: 'Invoice not found' }, status: :not_found
+    end
+  end
+
+
   private
 
   def invoice_params

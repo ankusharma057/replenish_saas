@@ -99,6 +99,9 @@ mount Sidekiq::Web => '/sidekiq'
       end
 
       member do
+        post :email_receipt
+        get :client_invoices
+        get :print_receipt
         post :finalize
         post :send_reject_mail
         get :download_attachment
