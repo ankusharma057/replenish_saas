@@ -141,6 +141,7 @@ const AllClientRoot = () => {
     const [createGroupModal, setCreateGroupModal] = useState(false);
     const [searchClient, setSearchClient] = useState("");
     const [showSearchClient, setShowSearchClient] = useState("");
+    const [showMessageDetails, setShowMessageDetails] = useState("");
     
 
     const topleftCardsData = [
@@ -2406,6 +2407,41 @@ const SpineWrapper = ({ index }) => (
         return null;
     }
   };
+const handleMessageDetails=()=>{
+  setShowMessageDetails(!showMessageDetails)
+};
+const MessagesDetails=()=>{
+  return <div>
+    <Offcanvas show={showMessageDetails} onHide={handleMessageDetails} placement="end" style={{width:"80%"}}>
+        <Offcanvas.Header closeButton style={{backgroundColor:"#ededed"}}>
+          <Offcanvas.Title>Email Message</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body style={{backgroundColor:"#ededed"}}>
+          <div>
+            <Row>
+              <Col xs={11} sm={11} md={11} lg={11}>
+              <div>
+                <div className="d-flex justify-content-start align-items-center gap-[30px]">
+                  <p className="mb-0 fw-bold w-[60px]">Date</p>
+                  <p className="mb-0 text-muted ">December 12, 2024 4:02 AM</p>
+                </div>
+                <div className="d-flex justify-content-start align-items-center gap-[30px]">
+                  <p className="mb-0 fw-bold w-[60px]">To</p>
+                  <p className="mb-0 text-muted ">bichli.cam@gmail.com</p>
+                </div>
+                <div className="d-flex justify-content-start align-items-center gap-[30px]">
+                  <p className="mb-0 fw-bold w-[60px]">Subject</p>
+                  <p className="mb-0 text-muted ">Your Receipt - ReplenishMD</p>
+                </div>
+              </div>
+              </Col>
+              <Col xs={1} sm={1} md={1} lg={1}><Badge bg="warning" text="dark">Delivered</Badge></Col>
+            </Row>
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
+  </div>
+}
 
 const handleAppointmentTabs=(tab)=>{
   setAppointmentTab(tab);
@@ -3422,6 +3458,75 @@ const handleCreateGroupModal=()=>{
                             </Button>
                           </Modal.Footer>
                         </Modal>
+                      </div>
+                    </div>
+                  )}
+                  {currentTab === "Messages" && (
+                    <div>
+                      <div className="bg-white p-3 rounded">
+                        <Row xs={6} sm={6} md={6} lg={6} >
+                          <Col xs={6} sm={6} md={6} lg={6}>
+                            <div className="d-flex justify-content-between align-items-center">
+                              {topleftCardsData.map((item, index) => {
+                                return <div onMouseOver={() => handleLeftCardClick(index)} onMouseOut={handleLeftCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                                  <ReactCardFlip isFlipped={flipLeftCardIndex === index} flipDirection="horizontal">
+                                    <div className="d-flex flex-column justify-content-between align-items-center">
+                                      <div className="h2 text-secondary">
+                                        <CountUp end={item.count} />
+                                      </div>
+                                      <div className="h6 text-center text-muted">{item.label}</div>
+                                    </div>
+                                    <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                                      <p className=" fs-6 mb-0 text-center text-white">{item.backLable}</p>
+                                    </div>
+                                  </ReactCardFlip>
+                                </div>
+                              })}
+                            </div>
+                          </Col>
+                          <Col xs={6} sm={6} md={6} lg={6}>
+                            <div className="d-flex justify-content-end align-items-center gap-[40px]">
+                              {topRightCardsData.map((item, index) => {
+                                const { mainAmount, decimalPart } = formatAmount(item.count);
+                                return <div onMouseOver={() => handleRightCardClick(index)} onMouseOut={handleRightCardOut} key={index} className="w-[110px] h-[110px] p-1">
+                                  <ReactCardFlip isFlipped={flipRightCardIndex === index} flipDirection="horizontal">
+                                    <div className="d-flex flex-column justify-content-between align-items-center">
+                                      <div className="h2 text-secondary d-flex justify-content-start">
+                                        <span className="fs-6 mt-[4px]">$</span>
+                                        <span className="large"> <CountUp end={mainAmount} />{ }</span>
+                                        <span className="fs-6  mt-[4px]">{decimalPart}</span>
+                                      </div>
+                                      <div className="h6 text-center text-muted">{item.label}</div>
+                                    </div>
+                                    <div className="w-[110px] h-[110px] d-flex justify-content-between align-items-center rounded" style={{ backgroundColor: "#0dcaf0" }} onClick={() => handleClientProfileFlipCard(item.targetTab)}>
+                                      <p className=" fs-6 mb-0 text-center text-white">{item.backLable}</p>
+                                    </div>
+                                  </ReactCardFlip>
+                                </div>
+                              })}
+                            </div>
+                          </Col>
+                        </Row>
+                      </div>
+                      <div className="mt-3 bg-white border rounded p-3">
+                        <ListGroup>
+                          <ListGroup.Item onClick={handleMessageDetails} className="cursor-pointer">
+                            <div>
+                              <Row>
+                                <Col xs={11} sm={11} md={11} lg={11}>
+                                <div>
+                                  <p className="mb-0 text-dark" style={{fontSize:"13px"}}>Payment Receipt - December 12, 2024 4:02 AM</p>
+                                  <p className="mb-0 text-muted" style={{fontSize:"13px"}}>Your receipt.Hello Tester,You have a new receipt available. Please visit the link below to securely review, download, or print your receipt.View Receipt [LINK] Thanks for choosing ReplenishMD.ReplenishMD - Concierge 1818 Washington Ave Houston, TX 77007-6131[LINK]</p>
+                                </div>
+                                </Col>
+                                <Col xs={1} sm={1} md={1} lg={1}>
+                                  <Badge bg="warning" text="dark">Delivered</Badge>
+                                </Col>
+                              </Row>
+                            </div>
+                          </ListGroup.Item>
+                        </ListGroup>
+                        <MessagesDetails/>
                       </div>
                     </div>
                   )}
