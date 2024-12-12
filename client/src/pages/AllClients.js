@@ -31,7 +31,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown, Plus, MoveRight, X, SlidersHorizontal, CalendarDays, Trash2 } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge, Offcanvas, Modal } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -42,7 +42,7 @@ import InviteClientsTab from "../components/Tabs/InviteClientsTab";
 import { FaUser, FaBriefcaseMedical, FaDollarSign, FaRegCalendarAlt, FaArrowRight, FaPrint, FaFileAlt, FaBell, FaQuestionCircle, FaThumbsUp, FaRegEdit, FaLongArrowAltUp, FaLongArrowAltDown, FaUndo } from "react-icons/fa";
 import { BiSolidPencil } from "react-icons/bi";
 import { IoCallSharp, IoMailSharp, IoHome, IoMegaphoneSharp, IoChatbubble, IoDocumentText } from "react-icons/io5";
-import { BsFileEarmarkTextFill, BsFillGearFill, BsSliders2, BsThreeDotsVertical } from "react-icons/bs";
+import { BsFileEarmarkTextFill, BsFillGearFill, BsPlusCircleFill, BsSliders2, BsThreeDots, BsThreeDotsVertical } from "react-icons/bs";
 import SubmitedClientIntakeForm from "./SubmitedClientIntakeForm";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import CreateClientCard from "../components/Cards/CreateClientCart";
@@ -53,9 +53,9 @@ import SignatureCanvas from "react-signature-canvas";
 import Select from "react-select";
 import { FaBook, FaHeading } from "react-icons/fa6";
 import { FaStar, FaCog, FaEye } from 'react-icons/fa';
-import { TbCheckbox, TbSignature } from "react-icons/tb";
-import { RxDropdownMenu } from "react-icons/rx";
-import { PiColumnsFill, PiGridNineLight, PiWarningCircleBold } from "react-icons/pi";
+import { TbCheckbox, TbEdit, TbSignature } from "react-icons/tb";
+import { RxCross2, RxDropdownMenu } from "react-icons/rx";
+import { PiColumnsFill, PiGridNineLight, PiPlusCircleFill, PiWarningCircleBold } from "react-icons/pi";
 import { TopModel } from "../components/TopModel";
 import Switch from "@mui/material/Switch";
 import { IoIosArrowDown, IoIosArrowUp, IoMdAdd } from "react-icons/io";
@@ -87,6 +87,9 @@ import CountUp from 'react-countup';
 import DatePicker from "react-datepicker";
 import { TiTick } from "react-icons/ti";
 import { MdModeEditOutline } from "react-icons/md";
+import { PiGridFourFill } from "react-icons/pi";
+import { ImList } from "react-icons/im";
+import { GrImage } from "react-icons/gr";
 
 const AllClientRoot = () => {
     let { clientId } = useParams();
@@ -131,9 +134,15 @@ const AllClientRoot = () => {
     const [searchLocation, setSearchLocation] = useState("");
     const [searchEmployee, setSearchEmployee] = useState("");
     const [serviceLocation, setServiceLocation] = useState([]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [showEditAppointmentSection, setShowEditAppointmentSection] = useState(false);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [showEditAppointmentSection, setShowEditAppointmentSection] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [createGroupModal, setCreateGroupModal] = useState(false);
+    const [searchClient, setSearchClient] = useState("");
+    const [showSearchClient, setShowSearchClient] = useState("");
+    
+
     const topleftCardsData = [
       {
           id: 1,
@@ -237,7 +246,7 @@ const AllClientRoot = () => {
             
             if (data?.length > 0) {
               const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
-                setEmployeeList(newData);
+                setEmployeeList(newData);                
                 if (clientId) {
                     let newClient = newData.find(client => client.id == clientId)
                     if(newClient){
@@ -2397,12 +2406,16 @@ const SpineWrapper = ({ index }) => (
         return null;
     }
   };
+
 const handleAppointmentTabs=(tab)=>{
   setAppointmentTab(tab);
 };
 const filteredLocationItems = serviceLocation.filter((item) =>
   item.label.toLowerCase().includes(searchLocation.toLowerCase())
 );
+const filteredClientList = searchClient ?employeeList.filter((item) =>
+  item.name.toLowerCase().startsWith(searchClient.toLowerCase())
+):[];
 const getEndDateMinDate = () => {
   if (startDate) {
     return getNextDay(startDate);
@@ -2414,6 +2427,22 @@ const getNextDay = (date) => {
   nextDay.setDate(nextDay.getDate() + 1);
   return nextDay;
 };
+const handleDrop = (event) => {
+  event.preventDefault();
+  const files = Array.from(event.dataTransfer.files);
+  setSelectedFiles(files);
+};
+const handleDragOver = (event) => {
+  event.preventDefault();
+};
+const handleFileSelect = (event) => {
+  const files = event.target.files ? Array.from(event.target.files) : [];
+  setSelectedFiles(files);
+};
+const handleCreateGroupModal=()=>{
+  setCreateGroupModal(!createGroupModal)
+}
+
     return (
         <>
             <AsideLayout
@@ -3255,8 +3284,147 @@ const getNextDay = (date) => {
                                     <CreateStaffCard
                                         show={showCreateUserModal}
                                         onHide={() => setShowCreateUserModal(false)}
-                                    />
-                                )}
+                    />
+                  )}
+                  {currentTab === "Files" && (
+                    <div className="border p-3 bg-white">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h3 className="fs-3 text-muted font-light">Files <span className="fs-6 font-light">Drag and drop files below to upload</span></h3>
+                        <div className="d-flex justify-content-end align-items-center gap-[10px]">
+                          {/* <ButtonGroup aria-label="Basic example">
+                            <Button variant="outline-secondary" style={{ padding: "10px 10px" }}><PiGridFourFill /></Button>
+                            <Button variant="outline-secondary" style={{ padding: "10px 10px" }}> <ImList /></Button>
+                          </ButtonGroup> */}
+                          <div>
+                            <Button onClick={() => document.getElementById("fileUpload").click()} className="d-flex align-items-center gap-[5px]" style={{ color: "#22D3EE", color: "#fff" }}><GrImage />Add Files/Image</Button>
+                            <input
+                              type="file"
+                              id="fileUpload"
+                              className="d-none"
+                              onChange={handleFileSelect}
+                              multiple
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div>
+                          <div
+                            className="dotted-border border-secondary d-flex justify-content-center align-items-center flex-column rounded w-100 p-2 h-[200px]"
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            style={{ textAlign: "center", cursor: "pointer", borderStyle: "dashed", border: "1px dashed" }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-arrow-up"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
+                            <span>Drag & Drop to upload</span>
+                            <input
+                              type="file"
+                              id="fileUpload"
+                              multiple
+                              className="d-none"
+                              onChange={handleFileSelect}
+                            />
+                          </div>
+                          {selectedFiles.length > 0 && (
+                            <div className="mt-3">
+                              <ul className="list-group">
+                                {selectedFiles.map((file, index) => {
+                                  return <li key={index} className="p-3 d-flex justify-content-between align-items-center list-group-item">
+                                    {file?.name}
+                                    <div className="d-flex justify-content-center gap-[10px]">
+                                      {moment(new Date(file?.lastModifiedDate).toISOString()).format("MMMM DD, YYYY")}
+                                      <Badge bg="secondary">{file?.name.split('.').pop().toUpperCase()}</Badge>
+                                    </div>
+                                  </li>
+                                })}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {currentTab === "Groups" && (
+                    <div className="border p-3 bg-white">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h3 className="fs-3 text-muted font-light">Groups</h3>
+                        <Button variant="outline-secondary d-flex align-items-center gap-[10px]" onClick={handleCreateGroupModal}><PiPlusCircleFill /> New Group</Button>
+                      </div>
+                      <div>
+                        <div className="mt-2 border rounded p-3 my-2 d-flex justify-content-between align-items-center">
+                          <div className="fw-bold">Tester</div>
+                          <div className="fw-bold">2 Members</div>
+                          <div>
+                          <OverlayTrigger
+                              trigger="click"
+                              placement="bottom"
+                              overlay={<Popover id="date-picker-popover">
+                                <Popover.Body className="p-0 w-[200px]">
+                                  <div className="d-flex justify-content-between gap-3 align-items-center">
+                                    <ListGroup className="w-[200px]">
+                                      <ListGroup.Item className="d-flex align-items-center gap-[5px]"><TbEdit size={20} />Edit</ListGroup.Item>
+                                      <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px]"><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
+                                    </ListGroup>
+                                  </div>
+                                </Popover.Body>
+                              </Popover>}
+                              rootClose
+                            >
+                              <Button variant="outline-secondary" style={{padding:"10px 10px"}}>
+                                <BsThreeDots />
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                        </div>
+                        <Modal show={createGroupModal} onHide={handleCreateGroupModal}>
+                          <Modal.Header closeButton>
+                            <Modal.Title className="text-muted">New Group</Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            <div>
+                              <Form>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                  <Form.Label>Name of the group</Form.Label>
+                                  <Form.Control type="email" placeholder="name@example.com" required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                  <Form.Label>Members</Form.Label>
+                                  <div className="p-4 d-flex justify-content-between align-items-center border rounded">
+                                    <div>Test Account <Badge bg="secondary">Primary</Badge></div>
+                                    <div>
+                                      <RxCross2 />
+                                    </div>
+                                  </div>
+                                </Form.Group>
+                              </Form>
+                              <div>
+                                {!showSearchClient && <Button variant="outline-secondary d-flex justify-content-start align-items-center gap-[5px]" size="sm" onClick={()=>setShowSearchClient(true)}><BsPlusCircleFill />Members</Button>}
+                                {showSearchClient &&<Form>
+                                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                  <Form.Label>Add Client</Form.Label>
+                                    <Form.Control type="search" placeholder="Add Client..." required onChange={(e) => { setSearchClient(e.target.value) }} />
+                                  </Form.Group>
+                                </Form>}
+                                {searchClient && <ListGroup style={{ maxHeight: "300px", overflow: "scroll" }}>
+                                  {filteredClientList.map((item) => {
+                                    return <ListGroup.Item>{item.name}</ListGroup.Item>
+                                  })}
+                                </ListGroup>}
+                              </div>
+                            </div>
+                          </Modal.Body>
+                          <Modal.Footer>
+                            <Button variant="outline-secondary" onClick={handleCreateGroupModal}>
+                              Cancel
+                            </Button>
+                            <Button variant="primary" onClick={handleCreateGroupModal}>
+                              Create
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
+                      </div>
+                    </div>
+                  )}
                             </div>
 
                             <CustomModal
