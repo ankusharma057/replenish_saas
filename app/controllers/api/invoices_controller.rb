@@ -159,19 +159,23 @@ class Api::InvoicesController < ApplicationController
   end
 
   def print_receipt
-    @invoices = Invoice.where(employee_id: params[:id],  client_id: params[:client_id])
-    if @invoices.present?
+    invoices = Invoice.where(client_id: params[:client_id])
+    invoices = invoices.where(employee_id: params[:employee_id]) if params[:employee_id].present?
+
+    if invoices.present?
       pdf_html = ActionController::Base.new.render_to_string(
-        template: 'api/invoices/print_receipt', 
-        assigns: { invoices: @invoices },
-        layout: 'pdf' 
+        template: 'api/invoices/print_receipt',
+        assigns: { invoices: invoices },
+        layout: 'pdf'
       )
       @pdf = WickedPdf.new.pdf_from_string(pdf_html)
-      send_data @pdf, filename: "Invoices_#{params[:id]}.pdf", type: 'application/pdf', disposition: 'inline'
+      filename = params[:employee_id].present? ? "Invoices_#{params[:client_id]}_#{params[:employee_id]}.pdf" : "Invoices_#{params[:client_id]}_all.pdf"
+      send_data @pdf, filename: filename, type: 'application/pdf', disposition: 'inline'
     else
-      render json: { message: 'Invoice not found' }, status: :not_found 
+      render json: { message: 'Invoice not found' }, status: :not_found
     end
   end
+
 
   def email_receipt
     @invoices = Invoice.where(employee_id: params[:id], client_id: params[:client_id])

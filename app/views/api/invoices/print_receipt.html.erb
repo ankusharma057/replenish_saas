@@ -94,9 +94,9 @@
   </div>
 
   <div class="customer-info">
-    <p><strong><%= @invoices.first.client&.name %> <%= @invoices.first.client&.last_name %></strong></p>
-    <p><%= @invoices.first.client&.phone_number %></p>
-    <p><%= @invoices.first.client&.email %></p>
+    <p>Name:<strong><%= @invoices.first.client&.name %> <%= @invoices.first.client&.last_name %></strong></p>
+    <p>Tel:<%= @invoices.first.client&.phone_number %></p>
+    <p>Email:<%= @invoices.first.client&.email %></p>
   </div>
 
   <table>

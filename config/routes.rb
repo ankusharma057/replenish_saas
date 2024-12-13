@@ -96,12 +96,12 @@ mount Sidekiq::Web => '/sidekiq'
     resources :invoices, except: :create do
       collection do
         post :finalize_multiple
+        get :print_receipt
       end
 
       member do
         post :email_receipt
         get :client_invoices
-        get :print_receipt
         post :finalize
         post :send_reject_mail
         get :download_attachment
