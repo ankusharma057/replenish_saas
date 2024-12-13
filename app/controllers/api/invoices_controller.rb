@@ -128,7 +128,30 @@ class Api::InvoicesController < ApplicationController
 
   def client_invoices
     invoices = Invoice.where(client_id: params[:id])
-    if invoices.present?  
+    if invoices.present?
+      invoices = invoices.where(location_id: params[:location_id]) if params[:location_id].present?
+      invoices = invoices.where(employee_id: params[:employee_id]) if params[:employee_id].present?
+      invoices = invoices.where(is_paid: params[:is_paid]) if params[:is_paid].present?
+      if params[:start_date].present? && params[:end_date].present?
+        invoices = invoices.where("DATE(created_at) BETWEEN ? AND ?", date_parse(params[:start_date]), date_parse(params[:end_date]))
+      elsif params[:start_date].present? 
+        invoices = invoices.where("DATE(created_at) >= ?", date_parse(params[:start_date]))
+      elsif params[:end_date].present?
+        invoices = invoices.where("DATE(created_at) <= ?", date_parse(params[:end_date]))
+      end
+      if params[:invoice_age].present?
+        today = Date.current
+        case params[:invoice_age]
+        when '0-30'
+          invoices = invoices.where("DATE(created_at) >= ?", today - 30.days)
+        when '31-60'
+          invoices = invoices.where("DATE(created_at) BETWEEN ? AND ?", today - 60.days, today - 31.days)
+        when '61-90'
+          invoices = invoices.where("DATE(created_at) BETWEEN ? AND ?", today - 90.days, today - 61.days)
+        when '91-120'
+          invoices = invoices.where("DATE(created_at) BETWEEN ? AND ?", today - 120.days, today - 91.days)
+        end
+      end
       render json: invoices, status: :ok
     else
       render json: { message: 'Invoice not found' }, status: :not_found 
@@ -167,6 +190,10 @@ class Api::InvoicesController < ApplicationController
 
 
   private
+
+  def date_parse(date)
+    Date.strptime(date, '%m/%d/%Y')
+  end
 
   def invoice_params
     params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value)

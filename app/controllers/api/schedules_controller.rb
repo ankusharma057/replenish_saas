@@ -70,6 +70,10 @@ class Api::SchedulesController < ApplicationController
     if params[:client_id].present?
       schedules = Schedule.client_schedules(params[:client_id])
       # Filters
+      if schedules.is_a?(Array)
+        schedule_ids = schedules.map { |schedule| schedule[:id] }
+        schedules = Schedule.where(id: schedule_ids) 
+      end
       schedules = schedules.where(state: params[:state]) if params[:state].present?
       schedules = schedules.where(location_id: params[:location_id]) if params[:location_id].present?
       schedules = schedules.where(employee_id: params[:employee_id]) if params[:employee_id].present?
