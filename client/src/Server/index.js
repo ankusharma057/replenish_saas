@@ -1057,3 +1057,69 @@ export const GetAllEmployeesLocations = async (payload) =>{
   });
   return res;
 }
+export const clientBillingPurchases = async (clientId) => {
+  try {
+    const response = await api.get(`/api/invoices/${clientId}/client_invoices`);
+    return response.data;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const printPurchasePdf = async (clientId,employeeId) => {
+  try {
+    const response = await api.get(`/api/invoices/${employeeId}/print_receipt?client_id=${clientId}`, {
+      headers: { Accept: 'application/pdf' },
+      responseType: 'blob',
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const sendPurchaseEmail = async (clientId,employeeId) => {
+  try {
+    const response = await api.post(`/api/invoices/${employeeId}/email_receipt?client_id=${clientId}`);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const createGroup = async (payload) => {
+  try {
+    const response = await api.post(`api/clients/${payload.clientId}/add_group`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const updateGroup = async (payload) => {
+  try {
+    const response = await api.patch(`api/clients/${payload.clientId}/add_group`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const deleteGroup = async (payload) => {
+  try {
+    const response = await api.delete(`api/clients/${payload.clientId}/add_group`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const uploadFiles = async (payload,clientId) => {
+  try {
+    const response = await api.post(`api/clients/${clientId}/upload_files`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};

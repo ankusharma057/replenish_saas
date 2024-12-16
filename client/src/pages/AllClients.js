@@ -18,7 +18,11 @@ import {
     UpdateClient,
     createCheckoutSession,
     confirmPayment,
-    getLocationsWithoutEmployee
+    getLocationsWithoutEmployee,
+    createGroup,
+    deleteGroup,
+    updateGroup,
+    uploadFiles
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -137,12 +141,23 @@ const AllClientRoot = () => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [showEditAppointmentSection, setShowEditAppointmentSection] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [selectedFiles, setSelectedFiles] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [enableFilesDetails, setEnableFilesDetails] = useState(false);
+    const [imageDescription, setImageDescription] = useState("");
+    const [includeInClientChart, setIncludeInClientChart] = useState(false);
+    const [imageVisibility, setImageVisibility] = useState("Viewable by Everyone");
     const [createGroupModal, setCreateGroupModal] = useState(false);
     const [searchClient, setSearchClient] = useState("");
     const [showSearchClient, setShowSearchClient] = useState("");
     const [showMessageDetails, setShowMessageDetails] = useState("");
-    
+    const [groupName, setGroupName] = useState("");
+    const [groupType, setGroupType] = useState("create");
+    const [createGroupPayload, setCreateGroupPayload] = useState({
+      "clientId": "",
+      "group_name": "",
+      "client_ids": []
+    });
 
     const topleftCardsData = [
       {
@@ -228,8 +243,6 @@ const AllClientRoot = () => {
     try {
       if (selectedEmployeeData) {
         const { data } = await getClientSchedulesOnly(selectedEmployeeData, refetch);
-        console.log("@@@data",data);
-        
         setSelectedClientSchedules(data);
       }
     } catch (error) {
@@ -856,9 +869,9 @@ setChanges(true);
 };
 
 const fonts = [
-    { label: "text", class: "pinyon-script-regular" },
-    { label: "text", class: "great-vibes-regular" },
-    { label: "text", class: "herr-von-muellerhoff-regular" },
+    { label: "text", className: "pinyon-script-regular" },
+    { label: "text", className: "great-vibes-regular" },
+    { label: "text", className: "herr-von-muellerhoff-regular" },
 ];
 
 const saveSignature = () => {
@@ -1241,7 +1254,15 @@ useEffect(()=>{
           }
         return "";
       }
-      useEffect(()=>{},[selectedEmployeeData])
+      useEffect(()=>{
+        setCreateGroupPayload((prev)=>(
+          {
+            "clientId": selectedEmployeeData?.id,
+            "group_name": "",
+            "client_ids": [selectedEmployeeData?.id]
+          }
+        ))
+      },[selectedEmployeeData])
     const EmployeeItem = ({ index, style }) => {
         const employee = filteredEmployeeList[index];
         let name=employee?.name+ " "
@@ -2449,9 +2470,12 @@ const handleAppointmentTabs=(tab)=>{
 const filteredLocationItems = serviceLocation.filter((item) =>
   item.label.toLowerCase().includes(searchLocation.toLowerCase())
 );
-const filteredClientList = searchClient ?employeeList.filter((item) =>
-  item.name.toLowerCase().startsWith(searchClient.toLowerCase())
-):[];
+const filteredClientList = searchClient
+  ? employeeList.filter((item) =>
+      item.name.toLowerCase().startsWith(searchClient.toLowerCase()) &&
+      !createGroupPayload.client_ids.includes(item.id)
+    )
+  : [];
 const getEndDateMinDate = () => {
   if (startDate) {
     return getNextDay(startDate);
@@ -2472,13 +2496,112 @@ const handleDragOver = (event) => {
   event.preventDefault();
 };
 const handleFileSelect = (event) => {
-  const files = event.target.files ? Array.from(event.target.files) : [];
-  setSelectedFiles(files);
+  const files = event.target.files[0];
+  if(files){
+    setSelectedFiles(files);
+  const reader = new FileReader();
+  reader.onload=(e)=>{
+    setPreviewImage(e.target.result)
+  }
+  reader.readAsDataURL(files);
+  setEnableFilesDetails(true)
+}
 };
 const handleCreateGroupModal=()=>{
   setCreateGroupModal(!createGroupModal)
 }
-
+  const handleGroupName = (event) => {
+    setCreateGroupPayload((prev) => ({
+      ...prev,
+      group_name: event.target.value
+    }))
+  };
+  const handleGroupMember = (clientId) => {
+    if (!createGroupPayload.client_ids.includes(clientId)) {
+      setCreateGroupPayload((prev) => ({
+        ...prev,
+        client_ids: [...prev?.client_ids, clientId]
+      }))
+    }
+  }
+  const handleRemoveGroupMember=(clientId)=>{
+    if (createGroupPayload.client_ids.includes(clientId)) {
+      setCreateGroupPayload((prev) => ({
+        ...prev,
+        client_ids: createGroupPayload.client_ids.filter((item)=>item!==clientId)
+      }))
+    }
+  };
+  const handleDisableCreateGroup=()=>{
+    if(!createGroupPayload.group_name|| createGroupPayload.client_ids.length>1){
+      return false
+    }else{
+      return true
+    }
+  }
+  const handleGroup=async(type)=>{
+    if(createGroupPayload.group_name !== "" || createGroupPayload.client_ids.length>1){
+      let response;
+      if(type==="create"){
+        response= await createGroup(createGroupPayload)
+      }else if(type==="update"){
+        response= await updateGroup(createGroupPayload)
+      }else if(type==="delete"){
+        response= await deleteGroup(createGroupPayload)
+      }
+      if(response.status=== 200){
+        toast.success(response.data.message);
+        setCreateGroupPayload((prev)=>({
+          "clientId": selectedEmployeeData.id,
+          "group_name": "",
+          "client_ids": [selectedEmployeeData.id]
+        }))
+        setCreateGroupModal(!createGroupModal)
+      }else{
+        toast.error(response.data.message)
+      }
+    }else{
+      toast.error("Add Group Name or Add Clients")
+    }
+  };
+  const handleEditGroup = () => {
+    setGroupType("edit");
+    handleCreateGroupModal()
+  };
+  const handleDescription=(event)=>{
+    setImageDescription(event.target.value)
+  };
+  const handleIncludeInClientChart=(event)=>{
+    setIncludeInClientChart(event.target.checked)
+  };
+  const handleImageVisibility=(event)=>{
+    setImageVisibility(event.target.value)
+  };
+  const handleDeleteImage=()=>{
+    setSelectedFiles(null)
+    setEnableFilesDetails(false);
+    setImageDescription("")
+    setIncludeInClientChart(false);
+    setImageVisibility("Viewable by Everyone");
+  };
+  const handleSubmitFiles = async () => {
+    const formData = new FormData();
+    formData.append("descriptions", imageDescription);
+    formData.append("files", selectedFiles);
+    let response = await uploadFiles(formData,clientId)
+    if (response.status === 200) {
+      toast.success(response.data.success)
+      setSelectedFiles(null)
+      setEnableFilesDetails(false);
+      setImageDescription("")
+      setIncludeInClientChart(false);
+      setImageVisibility("Viewable by Everyone");
+    } else {
+      toast.error(response.data.error)
+    }
+  }
+  
+  let filterClientList = employeeList.filter(client => createGroupPayload?.client_ids?.includes(client.id))
     return (
         <>
             <AsideLayout
@@ -3338,7 +3461,6 @@ const handleCreateGroupModal=()=>{
                               id="fileUpload"
                               className="d-none"
                               onChange={handleFileSelect}
-                              multiple
                             />
                           </div>
                         </div>
@@ -3351,33 +3473,85 @@ const handleCreateGroupModal=()=>{
                             onDragOver={handleDragOver}
                             style={{ textAlign: "center", cursor: "pointer", borderStyle: "dashed", border: "1px dashed" }}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-arrow-up"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" strokeLinejoin="round" className="lucide lucide-circle-arrow-up"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>
                             <span>Drag & Drop to upload</span>
                             <input
                               type="file"
                               id="fileUpload"
-                              multiple
                               className="d-none"
                               onChange={handleFileSelect}
                             />
                           </div>
-                          {selectedFiles.length > 0 && (
-                            <div className="mt-3">
-                              <ul className="list-group">
-                                {selectedFiles.map((file, index) => {
-                                  return <li key={index} className="p-3 d-flex justify-content-between align-items-center list-group-item">
-                                    {file?.name}
-                                    <div className="d-flex justify-content-center gap-[10px]">
-                                      {moment(new Date(file?.lastModifiedDate).toISOString()).format("MMMM DD, YYYY")}
-                                      <Badge bg="secondary">{file?.name.split('.').pop().toUpperCase()}</Badge>
-                                    </div>
-                                  </li>
-                                })}
-                              </ul>
-                            </div>
-                          )}
                         </div>
                       </div>
+                      <Offcanvas show={enableFilesDetails} placement="end" onHide={() => { setEnableFilesDetails(false) }}>
+                        <Offcanvas.Header >
+                          <Offcanvas.Title className="w-100">
+                            <div className=" w-100 d-flex justify-content-between align-items-center">
+                              <p className="text-muted fs-4 fw-light">Edit Files</p>
+                              <Button style={{ backgroundColor: "#22D3EE" }} onClick={handleSubmitFiles} disabled={selectedFiles !==null?false:true}>Save</Button>
+                            </div>
+                          </Offcanvas.Title>
+                        </Offcanvas.Header>
+                        <Offcanvas.Body>
+                          <p>{selectedFiles?.name}</p>
+                          <div className="w-100 h-[400px] border rounded dotted-border p-2">
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain"
+                              }}
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <Button variant="outline-secondary" onClick={() => document.getElementById("fileUpload").click()} className="d-flex align-items-center gap-[5px]"><GrImage />Add Files/Image</Button>
+                            <input
+                              type="file"
+                              id="fileUpload"
+                              className="d-none"
+                              onChange={handleFileSelect}
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <Form.Group controlId="formFile" className="mb-3">
+                              <Form.Label className="text-muted">File Description</Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                style={{ height: '100px' }}
+                                onChange={handleDescription}
+                                value={imageDescription}
+                              />
+                            </Form.Group>
+                          </div>
+                          <div className="mt-3">
+                            <Form className="d-flex justify-content-between align-items-center">
+                            <Form.Label className="text-muted">Include in client chart</Form.Label>
+                              <Form.Check
+                                type="switch"
+                                id="custom-switch"
+                                onChange={handleIncludeInClientChart}
+                                value={includeInClientChart}
+                              />
+                            </Form>
+                          </div>
+                          <div className="mt-3">
+                            <Form.Select aria-label="Default select example" onChange={handleImageVisibility} value={imageVisibility}>
+                              <option value="Viewable by Everyone">Viewable by Everyone</option>
+                              <option value="Viewable by all Doctors">Viewable by all Doctors</option>
+                              <option value="Viewable by all Aesthetics">Viewable by all Aesthetics</option>
+                              <option value="Viewable by all Consultants">Viewable by all Consultants</option>
+                            </Form.Select>
+                          </div>
+                          <div className="d-flex justify-content-end align-items-center gap-[10px] mt-3">
+                            <Button variant="danger" onClick={handleDeleteImage}><Trash2/></Button>
+                            <Button style={{ backgroundColor: "#22D3EE" }} onClick={handleSubmitFiles} disabled={selectedFiles !==null?false:true}>Save</Button>
+                          </div>
+                        </Offcanvas.Body>
+                        
+                      </Offcanvas>
                     </div>
                   )}
                   {currentTab === "Groups" && (
@@ -3398,8 +3572,8 @@ const handleCreateGroupModal=()=>{
                                 <Popover.Body className="p-0 w-[200px]">
                                   <div className="d-flex justify-content-between gap-3 align-items-center">
                                     <ListGroup className="w-[200px]">
-                                      <ListGroup.Item className="d-flex align-items-center gap-[5px]"><TbEdit size={20} />Edit</ListGroup.Item>
-                                      <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px]"><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
+                                      <ListGroup.Item className="d-flex align-items-center gap-[5px]" onClick={handleEditGroup}><TbEdit size={20} />Edit</ListGroup.Item>
+                                      <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px]" onClick={()=>handleGroup("delete")}><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
                                     </ListGroup>
                                   </div>
                                 </Popover.Body>
@@ -3414,28 +3588,31 @@ const handleCreateGroupModal=()=>{
                         </div>
                         <Modal show={createGroupModal} onHide={handleCreateGroupModal}>
                           <Modal.Header closeButton>
-                            <Modal.Title className="text-muted">New Group</Modal.Title>
+                            <Modal.Title className="text-muted">{groupType==="create"?"New Group":"Edit Group"}</Modal.Title>
                           </Modal.Header>
                           <Modal.Body>
                             <div>
                               <Form>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                   <Form.Label>Name of the group</Form.Label>
-                                  <Form.Control type="email" placeholder="name@example.com" required />
+                                  <Form.Control type="email" placeholder="Name of The Group" required onChange={handleGroupName} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                   <Form.Label>Members</Form.Label>
-                                  <div className="p-4 d-flex justify-content-between align-items-center border rounded">
-                                    <div>Test Account <Badge bg="secondary">Primary</Badge></div>
-                                    <div>
-                                      <RxCross2 />
+                                  {filterClientList.reverse()?.map((item) => {
+                                    return <div className="mt-2 p-4 d-flex justify-content-between align-items-center border rounded">
+                                      <div className="d-flex gap-[5px]">{item.name}{item.id===selectedEmployeeData.id &&<Badge bg="secondary">Primary</Badge>}</div>
+                                      <div onClick={()=>handleRemoveGroupMember(item.id)}>
+                                        <RxCross2 />
+                                      </div>
                                     </div>
-                                  </div>
+                                  })}
                                 </Form.Group>
                               </Form>
                               <div>
                                 {!showSearchClient && <Button variant="outline-secondary d-flex justify-content-start align-items-center gap-[5px]" size="sm" onClick={()=>setShowSearchClient(true)}><BsPlusCircleFill />Members</Button>}
-                                {showSearchClient &&<Form>
+                                {showSearchClient &&
+                                <Form>
                                   <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                   <Form.Label>Add Client</Form.Label>
                                     <Form.Control type="search" placeholder="Add Client..." required onChange={(e) => { setSearchClient(e.target.value) }} />
@@ -3443,7 +3620,7 @@ const handleCreateGroupModal=()=>{
                                 </Form>}
                                 {searchClient && <ListGroup style={{ maxHeight: "300px", overflow: "scroll" }}>
                                   {filteredClientList.map((item) => {
-                                    return <ListGroup.Item>{item.name}</ListGroup.Item>
+                                    return <ListGroup.Item onClick={()=>handleGroupMember(item?.id)}>{item.name}</ListGroup.Item>
                                   })}
                                 </ListGroup>}
                               </div>
@@ -3453,11 +3630,12 @@ const handleCreateGroupModal=()=>{
                             <Button variant="outline-secondary" onClick={handleCreateGroupModal}>
                               Cancel
                             </Button>
-                            <Button variant="primary" onClick={handleCreateGroupModal}>
-                              Create
+                            <Button variant="primary" onClick={()=>handleGroup("create")} disabled={handleDisableCreateGroup()}>
+                            {groupType==="create"?"Create":"Edit"}
                             </Button>
                           </Modal.Footer>
                         </Modal>
+                        
                       </div>
                     </div>
                   )}

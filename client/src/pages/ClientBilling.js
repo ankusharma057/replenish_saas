@@ -8,14 +8,17 @@ import {
   removeCreditCard as removeCreditCardAPI,
   fetchConfig,
   getEmployeesOnly,
-  getLocationsWithoutEmployee
+  getLocationsWithoutEmployee,
+  clientBillingPurchases,
+  printPurchasePdf,
+  sendPurchaseEmail
 } from "../Server";
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
 import { ArrowRightLeft, CalendarDays, ChevronDown, LogOut, Mail, Phone, Printer, PrinterIcon, Search, Settings, SlidersHorizontal, Smartphone, UserRound, X,XSquare } from "lucide-react";
-import { Badge, Button, ButtonGroup, Col, Collapse, Dropdown, DropdownButton, Form, FormControl, InputGroup, ListGroup, Offcanvas, Overlay, OverlayTrigger, Placeholder, Popover, Row, SplitButton, Table } from 'react-bootstrap';
+import { Badge, Button, ButtonGroup, Col, Collapse, Dropdown, DropdownButton, Form, FormControl, InputGroup, ListGroup, Modal, Offcanvas, Overlay, OverlayTrigger, Placeholder, Popover, Row, SplitButton, Table } from 'react-bootstrap';
 import ReactCardFlip from 'react-card-flip';
 import CountUp from 'react-countup';
 import DatePicker from "react-datepicker";
@@ -54,10 +57,14 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const [searchLocation, setSearchLocation] = useState("");
   const [allLocations, setAllLocations] = useState([]);
   const [purchaseDetails,setPurchaseDetails]=useState(false);
+  const [purchaseDetailsContent,setPurchaseDetailsContent]=useState(null);
   const [paymentDetails,setPaymentDetails]=useState(false);
   const [purchaseDate,setPurchaseDate]=useState(Date())
   const [enableAppliedCalender,setEnableAppliedCalender]=useState(false)
   const [enableAppliedHistoryCalender,setEnableAppliedHistoryCalender]=useState(false)
+  const [clientPurchases,setClientPurchases]=useState([])
+  const [purchaseChangeEmployee,setPurchaseChangeEmployee]=useState(false)
+  const [purchaseSearch,setPurchaseSearch]=useState("")
   const topleftCardsData = [
     {
       id: 1,
@@ -126,6 +133,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       loadConfig();
       getEmployees();
       getAllEmployeeLocation();
+      getClientBillingPurchases();
   }, []);
 
   useEffect(() => {
@@ -151,6 +159,14 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+  const getClientBillingPurchases=async()=>{
+    const data = await clientBillingPurchases(clientId)
+    if(Array.isArray(data)){
+      setClientPurchases(data)
+    }else if(data.message){
+      toast.error(data.message)
     }
   };
 
@@ -261,7 +277,15 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const filteredLocationItems = serviceLocation.filter((item) =>
     item.label.toLowerCase().includes(searchLocation.toLowerCase())
   );
-  const handlePurchaseDetails=()=>{
+  const handlePurchaseDetails=(purchaseId)=>{
+    let purchaseItem = clientPurchases.find((item)=>item.id === purchaseId);
+    if(purchaseItem){
+      setPurchaseDetailsContent(purchaseItem)
+      setPurchaseDetails(!purchaseDetails)
+    }
+  }
+  const handlePurchaseDetailsClose=()=>{
+    setPurchaseDetailsContent(null)
     setPurchaseDetails(!purchaseDetails)
   }
   const handlePaymentDetails=()=>{
@@ -272,6 +296,27 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   };
   const handleAppliedHistoryCalender=()=>{
     setEnableAppliedHistoryCalender(!enableAppliedHistoryCalender)
+  };
+  const handlePurchaseChangeEmployee=()=>{
+    setPurchaseDetails(!purchaseDetails)
+    setPurchaseChangeEmployee(!purchaseChangeEmployee)
+  };
+  let filterEmployeeList =employeeList.filter((item) =>
+    item.name.toLowerCase().startsWith(purchaseSearch?.toLowerCase())
+  );;
+  const handlePrintPdf = async (employeeId) => {
+    let response = await printPurchasePdf(clientId, employeeId)
+    const blobUrl = URL.createObjectURL(response);
+    window.open(blobUrl, '_blank');
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  };
+  const handleSendEmail = async (employeeId) => {
+    let response = await sendPurchaseEmail(clientId, employeeId)
+    if(response.status===200){
+      toast.success(response.data.message)
+    }else{
+      toast.error(response.data.message)
+    }
   };
   const Purchases = () => {
     return <div>
@@ -403,17 +448,18 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Nov 12 2024</td>
+              {Array.isArray(clientPurchases)? clientPurchases.map((purchase,index)=>{
+                return <tr>
+                <td>{moment(purchase.created_at).format("MMM DD YYYY")}</td>
                 <td>ICare Jenny</td>
-                <td>Ashrut Dev</td>
-                <td>Client Invoice 6039-01 Test Account</td>
-                <td>Unpaid</td>
-                <td>$75.00</td>
-                <td>Balance</td>
+                <td>{purchase.employee_name}</td>
+                <td>{purchase.client_name}-{purchase.id}-{purchase.employee_name}</td>
+                <td>{purchase.is_paid?"Paid":"Unpaid"}</td>
+                <td>${purchase.charge}</td>
+                <td className='text-danger'>${purchase.charge}</td>
                 <td>
                   <div className='d-flex border rounded justify-content-between align-items-center'>
-                    <Button variant='outline-secondary' style={{ border: "none" }} size='sm' className='w-100' onClick={handlePurchaseDetails}>View</Button>
+                    <Button variant='outline-secondary' style={{ border: "none" }} size='sm' className='w-100' onClick={()=>handlePurchaseDetails(purchase.id)}>View</Button>
                     <OverlayTrigger
                       trigger="click"
                       key={"top"}
@@ -426,13 +472,13 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                               <hr />
                             </div>
                             <div>
-                              <p>Print Receipt (Quick)</p>
+                              <p className='cursor-pointer' onClick={()=>handlePrintPdf(purchase.employee.id)}>Print Receipt (Quick)</p>
                               <p>Print Receipt (Options)</p>
                               <p>Print Receipt (Detailed)</p>
                               <hr />
                             </div>
                             <div>
-                              <p>Email Receipt (Options)</p>
+                              <p className='cursor-pointer' onClick={()=>handleSendEmail(purchase.employee.id)}>Email Receipt (Options)</p>
                               <p>Email Receipt (Detailed)</p>
                               <hr />
                             </div>
@@ -452,6 +498,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                   </div>
                 </td>
               </tr>
+              }): <p>No Invoices Found</p>}
             </tbody>
           </Table>
         </div>
@@ -460,7 +507,8 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   };
   const PurchaseDetails = () => {
     return <div>
-      <Offcanvas show={purchaseDetails} onHide={handlePurchaseDetails} placement='end' style={{ width: "80%", backgroundColor: "#ededed" }}>
+      <PurchaseChangeEmployee/>
+      <Offcanvas show={purchaseDetails} onHide={handlePurchaseDetailsClose} placement='end' style={{ width: "80%", backgroundColor: "#ededed" }}>
         <Offcanvas.Header>
           <div className='d-flex justify-content-between align-items-center w-100'>
             <div className='d-flex justify-content-start align-items-center'>
@@ -490,12 +538,12 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                 <Dropdown.Item>Receipt (Detailed)</Dropdown.Item>
               </SplitButton>
               <LogOut style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} />
-              <XSquare style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} onClick={handlePurchaseDetails} />
+              <XSquare style={{ backgroundColor: "#fff", padding: "5px", borderRadius: "5px" }} size={30} onClick={handlePurchaseDetailsClose} />
             </div>
           </div>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <p className='text-muted fs-5'>ICare Jenny - Replanish- La Frontera</p>
+          <p className='text-muted fs-5'>{}</p>
           <Row>
             <Col xs={12} sm={12} md={8} lg={8}>
               <div>
@@ -505,15 +553,15 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                     <Row>
                       <Col xs={6} sm={6} md={6} lg={6}>
                         <div>
-                          <p className='mb-0' style={{ fontSize: "13px" }}>Test (Tester) Account</p>
-                          <p className='mb-0 d-flex justify-content-start align-items-center gap-[5px]' style={{ fontSize: "13px" }}><Smartphone size={10} />1234567890</p>
-                          <p className='mb-0' style={{ fontSize: "13px", color: "#22D3EE" }}>test@gmail.com</p>
+                          <p className='mb-0' style={{ fontSize: "13px" }}>{purchaseDetailsContent?.client?.name}</p>
+                          <p className='mb-0 d-flex justify-content-start align-items-center gap-[5px]' style={{ fontSize: "13px" }}><Smartphone size={10} />{purchaseDetailsContent?.client?.phone_number?purchaseDetailsContent?.client?.phone_number:"-"}</p>
+                          <p className='mb-0' style={{ fontSize: "13px", color: "#22D3EE" }}>{purchaseDetailsContent?.client?.email}</p>
                         </div>
                       </Col>
                       <Col xs={6} sm={6} md={6} lg={6}>
                         <div>
                           <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Personal Health Number - </p>
-                          <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Birth Date</p>
+                          <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Birth Date - {purchaseDetailsContent?.client?.name}</p>
                           <p className='mb-0' style={{ fontSize: "13px", fontWeight: 700 }}>Client Number <span style={{ fontSize: "13px", fontWeight: 300 }}>389</span></p>
                         </div>
                       </Col>
@@ -582,7 +630,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                           <div className='d-flex justify-content-between align-items-center gap-[20px]'>
                             <p className='text-muted mb-0' style={{ fontSize: "15px" }}>Ashrut Dev</p>
                             <div className='d-flex align-items-center'>
-                              <Button variant='outline-secondary d-flex justify-content-start align-items-center' style={{ color: "#22D3EE", border: "none", fontSize: "13px" }}><ArrowRightLeft size={15} color={"#22D3EE"} />Change</Button>
+                              <Button variant='outline-secondary d-flex justify-content-start align-items-center' style={{ color: "#22D3EE", border: "none", fontSize: "13px" }} onClick={handlePurchaseChangeEmployee}><ArrowRightLeft size={15} color={"#22D3EE"} />Change</Button>
                               <div>|</div>
                               <Button variant='outline-secondary d-flex justify-content-start align-items-center text-danger' style={{ color: "red", border: "none", fontSize: "13px" }}><X size={15} color={"red"} />Remove</Button>
                             </div>
@@ -612,17 +660,17 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                             </thead>
                             <tbody>
                               <tr>
-                                <td>6039-P01</td>
-                                <td>Nov 12, 2024</td>
+                                <td>{purchaseDetailsContent?.id}</td>
+                                <td>{purchaseDetailsContent?.created_at}</td>
                                 <td>
                                   <div>
-                                    <p className='mb-0'>Test Account</p>
+                                    <p className='mb-0'>{purchaseDetailsContent?.employee.name}</p>
                                     <p className='mb-0' style={{ fontSize: "11px" }}>Quantity:1</p>
                                   </div>
                                 </td>
-                                <td><p style={{ color: "#f19a04" }}>Unpaid</p></td>
-                                <td><p>$75.00</p></td>
-                                <td><p style={{ color: "red" }}>$75.00</p></td>
+                                <td><p style={{ color: "#f19a04" }}>{purchaseDetailsContent?.is_paid?"Paid":"Unpaid"}</p></td>
+                                <td><p>${purchaseDetailsContent?.charge}</p></td>
+                                <td><p style={{ color: "red" }}>${purchaseDetailsContent?.charge}</p></td>
                               </tr>
                             </tbody>
                           </Table>
@@ -632,7 +680,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                   </div>
                 </div>
                 <div className='mt-3'>
-                  <p className='text-muted fs-4 mb-1 d-flex justify-content-between align-items-center w-100'>Invoices<Button variant='outline-secondary' className='bg-white'>Receive Payments</Button></p>
+                  <p className='text-muted fs-4 mb-1 d-flex justify-content-between align-items-center w-100'>Payment<Button variant='outline-secondary' className='bg-white'>Receive Payments</Button></p>
                   <div className='bg-white p-3 rounded'>
                     <Row>
                       <Col xs={12} sm={12} md={12} lg={12}>
@@ -648,7 +696,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                               </tr>
                             </thead>
                             <tbody>
-                              <p style={{ color: "#555555", fontSize: "16px", fontWeight: 700 }} className='text-center mt-3'>No Payments</p>
+                              {/* <p style={{ color: "#555555", fontSize: "16px", fontWeight: 700 }} className='text-center mt-3'>No Payments</p> */}
                               <tr>
                                 <td>Nov 12, 2024</td>
                                 <td>Nov 12, 2024</td>
@@ -780,6 +828,28 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
           </Row>
         </Offcanvas.Body>
       </Offcanvas>
+    </div>
+  };
+  const PurchaseChangeEmployee = () => {
+    return <div>
+      <Modal show={purchaseChangeEmployee} onHide={handlePurchaseChangeEmployee}>
+        <Modal.Header closeButton>
+          <Modal.Title className='text-muted fs-3 fw-light'>Select a Staff Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Text className="text-muted">Use the search field below to select a staff member to receive compensation</Form.Text>
+            <Form.Control type="text" placeholder="Search Staff Member..." value={purchaseSearch} onChange={(event) => setPurchaseSearch(event.target.value)} />
+          </Form.Group>
+          {purchaseSearch &&
+            <ListGroup style={{ maxHeight: "350px", overflow: "scroll" }}>
+              {filterEmployeeList.map((item, index) => {
+                return <ListGroup.Item key={index}>{item.name}</ListGroup.Item>
+              })}
+            </ListGroup>
+          }
+        </Modal.Body>
+      </Modal>
     </div>
   };
   const Payments = () => {
