@@ -140,17 +140,33 @@ class Api::ClientsController < ApplicationController
   end
 
   def add_group
-    @client = Client.find(params[:id])  
+    @client = Client.find(params[:id])
     if @client.nil?
       render json: { error: 'Client not found' }, status: :not_found
       return
     end
+
     group_name = params[:group_name]
-    @client.groups ||= {}
-    @client.groups[group_name] ||= []
-    @client.groups[group_name] << params[:client_ids] unless @client.groups[group_name].include?(params[:client_ids])
+    client_id = params[:client_ids]    
+    @client.groups ||= []    
+    existing_group = @client.groups.find { |group| group[:group_name] == group_name }
+    
+    if existing_group
+      unless existing_group[:client_ids].include?(client_id)
+        existing_group[:client_ids] << client_id
+      end
+      group_note = existing_group
+    else
+      next_id = @client.groups.size + 1 
+      group_note = {
+        id: next_id,
+        group_name: group_name,
+        client_ids: [client_id]
+      }
+      @client.groups << group_note
+    end
     if @client.save
-      render json: { message: "Client added to group #{group_name}", client: @client }, status: :ok
+      render json: { message: "Client added to group #{group_name}", group: group_note }, status: :ok
     else
       render json: { error: 'Failed to add client to group' }, status: :unprocessable_entity
     end
@@ -162,18 +178,25 @@ class Api::ClientsController < ApplicationController
       render json: { error: 'Client not found' }, status: :not_found
       return
     end
-    group_name = params[:group_name]
-    new_group_name = params[:new_group_name]
-    unless @client.groups&.key?(group_name)
-      render json: { error: "Group #{group_name} not found" }, status: :not_found
+    group_id = params[:group_id]
+    if group_id.nil?
+      render json: { error: 'Group ID is required to update a group' }, status: :unprocessable_entity
+      return
+    end    
+    group = @client.groups.find { |g| g["id"] == group_id }
+
+    if group.nil?
+      render json: { error: "Group with ID #{group_id} not found" }, status: :not_found
       return
     end
-
-    @client.groups[new_group_name] = @client.groups.delete(group_name) if new_group_name.present?
-    if params[:client_ids].present?
-      @client.groups[new_group_name || group_name] = params[:client_ids]
+    new_group_name = params[:new_group_name]
+    new_client_ids = params[:client_ids]
+    if new_group_name.present?
+      group[:group_name] = new_group_name
     end
-
+    if new_client_ids.present?
+      group[:client_ids] = new_client_ids
+    end
     if @client.save
       render json: { message: "Group updated successfully", groups: @client.groups }, status: :ok
     else
@@ -188,17 +211,16 @@ class Api::ClientsController < ApplicationController
       return
     end
 
-    group_name = params[:group_name]
+    group_id = params[:group_id]
+    group = @client.groups.find { |g| g["id"] == group_id }
 
-    unless @client.groups&.key?(group_name)
-      render json: { error: "Group #{group_name} not found" }, status: :not_found
+    if group.nil?
+      render json: { error: "Group with ID #{group_id} not found" }, status: :not_found
       return
     end
-
-    @client.groups.delete(group_name)
-
+    @client.groups.delete(group)
     if @client.save
-      render json: { message: "Group #{group_name} deleted successfully", groups: @client.groups }, status: :ok
+      render json: { message: "Group with ID #{group_id} deleted successfully", groups: @client.groups }, status: :ok
     else
       render json: { error: 'Failed to delete group' }, status: :unprocessable_entity
     end
