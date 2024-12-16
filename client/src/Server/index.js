@@ -1123,3 +1123,16 @@ export const uploadFiles = async (payload,clientId) => {
     throw error;
   }
 };
+export const getFilesList = async (clientId,refetch) => {
+  try {
+    const response = await api.get(`api/clients/${clientId}/list_files`,{
+      cache: {
+        ignoreCache: refetch,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};

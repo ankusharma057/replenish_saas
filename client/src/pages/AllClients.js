@@ -22,7 +22,8 @@ import {
     createGroup,
     deleteGroup,
     updateGroup,
-    uploadFiles
+    uploadFiles,
+    getFilesList
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -35,7 +36,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown, Plus, MoveRight, X, SlidersHorizontal, CalendarDays, Trash2 } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge, Offcanvas, Modal } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge, Offcanvas, Modal, Card } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -158,6 +159,7 @@ const AllClientRoot = () => {
       "group_name": "",
       "client_ids": []
     });
+    const [uploadedFiles,setUploadedFiles]=useState([])
 
     const topleftCardsData = [
       {
@@ -286,6 +288,7 @@ const AllClientRoot = () => {
 
     useEffect(() => {
         getEmployees();
+        getUploadedFiles();
         // getInvoices();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -1201,6 +1204,8 @@ useEffect(()=>{
     );
 
     const handleSelect = (emp) => {
+      console.log("@@@@@emp",emp);
+      
         navigate(`/customers/${emp.id}?${queryParams?.toString()}`);
         setSelectedEmployeeData(emp);
         setRadioTabs([]);
@@ -2490,7 +2495,15 @@ const getNextDay = (date) => {
 const handleDrop = (event) => {
   event.preventDefault();
   const files = Array.from(event.dataTransfer.files);
-  setSelectedFiles(files);
+  if(files[0]){
+    setSelectedFiles(files[0]);
+  const reader = new FileReader();
+  reader.onload=(e)=>{
+    setPreviewImage(e.target.result)
+  }
+  reader.readAsDataURL(files[0]);
+  setEnableFilesDetails(true)
+}
 };
 const handleDragOver = (event) => {
   event.preventDefault();
@@ -2577,12 +2590,28 @@ const handleCreateGroupModal=()=>{
   const handleImageVisibility=(event)=>{
     setImageVisibility(event.target.value)
   };
-  const handleDeleteImage=()=>{
-    setSelectedFiles(null)
-    setEnableFilesDetails(false);
-    setImageDescription("")
-    setIncludeInClientChart(false);
-    setImageVisibility("Viewable by Everyone");
+  const handleDeleteImage = () => {
+    confirmAlert({
+      title: "Are you sure you want to delete this file?",
+      message: `This cannot be undone.`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            setSelectedFiles(null)
+            setEnableFilesDetails(false);
+            setImageDescription("")
+            setIncludeInClientChart(false);
+            setImageVisibility("Viewable by Everyone");
+          },
+        },
+        {
+          label: "No",
+          onClick: () => { },
+        },
+      ],
+    });
+
   };
   const handleSubmitFiles = async () => {
     const formData = new FormData();
@@ -2590,6 +2619,7 @@ const handleCreateGroupModal=()=>{
     formData.append("files", selectedFiles);
     let response = await uploadFiles(formData,clientId)
     if (response.status === 200) {
+      await getUploadedFiles()
       toast.success(response.data.success)
       setSelectedFiles(null)
       setEnableFilesDetails(false);
@@ -2600,6 +2630,12 @@ const handleCreateGroupModal=()=>{
       toast.error(response.data.error)
     }
   }
+  const getUploadedFiles=async()=>{
+    let response = await getFilesList(clientId,true);
+    console.log("@@@@@@@response",response);
+    
+    setUploadedFiles(response.data.files)
+  };
   
   let filterClientList = employeeList.filter(client => createGroupPayload?.client_ids?.includes(client.id))
     return (
@@ -3483,6 +3519,23 @@ const handleCreateGroupModal=()=>{
                             />
                           </div>
                         </div>
+                      </div>
+                      <div className="mt-3">
+                      <ListGroup>
+                        {uploadedFiles.map((item, index) => {
+                          return <ListGroup.Item key={index} >
+                            <div className="w-100 h-[55px] p-[10px] d-flex justify-content-between align-items-center p-1">
+                              <div className="d-flex align-items-center justify-content-start gap-[5px] ">
+                              <img src={item?.file_url} className="w-[50px] h-[50px] rounded" style={{objectFit:"cover"}}/>
+                              <Card.Header style={{fontSize:"13px"}}>{decodeURIComponent(item?.file_url?.split('/').pop())}</Card.Header>
+                              </div>
+                              <div>
+                                <p className="d-flex align-items-center justify-content-start gap-[10px]" style={{fontSize:"13px"}}>{moment(item?.created_at).format('MMMM DD, YYYY')}<Badge bg="secondary">PNG</Badge></p>
+                              </div>
+                            </div>
+                          </ListGroup.Item>
+                        })}
+                        </ListGroup>
                       </div>
                       <Offcanvas show={enableFilesDetails} placement="end" onHide={() => { setEnableFilesDetails(false) }}>
                         <Offcanvas.Header >
