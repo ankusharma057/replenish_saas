@@ -100,7 +100,8 @@ class Api::ClientsController < ApplicationController
         if file_upload.file_data.attached?
           {
             file_url: url_for(file_upload.file_data),
-            description: file_upload.description
+            description: file_upload.description,
+            created_at: file_upload.created_at
           }
         else
           {
