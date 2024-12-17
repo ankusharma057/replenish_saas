@@ -65,6 +65,21 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const [clientPurchases,setClientPurchases]=useState([])
   const [purchaseChangeEmployee,setPurchaseChangeEmployee]=useState(false)
   const [purchaseSearch,setPurchaseSearch]=useState("")
+  const [locationFilter,setLocationFilter]=useState("")
+  const [invoiceNumberFilter,setInvoiceNumberFilter]=useState("")
+  const [employeeFilter,setEmployeeFilter]=useState("")
+  const [statusFilter,setStatusFilter]=useState("")
+  const [agesFilter,setAgesFilter]=useState("")
+  const [showDateRangeSelector,setShowDateRangeSelector]=useState(false)
+  const wrapperRef = useRef(null);
+  const [purchaseFilterPayload, setPurchaseFilterPayload] = useState({
+    location_id: "",
+    employee_id: "",
+    is_paid: false,
+    start_date: "",
+    end_date: "",
+    invoice_age: ""
+  })
   const topleftCardsData = [
     {
       id: 1,
@@ -162,14 +177,15 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
     }
   };
   const getClientBillingPurchases=async()=>{
-    const data = await clientBillingPurchases(clientId)
+    console.log("@@@@@purchaseFilterPayload",purchaseFilterPayload);
+    
+    const data = await clientBillingPurchases(clientId,purchaseFilterPayload)
     if(Array.isArray(data)){
       setClientPurchases(data)
     }else if(data.message){
       toast.error(data.message)
     }
   };
-
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
     const { data } = await getLocationsWithoutEmployee(employeeId, refetch);
     if (data?.length > 0) {
@@ -242,7 +258,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const statusOptions = [
     { label: "All", value: "all" },
     { label: "Paid", value: "paid" },
-    { label: "Unpaid / Unsubmitted", value: "unpaid_unsubmitted" },
+    { label: "Unpaid", value: "unpaid" },
     { label: "Submitted", value: "submitted" },
     { label: "Rejected", value: "rejected" },
     { label: "No Charge", value: "no_charge" },
@@ -251,11 +267,10 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
     { label: "All Claims Outstanding", value: "all_claims_outstanding" }
   ];
   const daysRangeOptions = [
-    { label: "0 - 30 Days", value: "0_30_days" },
-    { label: "31 - 60 Days", value: "31_60_days" },
-    { label: "61 - 90 Days", value: "61_90_days" },
-    { label: "91 - 120 Days", value: "91_120_days" },
-    { label: "120+ Days", value: "120_plus_days" }
+    { label: "0 - 30 Days", value: "0-30" },
+    { label: "31 - 60 Days", value: "31-60" },
+    { label: "61 - 90 Days", value: "61-90" },
+    { label: "91 - 120 Days", value: "91-120" },
   ];
   const getEndDateMinDate = () => {
     if (startDate) {
@@ -318,6 +333,110 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       toast.error(response.data.message)
     }
   };
+   const handleLocationFilter =async(event)=>{
+    let location = serviceLocation.find((item)=>item.label===event.target.value)
+    if(location){
+      setLocationFilter(event.target.value)
+      await setPurchaseFilterPayload((prev)=>({
+        ...prev,
+        location_id:location.id
+      }))
+      getClientBillingPurchases()
+    }
+   };
+   const handleInvoiceNumberFilter=(event)=>{
+      setInvoiceNumberFilter(event.target.value)
+      setPurchaseFilterPayload((prev)=>({
+        ...prev,
+        // location_id:location.id
+      }))
+   };
+   const handleEmployeeFilter=async(event)=>{
+     console.log("@@@@@@employee",event.target.name);
+   let employee = await employeeList.find((item)=>item.name===event.target.name)                                     
+    if(employee){
+      
+      setEmployeeFilter(event.target.value)
+      setPurchaseFilterPayload((prev)=>({
+        ...prev,
+        employee_id:employee.id
+      }))
+    }
+   };
+   const handleStatusFilter=(event)=>{
+      setStatusFilter(event.target.value)
+      setPurchaseFilterPayload((prev)=>({
+        ...prev,
+        location_id:event.target.value==="Paid"?true:event.target.value==="Unpaid"?false:""
+      }))
+   };
+   const handleAgesFilter=(event)=>{
+      setAgesFilter(event.target.value)
+      setPurchaseFilterPayload((prev)=>({
+        ...prev,
+        invoice_age:event.target.value
+      }))
+   };
+  const handleClear = () => {
+    setLocationFilter("");
+    setInvoiceNumberFilter("");
+    setEmployeeFilter("");
+    setStatusFilter("");
+    setAgesFilter("");
+    setPurchaseFilterPayload({
+      location_id: "",
+      employee_id: "",
+      is_paid: false,
+      start_date: "",
+      end_date: "",
+      invoice_age: ""
+    });
+  };
+  const handleClickOutside = (event) => {
+    if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+      setShowDateRangeSelector(false);
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  const isDateInRange = (date) => {
+    return (
+      startDate &&
+      endDate &&
+      moment(date).isBetween(moment(startDate), moment(endDate), "day", "[]")
+    );
+  };
+  const customDayClassName = (date) => {
+    if (moment(date).isSame(startDate, "day")) return "start-date";
+    if (moment(date).isSame(endDate, "day")) return "end-date";
+    if (isDateInRange(date)) return "in-range";
+    return "";
+  };
+  const handlePurchaseStartDate = (date) => {
+    setStartDate(date);
+    setPurchaseFilterPayload((prev) => ({
+      ...prev,
+      start_date: date,
+    }))
+    if (endDate && moment(date).isAfter(endDate)) {
+      setEndDate(null);
+      setPurchaseFilterPayload((prev) => ({
+        ...prev,
+        end_date: "",
+      }))
+    }
+  };
+  const handlePurchaseEndDate=(date)=>{
+    setEndDate(date);
+    setPurchaseFilterPayload((prev)=>({
+      ...prev,
+      end_date: date,
+    }));
+  };
   const Purchases = () => {
     return <div>
       <PurchaseDetails />
@@ -345,9 +464,9 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
           <div className='collapseContainer mt-0'>
             <div className={"w-100 p-3 rounded d-flex gap-[15px]"} style={{ backgroundColor: "rgb(247 245 245)" }} id="example-collapse-text">
               <div>
-                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'>
-                  {serviceLocation.map((item) => {
-                    return <option value={item.value}>{item.label}</option>
+                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm' value={locationFilter} onChange={handleLocationFilter}>
+                  {serviceLocation.map((item) => {                    
+                    return <option value={item.label}>{item.label}</option>
                   })}
                 </Form.Select>
               </div>
@@ -356,27 +475,28 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                   size='sm'
                   placeholder="Invoice Number"
                   aria-label="Username"
-                  aria-describedby="basic-addon1"
+                  value={invoiceNumberFilter} 
+                  onChange={handleInvoiceNumberFilter}
                 />
               </div>
               <div>
-                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'>
+                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'value={employeeFilter}  onChange={handleEmployeeFilter}>
                   <option>All Staff</option>
-                  {employeeList.map((employee) => {
-                    return <option value={employee.name}>{employee.name}</option>
+                  {employeeList.map((employee,index) => {
+                    return <option key={index} value={employee?.name}>{employee?.name}</option>
                   })}
                 </Form.Select>
               </div>
               <div>
-                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'>
+                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'value={statusFilter} onChange={handleStatusFilter}>
                   <option>Status</option>
                   {statusOptions.map((item) => {
-                    return <option value={item.value}>{item.label}</option>
+                    return <option value={item.label}>{item.label}</option>
                   })}
                 </Form.Select>
               </div>
-              <div className="d-flex justify-content-start align-items-center">
-                <OverlayTrigger
+              <div ref={wrapperRef} className="d-flex justify-content-start align-items-center position-relative">
+                {/* <OverlayTrigger
                   trigger="click"
                   placement="top"
                   overlay={<Popover id="date-picker-popover" style={{ width: "550px", marginLeft: "-70px", border: "none" }}>
@@ -405,7 +525,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                       </div>
                     </Popover.Body>
                   </Popover>}
-                  rootClose
+                  rootClose={false}
                 >
                   <Button
                     variant="outline-secondary"
@@ -418,18 +538,62 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                   >
                     Select Date Range
                   </Button>
-                </OverlayTrigger>
+                </OverlayTrigger> */}
+                <Button
+                  variant="outline-secondary"
+                  style={{
+                    fontSize: "12px",
+                    width: "150px",
+                    border: "1px solid #dee2e6",
+                    backgroundColor: "#fff",
+                  }}
+                  onClick={() => setShowDateRangeSelector(!showDateRangeSelector)}
+                >
+                  Select Date Range
+                </Button>
+                {showDateRangeSelector &&
+                  <div className="d-flex justify-content-between gap-3 align-items-center  position-absolute bg-white p-3 border rounded"
+                    style={{
+                      border: "1px solid red",
+                      bottom: "50px",
+                      right: "0px"
+                    }}
+                  >
+                    <div>
+                      <label>Start Date:</label>
+                      <DatePicker
+                        selected={startDate}
+                        onChange={(date) => {
+                          handlePurchaseStartDate(date)
+                        }}
+                        inline
+                        dayClassName={customDayClassName}
+                      />
+                    </div>
+                    <div>
+                      <label>End Date:</label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(date) => {handlePurchaseEndDate(date);}}
+                        inline
+                        minDate={startDate}
+                        disabled={!startDate}
+                        dayClassName={customDayClassName}
+                      />
+                    </div>
+                  </div>
+                }
               </div>
               <div>
-                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'>
+                <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm' value={agesFilter} onChange={handleAgesFilter}>
                   <option>All Invoices Ages</option>
                   {daysRangeOptions.map((item) => {
-                    return <option value={item.label}>{item.label}</option>
+                    return <option value={item.value}>{item.label}</option>
                   })}
                 </Form.Select>
               </div>
               <div>
-                <Button variant="outline-secondary" size='sm' style={{ border: "1px solid #dee2e6", backgroundColor: "#fff" }}>Clear</Button>
+                <Button variant="outline-secondary" size='sm' style={{ border: "1px solid #dee2e6", backgroundColor: "#fff" }} onClick={handleClear}>Clear</Button>
               </div>
             </div>
           </div>}

@@ -73,3 +73,23 @@ color: #696977 !important;
 .collapseContainer .collapse{
 visibility: visible;
 }
+/* Highlight the start date */
+.start-date {
+  background-color: #1ea7fd !important;
+  color: #fff !important;
+  border-radius: 50%;
+}
+
+/* Highlight the end date */
+.end-date {
+  background-color: #1ea7fd !important;
+  color: #fff !important;
+  border-radius: 50%;
+}
+
+/* Highlight dates in range */
+.in-range {
+  background-color: #c2e3f4 !important; /* Light blue */
+  color: #000 !important;
+  border-radius: 50%;
+}

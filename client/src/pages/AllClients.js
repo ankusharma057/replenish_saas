@@ -159,6 +159,12 @@ const AllClientRoot = () => {
       "group_name": "",
       "client_ids": []
     });
+    const [updateGroupPayload, setUpdateGroupPayload] = useState({
+      "group_id": "",
+      "group_name": "",
+      "new_group_name": "",
+      "client_ids": []
+    });
     const [uploadedFiles,setUploadedFiles]=useState([])
 
     const topleftCardsData = [
@@ -259,6 +265,7 @@ const AllClientRoot = () => {
     const getEmployees = async (refetch = false) => {
         try {
             const { data } = await getClients();
+            console.log("@@@@@data",data);
             
             if (data?.length > 0) {
               const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
@@ -1204,8 +1211,6 @@ useEffect(()=>{
     );
 
     const handleSelect = (emp) => {
-      console.log("@@@@@emp",emp);
-      
         navigate(`/customers/${emp.id}?${queryParams?.toString()}`);
         setSelectedEmployeeData(emp);
         setRadioTabs([]);
@@ -2552,15 +2557,14 @@ const handleCreateGroupModal=()=>{
       return true
     }
   }
-  const handleGroup=async(type)=>{
-    if(createGroupPayload.group_name !== "" || createGroupPayload.client_ids.length>1){
+  const handleGroup=async(type,groupId)=>{
       let response;
       if(type==="create"){
         response= await createGroup(createGroupPayload)
       }else if(type==="update"){
-        response= await updateGroup(createGroupPayload)
+        response= await updateGroup(clientId,updateGroupPayload)
       }else if(type==="delete"){
-        response= await deleteGroup(createGroupPayload)
+        response= await deleteGroup(clientId,{"group_id": groupId})
       }
       if(response.status=== 200){
         toast.success(response.data.message);
@@ -2569,15 +2573,32 @@ const handleCreateGroupModal=()=>{
           "group_name": "",
           "client_ids": [selectedEmployeeData.id]
         }))
+        if(type!=="delete"){
         setCreateGroupModal(!createGroupModal)
+        }
+        await getEmployees();
+        setCurrentTab("Groups")
+        setShowSearchClient(false)
       }else{
         toast.error(response.data.message)
       }
-    }else{
-      toast.error("Add Group Name or Add Clients")
-    }
   };
-  const handleEditGroup = () => {
+  const handleEditGroup = (groupData) => {
+    console.log("@@@groupData",groupData);
+    
+    let data={
+      "clientId": clientId,
+      "group_name": groupData?.group_name,
+      "client_ids": groupData?.client_ids
+    }
+    let payload = {
+      "group_id": groupData.id,
+      "group_name": groupData?.group_name,
+      "new_group_name": "",
+      "client_ids": groupData?.client_ids
+    }
+    setUpdateGroupPayload(payload)
+    setCreateGroupPayload(data)
     setGroupType("edit");
     handleCreateGroupModal()
   };
@@ -2632,8 +2653,6 @@ const handleCreateGroupModal=()=>{
   }
   const getUploadedFiles=async()=>{
     let response = await getFilesList(clientId,true);
-    console.log("@@@@@@@response",response);
-    
     setUploadedFiles(response.data.files)
   };
   
@@ -3522,7 +3541,7 @@ const handleCreateGroupModal=()=>{
                       </div>
                       <div className="mt-3">
                       <ListGroup>
-                        {uploadedFiles.map((item, index) => {
+                        {Array.isArray(uploadedFiles)&&uploadedFiles.map((item, index) => {
                           return <ListGroup.Item key={index} >
                             <div className="w-100 h-[55px] p-[10px] d-flex justify-content-between align-items-center p-1">
                               <div className="d-flex align-items-center justify-content-start gap-[5px] ">
@@ -3614,30 +3633,35 @@ const handleCreateGroupModal=()=>{
                         <Button variant="outline-secondary d-flex align-items-center gap-[10px]" onClick={handleCreateGroupModal}><PiPlusCircleFill /> New Group</Button>
                       </div>
                       <div>
-                        <div className="mt-2 border rounded p-3 my-2 d-flex justify-content-between align-items-center">
-                          <div className="fw-bold">Tester</div>
-                          <div className="fw-bold">2 Members</div>
-                          <div>
-                          <OverlayTrigger
-                              trigger="click"
-                              placement="bottom"
-                              overlay={<Popover id="date-picker-popover">
-                                <Popover.Body className="p-0 w-[200px]">
-                                  <div className="d-flex justify-content-between gap-3 align-items-center">
-                                    <ListGroup className="w-[200px]">
-                                      <ListGroup.Item className="d-flex align-items-center gap-[5px]" onClick={handleEditGroup}><TbEdit size={20} />Edit</ListGroup.Item>
-                                      <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px]" onClick={()=>handleGroup("delete")}><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
-                                    </ListGroup>
-                                  </div>
-                                </Popover.Body>
-                              </Popover>}
-                              rootClose
-                            >
-                              <Button variant="outline-secondary" style={{padding:"10px 10px"}}>
-                                <BsThreeDots />
-                              </Button>
-                            </OverlayTrigger>
+                        <div>
+                          {Array.isArray(selectedEmployeeData?.groups)&&selectedEmployeeData?.groups.map((group,index)=>{
+                            return <div key={index} className="mt-2 border rounded p-3 my-2 d-flex justify-content-between align-items-center">
+                            <div className="fw-bold w-100 d-flex justify-content-start align-items-center">{group?.group_name}</div>
+                            <div className="fw-bold w-100 d-flex justify-content-center align-items-center">{group?.client_ids.length} Members</div>
+                            <div className="w-100 d-flex justify-content-end align-items-center">
+                            <OverlayTrigger
+                                trigger="click"
+                                placement="bottom"
+                                overlay={<Popover id="date-picker-popover">
+                                  <Popover.Body className="p-0 w-[200px]">
+                                    <div className="d-flex justify-content-between gap-3 align-items-center">
+                                      <ListGroup className="w-[200px]">
+                                        <ListGroup.Item className="d-flex align-items-center gap-[5px] cursor-pointer" onClick={()=>{handleEditGroup(group)}}><TbEdit size={20} />Edit</ListGroup.Item>
+                                        <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px] cursor-pointer" onClick={()=>handleGroup("delete",group?.id)}><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
+                                      </ListGroup>
+                                    </div>
+                                  </Popover.Body>
+                                </Popover>}
+                                rootClose
+                              >
+                                <Button variant="outline-secondary" style={{padding:"10px 10px"}}>
+                                  <BsThreeDots />
+                                </Button>
+                              </OverlayTrigger>
+                            </div>
                           </div>
+                          })}
+                        
                         </div>
                         <Modal show={createGroupModal} onHide={handleCreateGroupModal}>
                           <Modal.Header closeButton>
@@ -3648,7 +3672,7 @@ const handleCreateGroupModal=()=>{
                               <Form>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                   <Form.Label>Name of the group</Form.Label>
-                                  <Form.Control type="email" placeholder="Name of The Group" required onChange={handleGroupName} />
+                                  <Form.Control type="email" placeholder="Name of The Group" required onChange={handleGroupName} value={createGroupPayload?.group_name} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                   <Form.Label>Members</Form.Label>
@@ -3683,7 +3707,17 @@ const handleCreateGroupModal=()=>{
                             <Button variant="outline-secondary" onClick={handleCreateGroupModal}>
                               Cancel
                             </Button>
-                            <Button variant="primary" onClick={()=>handleGroup("create")} disabled={handleDisableCreateGroup()}>
+                            <Button variant="primary" 
+                            onClick={()=>{
+                              setUpdateGroupPayload((prev) => ({
+                                ...prev,
+                                "group_name": "Updated Group A",
+                                "new_group_name": createGroupPayload.group_name,
+                                "client_ids": createGroupPayload.client_ids
+                              }))
+                              {groupType==="create"? handleGroup("create"): handleGroup("update")}
+                            }} 
+                            disabled={handleDisableCreateGroup()}>
                             {groupType==="create"?"Create":"Edit"}
                             </Button>
                           </Modal.Footer>

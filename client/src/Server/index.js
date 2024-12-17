@@ -43,7 +43,7 @@ export const getClientProfile = async (refetch) =>
 export const getClients = async (employee_id, refetch) =>
   api.get("/api/clients", {
     cache: {
-      ignoreCache: refetch,
+      ignoreCache: true,
     },
     params: {
       employee_id,
@@ -1057,9 +1057,11 @@ export const GetAllEmployeesLocations = async (payload) =>{
   });
   return res;
 }
-export const clientBillingPurchases = async (clientId) => {
+export const clientBillingPurchases = async (clientId,filters) => {
   try {
-    const response = await api.get(`/api/invoices/${clientId}/client_invoices`);
+    const response = await api.get(`/api/invoices/${clientId}/client_invoices`,{
+      params: filters // Send filters as query parameters
+    });
     return response.data;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
@@ -1096,18 +1098,18 @@ export const createGroup = async (payload) => {
     throw error;
   }
 };
-export const updateGroup = async (payload) => {
+export const updateGroup = async (clientId,payload) => {
   try {
-    const response = await api.patch(`api/clients/${payload.clientId}/add_group`,payload);
+    const response = await api.patch(`api/clients/${clientId}/update_group`,payload);
     return response;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
     throw error;
   }
 };
-export const deleteGroup = async (payload) => {
+export const deleteGroup = async (clientId,payload) => {
   try {
-    const response = await api.delete(`api/clients/${payload.clientId}/add_group`,payload);
+    const response = await api.delete(`api/clients/${clientId}/delete_group`,{data:payload});
     return response;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
