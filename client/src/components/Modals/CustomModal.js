@@ -52,7 +52,7 @@ function CustomModal({
     charge: 0,
   });
 
-  const { authUserDispatch } = useAuthContext();
+  const { authUserDispatch,authUserState } = useAuthContext();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [textAreaInput, settextAreaInput] = useState("");
@@ -64,7 +64,6 @@ function CustomModal({
   const [blobsForAfter, setBlobForAfter] = useState([]);
   const [deletedBeforeImages, setDeletedBeforeImages] = useState([]);
   const [deletedAfterImages, setDeletedAfterImages] = useState([]);
-
   // useEffect for initial assignment of before and after images
   useEffect(() => {
     if (invoiceData?.before_images) {
@@ -404,7 +403,8 @@ function CustomModal({
                           <th className="min-w-[6rem]">Product</th>
                           <th className="min-w-[6rem]">Quantity</th>
                           <th className="min-w-[6rem]">Price</th>
-                          <th className="min-w-[6rem]">Total Price</th>
+                          {authUserState.user.is_admin || authUserState.user.is_inv_manager && <th className="min-w-[6rem]">Total Price</th>} 
+                          
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
@@ -413,9 +413,7 @@ function CustomModal({
                             <td>{product[0]}</td>
                             <td>{product[1]}</td>
                             <td>{Number(product[2] || 0).toFixed(2)}</td>
-                            <td>
-                              {Number(product[1] * product[2] || 0).toFixed(2)}
-                            </td>
+                              {authUserState.user.is_admin || authUserState.user.is_inv_manager && <td>{Number(product[1] * product[2] || 0).toFixed(2)}</td>} 
                           </tr>
                         ))}
                       </tbody>
@@ -437,7 +435,7 @@ function CustomModal({
                           <th className="min-w-[6rem]">Product</th>
                           <th className="min-w-[6rem]">Quantity</th>
                           <th className="min-w-[6rem]">Price</th>
-                          <th className="min-w-[6rem]">Total Price</th>
+                          {authUserState.user.is_admin || authUserState.user.is_inv_manager &&<th className="min-w-[6rem]">Total Price</th>}
                         </tr>
                       </thead>
                       <tbody className="whitespace-normal">
@@ -447,7 +445,7 @@ function CustomModal({
                               <td>{product[0]}</td>
                               <td>{product[1]}</td>
                               <td>{product[2]}</td>
-                              <td>{+(product[1] * product[2])}</td>
+                              {authUserState.user.is_admin || authUserState.user.is_inv_manager && <td>{+(product[1] * product[2])}</td>}
                             </tr>
                           )
                         )}
