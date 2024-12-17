@@ -1,7 +1,8 @@
 class ClientSerializer < ActiveModel::Serializer
-  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :how_heard_about_us, :online_booking_policy, :online_booking_payment_policy, :notification_settings, :activated, :referred_employee, :profile_photo_url
+  attributes :id, :name, :email, :address, :phone_number, :last_name, :preferred_name, :pronouns, :prefix, :middle_name, :created_at, :how_heard_about_us, :online_booking_policy, :online_booking_payment_policy, :notification_settings, :activated, :referred_employee, :profile_photo_url, :groups
 
   has_one :client_detail, serializer: ClientDetailSerializer
+  has_many :file_uploads
 
   def activated
     object.password_digest.present?

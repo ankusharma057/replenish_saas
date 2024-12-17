@@ -5,7 +5,7 @@ class Api::ClientsController < ApplicationController
   skip_before_action :authorized_employee
 
   def index
-    clients = current_employee&.is_admin? ? Client.all : current_employee&.clients
+    clients = current_employee&.is_admin? ? Client.includes(:client_detail, :file_uploads, profile_photo_attachment: :blob) : current_employee&.clients
     clients = clients.includes(:employees) if clients.present?
     render json: clients, status: :ok
   end
@@ -149,7 +149,7 @@ class Api::ClientsController < ApplicationController
 
     group_name = params[:group_name]
     client_id = params[:client_ids]    
-    @client.groups ||= []    
+    @client.groups ||= []
     existing_group = @client.groups.find { |group| group[:group_name] == group_name }
     
     if existing_group
@@ -162,7 +162,7 @@ class Api::ClientsController < ApplicationController
       group_note = {
         id: next_id,
         group_name: group_name,
-        client_ids: [client_id]
+        client_ids: client_id
       }
       @client.groups << group_note
     end
