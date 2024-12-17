@@ -155,15 +155,11 @@ const AllClientRoot = () => {
     const [groupName, setGroupName] = useState("");
     const [groupType, setGroupType] = useState("create");
     const [createGroupPayload, setCreateGroupPayload] = useState({
+      "group_id": 1,
       "clientId": "",
       "group_name": "",
-      "client_ids": []
-    });
-    const [updateGroupPayload, setUpdateGroupPayload] = useState({
-      "group_id": "",
-      "group_name": "",
-      "new_group_name": "",
-      "client_ids": []
+      "client_ids": [],
+      "new_group_name":""
     });
     const [uploadedFiles,setUploadedFiles]=useState([])
 
@@ -265,8 +261,6 @@ const AllClientRoot = () => {
     const getEmployees = async (refetch = false) => {
         try {
             const { data } = await getClients();
-            console.log("@@@@@data",data);
-            
             if (data?.length > 0) {
               const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
                 setEmployeeList(newData);                
@@ -2527,12 +2521,28 @@ const handleFileSelect = (event) => {
 };
 const handleCreateGroupModal=()=>{
   setCreateGroupModal(!createGroupModal)
+  setGroupType("create")
+  setCreateGroupPayload(
+    {
+      "clientId": selectedEmployeeData?.id,
+      "group_name": "",
+      "client_ids": [selectedEmployeeData?.id]
+    }
+  )
 }
   const handleGroupName = (event) => {
-    setCreateGroupPayload((prev) => ({
-      ...prev,
-      group_name: event.target.value
-    }))
+    if(groupType==="update"){
+      setCreateGroupPayload((prev) => ({
+        ...prev,
+        new_group_name: event.target.value,
+        group_name: createGroupPayload.group_name,
+      }))
+    }else{
+      setCreateGroupPayload((prev) => ({
+        ...prev,
+        group_name: event.target.value
+      }))
+    }
   };
   const handleGroupMember = (clientId) => {
     if (!createGroupPayload.client_ids.includes(clientId)) {
@@ -2540,6 +2550,7 @@ const handleCreateGroupModal=()=>{
         ...prev,
         client_ids: [...prev?.client_ids, clientId]
       }))
+      setSearchClient("")
     }
   }
   const handleRemoveGroupMember=(clientId)=>{
@@ -2562,7 +2573,7 @@ const handleCreateGroupModal=()=>{
       if(type==="create"){
         response= await createGroup(createGroupPayload)
       }else if(type==="update"){
-        response= await updateGroup(clientId,updateGroupPayload)
+        response= await updateGroup(clientId,createGroupPayload)
       }else if(type==="delete"){
         response= await deleteGroup(clientId,{"group_id": groupId})
       }
@@ -2584,23 +2595,16 @@ const handleCreateGroupModal=()=>{
       }
   };
   const handleEditGroup = (groupData) => {
-    console.log("@@@groupData",groupData);
-    
     let data={
+      "group_id": groupData.id,
       "clientId": clientId,
       "group_name": groupData?.group_name,
-      "client_ids": groupData?.client_ids
+      "client_ids": groupData?.client_ids,
+      "new_group_name":""
     }
-    let payload = {
-      "group_id": groupData.id,
-      "group_name": groupData?.group_name,
-      "new_group_name": "",
-      "client_ids": groupData?.client_ids
-    }
-    setUpdateGroupPayload(payload)
     setCreateGroupPayload(data)
     setGroupType("edit");
-    handleCreateGroupModal()
+    setCreateGroupModal(!createGroupModal)
   };
   const handleDescription=(event)=>{
     setImageDescription(event.target.value)
@@ -3158,7 +3162,6 @@ const handleCreateGroupModal=()=>{
                                     <button
                                       className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
                                       onClick={() => {
-                                        console.log("API for adding the note will be handled later");
                                         setIsAddingNote(false);
                                       }}
                                     >
@@ -3646,8 +3649,8 @@ const handleCreateGroupModal=()=>{
                                   <Popover.Body className="p-0 w-[200px]">
                                     <div className="d-flex justify-content-between gap-3 align-items-center">
                                       <ListGroup className="w-[200px]">
-                                        <ListGroup.Item className="d-flex align-items-center gap-[5px] cursor-pointer" onClick={()=>{handleEditGroup(group)}}><TbEdit size={20} />Edit</ListGroup.Item>
-                                        <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px] cursor-pointer" onClick={()=>handleGroup("delete",group?.id)}><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
+                                        <ListGroup.Item className="d-flex align-items-center gap-[5px] cursor-pointer" onClick={(e)=>{e.stopPropagation();handleEditGroup(group)}}><TbEdit size={20} />Edit</ListGroup.Item>
+                                        <ListGroup.Item className="d-flex align-items-center text-danger gap-[5px] cursor-pointer" onClick={(e)=>{e.stopPropagation();handleGroup("delete",group?.id)}}><Trash2 size={20} color="red"/>Delete</ListGroup.Item>
                                       </ListGroup>
                                     </div>
                                   </Popover.Body>
@@ -3672,7 +3675,7 @@ const handleCreateGroupModal=()=>{
                               <Form>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                   <Form.Label>Name of the group</Form.Label>
-                                  <Form.Control type="email" placeholder="Name of The Group" required onChange={handleGroupName} value={createGroupPayload?.group_name} />
+                                  <Form.Control type="email" placeholder="Name of The Group" required onChange={handleGroupName} value={groupType==="update"?createGroupPayload?.new_group_name:createGroupPayload?.group_name} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                   <Form.Label>Members</Form.Label>
@@ -3708,15 +3711,9 @@ const handleCreateGroupModal=()=>{
                               Cancel
                             </Button>
                             <Button variant="primary" 
-                            onClick={()=>{
-                              setUpdateGroupPayload((prev) => ({
-                                ...prev,
-                                "group_name": "Updated Group A",
-                                "new_group_name": createGroupPayload.group_name,
-                                "client_ids": createGroupPayload.client_ids
-                              }))
+                            onClick={()=>
                               {groupType==="create"? handleGroup("create"): handleGroup("update")}
-                            }} 
+                            }
                             disabled={handleDisableCreateGroup()}>
                             {groupType==="create"?"Create":"Edit"}
                             </Button>

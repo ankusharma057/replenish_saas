@@ -1059,8 +1059,11 @@ export const GetAllEmployeesLocations = async (payload) =>{
 }
 export const clientBillingPurchases = async (clientId,filters) => {
   try {
-    const response = await api.get(`/api/invoices/${clientId}/client_invoices`,{
-      params: filters // Send filters as query parameters
+    const response = await api.get(`/api/invoices/${clientId}/client_invoices`, {
+      params: filters,
+      cache: {
+        ignoreCache: true,
+      }
     });
     return response.data;
   } catch (error) {

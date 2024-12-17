@@ -166,19 +166,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       console.log(error);
     }
   };
-  const getAllLocations = async (refetch = false) => {
-    try {
-      const { data } = await getEmployeesOnly(refetch);
-      if (data?.length > 0) {
-        setEmployeeList(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const getClientBillingPurchases=async()=>{
-    console.log("@@@@@purchaseFilterPayload",purchaseFilterPayload);
-    
     const data = await clientBillingPurchases(clientId,purchaseFilterPayload)
     if(Array.isArray(data)){
       setClientPurchases(data)
@@ -352,7 +340,6 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       }))
    };
    const handleEmployeeFilter=async(event)=>{
-     console.log("@@@@@@employee",event.target.name);
    let employee = await employeeList.find((item)=>item.name===event.target.name)                                     
     if(employee){
       
@@ -662,7 +649,14 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
                   </div>
                 </td>
               </tr>
-              }): <p>No Invoices Found</p>}
+              }): (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    No Invoices Found
+                  </td>
+                </tr>
+              )
+              }
             </tbody>
           </Table>
         </div>
