@@ -120,8 +120,7 @@ class Api::InvoiceListsController < ApplicationController
       return render json: {'error' => 'Location not found'}, status: :not_found
     end
   end
-
-
+  
   private
 
   def calculate_summary_data(invoices)
