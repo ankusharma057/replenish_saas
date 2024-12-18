@@ -1,0 +1,60 @@
+<!-- app/views/api/invoice_lists/location_report.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h1, h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    table, th, td { border: 1px solid black; }
+    th, td { padding: 8px; text-align: left; }
+    .total { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Billings Summary Report</h1>
+  <h2><%= location.name %></h2>
+
+  <h3>Sales Breakdown</h3>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>% Invoiced</th>
+      <th>Invoiced</th>
+    </tr>
+    <tr>
+      <td>Treatment Income</td>
+      <td>$<%= number_to_percentage(percentage_invoiced, unit: '') %></td>
+      <td>$<%= number_to_currency(treatment_income, unit: '') %></td>
+    </tr>
+    <tr>
+      <td>Product Income</td>
+      <td>$<%= number_to_percentage(percentage_invoiced, unit: '') %></td>
+      <td>$<%= number_to_currency(product_income, unit: '') %></td>
+    </tr>
+    <tr class="total">
+      <td>Total Inclusive of Taxes</td>
+      <td></td>
+      <td>$<%= number_to_currency(total_invoiced, unit: '') %></td>
+    </tr>
+  </table>
+
+  <h3>Invoices</h3>
+  <table>
+    <tr>
+      <th>Invoice ID</th>
+      <th>Client Name</th>
+      <th>Amount</th>
+    </tr>
+    <% invoices.each do |invoice| %>
+      <tr>
+        <td><%= invoice.id %></td>
+        <td><%= invoice.client&.name %></td>
+        <td>$<%= number_to_currency(invoice.charge, unit: '') %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <p style="text-align: center; margin-top: 20px;">Generated on <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %></p>
+</body>
+</html>

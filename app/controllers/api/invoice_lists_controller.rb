@@ -88,23 +88,25 @@ class Api::InvoiceListsController < ApplicationController
     @invoices = Invoice.where(location_id: location_id)
 
     @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
-    @treatment_income = @invoices.sum{ |invoice| calculate_charge(invoice) } - @product_income 
+    @treatment_income = @invoices.sum { |invoice| calculate_charge(invoice) } - @product_income
     @total_invoiced = @treatment_income + @product_income
-    respond_to do |format|
-      format.pdf do
-        render pdf: "location_#{@location.id}_report",
-               template: "api/invoice_lists/location_report",
-               layout: "pdf",
-               locals: {
-                 location: @location,
-                 invoices: @invoices,
-                 treatment_income: @treatment_income,
-                 product_income: @product_income,
-                 total_invoiced: @total_invoiced
-               }
-      end
-    end
+
+    pdf_html = ActionController::Base.new.render_to_string(
+      template: "api/invoice_lists/location_report",
+      layout: "pdf",
+      locals: {
+        location: @location,
+        invoices: @invoices,
+        treatment_income: @treatment_income,
+        product_income: @product_income,
+        total_invoiced: @total_invoiced,
+        percentage_invoiced: calculate_location_invoices(@invoices)
+      }
+    )
+    pdf = WickedPdf.new.pdf_from_string(pdf_html)
+    send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
   end
+
 
   private
 
@@ -175,6 +177,13 @@ class Api::InvoiceListsController < ApplicationController
         sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
       end
     end
+  end
+
+  def calculate_location_invoices(invoices)
+    total_invoices = Invoice.where(location_id: invoices.first.location_id).count
+    return 0 if total_invoices.zero?
+
+    (invoices.size.to_f / total_invoices * 100).round(2)
   end
 
   def calculate_percentage_invoiced(invoices)
