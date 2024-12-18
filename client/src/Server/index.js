@@ -1067,8 +1067,16 @@ export const clientBillingPurchases = async (clientId,filters) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Unable to load pricing plans:", error);
-    throw error;
+     if (error.response) {
+      console.error("Error response from API:", error.response);
+      throw new Error(error.response.data?.message || "An error occurred while fetching data.");
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      throw new Error("No response from server. Please try again later.");
+    } else {
+      console.error("Error setting up the request:", error.message);
+      throw new Error(error.message);
+    }
   }
 };
 export const printPurchasePdf = async (clientId,employeeId) => {

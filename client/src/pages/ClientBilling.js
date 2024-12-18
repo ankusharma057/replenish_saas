@@ -11,7 +11,8 @@ import {
   getLocationsWithoutEmployee,
   clientBillingPurchases,
   printPurchasePdf,
-  sendPurchaseEmail
+  sendPurchaseEmail,
+  getProductsList
 } from "../Server";
 import {
   EmbeddedCheckoutProvider,
@@ -27,7 +28,7 @@ import { BiSolidDownArrow } from 'react-icons/bi';
 import moment from 'moment';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
-import { FaLinkSlash, FaPencil, FaRegBuilding, FaRegCreditCard } from 'react-icons/fa6';
+import { FaLinkSlash, FaPencil, FaRegBuilding, FaRegCalendarDays, FaRegCreditCard } from 'react-icons/fa6';
 import { PiCurrencyDollarSimpleBold } from "react-icons/pi";
 
 
@@ -72,10 +73,17 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const [agesFilter,setAgesFilter]=useState("")
   const [showDateRangeSelector,setShowDateRangeSelector]=useState(false)
   const wrapperRef = useRef(null);
+  const [showNewPurchaseSlider, setShowNewPurchaseSlider] = useState(false)
+  const [showPayBalance, setShowPayBalance] = useState(false)
+  const [showAddStaffModal, setShowAddStaffModal] = useState(false)
+  const [showNewPurchaseSliderLocation, setShowNewPurchaseSliderLocation] = useState("")
+  const [showNewPurchaseSliderProductSearch, setShowNewPurchaseSliderProductSearch] = useState("")
+  const [productList, setProductList] = useState([])
+  const [selectedProductsIds, setSelectedProductsIds] = useState([])
   const [purchaseFilterPayload, setPurchaseFilterPayload] = useState({
     location_id: "",
     employee_id: "",
-    is_paid: false,
+    is_paid: "",
     start_date: "",
     end_date: "",
     invoice_age: ""
@@ -149,6 +157,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       getEmployees();
       getAllEmployeeLocation();
       getClientBillingPurchases();
+      getAllProducts();
   }, []);
 
   useEffect(() => {
@@ -156,6 +165,10 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         setStripePromise(loadStripe(stripePublicKey));
       }
   }, [stripePublicKey]);
+  const getAllProducts=async()=>{
+    let response = await getProductsList()
+    setProductList(response.data)
+  };
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getEmployeesOnly(refetch);
@@ -166,12 +179,18 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       console.log(error);
     }
   };
-  const getClientBillingPurchases=async()=>{
-    const data = await clientBillingPurchases(clientId,purchaseFilterPayload)
-    if(Array.isArray(data)){
-      setClientPurchases(data)
-    }else if(data.message){
-      toast.error(data.message)
+  const getClientBillingPurchases = async () => {
+    try {
+      const data = await clientBillingPurchases(clientId, purchaseFilterPayload)
+      console.log("@@@@@data");
+      if (Array.isArray(data)) {
+        setClientPurchases(data)
+      } else if (data.message) {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.error("Error in getClientBillingPurchases:", error.message);
+      toast.error(error.message);
     }
   };
   const getAllEmployeeLocation = async (employeeId, refetch = false) => {
@@ -427,6 +446,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const Purchases = () => {
     return <div>
       <PurchaseDetails />
+      <PurchasePayBalance/>
       <div >
         <div className={"w-100 py-3 rounded"} style={{ backgroundColor: "rgb(247 245 245)" }}>
           <Row>
@@ -441,7 +461,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
             </Col>
             <Col xs={6} sm={6} md={6} lg={6}>
               <div className='d-flex justify-content-end align-items-center gap-[10px] pr-3'>
-                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Mail size={20} color='black' />Pay Balance</Button>
+                <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]' onClick={()=>setShowPayBalance(true)}><Mail size={20} color='black' />Pay Balance</Button>
                 <Button variant="outline-secondary" className='border border-secondary w-[140px] bg-none d-flex align-items-center text-dark gap-[5px]'><Printer size={20} color='#111' />Statement</Button>
               </div>
             </Col>
@@ -1009,6 +1029,30 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         </Modal.Body>
       </Modal>
     </div>
+  };
+  const PurchasePayBalance = () => {
+    return <Modal show={showPayBalance} onHide={() => setShowPayBalance(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title className='text-muted'>Send Pay Balance Reminder by Email</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+            <Form.Label className='text-muted'>Hello Tester,</Form.Label>
+            <Form.Control as="textarea" rows={5} placeholder='Add optional note...'/>
+          </Form.Group>
+        </Form>
+        <Form.Label className='text-muted' style={{lineHeight:"17px",fontSize:"14px",fontStyle:"italic"}}>You have an account balance of $1,996.50 which you can pay through the patient portal. (A button reading "Pay" will appear below message)</Form.Label>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowPayBalance(false)}>
+          Close
+        </Button>
+        <Button variant="primary" onClick={() => setShowPayBalance(false)}>
+          Send
+        </Button>
+      </Modal.Footer>
+    </Modal>
   };
   const Payments = () => {
     return <div>
@@ -1933,7 +1977,22 @@ const formatAmount = (amount) => {
   const mainAmount = amountString.slice(0, -3);
   return { mainAmount, decimalPart };
 };
-
+const handlePurchaseLocation=(event)=>{
+  setShowNewPurchaseSliderLocation(event.target.value)
+};
+const handlePurchaseSearch=(event)=>{
+  setShowNewPurchaseSliderProductSearch(event.target.value)
+};
+const filterProductList = productList.filter((item) => item.name.toLowerCase().startsWith(showNewPurchaseSliderProductSearch.toLowerCase()))
+const handleSelectProduct=(productId)=>{
+  if(!setSelectedProductsIds.includes(productId)){
+    setSelectedProductsIds((prevSelectedIds) => [...prevSelectedIds, productId]);
+  }else{
+    setSelectedProductsIds((prevSelectedIds) => 
+      prevSelectedIds.filter((id) => id !== productId)
+    );
+  }
+};
 
   return (
     <div className="">
@@ -1997,7 +2056,160 @@ const formatAmount = (amount) => {
                 </button>
               ))}
             </div>
-            <Button size='sm' className='w-[130px] h-[35px]'>New Purchase</Button>
+            <Button size='sm' className='w-[130px] h-[35px]' onClick={()=>setShowNewPurchaseSlider(true)}>New Purchase</Button>
+            <Offcanvas show={showNewPurchaseSlider} onHide={() => setShowNewPurchaseSlider(false)} placement={"end"} style={{ width: "75%", backgroundColor: "rgb(243 244 246)" }} className="">
+              <Offcanvas.Header closeButton >
+                <Offcanvas.Title className='fs-4 text-secondary font'>New Sale</Offcanvas.Title>
+              </Offcanvas.Header>
+              <Offcanvas.Body>
+                <div className='bg-white p-3 rounded'>
+                  <div>
+                    <Form.Label className='fs-6 text-secondary fw-bolder'>Location</Form.Label>
+                    <Form.Select aria-label="Default select example" value={showNewPurchaseSliderLocation} onChange={handlePurchaseLocation}>
+                      {filteredLocationItems.map((item) => (
+                        <option value={item.label}>{item.label}</option>
+                      ))}
+                    </Form.Select>
+                  </div>
+                  <div className='mt-2'>
+                    <Form.Label className='fs-6 text-secondary fw-bold'>Client</Form.Label>
+                    <Row>
+                      <Col xs={1} sm={1} md={1} lg={1}>
+                        <div className='d-flex flex-column'>
+                          <Form.Label className='text-muted fw-bold mb-0' style={{ fontSize: "13px" }}>Name:</Form.Label>
+                          <Form.Label className='text-muted fw-bold mb-0' style={{ fontSize: "13px" }}>Email:</Form.Label>
+                        </div>
+                      </Col>
+                      <Col xs={3} sm={3} md={3} lg={3}>
+                        <div className='d-flex flex-column'>
+                          <Form.Label className='text-muted fw-light mb-0' style={{ fontSize: "13px" }}>Testaccount</Form.Label>
+                          <Form.Label className='text-muted fw-light mb-0' style={{ fontSize: "13px" }}>Testaccount@gmail.com</Form.Label>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className='w-100 mt-2'>
+                    <Form.Label className='text-secondary fs-6 text-secondary fw-bolder'>Items</Form.Label>
+                    <div>
+                      <Table striped bordered hover>
+                        <tbody>
+                          <tr>
+                            <td>
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <InputGroup className="mb-3">
+                                  <InputGroup.Text id="basic-addon1"><FaRegCalendarDays /></InputGroup.Text>
+                                  <Form.Control
+                                    placeholder="Add a product.."
+                                    onChange={handlePurchaseSearch}
+                                    value={showNewPurchaseSliderProductSearch}
+                                  />
+                                </InputGroup>
+                              </div>
+                            </td>
+                            <td >
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <p className='mb-0 text-dark d-flex gap-[10px]'>$9.50-botox<div className='w-[50px] h-[20px] rounded px-1 text-white fw-semibold' style={{ backgroundColor: "#fba919", fontSize: "12px" }}>Unpaid</div> </p>
+                              </div>
+                            </td>
+                            <td >
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <p className='mb-0 cursor-pointer' style={{ color: "#00c1ca" }} onClick={() => setShowAddStaffModal(true)}>Add Staff Member</p>
+                              </div>
+                            </td>
+                            <td >
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <Form.Control
+                                  type='number'
+                                  value={1}
+                                />
+                              </div>
+                            </td>
+                            <td >
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <p className='mb-0 text-dark'>$9.50</p>
+                              </div>
+                            </td>
+                            <td >
+                              <div className={"d-flex justify-content-start align-items-center"}>
+                                <ButtonGroup aria-label="Basic example">
+                                  <Button variant="outline-secondary" className='bg-none'><FaPencil /></Button>
+                                  <Button variant="outline-secondary" className='bg-none'><X /></Button>
+                                </ButtonGroup>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </div>
+                    <div className='position-relative w-50'>
+                      <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon1"><Search size={20} color='#696977' /></InputGroup.Text>
+                        <Form.Control
+                          placeholder="Add a product.."
+                          onChange={handlePurchaseSearch}
+                          value={showNewPurchaseSliderProductSearch}
+                        />
+                      </InputGroup>
+                      {showNewPurchaseSliderProductSearch && <div className='position-absolute z-index-10 w-100' style={{ maxHeight: "300px", overflow: "scroll" }}>
+                        <ListGroup>
+                          {filterProductList.map((item, index) => {
+                            return <ListGroup.Item key={index} onClick={() => handleSelectProduct(item.id)}>{item.name}</ListGroup.Item>
+                          })}
+                        </ListGroup>
+                      </div>}
+                    </div>
+                  </div>
+                  <div className='w-100 bg-secondary h-[1px] my-1' />
+                  <div className='mt-3'>
+                    <Row>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div className='d-flex flex-column justify-content-end'>
+                          <Form.Label className='fs-6 mb-2 fw-light text-end'>Sub Total</Form.Label>
+                          <Form.Label className='fs-6 mb-2 fw-light text-end'>Tax</Form.Label>
+                          <Form.Label className='fs-6 mb-2 fw-light text-end'>Grand Total</Form.Label>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div className='d-flex flex-column justify-content-end'>
+                          <Form.Label className='fs-6 mb-2 text-muted fw-bold text-end'>$234.00</Form.Label>
+                          <Form.Label className='fs-6 mb-2 text-muted fw-bold text-end'>$0.00</Form.Label>
+                          <Form.Label className='fs-6 mb-2 text-muted fw-bold text-end'>$234.00</Form.Label>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+              </Offcanvas.Body>
+            </Offcanvas>
+            <Modal show={showAddStaffModal} onHide={() => setShowAddStaffModal(false)}>
+              <Modal.Header closeButton>
+                <Modal.Title>Select a Staff Member</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+              <div className='position-relative w-100'>
+                      <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon1"><Search size={20} color='#696977' /></InputGroup.Text>
+                        <Form.Control
+                          placeholder="Add a product.."
+                          onChange={handlePurchaseSearch}
+                          value={showNewPurchaseSliderProductSearch}
+                        />
+                      </InputGroup>
+                      {showNewPurchaseSliderProductSearch && <div className='w-100' style={{ maxHeight: "300px", overflow: "scroll" }}>
+                        <ListGroup>
+                          {filterProductList.map((item, index) => {
+                            return <ListGroup.Item key={index} onClick={() => handleSelectProduct(item.id)}>{item.name}</ListGroup.Item>
+                          })}
+                        </ListGroup>
+                      </div>}
+                    </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowAddStaffModal(false)}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </div>
           <div className="mt-4 w-100">
             {tabContent[activeTab]}
