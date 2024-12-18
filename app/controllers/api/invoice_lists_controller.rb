@@ -81,6 +81,31 @@ class Api::InvoiceListsController < ApplicationController
               disposition: "attachment"
   end
 
+
+  def location_pdf
+    location_id = params[:location_id]
+    @location = Location.find(location_id)
+    @invoices = Invoice.where(location_id: location_id)
+
+    @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
+    @treatment_income = @invoices.sum{ |invoice| calculate_charge(invoice) } - @product_income 
+    @total_invoiced = @treatment_income + @product_income
+    respond_to do |format|
+      format.pdf do
+        render pdf: "location_#{@location.id}_report",
+               template: "api/invoice_lists/location_report",
+               layout: "pdf",
+               locals: {
+                 location: @location,
+                 invoices: @invoices,
+                 treatment_income: @treatment_income,
+                 product_income: @product_income,
+                 total_invoiced: @total_invoiced
+               }
+      end
+    end
+  end
+
   private
 
   def calculate_summary_data(invoices)
@@ -96,6 +121,11 @@ class Api::InvoiceListsController < ApplicationController
         total_applied: calculate_total_applied(grouped_invoices)
       }
     end
+  end
+
+  def calculate_product_income(invoice)
+    products = invoice.products_hash["products"] || []
+    products.sum { |product| product[2].to_f }
   end
 
   def calculate_charge(invoice)
@@ -122,7 +152,7 @@ class Api::InvoiceListsController < ApplicationController
 
     invoices = invoices.filter_by_location(location_ids) if location_ids.present?
     invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
-    invoices = invoices.where(date_of_service: start_date..end_date)
+    invoices = invoices.where(created_at: start_date..end_date)
     invoices
   end
 
