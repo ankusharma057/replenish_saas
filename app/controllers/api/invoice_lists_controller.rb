@@ -192,6 +192,13 @@ class Api::InvoiceListsController < ApplicationController
     end
   end
 
+  def calculate_location_invoices(invoices)
+    total_invoices = Invoice.where(location_id: invoices.first.location_id).count
+    return 0 if total_invoices.zero?
+
+    (invoices.size.to_f / total_invoices * 100).round(2)
+  end
+
   def calculate_percentage_invoiced(invoices)
     total_invoices = Invoice.count
     return 0 if total_invoices.zero?
