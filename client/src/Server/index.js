@@ -1016,11 +1016,13 @@ export const UpdateLocation = async (locationId,payload) =>{
 }
 export const GenerateExcelForInvoices = async (payload,refetch) =>{
   let url = `/api/export_invoices`;
-  const res = await api.get(url,{
-    body: payload,
+  const res = await api.get(url, {
+    headers: { Accept: 'application/pdf' },
+    responseType: 'blob',
+    params: payload,
     cache: {
       ignoreCache: refetch,
     },
   });
-  return res;
+  return res.data;
 }

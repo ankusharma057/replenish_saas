@@ -29,6 +29,7 @@ const ReportSummary = () => {
   const buttonRef = useRef(null);
   const [salesByLocationData, setSalesByLocationData] = useState([]);
   const [payload, setPayload] = useState({})
+  const [showOptions,setShowOptions]=useState(false)
   useEffect(() => {
     GetAllLocations();
     GetAllEmployees();
@@ -98,22 +99,16 @@ const ReportSummary = () => {
     }
   };
   const handleExcel = async () => {
-    let response = await GenerateExcelForInvoices(payload)
-    const blob = await response.blob();
-
-      // 3. Create a URL for the Blob
-      const fileURL = window.URL.createObjectURL(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
-
-      // 4. Open the file in a new tab
-      const newTab = window.open();
-      newTab.location.href = fileURL;
-
-      // Optionally: Add Download Name
-      const link = document.createElement("a");
-      link.href = fileURL;
-      link.setAttribute("download", "data.xlsx"); // File name
-      document.body.appendChild(link);
-      link.click();
+    let response = await GenerateExcelForInvoices(payload,true)
+    const blobUrl = URL.createObjectURL(response);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.setAttribute("download", "billing_summary_report.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+    setShowOptions(false);
   }
   const handleSelectAllEmployees = async(e) => {
     e.stopPropagation();
@@ -316,8 +311,8 @@ const ReportSummary = () => {
           </div>
           <div>
             {authUserState.user.is_admin &&
-              <OverlayTrigger trigger="click" placement="bottom" overlay={popover}>
-                <MoreHorizontal />
+              <OverlayTrigger trigger="click" placement="bottom" overlay={popover} show={showOptions} onToggle={()=>setShowOptions(false)}>
+                <MoreHorizontal onClick={()=>setShowOptions(true)}/>
               </OverlayTrigger>
             }
           </div>
