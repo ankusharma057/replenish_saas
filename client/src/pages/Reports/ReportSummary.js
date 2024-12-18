@@ -59,7 +59,6 @@ const ReportSummary = () => {
     
   }
   const GetAllSummaryReport = async () => {
-    console.log("@@@@@@payload",payload);
     let response = await GetAllSummaryInvoices(payload,true);
     setSalesByLocationData(response.data.data)
   };
@@ -87,11 +86,15 @@ const ReportSummary = () => {
   };
   const handleEmployeeCheckbox = async (event, employeeId) => {
     if (!allEmployeesIds.includes(employeeId)) {
-      allEmployeesIds.push(employeeId);
-      setAllEmployeesIds((prev) => [...prev, employeeId])
+      setAllEmployeesIds((prev) => {
+        const updatedIds = [...prev, employeeId];
+        return updatedIds;
+    });
     } else {
-      let updatedAllEmployeesIds = await allEmployeesIds.filter((id) => { return id !== employeeId })
-      setAllEmployeesIds(updatedAllEmployeesIds)
+      setAllEmployeesIds((prev) => {
+        const updatedIds = prev.filter((id) => id !== employeeId);
+        return updatedIds;
+    });
     }
   };
   const handleExcel = async () => {
