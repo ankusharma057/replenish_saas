@@ -24,10 +24,7 @@ class Invoice < ApplicationRecord
   scope :filter_by_employee, ->(employee_ids) {
     where(employee_id: employee_ids) if employee_ids.is_a?(Array)
   }
-
-
-
-  
+ 
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 
   # before_update :revise_charge
