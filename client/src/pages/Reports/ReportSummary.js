@@ -28,19 +28,21 @@ const ReportSummary = () => {
   const [endDate, setEndDate] = useState("");
   const buttonRef = useRef(null);
   const [salesByLocationData, setSalesByLocationData] = useState([]);
-  const [payload, setPayload] = useState(
-    {
-      "location_id": [],
-      "employee_id": [],
-      "start_date": "",
-      "end_date": ""
-    }
-  )
+  const [payload, setPayload] = useState({})
   useEffect(() => {
     GetAllLocations();
     GetAllEmployees();
     GetAllSummaryReport()
   }, [])
+  useEffect(() => {
+    setPayload((prev) => ({
+      ...prev,
+      "employee_id": allEmployeesIds,
+      "start_date": startDate,
+      "end_date": endDate
+    }))
+    GetAllSummaryReport()
+  },[allEmployeesIds,endDate])
   const handleToggle = (event) => {
     setShow(!show);
     setTarget(event.target);
@@ -54,21 +56,12 @@ const ReportSummary = () => {
     setAllEmployees(response.data)
     let allIds = response.data.map((item) => { return item.id })
     setAllEmployeesIds(allIds)
+    
   }
   const GetAllSummaryReport = async () => {
-    let response = await GetAllSummaryInvoices()
+    console.log("@@@@@@payload",payload);
+    let response = await GetAllSummaryInvoices(payload,true);
     setSalesByLocationData(response.data.data)
-  };
-  const getNextDay = (date) => {
-    const nextDay = new Date(date);
-    nextDay.setDate(nextDay.getDate() + 1);
-    return nextDay;
-  };
-  const getEndDateMinDate = () => {
-    if (startDate) {
-      return getNextDay(startDate);
-    }
-    return null;
   };
   const selectLocation = async (locationName) => {
     let location = filteredLocation.find((item) => { return item.name === locationName });
@@ -78,8 +71,7 @@ const ReportSummary = () => {
         ...prevPayload,
         location_id: [location.id],
       }));
-      let response = await GetAllSummaryInvoices(payload, true)
-      setSalesByLocationData(response.data.data)
+      await GetAllSummaryReport()
     }
   };
   const selectEmployee = async (employeeName) => {
@@ -91,8 +83,6 @@ const ReportSummary = () => {
         ...prevPayload,
         employee_id: [employee.id]
       }));
-      let response = await GetAllSummaryInvoices(payload, true)
-      setSalesByLocationData(response.data.data)
     }
   };
   const handleEmployeeCheckbox = async (event, employeeId) => {
@@ -103,16 +93,11 @@ const ReportSummary = () => {
       let updatedAllEmployeesIds = await allEmployeesIds.filter((id) => { return id !== employeeId })
       setAllEmployeesIds(updatedAllEmployeesIds)
     }
-    const updatedPayload = {
-      ...payload,
-      employee_id: allEmployeesIds
-    };
-    GetAllSummaryReport(updatedPayload);
   };
   const handleExcel = async () => {
     await GenerateExcelForInvoices(payload)
   }
-  const handleSelectAllEmployees = (e) => {
+  const handleSelectAllEmployees = async(e) => {
     e.stopPropagation();
     let allIds = allEmployees.map((item) => { return item.id })
     setAllEmployeesIds(allIds)
@@ -139,6 +124,40 @@ const ReportSummary = () => {
   const filteredEmployee = Array.isArray(allEmployees) && allEmployees.filter((location) =>
     location.name.toLowerCase().startsWith(employeeSearchQuery.toLowerCase())
   );
+  const handleStartDate = async (date) => {
+    setStartDate(date);
+    await setPayload((prev)=>({
+      ...prev,
+      "start_date": moment(date).format('YYYY-MM-DD'),
+    }))
+    if (endDate && date > endDate) {
+      setEndDate(null);
+      setPayload((prev)=>({
+        ...prev,
+        "end_date": ""
+      }))
+    }
+  };
+
+  const handleEndDate = async (date) => {
+    setEndDate(date);
+    await setPayload((prev)=>({
+      ...prev,
+      "end_date": moment(date).format('YYYY-MM-DD'),
+    }))
+  };
+
+  const isInRange = (date) => {
+    return startDate && endDate && date >= startDate && date <= endDate;
+  };
+
+  const getDayClassName = (date) => {
+    if (!startDate) return '';
+    if (moment(date).isSame(startDate, 'day')) return 'date-range-start';
+    if (moment(date).isSame(endDate, 'day')) return 'date-range-end';
+    if (isInRange(date)) return 'date-range-highlight';
+    return '';
+  };
   return (
     <div className='p-3 w-full' key={key}>
 
@@ -223,20 +242,22 @@ const ReportSummary = () => {
                           <label>Start Date:</label>
                           <DatePicker
                             selected={startDate}
-                            onChange={(date) => setStartDate(moment(date).format('YYYY/MM/DD'))}
+                            onChange={handleStartDate}
                             dateFormat="yyyy/MM/dd"
                             inline
+                            dayClassName={getDayClassName}
                           />
                         </div>
                         <div>
                           <label>End Date:</label>
                           <DatePicker
                             selected={endDate}
-                            onChange={(date) => setEndDate(moment(date).format('YYYY/MM/DD'))}
+                            onChange={handleEndDate}
                             dateFormat="yyyy/MM/dd"
                             inline
-                            minDate={getEndDateMinDate()}
-                            disabled={!startDate || !endDate}
+                            minDate={startDate}
+                            dayClassName={getDayClassName}
+                            disabled={!startDate}
                           />
                         </div>
                       </div>

@@ -53,3 +53,20 @@ color: #696977 !important;
   gap: 20px;
   align-items: center;
 }
+.date-range-highlight {
+  background-color: #d1ecf1; 
+  border-radius: 0;
+  color: #333;
+}
+
+.date-range-start {
+  background-color: #17a2b8; 
+  color: white;
+  border-radius: 50% 0 0 50%;
+}
+
+.date-range-end {
+  background-color: #17a2b8;
+  color: white;
+  border-radius: 0 50% 50% 0;
+}

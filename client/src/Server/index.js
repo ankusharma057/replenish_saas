@@ -998,7 +998,7 @@ export const GetLocationDetails = async (locationId,refetch) =>{
 export const GetAllSummaryInvoices = async (payload,refetch) =>{
   let url = `/api/summary`;
   const res = await api.get(url,{
-    body: payload,
+    params: payload,
     cache: {
       ignoreCache: refetch,
     },
