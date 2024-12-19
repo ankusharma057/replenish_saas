@@ -1,60 +1,161 @@
-<!-- app/views/api/invoice_lists/location_report.html.erb -->
 <!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; font-size: 12px; }
-    h1, h2 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    table, th, td { border: 1px solid black; }
-    th, td { padding: 8px; text-align: left; }
-    .total { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 20px;
+      line-height: 1.6;
+    }
+
+    h1, h2 {
+      text-align: center;
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin: 15px 0 10px;
+      font-weight: bold;
+    }
+
+    p {
+      text-align: center;
+      font-size: 10px;
+      color: gray;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px 5px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      font-weight: bold;
+      background-color: #f9f9f9;
+    }
+
+    .total {
+      font-weight: bold;
+    }
+
+    .header {
+      text-align: right;
+      font-size: 10px;
+      color: gray;
+    }
+
+    .generated {
+      text-align: center;
+      font-size: 10px;
+      margin-top: 20px;
+      color: gray;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>Billings Summary Report</h1>
-  <h2><%= location.name %></h2>
+  <div class="header">
+    1818 Washington Ave, Houston, TX 77007-6131<br>
+    (346) 955-7943<br>
+    ReplenishMD - Concierge
+  </div>
 
-  <h3>Sales Breakdown</h3>
+  <h1>Billings Summary Report</h1>
+  <p>This report was generated on <%= Time.now.strftime("%A, %B %d, %Y at %I:%M%p") %>.</p>
+  <p><%= start_date.strftime("%B %-d, %Y") %> to <%= end_date.strftime("%B %-d, %Y") %></p>
+  <h2>Replenish - <%= location.name %></h2>
+
+  <div class="section-title">Sales Breakdown</div>
   <table>
     <tr>
       <th>Item</th>
       <th>% Invoiced</th>
       <th>Invoiced</th>
+      <th>Applied</th>
     </tr>
     <tr>
       <td>Treatment Income</td>
-      <td>$<%= number_to_percentage(percentage_invoiced, unit: '') %></td>
-      <td>$<%= number_to_currency(treatment_income, unit: '') %></td>
-    </tr>
-    <tr>
-      <td>Product Income</td>
-      <td>$<%= number_to_percentage(percentage_invoiced, unit: '') %></td>
-      <td>$<%= number_to_currency(product_income, unit: '') %></td>
+      <td><%= percentage_invoiced%>%</td>
+      <td><%=treatment_income%></td>
+      <td><%=applied_income%></td>
     </tr>
     <tr class="total">
       <td>Total Inclusive of Taxes</td>
       <td></td>
-      <td>$<%= number_to_currency(total_invoiced, unit: '') %></td>
+      <td><%=treatment_income%></td>
+      <td><%=applied_income%></td>
     </tr>
   </table>
 
-  <h3>Invoices</h3>
+  <div class="section-title">Transactions</div>
   <table>
     <tr>
-      <th>Invoice ID</th>
-      <th>Client Name</th>
+      <th>Method</th>
       <th>Amount</th>
     </tr>
-    <% invoices.each do |invoice| %>
-      <tr>
-        <td><%= invoice.id %></td>
-        <td><%= invoice.client&.name %></td>
-        <td>$<%= number_to_currency(invoice.charge, unit: '') %></td>
-      </tr>
-    <% end %>
+    <tr>
+      <td>Credit Card</td>
+      <td>$7,000.00</td>
+    </tr>
+    <tr>
+      <td>Cash</td>
+      <td>$2,300.00</td>
+    </tr>
   </table>
 
-  <p style="text-align: center; margin-top: 20px;">Generated on <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %></p>
+  <div class="section-title">Gift Cards</div>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Increase</th>
+      <th>Decrease</th>
+    </tr>
+    <tr>
+      <td>Gift Cards Loaded</td>
+      <td>$1,000.00</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Gift Cards Redeemed</td>
+      <td></td>
+      <td>$800.00</td>
+    </tr>
+  </table>
+
+  <div class="section-title">Tax</div>
+  <table>
+    <tr>
+      <th>Tax</th>
+      <th>Invoiced</th>
+      <th>Applied</th>
+    </tr>
+    <tr>
+      <td>Sales Tax</td>
+      <td>$500.00</td>
+      <td>$450.00</td>
+    </tr>
+    <tr class="total">
+      <td>Total Tax</td>
+      <td>$500.00</td>
+      <td>$450.00</td>
+    </tr>
+  </table>
+
+  <p class="generated">Generated on <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %></p>
 </body>
 </html>

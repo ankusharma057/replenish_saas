@@ -85,26 +85,40 @@ class Api::InvoiceListsController < ApplicationController
   def location_pdf
     location_id = params[:location_id]
     @location = Location.find(location_id)
-    @invoices = Invoice.where(location_id: location_id)
+    if @location.present?
+      @start_date = params[:start_date].present? ? Date.strptime(params[:start_date], "%Y-%m-%d") : Date.today.beginning_of_month
+      @end_date = params[:end_date].present? ? Date.strptime(params[:end_date], "%Y-%m-%d") : Date.today.end_of_month
+      @invoices = Invoice.where(location_id: location_id, created_at: @start_date..@end_date)
+      if @invoices.present?
+        @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
+        @treatment_income = @invoices.sum { |invoice| calculate_charge(invoice) } - @product_income
+        @applied_income = @invoices.sum {|data| data[:charge] }
+        @total_invoiced = @treatment_income + @product_income
 
-    @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
-    @treatment_income = @invoices.sum { |invoice| calculate_charge(invoice) } - @product_income
-    @total_invoiced = @treatment_income + @product_income
+        pdf_html = ActionController::Base.new.render_to_string(
+          template: "api/invoice_lists/location_report",
+          layout: "pdf",
+          locals: {
+            location: @location,
+            invoices: @invoices,
+            treatment_income: @treatment_income,
+            product_income: @product_income,
+            total_invoiced: @total_invoiced,
+            percentage_invoiced: calculate_location_invoices(@invoices),
+            start_date: @start_date,
+            end_date: @end_date,
+            applied_income: @applied_income
+          }
+        )
 
-    pdf_html = ActionController::Base.new.render_to_string(
-      template: "api/invoice_lists/location_report",
-      layout: "pdf",
-      locals: {
-        location: @location,
-        invoices: @invoices,
-        treatment_income: @treatment_income,
-        product_income: @product_income,
-        total_invoiced: @total_invoiced,
-        percentage_invoiced: calculate_location_invoices(@invoices)
-      }
-    )
-    pdf = WickedPdf.new.pdf_from_string(pdf_html)
-    send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
+        pdf = WickedPdf.new.pdf_from_string(pdf_html)
+        send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
+      else
+        return render json: {'error' => 'Invoice not found'}, status: :not_found
+      end
+    else
+      return render json: {'error' => 'Location not found'}, status: :not_found
+    end
   end
 
 
