@@ -16,17 +16,27 @@ class Api::LocationsController < ApplicationController
     end
   end
 
-
-  def employees
+  def show
     location = Location.find_by(id: params[:id])
-    employees = location.employees
+    render json: location, status: :ok
+  end
 
-    render json: employees, status: :ok
+  def update
+    location = Location.find_by(id: params[:id])
+    if location
+      if location.update(location_params)
+        render json: location, status: :ok
+      else
+        render json: { error: 'Unable to update location', details: location.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Location not found' }, status: :not_found
+    end
   end
 
   private
   def location_params
-    params.permit(:short_description, :long_description, :email, :phone_number, :fax, :street_address, :apartment, :city, :country, :province, :postal_code, :display_location_address, :display_map_in_emails, :legal_name, :business_number, :use_location_for_billing, :online_booking_available
+    params.permit(:name, :short_description, :long_description, :email, :phone_number, :fax, :street_address, :apartment, :city, :country, :province, :postal_code, :display_location_address, :display_map_in_emails, :legal_name, :business_number, :use_location_for_billing, :online_booking_available
     )
   end
 end
