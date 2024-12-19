@@ -10,6 +10,7 @@ import SuspenseLoading from "./components/SuspenseLoading";
 import Header from "./components/Header";
 import ClientHeader from "./components/ClientHeader";
 import "./App.css"
+
 const ConfirmPayment = lazy(() =>
   import("./pages/Clients/payment/ConfirmPayment")
 );
@@ -37,6 +38,9 @@ const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
 const InvoicesToPay = lazy(() => import("./pages/InvoicesToPay"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Settings2 = lazy(() => import("./pages/Settings/Settings"));
+const Locations = lazy(() => import("./pages/Settings/Locations"));
+const NewAndUpdateLocation = lazy(() => import("./pages/Settings/NewAndUpdateLocation"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AddInvoices = lazy(() => import("./pages/AddInvoice"));
 const Invoice = lazy(() => import("./pages/Invoice"));
@@ -255,7 +259,11 @@ function App() {
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
-                  <Route path="/settings" element={<Settings />} />
+                  {/* <Route path="/settings" element={<Settings />} /> */}
+                  <Route path="/settings" element={<Settings2 />} >
+                    <Route path="locations" element={<Locations />} />
+                    <Route path="locations/:newOrUpdate" element={<NewAndUpdateLocation />} />
+                  </Route>
                 </>
               ) : (
                 <>

@@ -975,3 +975,32 @@ export const subscribeToFreePlan = async (employeeId) => {
     throw error;
   }
 };
+
+export const createNewLocation = async (data) =>{
+  let url = `/api/locations`;
+  const res = await api.get(url,data,{
+    cache: {
+      ignoreCache: true,
+    },
+  });
+  return res;
+}
+
+export const GetLocationDetails = async (locationId,refetch) =>{
+  let url = `/api/locations/${locationId}`;
+  const res = await api.get(url,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
+export const UpdateLocation = async (locationId,refetch) =>{
+  let url = `/api/locations/${locationId}`;
+  const res = await api.get(url,{
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  return res;
+}
