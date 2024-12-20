@@ -54,7 +54,6 @@ class Api::LocationsController < ApplicationController
     render json: { error: 'Failed to reorder locations', details: e.message }, status: :unprocessable_entity
   end
 
-
   def get_locations
     employee = Employee.find_by(id: params[:employee_id])
     if employee
