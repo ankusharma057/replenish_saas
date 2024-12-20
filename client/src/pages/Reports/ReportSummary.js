@@ -66,12 +66,13 @@ const ReportSummary = () => {
   const selectLocation = async (locationName) => {
     let location = filteredLocation.find((item) => { return item.name === locationName });
     if (location) {
-      setSelectedLocationsName(location.name);
-      setPayload((prevPayload) => ({
-        ...prevPayload,
+      const updatedPayload = {
+        ...payload,
         location_id: [location.id],
-      }));
-      await GetAllSummaryReport()
+      };
+      setSelectedLocationsName(location.name);
+      let response = await GetAllSummaryInvoices(updatedPayload, true);
+      setSalesByLocationData(response.data.data)
     }
   };
   const selectEmployee = async (employeeName) => {
@@ -297,14 +298,11 @@ const ReportSummary = () => {
             {
               hasValue &&
               <div className='d-flex justify-content-start align-items-center'>
-                <span className='' style={{ color: "#696977", cursor: "pointer" }} onClick={() => {
-                  setPayload({
-                    "location_id": [],
-                    "employee_id": [],
-                    "start_date": "",
-                    "end_date": ""
-                  })
+                <span className='' style={{ color: "#696977", cursor: "pointer" }} onClick={async () => {
+                  await setPayload({})
                   setSelectedLocationsName("")
+                  let response = await GetAllSummaryInvoices({}, true);
+                  setSalesByLocationData(response.data.data)
                 }}>Reset</span>
               </div>
             }
