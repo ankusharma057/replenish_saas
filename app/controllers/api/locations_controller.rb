@@ -54,7 +54,27 @@ class Api::LocationsController < ApplicationController
   end
 
 
+  def get_locations
+    employee = Employee.find_by(id: params[:employee_id])
+    if employee
+      locations = EmployeeLocation
+                    .where(employee_id: employee.id)
+                    .includes(:location)
+                    .order(:position)
+      render json: locations.map { |el| format_location(el) }, status: :ok
+    else
+      render json: { error: 'Employee not found' }, status: :not_found
+    end
+  end
+
   private
+
+  def format_location(employee_location)
+    location = employee_location.location
+    location.as_json.merge(position: employee_location.position)
+  end
+
+
   def location_params
     params.permit(:name, :short_description, :long_description, :email, :phone_number, :fax, :street_address, :apartment, :city, :country, :province, :postal_code, :display_location_address, :display_map_in_emails, :legal_name, :business_number, :use_location_for_billing, :online_booking_available
     )

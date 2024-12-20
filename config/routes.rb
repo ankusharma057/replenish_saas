@@ -57,6 +57,7 @@ mount Sidekiq::Web => '/sidekiq'
     resources :locations, only: [ :index, :create, :update, :show] do
       collection do
         post :reorder_location
+        get :get_locations
       end
     end
     resources :schedules, only: [:index, :create, :destroy, :show, :update] do
