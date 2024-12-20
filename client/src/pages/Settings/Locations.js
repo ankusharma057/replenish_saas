@@ -48,6 +48,7 @@ const Locations = () => {
         setReorderAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
     };
     const handleReorder = async () => {
+        let locationIdss = await allLocations.map((item) => { return item.id })
         let locationIds = await reorderAllLocations.map((item) => { return item.id })
         let payload={
             employee_id:authUserState.user.id,

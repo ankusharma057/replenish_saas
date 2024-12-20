@@ -1014,6 +1014,7 @@ export const UpdateLocation = async (locationId,payload) =>{
   });
   return res;
 }
+
 export const GenerateExcelForInvoices = async (payload,refetch) =>{
   let url = `/api/export_invoices`;
   const res = await api.get(url, {
@@ -1026,6 +1027,7 @@ export const GenerateExcelForInvoices = async (payload,refetch) =>{
   });
   return res;
 }
+
 export const ReorderLocation = async (payload) =>{
   let url = `api/locations/reorder_location`;
   const res = await api.post(url,payload,{
@@ -1035,6 +1037,7 @@ export const ReorderLocation = async (payload) =>{
   });
   return res;
 }
+
 export const GenerateSingleSummaryReport = async (locationId,) => {
   let url = `/api/location_pdf`;
   const res = await api.get(url, {
@@ -1057,6 +1060,7 @@ export const GetAllEmployeesLocations = async (payload) =>{
   });
   return res;
 }
+
 export const clientBillingPurchases = async (clientId,filters) => {
   try {
     const response = await api.get(`/api/invoices/${clientId}/client_invoices`, {
