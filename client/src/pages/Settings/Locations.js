@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { Button, ButtonGroup, Dropdown, DropdownButton, ListGroup, Modal } from 'react-bootstrap'
 import { PlusCircle, HelpCircle, GripVertical } from 'lucide-react';
-import { getLocations } from '../../Server';
+import { GetAllEmployeesLocations, ReorderLocation } from '../../Server';
 import { useNavigate } from 'react-router-dom';
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import { arrayMoveImmutable } from "array-move";
+import { useAuthContext } from '../../context/AuthUserContext';
+import { toast } from 'react-toastify';
 const Locations = () => {
     const [allLocations, setAllLocations] = useState([])
     const [reorderAllLocations, setReorderAllLocations] = useState([])
     const [showReorder, setShowOrder] = useState(false);
     const navigate=useNavigate()
+    const { authUserState } = useAuthContext();
     useEffect(() => {
         getAllLocations();
     }, [])
     const getAllLocations = async () => {
-        let response = await getLocations(true)
+        let response = await GetAllEmployeesLocations({employee_id:authUserState.user.id},true)
         setAllLocations(response.data)
     }
     const handleReorderModal = () => {
@@ -44,6 +47,22 @@ const Locations = () => {
     const onSortEnd = ({ oldIndex, newIndex }) => {
         setReorderAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
     };
+    const handleReorder = async () => {
+        let locationIdss = await allLocations.map((item) => { return item.id })
+        let locationIds = await reorderAllLocations.map((item) => { return item.id })
+        let payload={
+            employee_id:authUserState.user.id,
+            location_ids:locationIds
+        }
+        let response = await ReorderLocation(payload);
+        if (response.status === 200 || response.status === 201) {
+            toast.success(response.data.success);
+            await getAllLocations();
+            handleReorderModal()
+        } else {
+            toast.error(response.data.success)
+        }
+    };
     const ReorderLocations = () => {
         return <div>
             <Modal show={showReorder} onHide={handleReorderModal}>
@@ -57,7 +76,7 @@ const Locations = () => {
                     <Button variant="outline-secondary" onClick={handleReorderModal}>
                         Close
                     </Button>
-                    <Button variant="outline-secondary" onClick={handleReorderModal} style={{ backgroundColor: "rgb(0, 193, 202)", color: "#fff", border: "1px solid rgb(0, 193, 202)" }}>
+                    <Button variant="outline-secondary" onClick={handleReorder} style={{ backgroundColor: "rgb(0, 193, 202)", color: "#fff", border: "1px solid rgb(0, 193, 202)" }}>
                         Save Changes
                     </Button>
                 </Modal.Footer>

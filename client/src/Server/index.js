@@ -1026,6 +1026,15 @@ export const GenerateExcelForInvoices = async (payload,refetch) =>{
   });
   return res.data;
 }
+export const ReorderLocation = async (payload) =>{
+  let url = `api/locations/reorder_location`;
+  const res = await api.post(url,payload,{
+    cache: {
+      ignoreCache: true,
+    },
+  });
+  return res;
+}
 export const GenerateSingleSummaryReport = async (locationId,) => {
   let url = `/api/location_pdf`;
   const res = await api.get(url, {
@@ -1036,5 +1045,15 @@ export const GenerateSingleSummaryReport = async (locationId,) => {
       ignoreCache: true,
     },
   });
-  return res.data;
-};
+  return res;
+}
+export const GetAllEmployeesLocations = async (payload) =>{
+  let url = `api/locations/get_locations`;
+  const res = await api.get(url,{
+    cache: {
+      ignoreCache: true,
+    },
+    params:payload
+  });
+  return res;
+}
