@@ -9,10 +9,14 @@
       line-height: 1.6;
     }
 
-    h1, h2 {
-      text-align: center;
+    h2 {
+      text-align: left;
       font-size: 16px;
       margin: 5px 0;
+    }
+
+    h1{
+      font-weight: lighter;
     }
 
     h3 {
@@ -22,7 +26,7 @@
     }
 
     p {
-      text-align: center;
+      text-align: left;
       font-size: 10px;
       color: gray;
     }
@@ -41,7 +45,6 @@
 
     th {
       font-weight: bold;
-      background-color: #f9f9f9;
     }
 
     .total {
@@ -72,7 +75,7 @@
   <div class="header">
     1818 Washington Ave, Houston, TX 77007-6131<br>
     (346) 955-7943<br>
-    ReplenishMD - Concierge
+    <h5>Replenish - <%= location.name %></h5>
   </div>
 
   <h1>Billings Summary Report</h1>
