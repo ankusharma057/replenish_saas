@@ -978,7 +978,7 @@ export const subscribeToFreePlan = async (employeeId) => {
 
 export const createNewLocation = async (data) =>{
   let url = `/api/locations`;
-  const res = await api.get(url,data,{
+  const res = await api.post(url,data,{
     cache: {
       ignoreCache: true,
     },
@@ -995,11 +995,11 @@ export const GetLocationDetails = async (locationId,refetch) =>{
   });
   return res;
 }
-export const UpdateLocation = async (locationId,refetch) =>{
+export const UpdateLocation = async (locationId,payload) =>{
   let url = `/api/locations/${locationId}`;
-  const res = await api.get(url,{
+  const res = await api.patch(url,payload,{
     cache: {
-      ignoreCache: refetch,
+      ignoreCache: true,
     },
   });
   return res;

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { Button, ButtonGroup, Dropdown, DropdownButton, ListGroup, Modal } from 'react-bootstrap'
 import { PlusCircle, HelpCircle, GripVertical } from 'lucide-react';
 import { getLocations } from '../../Server';
-import { Draggable, Droppable } from 'react-drag-and-drop'
 import { useNavigate } from 'react-router-dom';
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { arrayMoveImmutable } from "array-move";
 const Locations = () => {
     const [allLocations, setAllLocations] = useState([])
+    const [reorderAllLocations, setReorderAllLocations] = useState([])
     const [showReorder, setShowOrder] = useState(false);
     const navigate=useNavigate()
     useEffect(() => {
@@ -16,50 +18,46 @@ const Locations = () => {
         setAllLocations(response.data)
     }
     const handleReorderModal = () => {
+        setReorderAllLocations(allLocations)
         setShowOrder(!showReorder)
     }
-    const onDrop = (data) => {
-        console.log(data);
-        // => banana 
-    };
-    const handleNavigation=(path)=>{
+    const handleNavigation = (path) => {
         navigate(path)
     }
+    const SortableItem = SortableElement(({ item }) => (
+        <ListGroup.Item className="p-2">
+            <div className="d-flex align-items-center">
+                <GripVertical className="text-secondary me-2" />
+                <p className="mb-0" style={{ fontSize: "14px" }}>
+                    {item.name}
+                </p>
+            </div>
+        </ListGroup.Item>
+    ));
+    const SortableList = SortableContainer(({ items }) => (
+        <ListGroup>
+            {items.map((item, index) => (
+                <SortableItem key={item.id} index={index} item={item} />
+            ))}
+        </ListGroup>
+    ));
+    const onSortEnd = ({ oldIndex, newIndex }) => {
+        setAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
+    };
     const ReorderLocations = () => {
         return <div>
             <Modal show={showReorder} onHide={handleReorderModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Modal heading</Modal.Title>
+                    <Modal.Title className='text-muted fw-light'>Online Booking Location Order</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <div>
-                        <h2 style={{fontWeight:300,fontSize:"13px",marginBottom:"20px"}}>Click and drag to set the order of your locations for online booking.</h2>
-                        <div style={{maxHeight:"500px",overflow:"scroll"}}>
-                        <ListGroup>
-                            {allLocations.map((item, index) => {
-                                return <Draggable type="location" data={item?.name}  key={index}><ListGroup.Item className='p-2'>
-                                    <div className='d-flex justify-content-between align-items-center py-1'>
-                                        <div className='d-flex justify-content-start align-items-center'>
-                                            <GripVertical className='text-secondary'/>
-                                            <p className='fw-light text-dark mb-0' style={{fontSize:"14px"}}>{item?.name}</p>
-                                        </div>
-                                    </div>
-                                </ListGroup.Item></Draggable>
-                            })}
-                        </ListGroup>
-                        </div>
-                        <Droppable
-                            types={['location']}
-                            onDrop={onDrop}>
-                            <ul className="Smoothie"></ul>
-                        </Droppable>
-                    </div>
+                    <SortableList items={reorderAllLocations} onSortEnd={onSortEnd} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="outline-secondary" onClick={handleReorderModal}>
                         Close
                     </Button>
-                    <Button variant="outline-secondary" onClick={handleReorderModal} style={{backgroundColor:"rgb(0, 193, 202)",color:"#fff",border:"1px solid rgb(0, 193, 202)"}}>
+                    <Button variant="outline-secondary" onClick={handleReorderModal} style={{ backgroundColor: "rgb(0, 193, 202)", color: "#fff", border: "1px solid rgb(0, 193, 202)" }}>
                         Save Changes
                     </Button>
                 </Modal.Footer>
@@ -67,7 +65,7 @@ const Locations = () => {
         </div>
     }
     return (
-        <div style={{height:"86vh",overflow:"scroll"}}>
+        <div style={{ height: "86vh", overflow: "scroll" }}>
             <ReorderLocations />
             <div className='d-flex justify-content-between align-items-center w-100'>
                 <h2 className='text-secondary fw-light'>Locations</h2>
@@ -93,8 +91,8 @@ const Locations = () => {
                         <div className='d-flex justify-content-between align-items-center py-1'>
                             <div>
                                 <p className='fw-bolder'>{item?.name}</p>
-                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>1818 Washington Ave, Houston, United States</p>
-                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>This location is listed in online booking, but the address is hidden online and in emails.</p>
+                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>&nbsp;{item.apartment!==null&&item.apartment+","}{item.street_address!==null&&item.street_address+","}{item.city!==null&&item.city+","}{item.city!==null&&item.city+","}{item.country!==null&&item.country}</p>
+                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>&nbsp;{item.short_description!==null&&item.short_description}</p>
                             </div>
                             <div>
                                 <Button variant='outline-secondary' size='md'  onClick={()=>handleNavigation(`/settings/locations/${item.id}`)}>Edit</Button>

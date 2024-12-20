@@ -1,14 +1,17 @@
-import { HelpCircle } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { Badge, Button, CloseButton, Col, Dropdown, DropdownButton, Form, Row } from 'react-bootstrap'
-import { useParams } from 'react-router-dom'
-import { createNewLocation, getEmployeesList, GetLocationDetails } from '../../Server'
-
+import { HelpCircle } from 'lucide-react'
+import { Button, Col, Dropdown, DropdownButton, Form, Row } from 'react-bootstrap'
+import { useNavigate, useParams } from 'react-router-dom'
+import { createNewLocation, getEmployeesList, GetLocationDetails, UpdateLocation } from '../../Server'
+import { toast } from 'react-toastify'
+import {getData} from 'country-list';
 const NewAndUpdateLocation = () => {
     const [formType, setFormType] = useState("new")
-    const [locationData, setLocationData] = useState([])
+    const [locationId, setLocationId] = useState([])
     const [employeeList, setEmployeeList] = useState([])
     const params = useParams()
+    const navigate = useNavigate()
+    const [countries, setCountries] = useState([]);
     const [formData, setFormData] = useState({
         "name": "",
         "short_description": "",
@@ -32,23 +35,41 @@ const NewAndUpdateLocation = () => {
     })
     useEffect(() => {
         getAllEmployees();
+        countryList();
         if (params.newOrUpdate !== "new") {
             setFormType("update");
             getLocationDetails();
         } else {
             const updatedFormData = {
                 ...formData,
-                ["location"]: formData.key
+                location: ""
             };
-            delete updatedFormData.key;
+            delete updatedFormData.name;
+            setFormData(updatedFormData)
         }
     }, []);
-    const getLocationDetails = async () => {
-        let response = await GetLocationDetails(params.newOrUpdate, true);
-
-
-        setLocationData(response.data)
+    const countryList=()=>{
+        const countriesArray = getData();
+        const sortedCountries = countriesArray.sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(sortedCountries);
     };
+    const getLocationDetails = async () => {
+        try {
+            const response = await GetLocationDetails(params.newOrUpdate, true);
+            const newData = {
+                ...response?.data,
+                employee_ids: response?.data?.employees?.map(emp => emp?.id) || [],
+            };
+            setFormData(prevState => ({
+                ...prevState,
+                ...newData,
+            }));
+            setLocationId(response.data.id)
+        } catch (error) {
+            console.error("Error fetching location details:", error);
+        }
+    };
+    
     const getAllEmployees = async () => {
         let response = await getEmployeesList();
         setEmployeeList(response.data)
@@ -62,7 +83,18 @@ const NewAndUpdateLocation = () => {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        let response = await createNewLocation(formData)
+        let response;
+        if(params.newOrUpdate==="new"){
+        response = await createNewLocation(formData)
+        }else{
+            response = await UpdateLocation(locationId,formData)
+        }
+        if(response.status===200 || response.status===201){
+            toast.success(params.newOrUpdate === "new"?"Location created":"Location updated");
+            navigate("/settings/locations")
+        }else{
+            toast.error(response.data.error)
+        }
         console.log("Form Data Submitted:", response);
     };
     const handleEmployeeSelection = (event,employeeId) => {
@@ -79,19 +111,15 @@ const NewAndUpdateLocation = () => {
             }))
         }
     };
-    const getEmployeeName = async (id) => {
-        let employee = await employeeList.find((employee) => employee?.id == id)
-        return employee ? employee?.name : "-";
-    };
     return (
         <div style={{ height: "86vh", overflow: "scroll" }}>
-            <h2 className='text-muted fw-light'>{formType === "update" ? `Edit Location ${locationData?.name}` : "Create Location"}</h2>
+            <h2 className='text-muted fw-light'>{formType === "update" ? `Edit Location ${formData?.name}` : "Create Location"}</h2>
             <Form onSubmit={handleSubmit}>
                 <div className='mt-4 bg-white p-3 rounded border'>
                     <Form.Label className={"text-secondary fw-bolder mb-4"}>Name</Form.Label>
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                    <Form.Group className="mb-3">
                         <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Location Name - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                        <Form.Control type="text" required name='name' value={formData.name} onChange={handleChange} />
+                        <Form.Control type="text" required name={params.newOrUpdate === "new"?'location':"name"}value={params.newOrUpdate === "new"?formData.location:formData.name} onChange={handleChange} />
                     </Form.Group>
                 </div>
                 <div className='mt-4 bg-white p-3 rounded border'>
@@ -102,30 +130,17 @@ const NewAndUpdateLocation = () => {
                                 return <Dropdown.Item key={index} className='d-flex justify-content-between align-items-center w-100 gap-[20px]' onClick={(e) => handleEmployeeSelection(e, employee?.id)}>{employee?.name}<Form.Check type='checkbox' checked={formData?.employee_ids.includes(employee?.id)} /></Dropdown.Item>
                             })}
                         </DropdownButton>
-                        {/* {Array.isArray(formData.employee_ids) && formData?.employee_ids.map(async(id,index) => {
-                            const employeeName = await getEmployeeName(id);
-                            console.log("employee",employeeName);
-                            return <Badge key={index} bg="primary" className="" style={{width:"auto"}}>
-                                {employeeName|| "Loading..."}
-                                <CloseButton
-                                    onClick={() => handleEmployeeSelection(id)}
-                                    variant="white"
-                                    aria-label="Remove"
-                                    className="ms-2"
-                                />
-                            </Badge>
-                        })} */}
                     </div>
                     <div className='mb-3'>
                         <Form.Label className={"text-secondary fw-bolder mb-4"}>Client Communication</Form.Label>
-                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Group className="mb-3">
                             <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Short Description - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                            <Form.Control type="text" required name='short_description' value={formData.short_description} onChange={handleChange} />
+                            <Form.Control type="text" name='short_description' value={formData.short_description} onChange={handleChange} />
                             <Form.Text className="text-muted">Appears with the location name on your online booking site and emails—e.g., a neighborhoods name or cross street.</Form.Text>
                         </Form.Group>
                     </div>
                     <div className='mb-3'>
-                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Group className="mb-3">
                             <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Long Description - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
                             <Form.Control as="textarea" rows={2} name='long_description' value={formData.long_description} onChange={handleChange} />
                             <Form.Text className="text-muted">Appears on the location information page of your online booking site and in appointment related emails—e.g., directions, parking instructions, etc.</Form.Text>
@@ -138,21 +153,21 @@ const NewAndUpdateLocation = () => {
                         <Form.Label className={"text-secondary fw-bolder mb-4"}>Contact Info</Form.Label>
                         <Row>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Email</Form.Label>
-                                    <Form.Control type="text" required name='email' value={formData.email} onChange={handleChange} />
+                                    <Form.Control type="text" name='email' value={formData.email} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Phone Number</Form.Label>
-                                    <Form.Control type="text" required name='phone_number' value={formData.phone_number} onChange={handleChange} />
+                                    <Form.Control type="text" name='phone_number' value={formData.phone_number} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Fax</Form.Label>
-                                    <Form.Control type="text" required name='fax' value={formData.fax} onChange={handleChange} />
+                                    <Form.Control type="text" name='fax' value={formData.fax} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -166,47 +181,47 @@ const NewAndUpdateLocation = () => {
                         </div>
                         <Row className='mt-3'>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Street Address - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                    <Form.Control type="text" required name='street_address' value={formData.street_address} onChange={handleChange} />
+                                    <Form.Control type="text" name='street_address' value={formData.street_address} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Apartment,Suite,etc.</Form.Label>
-                                    <Form.Control type="text" required name='apartment' value={formData.apartment} onChange={handleChange} />
+                                    <Form.Control type="text" name='apartment' value={formData.apartment} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>City - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                    <Form.Control type="text" required name='city' value={formData.city} onChange={handleChange} />
+                                    <Form.Control type="text" name='city' value={formData.city} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
                                 <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Country - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                <Form.Select name='country' value={formData.country} onChange={handleChange}>
+                                <Form.Select name='country' value={formData.country} onChange={handleChange}   style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                     <option>Select Country</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
+                                    {countries.map((country,index)=>{
+                                        return <option value={country.name} key={index}>{country?.name}</option>
+                                    })}
                                 </Form.Select>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6} className='mt-2'>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Province - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                    <Form.Control type="text" required name='province' value={formData.province} onChange={handleChange} />
+                                    <Form.Control type="text" name='province' value={formData.province} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6} className='mt-2'>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Postal / Zip - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                    <Form.Control type="text" required name='postal_code' value={formData.postal_code} onChange={handleChange} />
+                                    <Form.Control type="text" name='postal_code' value={formData.postal_code} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <hr style={{ width: "100%", backgroundColor: "#eeeeee" }} className='my-3' />
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Check
                                         type={"checkbox"}
                                         label={`Display location address on your online booking site and emails`}
@@ -217,7 +232,7 @@ const NewAndUpdateLocation = () => {
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Check
                                         type={"checkbox"}
                                         label={`Display location address on your online booking site and emails`}
@@ -241,20 +256,20 @@ const NewAndUpdateLocation = () => {
                         </div>
                         <Row className='mt-3'>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Legal Name - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
-                                    <Form.Control type="text" required name='legal_name' value={formData.legal_name} onChange={handleChange} />
+                                    <Form.Control type="text" name='legal_name' value={formData.legal_name} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Business Numbers / Tax Numbers</Form.Label>
-                                    <Form.Control type="text" required name='business_number' value={formData.business_number} onChange={handleChange} />
+                                    <Form.Control type="text" name='business_number' value={formData.business_number} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <hr style={{ width: "100%", backgroundColor: "#eeeeee" }} className='my-3' />
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Check
                                         type={"checkbox"}
                                         label={`Use my location address for billing`}
@@ -274,7 +289,7 @@ const NewAndUpdateLocation = () => {
                         </div>
                         <Row className='mt-3'>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Group className="mb-3">
                                     <Form.Check
                                         type={"checkbox"}
                                         label={`Location available to be booked online`}
@@ -289,7 +304,7 @@ const NewAndUpdateLocation = () => {
                 </div>
                 <div className='mt-4 bg-white p-3 rounded border'>
                     <div className='d-flex justify-content-end align-items-center gap-[20px]'>
-                        <Button variant='outline-secondary'>Cancel</Button>
+                        <Button variant='outline-secondary' onClick={()=>navigate("/settings/locations")}>Cancel</Button>
                         <Button variant='outline-secondary' type='submit' style={{ backgroundColor: "#00c1ca", border: "1px solid #00c1ca", color: "#fff" }}>Save</Button>
                     </div>
                 </div>
