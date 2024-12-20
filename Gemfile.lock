@@ -71,6 +71,9 @@ GEM
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+    acts_as_list (1.2.4)
+      activerecord (>= 6.1)
+      activesupport (>= 6.1)
     addressable (2.8.4)
       public_suffix (>= 2.0.2, < 6.0)
     bcrypt (3.1.19)
@@ -210,11 +213,12 @@ GEM
 
 PLATFORMS
   ruby
-  x64-mingw-ucrt
+  x64-unknown
   x86_64-linux
 
 DEPENDENCIES
   active_model_serializers (~> 0.10.13)
+  acts_as_list
   bcrypt (~> 3.1.7)
   bootsnap
   bullet (~> 7.2)

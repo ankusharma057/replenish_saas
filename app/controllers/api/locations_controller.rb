@@ -12,7 +12,7 @@ class Api::LocationsController < ApplicationController
       location.employees = Employee.where(id: params[:employee_ids]) if params[:employee_ids]
       render json: location, status: :created
     else
-      render json: { error: 'Something went wrong!' }, status: :unprocessable_entity
+      render json: { error: 'Unable create or find location' }, status: :unprocessable_entity
     end
   end
 

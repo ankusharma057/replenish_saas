@@ -18,6 +18,8 @@ const Locations = () => {
     }, [])
     const getAllLocations = async () => {
         let response = await GetAllEmployeesLocations({employee_id:authUserState.user.id},true)
+        console.log("@@@@@response",response.data);
+        
         setAllLocations(response.data)
     }
     const handleReorderModal = () => {
@@ -48,7 +50,6 @@ const Locations = () => {
         setReorderAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
     };
     const handleReorder = async () => {
-        let locationIdss = await allLocations.map((item) => { return item.id })
         let locationIds = await reorderAllLocations.map((item) => { return item.id })
         let payload={
             employee_id:authUserState.user.id,
@@ -62,6 +63,9 @@ const Locations = () => {
         } else {
             toast.error(response.data.success)
         }
+    };
+    const checkNullValue=(value)=>{
+        return value === null || value === "" ? "": value+", "
     };
     const ReorderLocations = () => {
         return <div>
@@ -110,8 +114,17 @@ const Locations = () => {
                         <div className='d-flex justify-content-between align-items-center py-1'>
                             <div>
                                 <p className='fw-bolder'>{item?.name}</p>
-                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>&nbsp;{item.apartment!==null&&item.apartment+","}{item.street_address!==null&&item.street_address+","}{item.city!==null&&item.city+","}{item.city!==null&&item.city+","}{item.country!==null&&item.country}</p>
-                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>&nbsp;{item.short_description!==null&&item.short_description}</p>
+                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>
+                                    &nbsp;
+                                    {checkNullValue(item.street_address)}
+                                    {checkNullValue(item.apartment)}
+                                    {checkNullValue(item.city)}
+                                    {checkNullValue(item.country)}
+                                    </p>
+                                <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>
+                                    &nbsp;
+                                    {item.short_description!==null&&item.short_description}
+                                    </p>
                             </div>
                             <div>
                                 <Button variant='outline-secondary' size='md'  onClick={()=>handleNavigation(`/settings/locations/${item.id}`)}>Edit</Button>

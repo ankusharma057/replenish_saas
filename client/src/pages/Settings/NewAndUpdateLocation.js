@@ -66,7 +66,7 @@ const NewAndUpdateLocation = () => {
             }));
             setLocationId(response.data.id)
         } catch (error) {
-            console.error("Error fetching location details:", error);
+            toast.error(error.message)
         }
     };
     
@@ -83,6 +83,9 @@ const NewAndUpdateLocation = () => {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if(formData.employee_ids.length ===0){
+            toast.error("Please select at least one employee")
+        }else{
         let response;
         if(params.newOrUpdate==="new"){
         response = await createNewLocation(formData)
@@ -95,7 +98,7 @@ const NewAndUpdateLocation = () => {
         }else{
             toast.error(response.data.error)
         }
-        console.log("Form Data Submitted:", response);
+    }
     };
     const handleEmployeeSelection = (event,employeeId) => {
         event.stopPropagation();
@@ -124,7 +127,7 @@ const NewAndUpdateLocation = () => {
                 </div>
                 <div className='mt-4 bg-white p-3 rounded border'>
                     <div className='mb-3'>
-                        <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Employee - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                        <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Employee - </Form.Label>
                         <DropdownButton variant='outline-secondary' id="dropdown-basic-button" title="Select Employee" className='w-100'>
                             {Array.isArray(employeeList) && employeeList.map((employee, index) => {
                                 return <Dropdown.Item key={index} className='d-flex justify-content-between align-items-center w-100 gap-[20px]' onClick={(e) => handleEmployeeSelection(e, employee?.id)}>{employee?.name}<Form.Check type='checkbox' checked={formData?.employee_ids.includes(employee?.id)} /></Dropdown.Item>
@@ -134,14 +137,14 @@ const NewAndUpdateLocation = () => {
                     <div className='mb-3'>
                         <Form.Label className={"text-secondary fw-bolder mb-4"}>Client Communication</Form.Label>
                         <Form.Group className="mb-3">
-                            <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Short Description - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                            <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Short Description - </Form.Label>
                             <Form.Control type="text" name='short_description' value={formData.short_description} onChange={handleChange} />
                             <Form.Text className="text-muted">Appears with the location name on your online booking site and emails—e.g., a neighborhoods name or cross street.</Form.Text>
                         </Form.Group>
                     </div>
                     <div className='mb-3'>
                         <Form.Group className="mb-3">
-                            <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Long Description - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                            <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Long Description - </Form.Label>
                             <Form.Control as="textarea" rows={2} name='long_description' value={formData.long_description} onChange={handleChange} />
                             <Form.Text className="text-muted">Appears on the location information page of your online booking site and in appointment related emails—e.g., directions, parking instructions, etc.</Form.Text>
                         </Form.Group>
@@ -182,7 +185,7 @@ const NewAndUpdateLocation = () => {
                         <Row className='mt-3'>
                             <Col xs={12} sm={12} md={12} kg={12}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Street Address - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Street Address - </Form.Label>
                                     <Form.Control type="text" name='street_address' value={formData.street_address} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
@@ -194,12 +197,12 @@ const NewAndUpdateLocation = () => {
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>City - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>City - </Form.Label>
                                     <Form.Control type="text" name='city' value={formData.city} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={12} sm={12} md={12} kg={12}>
-                                <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Country - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Country - </Form.Label>
                                 <Form.Select name='country' value={formData.country} onChange={handleChange}   style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                     <option>Select Country</option>
                                     {countries.map((country,index)=>{
@@ -209,13 +212,13 @@ const NewAndUpdateLocation = () => {
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6} className='mt-2'>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Province - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Province - </Form.Label>
                                     <Form.Control type="text" name='province' value={formData.province} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6} className='mt-2'>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Postal / Zip - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Postal / Zip - </Form.Label>
                                     <Form.Control type="text" name='postal_code' value={formData.postal_code} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
@@ -257,7 +260,7 @@ const NewAndUpdateLocation = () => {
                         <Row className='mt-3'>
                             <Col xs={12} sm={12} md={12} kg={12}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Legal Name - <span className='d-flex gap-[10px] align-items-center' style={{ fontSize: "10px", fontStyle: "italic" }}>Required <HelpCircle size={10} /></span></Form.Label>
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Legal Name - </Form.Label>
                                     <Form.Control type="text" name='legal_name' value={formData.legal_name} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
