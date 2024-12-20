@@ -34,6 +34,26 @@ class Api::LocationsController < ApplicationController
     end
   end
 
+  def reorder_location
+    employee = Employee.find_by(id: params[:employee_id])
+    location_ids = params[:location_ids]
+
+    if employee && location_ids.present?
+      EmployeeLocation.transaction do
+        location_ids.each_with_index do |location_id, index|
+          employee_location = EmployeeLocation.find_by(employee_id: employee.id, location_id: location_id)
+          employee_location.update!(position: index + 1) if employee_location
+        end
+      end
+      render json: { success: 'Locations reordered successfully for the employee' }, status: :ok
+    else
+      render json: { error: 'Invalid employee or location data' }, status: :unprocessable_entity
+    end
+  rescue => e
+    render json: { error: 'Failed to reorder locations', details: e.message }, status: :unprocessable_entity
+  end
+
+
   private
   def location_params
     params.permit(:name, :short_description, :long_description, :email, :phone_number, :fax, :street_address, :apartment, :city, :country, :province, :postal_code, :display_location_address, :display_map_in_emails, :legal_name, :business_number, :use_location_for_billing, :online_booking_available

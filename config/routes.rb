@@ -54,7 +54,11 @@ mount Sidekiq::Web => '/sidekiq'
 
     resources :treatments
     resources :unavailabilities
-    resources :locations, only: [ :index, :create, :update, :show]
+    resources :locations, only: [ :index, :create, :update, :show] do
+      collection do
+        post :reorder_location
+      end
+    end
     resources :schedules, only: [:index, :create, :destroy, :show, :update] do
       post :remaining_paid, on: :member 
       patch 'update_note/:note_id', to: 'schedules#update_note'
