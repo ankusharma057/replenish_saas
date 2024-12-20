@@ -42,6 +42,7 @@ gem "rack-cors"
 # To store the env variables 
 gem 'figaro'
 gem 'axlsx'
+
 gem 'acts_as_list'
 
 group :development, :test do
