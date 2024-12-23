@@ -164,13 +164,13 @@ const NewAndUpdateLocation = () => {
                             <Col xs={6} sm={6} md={6} kg={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Phone Number</Form.Label>
-                                    <Form.Control type="text" name='phone_number' value={formData.phone_number} onChange={handleChange} />
+                                    <Form.Control type="number" name='phone_number' value={formData.phone_number} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Fax</Form.Label>
-                                    <Form.Control type="text" name='fax' value={formData.fax} onChange={handleChange} />
+                                    <Form.Control type="number" name='fax' value={formData.fax} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -218,8 +218,8 @@ const NewAndUpdateLocation = () => {
                             </Col>
                             <Col xs={6} sm={6} md={6} kg={6} className='mt-2'>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Postal / Zip - </Form.Label>
-                                    <Form.Control type="text" name='postal_code' value={formData.postal_code} onChange={handleChange} />
+                                    <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Postal / Zip </Form.Label>
+                                    <Form.Control type="number" name='postal_code' value={formData.postal_code} onChange={handleChange} />
                                 </Form.Group>
                             </Col>
                             <hr style={{ width: "100%", backgroundColor: "#eeeeee" }} className='my-3' />

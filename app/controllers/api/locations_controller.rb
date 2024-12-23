@@ -25,6 +25,7 @@ class Api::LocationsController < ApplicationController
     location = Location.find_by(id: params[:id])
     if location
       if location.update(location_params)
+        location.employees = Employee.where(id: params[:employee_ids]) if params[:employee_ids]
         render json: location, status: :ok
       else
         render json: { error: 'Unable to update location', details: location.errors.full_messages }, status: :unprocessable_entity
