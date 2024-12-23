@@ -12,7 +12,7 @@ const ReportSummary = () => {
   const [key, setKey] = useState(0);
 
   const reloadComponent = () => {
-    setKey(prevKey => prevKey + 1);
+    window.location.reload()
   };
   const { authUserState } = useAuthContext();
   const [locationSearchQuery, setLocationSearchQuery] = useState("")
@@ -70,6 +70,10 @@ const ReportSummary = () => {
         ...payload,
         location_id: [location.id],
       };
+      setPayload((prev) => ({
+        ...prev,
+        location_id: [location.id],
+      }))
       setSelectedLocationsName(location.name);
       let response = await GetAllSummaryInvoices(updatedPayload, true);
       setSalesByLocationData(response.data.data)
@@ -100,17 +104,18 @@ const ReportSummary = () => {
     }
   };
   const handleExcel = async () => {
-    let response = await GenerateExcelForInvoices(payload,true)
-    const blobUrl = URL.createObjectURL(response);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.setAttribute("download", "billing_summary_report.xlsx");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
-    setShowOptions(false);
-  }
+    try {
+      let response = await GenerateExcelForInvoices(payload, true);
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank'); // Open the blob URL in a new tab
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000); // Revoke the blob URL after 10 seconds
+      setShowOptions(false);
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+    }
+  };
+  
   const handleSelectAllEmployees = async(e) => {
     e.stopPropagation();
     let allIds = allEmployees.map((item) => { return item.id })
@@ -174,8 +179,10 @@ const ReportSummary = () => {
   };
   const generateSingleSummaryReport = async (locationId) => {
     let response = await GenerateSingleSummaryReport(locationId, true)
-    const blobUrl = URL.createObjectURL(response);
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, '_blank');
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
     setShowOptions(false);
   };
   return (
@@ -315,7 +322,7 @@ const ReportSummary = () => {
           </div>
           <div>
             {authUserState.user.is_admin &&
-              <OverlayTrigger trigger="click" placement="bottom" overlay={popover} show={showOptions} onToggle={()=>setShowOptions(false)}>
+              <OverlayTrigger rootClose trigger="click" placement="bottom" overlay={popover} show={showOptions} onToggle={()=>setShowOptions(false)}>
                 <MoreHorizontal onClick={()=>setShowOptions(true)}/>
               </OverlayTrigger>
             }
@@ -323,7 +330,7 @@ const ReportSummary = () => {
         </div>
         <div>
           <p className='my-2' style={{ fontSize: "0.8rem" }}>This report was generated on {moment().format('dddd MMMM D, YYYY [at] h:mma')}. <span style={{ color: "rgb(34 211 238)", cursor: "pointer" }} onClick={reloadComponent}>Load a fresh copy</span></p>
-          <p className='my-2 fs-6 text-black-50 mt-3'>November 1, 2024 to November 30, 2024</p>
+          <p className='my-2 fs-6 text-black-50 mt-3'> {startDate && endDate? moment(startDate).format('dddd MMMM D, YYYY [at] h:mma')+" to "+moment(endDate).format('dddd MMMM D, YYYY [at] h:mma'):moment().format('dddd MMMM D')}</p>
         </div>
         <hr className='w-[100%] h-[1px] bg-secondary' />
         <div>

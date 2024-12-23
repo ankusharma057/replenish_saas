@@ -1017,7 +1017,7 @@ export const UpdateLocation = async (locationId,payload) =>{
 export const GenerateExcelForInvoices = async (payload,refetch) =>{
   let url = `/api/export_invoices`;
   const res = await api.get(url, {
-    headers: { Accept: 'application/pdf' },
+    headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }, // Correct header for Excel
     responseType: 'blob',
     params: payload,
     cache: {
