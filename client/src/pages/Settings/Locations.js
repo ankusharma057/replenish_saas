@@ -42,7 +42,7 @@ const Locations = () => {
         </ListGroup>
     ));
     const onSortEnd = ({ oldIndex, newIndex }) => {
-        setAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
+        setReorderAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
     };
     const ReorderLocations = () => {
         return <div>

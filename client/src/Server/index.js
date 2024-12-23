@@ -1026,3 +1026,15 @@ export const GenerateExcelForInvoices = async (payload,refetch) =>{
   });
   return res.data;
 }
+export const GenerateSingleSummaryReport = async (locationId,) => {
+  let url = `/api/location_pdf`;
+  const res = await api.get(url, {
+    headers: { Accept: 'application/pdf' },
+    responseType: 'blob',
+    params: { location_id: locationId },
+    cache: {
+      ignoreCache: true,
+    },
+  });
+  return res.data;
+};

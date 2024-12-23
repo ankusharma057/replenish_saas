@@ -1,7 +1,7 @@
 import { SlidersHorizontal, MoreHorizontal, SearchIcon } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { Dropdown, Form, ListGroup, Nav, NavDropdown, Overlay, OverlayTrigger, Popover, Table } from 'react-bootstrap'
-import { GenerateExcelForInvoices, GetAllSummaryInvoices, getEmployeesList, getLocations } from '../../Server'
+import { GenerateExcelForInvoices, GetAllSummaryInvoices, getEmployeesList, getLocations, GenerateSingleSummaryReport } from '../../Server'
 import { BiSolidDownArrow } from 'react-icons/bi'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -172,6 +172,12 @@ const ReportSummary = () => {
     if (isInRange(date)) return 'date-range-highlight';
     return '';
   };
+  const generateSingleSummaryReport = async (locationId) => {
+    let response = await GenerateSingleSummaryReport(locationId, true)
+    const blobUrl = URL.createObjectURL(response);
+    window.open(blobUrl, '_blank');
+    setShowOptions(false);
+  };
   return (
     <div className='p-3 w-full' key={key}>
 
@@ -321,7 +327,7 @@ const ReportSummary = () => {
         </div>
         <hr className='w-[100%] h-[1px] bg-secondary' />
         <div>
-          <Table>
+          <Table striped bordered hover>
             <thead>
               <tr>
                 <th colSpan="4" className="text-start text-black-50 fs-4">Billing Summary Report</th>
@@ -335,7 +341,7 @@ const ReportSummary = () => {
             </thead>
             <tbody>
               {Array.isArray(salesByLocationData) && salesByLocationData.map((item, index) => {
-                return <tr key={index}>
+                return <tr key={index} onClick={() => generateSingleSummaryReport(item.location_id)} className='cursor-pointer'>
                   <td>{item.location_name}</td>
                   <td>{item.percentage_invoiced}%</td>
                   <td>{item.total_invoiced}</td>

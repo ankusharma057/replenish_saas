@@ -129,6 +129,7 @@ class Api::InvoiceListsController < ApplicationController
 
       total_invoiced = grouped_invoices.sum { |invoice| calculate_charge(invoice) }
       {
+        location_id: location_id,
         location_name: location_name,
         percentage_invoiced: calculate_percentage_invoiced(grouped_invoices),
         total_invoiced: total_invoiced,
