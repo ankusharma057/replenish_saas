@@ -312,7 +312,12 @@ const ReportSummary = () => {
               hasValue &&
               <div className='d-flex justify-content-start align-items-center'>
                 <span className='' style={{ color: "#696977", cursor: "pointer" }} onClick={async () => {
-                  await setPayload({})
+                  await setPayload(()=>({
+                    location_id:[],
+                    end_date:"",
+                    start_date:"",
+                    employee_id:allEmployeesIds
+                  }))
                   setSelectedLocationsName("")
                   let response = await GetAllSummaryInvoices({}, true);
                   setSalesByLocationData(response.data.data)
