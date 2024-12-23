@@ -18,8 +18,6 @@ const Locations = () => {
     }, [])
     const getAllLocations = async () => {
         let response = await GetAllEmployeesLocations({employee_id:authUserState.user.id},true)
-        console.log("@@@@@response",response.data);
-        
         setAllLocations(response.data)
     }
     const handleReorderModal = () => {
