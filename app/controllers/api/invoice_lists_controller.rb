@@ -148,8 +148,15 @@ class Api::InvoiceListsController < ApplicationController
     credit = invoice.paid_by_client_credit.to_f
     adjusted_credit = credit - (credit * 0.031)
     consumable_cost = invoice.total_consumable_cost.to_f
-    total_payment = cash + adjusted_credit - consumable_cost
+    tip = invoice.tip.to_f
+    discount = invoice.personal_discount.to_f
+    concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
+    gfe_fee = invoice.gfe? ? 20 : 0
+    semag_consult_fee = (cash + credit) * 0.2
+
+    total_payment = cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
   end
+
 
   def filtered_invoices_with_date_range
     if params[:start_date].present? && params[:end_date].present?
@@ -208,6 +215,14 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def calculate_total_applied(invoices)
-    invoices.sum(&:charge)
+    invoices.sum do |invoice|
+      concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
+      gfe_fee = invoice.gfe? ? 20 : 0
+      semag_consult_fee = (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+      discount = invoice.personal_discount.to_f
+
+      concierge_fee + gfe_fee + semag_consult_fee - discount
+    end
   end
+
 end
