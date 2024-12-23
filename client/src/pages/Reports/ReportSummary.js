@@ -61,7 +61,9 @@ const ReportSummary = () => {
   }
   const GetAllSummaryReport = async () => {
     let response = await GetAllSummaryInvoices(payload,true);
-    setSalesByLocationData(response.data.data)
+    setSalesByLocationData(response.data)
+    console.log("@@@@@@@response",response.data);
+    
   };
   const selectLocation = async (locationName) => {
     let location = filteredLocation.find((item) => { return item.name === locationName });
@@ -352,7 +354,7 @@ const ReportSummary = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.isArray(salesByLocationData) && salesByLocationData.map((item, index) => {
+              {Array.isArray(salesByLocationData.data) && salesByLocationData.data.map((item, index) => {
                 return <tr key={index} onClick={() => generateSingleSummaryReport(item.location_id)} className='cursor-pointer'>
                   <td>{item.location_name}</td>
                   <td>{item.percentage_invoiced}%</td>
@@ -360,6 +362,12 @@ const ReportSummary = () => {
                   <td>{item.total_applied}</td>
                 </tr>
               })}
+              <tr className='cursor-pointer'>
+                  <td><p className='fw-bolder'>Total <span style={{fontSize:"12px",fontStyle:"italic",fontWeight:300}}>inclusive of taxes</span></p></td>
+                  <td></td>
+                  <td className='fw-bolder'>${salesByLocationData?.total_summary?.total_invoiced}</td>
+                  <td className='fw-bolder'>${salesByLocationData?.total_summary?.total_applied}</td>
+                </tr>
             </tbody>
           </Table>
         </div>
