@@ -73,7 +73,6 @@
     }
   </style>
 </head>
-<body>
   <div class="header">
     1818 Washington Ave, Houston, TX 77007-6131<br>
     (346) 955-7943<br>
@@ -89,18 +88,6 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    1818 Washington Ave, Houston, TX 77007-6131<br>
-    (346) 955-7943<br>
-    ReplenishMD - Concierge
-  </div>
-
-  <h1>Billings Summary Report</h1>
-  <p>This report was generated on <%= Time.now.strftime("%A, %B %d, %Y at %I:%M%p") %>.</p>
-  <p><%= start_date.strftime("%B %-d, %Y") %> to <%= end_date.strftime("%B %-d, %Y") %></p>
-  <h2>Replenish - <%= location.name %></h2>
-
-  <h3>Sales Breakdown</h3>
   <table>
     <tr>
       <th>Item</th>
@@ -175,14 +162,6 @@
       <td>$</td>
     </tr>
   </table>
-
-  <p class="generated">Generated on <%= Time.now.strftime("%Y-%m-%d %H:%M:%S") %></p>
-      <td>$<%= number_to_currency(total_invoiced, unit: '') %></td>
-      <td><%=treatment_income%></td>
-      <td><%=applied_income%></td>
-    </tr>
-  </table>
-
   <div class="section-title">Transactions</div>
   <table>
     <tr>
