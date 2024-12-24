@@ -1081,7 +1081,7 @@ export const clientBillingPurchases = async (clientId,filters) => {
 };
 export const printPurchasePdf = async (clientId,employeeId) => {
   try {
-    const response = await api.get(`/api/invoices/${employeeId}/print_receipt?client_id=${clientId}`, {
+    const response = await api.get(`/api/invoices/print_receipt?client_id=${clientId}`, {
       headers: { Accept: 'application/pdf' },
       responseType: 'blob',
     });

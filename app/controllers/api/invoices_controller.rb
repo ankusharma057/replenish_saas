@@ -195,10 +195,13 @@ class Api::InvoicesController < ApplicationController
 
   private
 
-  def date_parse(date)
-    Date.strptime(date, '%m/%d/%Y')
+  def date_parse(date_string)
+    Date.strptime(date_string, '%m-%d-%Y')
+  rescue ArgumentError => e
+    Rails.logger.error("Date parse error: #{e.message}")
+    nil
   end
-
+  
   def invoice_params
     params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value)
   end

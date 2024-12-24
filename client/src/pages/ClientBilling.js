@@ -182,7 +182,6 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
   const getClientBillingPurchases = async () => {
     try {
       const data = await clientBillingPurchases(clientId, purchaseFilterPayload)
-      console.log("@@@@@data");
       if (Array.isArray(data)) {
         setClientPurchases(data)
       } else if (data.message) {
@@ -263,15 +262,15 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
     { id: 'packagesMemberships', label: 'Packages & Memberships' },
   ];
   const statusOptions = [
-    { label: "All", value: "all" },
+    // { label: "All", value: "all" },
     { label: "Paid", value: "paid" },
     { label: "Unpaid", value: "unpaid" },
-    { label: "Submitted", value: "submitted" },
-    { label: "Rejected", value: "rejected" },
-    { label: "No Charge", value: "no_charge" },
-    { label: "All Outstanding", value: "all_outstanding" },
-    { label: "All Private Outstanding", value: "all_private_outstanding" },
-    { label: "All Claims Outstanding", value: "all_claims_outstanding" }
+    // { label: "Submitted", value: "submitted" },
+    // { label: "Rejected", value: "rejected" },
+    // { label: "No Charge", value: "no_charge" },
+    // { label: "All Outstanding", value: "all_outstanding" },
+    // { label: "All Private Outstanding", value: "all_private_outstanding" },
+    // { label: "All Claims Outstanding", value: "all_claims_outstanding" }
   ];
   const daysRangeOptions = [
     { label: "0 - 30 Days", value: "0-30" },
@@ -358,23 +357,66 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         // location_id:location.id
       }))
    };
-   const handleEmployeeFilter=async(event)=>{
-   let employee = await employeeList.find((item)=>item.name===event.target.name)                                     
-    if(employee){
-      
+  const handleEmployeeFilter = async (event) => {
+    if (event.target.value === "All Staff") {
+      try {
+        const data = await clientBillingPurchases(clientId, employeeFilter)
+        if (Array.isArray(data)) {
+          setClientPurchases(data)
+        } else if (data.message) {
+          toast.error(data.message)
+        }
+      } catch (error) {
+        console.error("Error in getClientBillingPurchases:", error.message);
+        toast.error(error.message);
+      }
+    } else {
       setEmployeeFilter(event.target.value)
-      setPurchaseFilterPayload((prev)=>({
-        ...prev,
-        employee_id:employee.id
-      }))
+      let employee = await employeeList.find((item) => item.name === event.target.value)
+      if (employee) {
+        setPurchaseFilterPayload((prev) => ({
+          ...prev,
+          employee_id: employee.id
+        }))
+        let payload = {
+          ...purchaseFilterPayload,
+          employee_id: employee.id
+        }
+        try {
+          const data = await clientBillingPurchases(clientId, payload)
+          if (Array.isArray(data)) {
+            setClientPurchases(data)
+          } else if (data.message) {
+            toast.error(data.message)
+          }
+        } catch (error) {
+          console.error("Error in getClientBillingPurchases:", error.message);
+          toast.error(error.message);
+        }
+      }
     }
-   };
-   const handleStatusFilter=(event)=>{
+  };
+   const handleStatusFilter=async(event)=>{
       setStatusFilter(event.target.value)
       setPurchaseFilterPayload((prev)=>({
         ...prev,
-        location_id:event.target.value==="Paid"?true:event.target.value==="Unpaid"?false:""
+        is_paid:event.target.value==="Paid"?true:event.target.value==="Unpaid"?false:""
       }))
+      let payload={
+        ...purchaseFilterPayload,
+        is_paid:event.target.value==="Paid"?true:event.target.value==="Unpaid"?false:""
+      }
+      try {
+        const data = await clientBillingPurchases(clientId, payload)
+        if (Array.isArray(data)) {
+          setClientPurchases(data)
+        } else if (data.message) {
+          toast.error(data.message)
+        }
+      } catch (error) {
+        console.error("Error in getClientBillingPurchases:", error.message);
+        toast.error(error.message);
+      }
    };
    const handleAgesFilter=(event)=>{
       setAgesFilter(event.target.value)
@@ -383,7 +425,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
         invoice_age:event.target.value
       }))
    };
-  const handleClear = () => {
+  const handleClear = async () => {
     setLocationFilter("");
     setInvoiceNumberFilter("");
     setEmployeeFilter("");
@@ -397,6 +439,18 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       end_date: "",
       invoice_age: ""
     });
+    let payload={}
+    try {
+      const data = await clientBillingPurchases(clientId, payload)
+      if (Array.isArray(data)) {
+        setClientPurchases(data)
+      } else if (data.message) {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.error("Error in getClientBillingPurchases:", error.message);
+      toast.error(error.message);
+    }
   };
   const handleClickOutside = (event) => {
     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -426,7 +480,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
     setStartDate(date);
     setPurchaseFilterPayload((prev) => ({
       ...prev,
-      start_date: date,
+      start_date: moment(date).format('MM-DD-YYYY'),
     }))
     if (endDate && moment(date).isAfter(endDate)) {
       setEndDate(null);
@@ -436,12 +490,28 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
       }))
     }
   };
-  const handlePurchaseEndDate=(date)=>{
+  const handlePurchaseEndDate=async(date)=>{
     setEndDate(date);
     setPurchaseFilterPayload((prev)=>({
       ...prev,
       end_date: date,
     }));
+    let payload={
+      start_date: purchaseFilterPayload.start_date,
+      end_date: moment(date).format('MM-DD-YYYY'),
+    }
+    try {
+      const data = await clientBillingPurchases(clientId, payload)
+      if (Array.isArray(data)) {
+        setClientPurchases(data)
+      } else if (data.message) {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.error("Error in getClientBillingPurchases:", error.message);
+      toast.error(error.message);
+    }
+    setShowDateRangeSelector(false);
   };
   const Purchases = () => {
     return <div>
@@ -488,7 +558,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
               </div>
               <div>
                 <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'value={employeeFilter}  onChange={handleEmployeeFilter}>
-                  <option>All Staff</option>
+                  <option value ={"All Staff"}>All Staff</option>
                   {employeeList.map((employee,index) => {
                     return <option key={index} value={employee?.name}>{employee?.name}</option>
                   })}
@@ -496,7 +566,7 @@ const ClientBilling = ({ stripeClientId, clientId, setCurrentTab }) => {
               </div>
               <div>
                 <Form.Select style={{ width: "150px" }} aria-label="Default select example" size='sm'value={statusFilter} onChange={handleStatusFilter}>
-                  <option>Status</option>
+                  <option>---Status---</option>
                   {statusOptions.map((item) => {
                     return <option value={item.label}>{item.label}</option>
                   })}
