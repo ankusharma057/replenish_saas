@@ -1024,7 +1024,7 @@ export const GenerateExcelForInvoices = async (payload,refetch) =>{
       ignoreCache: refetch,
     },
   });
-  return res.data;
+  return res;
 }
 export const ReorderLocation = async (payload) =>{
   let url = `api/locations/reorder_location`;

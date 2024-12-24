@@ -86,7 +86,7 @@ const Locations = () => {
         </div>
     }
     return (
-        <div style={{ height: "86vh", overflow: "scroll" }}>
+        <div>
             <ReorderLocations />
             <div className='d-flex justify-content-between align-items-center w-100'>
                 <h2 className='text-secondary fw-light'>Locations</h2>

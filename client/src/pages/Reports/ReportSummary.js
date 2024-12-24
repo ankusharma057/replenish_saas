@@ -61,8 +61,7 @@ const ReportSummary = () => {
   }
   const GetAllSummaryReport = async () => {
     let response = await GetAllSummaryInvoices(payload,true);
-    setSalesByLocationData(response.data)
-    console.log("@@@@@@@response",response.data);
+    setSalesByLocationData(response.data) 
     
   };
   const selectLocation = async (locationName) => {
@@ -78,7 +77,7 @@ const ReportSummary = () => {
       }))
       setSelectedLocationsName(location.name);
       let response = await GetAllSummaryInvoices(updatedPayload, true);
-      setSalesByLocationData(response.data.data)
+      setSalesByLocationData(response.data);
     }
   };
   const selectEmployee = async (employeeName) => {
@@ -356,7 +355,7 @@ const ReportSummary = () => {
             <tbody>
               {Array.isArray(salesByLocationData.data) && salesByLocationData.data.map((item, index) => {
                 return <tr key={index} onClick={() => generateSingleSummaryReport(item.location_id)} className='cursor-pointer'>
-                  <td>{item.location_name}</td>
+                  <td style={{color:"#17a2b8"}}>{item.location_name}</td>
                   <td>{item.percentage_invoiced}%</td>
                   <td>{item.total_invoiced}</td>
                   <td>{item.total_applied}</td>

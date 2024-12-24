@@ -85,7 +85,7 @@ const Reports = () => {
                         item.subHeadings.map((subheadingItem,index)=>{
                             return <ListGroup key={index}>
                                 <Link to={subheadingItem.route} className="text-decoration-none fs-6"><ListGroup.Item className="fs-6">{subheadingItem.title}</ListGroup.Item></Link>
-                          </ListGroup>
+                            </ListGroup>
                         })
                     }
                 </div>

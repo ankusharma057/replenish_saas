@@ -32,7 +32,7 @@ const AsideLayout = ({ asideContent, children, hideAsideContent=false }) => {
         {!isCollapsed && asideContent}
       </aside>
       </>}
-      <div className={`${isCollapsed ? "w-[100%]" : "w-[90%]"}`}>
+      <div className={`${isCollapsed ? "w-[100%]" : "w-[90%]"}`} style={{ height: "88vh", overflow: "scroll" }}>
         {children}
       </div>
     </div>
