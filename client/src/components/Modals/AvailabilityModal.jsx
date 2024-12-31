@@ -10,7 +10,6 @@ import { getLocationEmployee, getLocations, postAvailability, getEmployeeLocatio
 import { useAuthContext } from "../../context/AuthUserContext";
 import Select from "react-select";
 import dayjs from 'dayjs';
-import { DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
@@ -337,9 +336,7 @@ const DayShift = ({ day, availabilityTimings,setChanges, setAvailabilityTimings 
                     onChange={(event) => handleInputChange(event, "start_time", index)}
                   /> */}
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoItem >
-                          <DesktopTimePicker views={['hours', 'minutes']} onChange={(event) => handleInputChange(event, "start_time", index)}  />
-                        </DemoItem>
+                          <DesktopTimePicker views={['hours', 'minutes']} onChange={(event) => handleInputChange(event, "start_time", index)}  />                       
                       </LocalizationProvider>
                 </div>
                 <div>to</div>
@@ -351,9 +348,7 @@ const DayShift = ({ day, availabilityTimings,setChanges, setAvailabilityTimings 
                     onChange={(event) => handleInputChange(event, "end_time", index)}
                   /> */}
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoItem >
                           <DesktopTimePicker views={['hours', 'minutes']} onChange={(event) => handleInputChange(event, "end_time", index)}  />
-                        </DemoItem>
                       </LocalizationProvider>
                 </div>
                 <div onClick={() => handleRemoveTimes(index)} className="text-cyan-400 hover:cursor-pointer"><RxCross2 className="w-6 h-6" /></div>

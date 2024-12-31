@@ -221,6 +221,7 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw-ucrt
   x64-unknown
   x86_64-linux
 
@@ -251,7 +252,7 @@ DEPENDENCIES
   wkhtmltopdf-heroku (= 2.12.6.0)
 
 RUBY VERSION
-   ruby 2.7.4p191
+   ruby 3.3.5p100
 
 BUNDLED WITH
    2.4.7
