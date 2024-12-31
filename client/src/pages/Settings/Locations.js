@@ -3,8 +3,6 @@ import { Button, ButtonGroup, Dropdown, DropdownButton, ListGroup, Modal } from 
 import { PlusCircle, HelpCircle, GripVertical } from 'lucide-react';
 import { GetAllEmployeesLocations, ReorderLocation } from '../../Server';
 import { useNavigate } from 'react-router-dom';
-import { SortableContainer, SortableElement } from "react-sortable-hoc";
-import { arrayMoveImmutable } from "array-move";
 import { useAuthContext } from '../../context/AuthUserContext';
 import { toast } from 'react-toastify';
 const Locations = () => {
@@ -27,28 +25,7 @@ const Locations = () => {
     const handleNavigation = (path) => {
         navigate(path)
     }
-    const SortableItem = SortableElement(({ item }) => (
-        <ListGroup.Item className="p-2">
-            <div className="d-flex align-items-center">
-                <GripVertical className="text-secondary me-2" />
-                <p className="mb-0" style={{ fontSize: "14px" }}>
-                    {item.name}
-                </p>
-            </div>
-        </ListGroup.Item>
-    ));
-    const SortableList = SortableContainer(({ items }) => (
-        <ListGroup>
-            {items.map((item, index) => (
-                <SortableItem key={item.id} index={index} item={item} />
-            ))}
-        </ListGroup>
-    ));
-    const onSortEnd = ({ oldIndex, newIndex }) => {
-        setReorderAllLocations((prev) => arrayMoveImmutable(prev, oldIndex, newIndex));
-    };
     const handleReorder = async () => {
-        let locationIdss = await allLocations.map((item) => { return item.id })
         let locationIds = await reorderAllLocations.map((item) => { return item.id })
         let payload={
             employee_id:authUserState.user.id,
@@ -73,7 +50,18 @@ const Locations = () => {
                     <Modal.Title className='text-muted fw-light'>Online Booking Location Order</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <SortableList items={reorderAllLocations} onSortEnd={onSortEnd} />
+                    <ListGroup>
+                        {allLocations.map((item, index) => {
+                            return <ListGroup.Item className="p-2" key={index}>
+                                <div className="d-flex align-items-center">
+                                    <GripVertical className="text-secondary me-2" />
+                                    <p className="mb-0" style={{ fontSize: "14px" }}>
+                                        {item.name}
+                                    </p>
+                                </div>
+                            </ListGroup.Item>
+                        })}
+                    </ListGroup>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="outline-secondary" onClick={handleReorderModal}>
@@ -119,11 +107,11 @@ const Locations = () => {
                                     {checkNullValue(item.apartment)}
                                     {checkNullValue(item.city)}
                                     {checkNullValue(item.country)}
-                                    </p>
+                                </p>
                                 <p style={{ fontSize: "14px" }} className='text-muted text-selectable text-body'>
                                     &nbsp;
                                     {item.short_description!==null&&item.short_description}
-                                    </p>
+                                </p>
                             </div>
                             <div>
                                 <Button variant='outline-secondary' size='md'  onClick={()=>handleNavigation(`/settings/locations/${item.id}`)}>Edit</Button>
