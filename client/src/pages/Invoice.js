@@ -7,7 +7,7 @@ import {
 } from "../Server";
 import InvoiceCard from "../components/Cards/InvoiceCard";
 import DataFilterService from "../services/DataFilterService";
-import { Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Button, ButtonGroup, Table, ToggleButton } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import CustomModal from "../components/Modals/CustomModal";
@@ -16,6 +16,7 @@ import ModalWraper from "../components/Modals/ModalWraper";
 import FinalizeInvoicesCard from "../components/Cards/FinalizeInvoicesCard";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { Pagination } from "@mui/material";
 
 const Invoice = () => {
   const [radioValue, setRadioValue] = useState("1");
@@ -105,6 +106,8 @@ const Invoice = () => {
   ];
 
   const seeMore = (invoice) => {
+    console.log("@@@@invoice",invoice);
+    
     setSingleInvoice(invoice);
     setModalShow(true);
   };
@@ -285,7 +288,7 @@ const Invoice = () => {
           })}
         </div>
       </ModalWraper>
-      <div className="p-4">
+      <div className="px-3" >
         {modalShow && (
           <CustomModal
             show={modalShow}
@@ -298,8 +301,7 @@ const Invoice = () => {
           />
         )}
 
-        <div className="flex gap-x-4  justify-end my-4">
-          {/* Pagination controls */}
+        {/* <div className="flex gap-x-4  justify-end my-4">
           <Button
             onClick={() => setPageNumber(pageNumber - 1)}
             className="!bg-cyan-400 !border-cyan-500"
@@ -316,8 +318,11 @@ const Invoice = () => {
           >
             <ChevronRight />
           </Button>
-        </div>
-        <div className="justify-center flex flex-wrap gap-3">
+        </div> */}
+        <div className="d-flex justify-content-end align-items-center w-100">
+            <Pagination count={totalPages} variant="outlined" shape="rounded" onChange={(event, value) => { setPageNumber(value) }} />
+          </div>
+        <div className="justify-center flex flex-wrap gap-3 mt-3" style={{height:"66vh",overflow:"scroll"}}>
           {/* {invoiceList[selectList]?.map((invoice) => {
             return (
               <InvoiceCard
@@ -328,15 +333,49 @@ const Invoice = () => {
               />
             );
           })} */}
-          {invoiceList[selectList]?.map((invoice) => (
-            <InvoiceCard
-              key={invoice.id}
-              invoice={invoice}
-              finalizeInvoiceSubmit={finalizeInvoiceSubmit}
-              seeMore={seeMore}
-              getInvoices={getInvoices}
-            />
-          ))}
+
+          
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Invoice ID</th>
+                <th>Employee Name</th>
+                <th>Client Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoiceList[selectList]?.map((invoice,index) => (
+                <tr>
+                  <td>{index+1}</td>
+                 <td>{invoice.id}</td>
+                 <td>{invoice.employee?.name}</td>
+                 <td>{invoice.client?.name}</td>
+                 <td>
+                  {/* <div> */}
+                  <InvoiceCard
+                    key={invoice.id}
+                    invoice={invoice}
+                    finalizeInvoiceSubmit={finalizeInvoiceSubmit}
+                    seeMore={seeMore}
+                    getInvoices={getInvoices}
+                  />
+                  {/* </div> */}
+                 </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          {/* {invoiceList[selectList]?.map((invoice,index) => (
+          <InvoiceCard
+                    key={invoice.id}
+                    invoice={invoice}
+                    finalizeInvoiceSubmit={finalizeInvoiceSubmit}
+                    seeMore={seeMore}
+                    getInvoices={getInvoices}
+                  />
+                ))} */}
         </div>
       </div>
     </>

@@ -35,7 +35,8 @@ class InvoiceListSerializer < ActiveModel::Serializer
 
     {
       id: client.id,
-      name: client.name
+      name: client.name,
+      last_name: client.last_name
     }
   end
   def location

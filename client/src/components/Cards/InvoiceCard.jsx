@@ -6,26 +6,29 @@ import { deleteInvoice } from "../../Server";
 
 const InvoiceCard = ({ invoice, seeMore, finalizeInvoiceSubmit, getInvoices }) => {
   return (
-    <Card className="text-center" border="info" style={{ width: "18rem" }}>
-      <Card.Header as="h5">{invoice.source_invoice_id ? "Mentor " : ""}Invoice Id {invoice.id}</Card.Header>
-      <Card.Body className="">
-        <Card.Title className="mb-3">
+    <span className="d-flex justify-content-start gap-[20px] w-auto">
+    {/* // <Card  */}
+    {/* // className="text-center"  */}
+    {/* // border="info"  */}
+    {/* // style={{ width: "18rem" }} */}
+    {/* // > */}
+      {/* <Card.Header as="h5">{invoice.source_invoice_id ? "Mentor " : ""}Invoice Id {invoice.id}</Card.Header> */}
+      {/* <Card.Body className=""> */}
+        {/* <Card.Title className="mb-3">
           {invoice.source_invoice_id ? "Mentor:" : "Employee:"} {invoice.employee?.name}
-        </Card.Title>
+        </Card.Title> */}
         <Button
           onClick={() => seeMore(invoice)}
-          className="mb-3 text-white"
+          className="text-white h-[40px] w-auto"
           variant="info"
         >
           See More Details
         </Button>
-        <br />
-
         <Button
           style={{ display: invoice.is_finalized ? "none" : "inline" }}
           onClick={() => finalizeInvoiceSubmit(invoice)}
           variant="info"
-          className="text-white"
+          className="text-white  h-[40px] w-auto"
         >
           Finalize Invoice
         </Button>
@@ -60,12 +63,13 @@ const InvoiceCard = ({ invoice, seeMore, finalizeInvoiceSubmit, getInvoices }) =
             });
           }}
           variant="danger"
-          className="text-white"
+          className="text-white  h-[40px] w-auto"
         >
         Delete
         </Button>
-      </Card.Body>
-    </Card>
+      {/* </Card.Body> */}
+    {/* // </Card> */}
+        </span>
   );
 };
 
