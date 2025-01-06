@@ -60,6 +60,7 @@ const ClientProfileUpdate= lazy(()=>import("./pages/Clients/ClientsProfileUpdate
 const AddNewClient= lazy(()=>import("./pages/Clients/AddNewClient"))
 const Reports= lazy(()=>import("./pages/Reports/Reports"))
 const ReportSummary= lazy(()=>import("./pages/Reports/ReportSummary"))
+const PaymentInterface =lazy(()=>import("./components/PaymentInterface/PaymentInterface"));
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -271,6 +272,8 @@ function App() {
                     <Route path="locations/:newOrUpdate" element={<NewAndUpdateLocation />} />
                     <Route path="dashboard" element={<DashboardSettings />} />
                   </Route>
+                  <Route path="/payment-interface" element={<PaymentInterface />} />
+
                 </>
               ) : (
                 <>
