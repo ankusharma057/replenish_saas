@@ -36,9 +36,10 @@ mount Sidekiq::Web => '/sidekiq'
           post '/create_save_card_checkout_session', to: 'stripe#create_save_card_checkout_session'
           post '/confirm_payment', to: 'stripe#confirm_payment'
           delete '/remove_card', to: 'stripe#remove_card'
+          post 'initiate_ach_account_verification', to: 'stripe#initiate_ach_account_verification'
+          post 'create_setup_intent', to: 'stripe#create_setup_intent'
+          post "confirm_micro_deposit",to: 'stripe#confirm_micro_deposit'
           post 'ach_payment', to: 'stripe#create_with_custom_fees'
-          post "initiate_ach_verification",to: 'stripe#initiate_ach_verification'
-          post 'verify_bank_account', to: 'stripe#verify_bank_account'
         end
       end
 

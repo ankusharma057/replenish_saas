@@ -1,6 +1,6 @@
 class Api::Client::StripeController < ClientApplicationController
   skip_before_action :authorized_client
-  before_action :set_customer_id, only: [:list_attached_cards, :create_save_card_checkout_session]
+  before_action :set_customer_id, only: [:list_attached_cards, :create_save_card_checkout_session, :confirm_micro_deposit]
 
   def success
     update_payment(params[:data][:object])
@@ -95,26 +95,108 @@ class Api::Client::StripeController < ClientApplicationController
     end
   end
 
+  def initiate_ach_account_verification
+    payment_method_data = params.require(:payment_method_data).permit(
+      us_bank_account: [:account_number, :routing_number, :account_holder_type],
+      billing_details: [:name]
+    )
+
+    payment_method = Stripe::PaymentMethod.create(
+      type: 'us_bank_account',
+      us_bank_account: {
+        account_number: payment_method_data[:us_bank_account][:account_number],
+        routing_number: payment_method_data[:us_bank_account][:routing_number],
+        account_holder_type: payment_method_data[:us_bank_account][:account_holder_type]
+      },
+      billing_details: {
+        name: payment_method_data[:billing_details][:name]
+      }
+    )
+
+    render json: { 
+      payment_method_id: payment_method.id 
+    }, status: :ok
+  rescue Stripe::StripeError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+
+  def create_setup_intent
+    payment_method_id = params[:payment_method_id]
+
+    setup_intent = Stripe::SetupIntent.create(
+      payment_method: payment_method_id,
+      payment_method_types: ['us_bank_account']
+    )
+
+    render json: { 
+      setup_intent_id: setup_intent.id 
+    }, status: :ok
+  rescue Stripe::StripeError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  def confirm_micro_deposit
+    setup_intent_id = params[:setup_intent_id]
+    deposit_amounts = params[:deposit_amounts]
+
+    setup_intent = Stripe::SetupIntent.retrieve(setup_intent_id)
+    if setup_intent.status == 'requires_confirmation'
+      setup_intent = Stripe::SetupIntent.confirm(
+        setup_intent.id,
+        {
+          payment_method: setup_intent.payment_method,
+          mandate_data: { 
+            customer_acceptance: {
+              type: 'online',
+              online: {
+                ip_address: request.remote_ip,
+                user_agent: request.user_agent
+              }
+            }
+          }
+        }
+      )
+    end
+    verification = Stripe::SetupIntent.verify_microdeposits(
+      setup_intent.id,
+      { amounts: deposit_amounts }
+    )
+    if verification.status == 'succeeded'
+      payment_method = Stripe::PaymentMethod.retrieve(id: setup_intent.payment_method)
+      attach_customer = payment_method.attach(
+        customer: @customer_id
+      )
+      render json: { message: 'Bank account verified successfully.' }, status: :ok
+    else
+      render json: { error: 'Verification failed. Please try again.' }, status: :unprocessable_entity
+    end
+  rescue Stripe::StripeError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   def create_with_custom_fees
     original_amount = params[:price].to_i
     currency = params[:currency]
-    payment_method_id = params[:payment_method_id] 
+    payment_method_id = params[:payment_method_id]
 
     stripe_fee = calculate_stripe_fee(original_amount)
     custom_fee = calculate_custom_fee(original_amount)
     total_amount = original_amount + stripe_fee + custom_fee
 
-    payment_intent = Stripe::PaymentIntent.create({
+    payment_method = Stripe::PaymentMethod.retrieve(id: payment_method_id)
+    payment_intent = Stripe::PaymentIntent.create(
       amount: total_amount,
       currency: currency,
       payment_method: payment_method_id,
-      confirm: true, 
-      automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+      confirm: true,
+      payment_method_types: ['us_bank_account'],
+      customer: payment_method.customer,
       mandate_data: {
         customer_acceptance: {
-          type: 'online', 
+          type: 'online',
           online: {
-            ip_address: request.remote_ip ,
+            ip_address: request.remote_ip,
             user_agent: request.user_agent
           }
         }
@@ -124,34 +206,11 @@ class Api::Client::StripeController < ClientApplicationController
         stripe_fee: stripe_fee,
         custom_fee: custom_fee
       }
-    })
-
-    render json: { 
-      clientSecret: payment_intent.client_secret, 
-      payment_intent: payment_intent.id,
-      fees: { amount: total_amount, stripe_fee: stripe_fee, custom_fee: custom_fee } 
-    }, status: :ok
-  rescue Stripe::StripeError => e
-    render json: { error: e.message }, status: :unprocessable_entity
-  end
-
-
-  def initiate_ach_verification
-    bank_account = Stripe::PaymentMethod.create({
-      type: 'us_bank_account',
-      us_bank_account: {
-        account_number: params[:account_number],
-        routing_number: params[:routing_number],
-        account_holder_type: params[:account_holder_type]
-      },
-      billing_details: {
-        name: params[:account_holder_name]
-      }
-    })
-
-    render json: { 
-      message: 'Bank account verification initiated.', 
-      bank_account: bank_account 
+    )
+    render json: {
+      client_secret: payment_intent.client_secret,
+      payment_intent_id: payment_intent.id,
+      fees: { amount: total_amount, stripe_fee: stripe_fee, custom_fee: custom_fee }
     }, status: :ok
   rescue Stripe::StripeError => e
     render json: { error: e.message }, status: :unprocessable_entity
@@ -171,32 +230,37 @@ class Api::Client::StripeController < ClientApplicationController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  # def handle_ach_webhook
-  #   payload = request.body.read
-  #   sig_header = request.env['HTTP_STRIPE_SIGNATURE']
-  #   event = nil
+  def stripe_webhook
+    payload = request.body.read
+    sig_header = request.env['HTTP_STRIPE_SIGNATURE']
+    event = nil
 
-  #   begin
-  #     event = Stripe::Webhook.construct_event(payload, sig_header, ENV['STRIPE_WEBHOOK_SECRET'])
-  #   rescue JSON::ParserError, Stripe::SignatureVerificationError => e
-  #     render json: { error: e.message }, status: :bad_request
-  #     return
-  #   end
+    begin
+      event = Stripe::Webhook.construct_event(
+        payload, sig_header, ENV['STRIPE_WEBHOOK_SECRET']
+      )
+    rescue JSON::ParserError => e
+      render json: { error: 'Invalid payload' }, status: 400 and return
+    rescue Stripe::SignatureVerificationError => e
+      render json: { error: 'Invalid signature' }, status: 400 and return
+    end
 
-  #   case event['type']
-  #   when 'payment_intent.succeeded'
-  #     handle_ach_payment_success(event['data']['object'])
-  #   when 'payment_intent.payment_failed'
-  #     handle_ach_payment_failure(event['data']['object'])
-  #   end
+    case event['type']
+    when 'payment_intent.succeeded'
+      payment_intent = event['data']['object']
+      handle_payment_success(payment_intent)
+    when 'payment_intent.payment_failed'
+      payment_intent = event['data']['object']
+      handle_payment_failure(payment_intent)
+    end
 
-  #   head :ok
-  # end
+    render json: { message: 'Webhook received' }, status: :ok
+  end
 
   private
 
   def calculate_stripe_fee(amount)
-    ((amount * 0.029 + 0.30)).round
+    ((amount * 0.029 + 0.30)).round 
   end
 
   def calculate_custom_fee(amount)
