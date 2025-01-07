@@ -59,6 +59,7 @@ const ClientLocation = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [productsList, setProductsList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
+  const [selectedTreatments, setSelectedTreatments] = useState([]);
   const [selectedTreatMent, setSelectedTreatMent] = useState(null);
   const [selectedEmpSchedules, setSelectedEmpSchedules] = useState([]);
   const topViewRef = useRef();
@@ -289,25 +290,28 @@ const ClientLocation = () => {
       toast("Unavailable at this slot");
       return;
     }
-    if (!selectedTreatMent) {
-      return toast("Please select the treatment");
+    if (selectedTreatments.length === 0) {
+      return toast("Please select at least one treatment");
     }
 
-    const start = e.start_time;
-    const end = e.end_time;
-    const duration = selectedTreatMent?.treatment?.duration;
+    const start_time = e.start_time;
+    const end_time = e.end_time;
+    const totalDuration = selectedTreatments.reduce((sum, treatment) => {
+      return sum + (parseInt(treatment.treatment.duration, 10) || 0);
+    }, 0);
 
-   const a =  getTimeSlots(duration, start, selectedEmpSchedules, end, e.available? false : true)
+    let timeSlots = getTimeSlots(totalDuration, start_time, selectedEmpSchedules, end_time, e.available ? false : true);
 
     let formateData = {
       show: true,
-      start_time: start,
-      end_time: isNaN(duration)
-        ? end
-        : moment(start).add(+duration, "minutes").toDate(),
-      date: moment(start).format("DD/MM/YYYY"),
+      start_time,
+      end_time: isNaN(totalDuration)
+        ? end_time
+        : moment(start_time).add(+totalDuration, "minutes").toDate(),
+      date: moment(start_time).format("DD/MM/YYYY"),
       isEdit: true,
-      timeSlots: a,
+      timeSlots,
+      treatments: selectedTreatments,
     };
 
     localStorage.setItem("formateData", JSON.stringify(formateData));
@@ -347,17 +351,17 @@ const ClientLocation = () => {
     }
   };
 
-  const addAppointMentSubmit = async (e) => {
+  const addAppointmentSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedTreatMent?.product?.id) {
-      toast.error("Please select a treatment");
+    if (selectedTreatments.length === 0) {
+      toast.error("Please select at least one treatment");
       return;
     }
     if (!appointmentModal?.selectedTimeSlot?.start) {
       toast.error("Please select a time slot.");
       return;
     }
-    const copyAppointMent = {
+    const appointmentData = {
       start_time: appointmentModal?.selectedTimeSlot?.start,
       date: appointmentModal?.date,
       end_time: appointmentModal?.selectedTimeSlot?.end,
@@ -365,35 +369,36 @@ const ClientLocation = () => {
       treatment_id: selectedTreatMent?.treatment?.id,
       product_id: selectedTreatMent?.product?.id,
       location_id: locId,
+      treatment_ids: selectedTreatments.map((treatment) => treatment.treatment.id), // Array of treatment ids
     };
-
-    const { data } = await createClientSchedule(copyAppointMent);
-    if (data?.redirect_url) {
-      const stateObject = {
-          locId,
-          empId,
-          selectedTreatMent,
-          id: data?.schedule.id,
-      };
-
-      if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
-        stateObject.redirect_url = data?.redirect_url;
-      }else{
-        stateObject.redirect_url = `/clients/appointments`;
-      }
-      navigate(`/clients/payment/confirm_payment?empId=${empId}&treatment_id=${selectedTreatMent?.treatment?.id}`, {
-        state: stateObject,
-      });
-    }
-    else if(data.schedule) {
-      toast.success("Appointment added successfully.");
-    }  
-    else {
-      toast.error("Something went wrong. Please try again.");
-    }
-    setAppointmentModal(initialAppointmentModal);
-    await getEmpSchedule(calenderCurrentRange, true);
+  
     try {
+      const { data } = await createClientSchedule(appointmentData);
+      if (data?.redirect_url) {
+        const stateObject = {
+            locId,
+            empId,
+            selectedTreatMent,
+            id: data?.schedule.id,
+        };
+  
+        if (data?.redirect_url && data?.schedule?.employee?.pay_50) {
+          stateObject.redirect_url = data?.redirect_url;
+        }else{
+          stateObject.redirect_url = `/clients/appointments`;
+        }
+        navigate(`/clients/payment/confirm_payment?empId=${empId}&treatment_id=${selectedTreatMent?.treatment?.id}`, {
+          state: stateObject,
+        });
+      }
+      else if(data.schedule) {
+        toast.success("Appointments successfully booked!");
+      }  
+      else {
+        toast.error("Something went wrong. Please try again.");
+      }
+      setAppointmentModal(initialAppointmentModal);
+      await getEmpSchedule(calenderCurrentRange, true);
     } catch (error) {
       toast.error(
         error?.response?.data?.exception ||
@@ -439,40 +444,64 @@ const ClientLocation = () => {
             asideContent={
               <div className="flex flex-col h-[125rem] md:h-[130rem] lg:h-[125rem]">
                 <h3>{selectedEmployee?.name}</h3>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-600 text-center">
+                    Selected: {selectedTreatments.length}
+                  </div>
+                  <button
+                    onClick={() => setSelectedTreatments([])}
+                    className="text-white bg-red-600 rounded-md px-4 py-2"
+                  >
+                    Clear
+                  </button>
+                </div>
                 <p>Select a treatment</p>
-                <ul className="flex p-0 flex-col gap-2 ">
+                <ul className="flex p-0 flex-col gap-2">
                   {(treatmentsList || []).map((treatmentObj) => (
-                    <li key={treatmentObj?.product?.id} className="rounded-lg p-2">
-                      {treatmentObj?.product?.name}
+                    <li key={treatmentObj?.product?.id} className="rounded-lg p-2 border-b border-gray-300">
+                      <h4 className="font-bold text-lg mb-2">{treatmentObj?.product?.name}</h4>
+
                       <ul className="m-0 p-0 text-center space-y-2">
                         {(treatmentObj?.treatments || []).map((treatment) => (
                           <li
                             key={treatment?.id}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setSelectedTreatMent({
-                                product: treatmentObj?.product,
-                                treatment,
-                              });
-
-                              if (window.innerWidth < 1024) {
-                                collapse();
-                              }
-                              setTimeout(() => {
-                                topViewRef.current?.scrollIntoView({
-                                  behavior: "smooth",
-                                });
-                              }, 500);
-                            }}
-                            className={`flex flex-col transition-all text-white text-sm cursor-pointer rounded-sm p-2 ${selectedTreatMent?.treatment?.id === treatment?.id
+                            className={`flex items-center transition-all text-white text-sm rounded-sm p-2 ${
+                              selectedTreatments.some((selected) => selected.treatment.id === treatment.id)
                                 ? "bg-blue-800"
                                 : "bg-primary-dark-blue hover:bg-black"
-                              }`}
+                            }`}
                           >
-                            <span>{treatment?.name}</span>
-                            <span>
-                              {treatment?.duration} min
-                            </span>
+                            <input
+                              type="checkbox"
+                              id={`treatment-${treatment.id}`}
+                              className="mr-2 hidden"
+                              checked={selectedTreatments.some(
+                                (selected) => selected.treatment.id === treatment.id
+                              )}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                if (isChecked) {
+                                  setSelectedTreatments((prev) => [
+                                    ...prev,
+                                    {
+                                      product: treatmentObj.product,
+                                      treatment,
+                                    },
+                                  ]);
+                                } else {
+                                  setSelectedTreatments((prev) =>
+                                    prev.filter((selected) => selected.treatment.id !== treatment.id)
+                                  );
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={`treatment-${treatment.id}`}
+                              className="cursor-pointer flex flex-col flex-1"
+                            >
+                              <span>{treatment?.name}</span>
+                              <span>{treatment?.duration} min</span>
+                            </label>
                           </li>
                         ))}
                       </ul>
@@ -487,13 +516,17 @@ const ClientLocation = () => {
               className="flex-1 mt-5 overflow-x-auto md:ml-3 lg:px-4"
             >
               <div>
-                {selectedTreatMent?.treatment?.name ? (
-                  <p>
-                    Selected treatment
-                    <span className="ml-2 font-bold">
-                      {selectedTreatMent?.treatment?.name}
-                    </span>
-                  </p>
+                {selectedTreatments.length > 0 ? (
+                  <div>
+                  <h4>Selected Treatments:</h4>
+                  <ul>
+                    {selectedTreatments.map((selected) => (
+                      <li key={selected.treatment.id}>
+                        {selected.treatment.name} - {selected.product.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>                
                 ) : (
                   <p className="pl-4">Please select a treatment</p>
                 )}
@@ -509,22 +542,65 @@ const ClientLocation = () => {
                       while (currentTime < end_time) {
                         const nextTime = new Date(currentTime);
                         nextTime.setHours(currentTime.getHours() + 1);
-                        events.push({
-                          ...data,
-                          start_time: currentTime,
-                          end_time: nextTime >= end_time ? end_time : nextTime,
-                        });
+
+                        if (
+                          currentTime.getHours() >= 7 &&
+                          nextTime.getHours() <= 19
+                        ) {
+                          events.push({
+                            ...data,
+                            start_time: currentTime,
+                            end_time: nextTime >= end_time ? end_time : nextTime,
+                          });
+                        }
+
                         currentTime = nextTime;
                       }
                       return events;
+                    } else if (!data.available) {
+                      const start_time = new Date(data?.start_time);
+                      const end_time = new Date(data?.end_time);
+                      const events = [];
+                      let currentTime = new Date(start_time);
+
+                      while (currentTime < end_time) {
+                        const nextTime = new Date(currentTime);
+                        nextTime.setMinutes(currentTime.getMinutes() + 30);
+
+                        if (
+                          currentTime.getHours() >= 7 &&
+                          nextTime.getHours() <= 19
+                        ) {
+                          events.push({
+                            ...data,
+                            start_time: currentTime,
+                            end_time: nextTime >= end_time ? end_time : nextTime,
+                            available: false,
+                          });
+                        }
+
+                        currentTime = nextTime;
+                      }
+
+                      return events;
                     }
-                    return [data];
+
+                    return [];
                   })}
                   onSelectSlot={handleSelectSlot}
                   onRangeChange={onCalenderRangeChange}
                   eventPropGetter={(event) => {
-                    const backgroundColor = ( "available" in event && event.available ) ? "#22d3ee" :"#000";                      
-                    return { style: { backgroundColor } };
+                    const backgroundColor = event.available ? "#22d3ee" : "#000";
+                    const border = event.available ? "1px solid #007bff" : "none";
+
+                    return {
+                      style: {
+                        backgroundColor,
+                        border,
+                        color: "#fff",
+                        opacity: event.available ? 1 : 0.7,
+                      },
+                    };
                   }}
                 />                  
                 </div>
@@ -617,15 +693,19 @@ const ClientLocation = () => {
 
         <form
           id="appointmentForm"
-          onSubmit={addAppointMentSubmit}
+          onSubmit={addAppointmentSubmit}
           className="text-lg flex flex-col gap-y-2"
         >
           <div className="flex flex-col gap-2">
-            <span>Treatment</span>
-            <span>
-              {selectedTreatMent?.treatment?.name} -{" "}
-              {selectedTreatMent?.treatment?.duration || 30}min
-            </span>
+            <span>Treatment(s)</span>
+            <ul>
+              {selectedTreatments.map((selected) => (
+                <li key={selected.treatment.id}>
+                  - {selected.treatment.name} - {selected.product.name} -{" "}
+                    {selected.treatment.duration || 30}min
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -636,44 +716,50 @@ const ClientLocation = () => {
                 {moment(appointmentModal.end_time).format("hh:mm A")}
               </span>
             ) : (
-              (filteredTimeSlots.length !==0)?
-              filteredTimeSlots.filter(
-                  (slot) =>
-                    !selectedEmpSchedules.some(
-                      (schedule) =>
-                        moment(schedule.start_time).isSame(
-                          moment(slot.start)
-                        ) && moment(schedule.end_time).isSame(moment(slot.end))
+              <>
+                {console.log("Filtered Time Slots:", filteredTimeSlots, appointmentModal)}
+                {filteredTimeSlots.length !== 0 ? (
+                  filteredTimeSlots
+                    .filter(
+                      (slot) =>
+                        !selectedEmpSchedules.some(
+                          (schedule) =>
+                            moment(schedule.start_time).isSame(moment(slot.start)) &&
+                            moment(schedule.end_time).isSame(moment(slot.end))
+                        )
                     )
-                )
-                ?.map((slot) => {
-                  return (
-                    <Form.Check
-                      type="radio"
-                      checked={
-                        appointmentModal?.selectedTimeSlot &&
-                        appointmentModal.selectedTimeSlot === slot
-                      }
-                      label={`${moment(slot.start).format(
-                        "hh:mm A"
-                      )} - ${moment(slot.end).format("hh:mm A")}`}
-                      id={slot}
-                      onChange={(selectedOption) => {
-                        let tempData = appointmentModal;
-                        tempData.selectedTimeSlot = slot;
-                        localStorage.setItem(
-                          "appointmentData",
-                          JSON.stringify(tempData)
-                        );
+                    ?.map((slot) => {
+                      return (
+                        <Form.Check
+                          type="radio"
+                          checked={
+                            appointmentModal?.selectedTimeSlot &&
+                            appointmentModal.selectedTimeSlot === slot
+                          }
+                          label={`${moment(slot.start).format(
+                            "hh:mm A"
+                          )} - ${moment(slot.end).format("hh:mm A")}`}
+                          id={slot}
+                          onChange={(selectedOption) => {
+                            let tempData = appointmentModal;
+                            tempData.selectedTimeSlot = slot;
+                            localStorage.setItem(
+                              "appointmentData",
+                              JSON.stringify(tempData)
+                            );
 
-                        setAppointmentModal((pre) => ({
-                          ...pre,
-                          selectedTimeSlot: slot,
-                        }));
-                      }}
-                    />
-                  );
-                }):<p>Slot is Not available for this Treatment</p>
+                            setAppointmentModal((pre) => ({
+                              ...pre,
+                              selectedTimeSlot: slot,
+                            }));
+                          }}
+                        />
+                      );
+                    })
+                ) : (
+                  <p>Slot is Not available for this Treatment</p>
+                )}
+              </>
             )}
           </div>
         </form>

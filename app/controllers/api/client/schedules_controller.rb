@@ -32,12 +32,19 @@ class Api::Client::SchedulesController < ClientApplicationController
   def create
     schedule = current_client.schedules.new(schedule_param)
     if schedule.save
+      treatment_ids = params[:treatment_ids]
+      
+      treatment_ids.each do |treatment_id|
+        ScheduleTreatment.create!(schedule_id: schedule.id, treatment_id: treatment_id)
+      end
+      
       response_data = Stripe::Payment.create(schedule)
       amount = schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
       record_payment_from_session(response_data, schedule, amount)
 
       render json: {schedule: ScheduleSerializer.new(schedule)}.merge!({redirect_url: response_data['url']}), status: :created
     else
+      raise ActiveRecord::Rollback
       render json: {error: schedule.errors}, status: :unprocessable_entity
     end
   end

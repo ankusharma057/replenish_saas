@@ -20,7 +20,7 @@ module Stripe
           price_data: {
             currency: 'usd',
             product_data: {
-              name: "#{@schedule.product.name}(#{@schedule.product.product_type})",
+              name: "Testing",
             },
             unit_amount: (@amount * 100), # multiply with 100 to convert into Doller
           },

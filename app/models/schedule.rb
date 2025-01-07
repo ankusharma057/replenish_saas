@@ -88,7 +88,7 @@ class Schedule < ApplicationRecord
       {
         id: schedule.id,
         treatments: schedule.treatments.map do |treatment|
-          { name: treatment.name }
+          { name: treatment.name, amount: treatment.cost }
         end,
         client: {
           name: schedule.client&.name,

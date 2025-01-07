@@ -23,7 +23,7 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   def create_checkout_session
-    line_items = build_line_items(params[:appointment_id], params[:amount])
+    line_items = build_line_items(params[:appointment_id])
     session = Stripe::Session.create_checkout_session(customer: params[:stripe_id], line_items: line_items, return_url: build_return_url(params[:client_id], params[:appointment_id]))
 
     render json: { clientSecret: session.client_secret }
@@ -309,17 +309,22 @@ class Api::Client::StripeController < ClientApplicationController
     render json: { error: exception.message }, status: :unprocessable_entity
   end
 
-  def build_line_items(appointment_id, price)
-    [{
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: Schedule.find_by(id: appointment_id).treatment.name
+  def build_line_items(appointment_id)
+    appointment = Schedule.find_by(id: appointment_id)
+    return [] unless appointment
+  
+    appointment.treatments.map do |treatment|
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: treatment.name || 'Treatment'
+          },
+          unit_amount: (treatment.cost.to_f * 100).to_i
         },
-        unit_amount: price.to_i * 100
-      },
-      quantity: 1
-    }]
+        quantity: 1
+      }
+    end
   end
   
   def build_return_url(client_id, appointment_id)

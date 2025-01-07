@@ -23,7 +23,8 @@ import {
     deleteGroup,
     updateGroup,
     uploadFiles,
-    getFilesList
+    getFilesList,
+    getProductsList
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -220,7 +221,7 @@ const AllClientRoot = () => {
     useEffect(() => {
         async function loadConfig() {
         const publicKey = await fetchConfig();
-        setStripePublicKey(publicKey);
+        setStripePublicKey("pk_test_51LB9bEBZZntSWQ9mTfXQdmFLUArwS1bGxqZmwR41fRs9waoUdV7Keg35ew885hCIug4aFlmI04EKn8Ah3T8RjV4s00M9v95cmy");
         }
         loadConfig();
         getAllEmployeeLocation();
@@ -1401,6 +1402,7 @@ useEffect(()=>{
         return () => clearTimeout(timer);
     };
 
+    
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
@@ -1408,6 +1410,88 @@ useEffect(()=>{
     const [showNotes, setShowNotes] = useState(false);
     const [showBillingInfo, setShowBillingInfo] = useState(false);
     const [isAddingNote, setIsAddingNote] = useState(false);
+    const [showSearch, setShowSearch] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    
+    const [productList, setProductList] = useState([]);
+    
+    const dummyProducts = ["Product A", "Product B", "Product C"];
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isDropdownOpenn, setIsDropdownOpenn] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    
+    // const filteredProducts = dummyProducts.filter((product) =>
+      //   product.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+    
+    const handleDropdownToggle = () => {
+      setIsDropdownOpenn(!isDropdownOpenn);
+    };
+    
+    const handleAddItemm = () => {
+      setShowSearch(true);
+    };
+    
+    const totalAmount = productList.reduce((acc, product) => acc + (product.price * product.quantity), 0) + selectedAppointment?.total_amount;
+    
+    
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const { data } = await getProductsList();
+          setProducts(data); // Store the fetched products
+          setFilteredProducts(data); // Initialize the filtered products
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      };
+
+      fetchProducts();
+    }, []);
+
+    useEffect(() => {
+      // debugger
+      setFilteredProducts(
+        products.filter((product) =>
+          product.name?.toLowerCase().includes(searchTerm?.toLowerCase())
+        )
+      );
+    }, [searchTerm, products]);
+    // const handleProductSelect = async (product) => {
+    //     const confirmAdd = window.confirm(`Do you want to add ${product}?`);
+    //     if (confirmAdd) {
+    //     const newProduct = { name: product, quantity: 1, price: 100 };
+    //     const { data } = await getProductsList();
+    //     setProductList(data);
+    //     setProductList([...productList, newProduct]);
+    //     setShowSearch(false);
+    //     }
+    // };
+
+    const handleProductSelect = (product) => {
+        setProductList((prevList) => [
+            ...prevList,
+            { ...product, quantity: 1 },
+        ]);
+        setIsDropdownOpenn(false);
+    };  
+
+    const handleQuantityChange = (index, change) => {
+        const updatedProductList = [...productList];
+        const updatedProduct = updatedProductList[index];
+        updatedProduct.quantity += change;
+        
+        if (updatedProduct.quantity < 1) updatedProduct.quantity = 1; // Prevent negative or zero quantities
+        
+        setProductList(updatedProductList);
+    };
+
+    const handleRemoveProduct = (index) => {
+        const updatedProductList = [...productList];
+        updatedProductList.splice(index, 1);
+        setProductList(updatedProductList);
+    };
 
     const toggleDrawer = async () => {
         if (selectedAppointment) {
@@ -3121,10 +3205,26 @@ const handleCreateGroupModal=()=>{
                                   {new Date(selectedAppointment?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                                 </p>
                                 <hr className="my-2" />
-                                <span className="px-2"><strong>Treatment:</strong></span>
-                                <br />
-                                <span className="px-2 ">{selectedAppointment?.treatment?.name} - <span className="font-semibold"> ${selectedAppointment?.total_amount}</span></span>
-                                <br />
+                                <div className="px-2">
+                                  <span className="font-bold">Treatments:</span>
+                                  <hr className="my-2" />
+                                  <div className="mt-2 space-y-2">
+                                    {selectedAppointment?.treatments?.map((treatment, index) => (
+                                      <div key={index} className="border-b pb-2">
+                                        <span className="block">
+                                          <strong className="text-gray-700">Treatment {index + 1}:</strong>
+                                        </span>
+                                        <span className="block px-2">
+                                          {treatment.name} -
+                                          <span className="font-semibold"> ${treatment.amount?.toFixed(2)}</span>
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="px-2">
+                                  <span className="font-bold">Location:</span>
+                                </div>
                                 <span className="px-2 ">{selectedAppointment?.employee?.name}</span>
                               </div>
                             )}
@@ -3162,6 +3262,7 @@ const handleCreateGroupModal=()=>{
                                     <button
                                       className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
                                       onClick={() => {
+                                        console.log("API for adding the note will be handled later");
                                         setIsAddingNote(false);
                                       }}
                                     >
@@ -3192,18 +3293,71 @@ const handleCreateGroupModal=()=>{
 
                                   <button
                                     className="flex text-[#22D3EE] rounded"
+                                    onClick={() => handleAddItemm()}
                                   >
                                     Add Item
                                     <Plus />
                                   </button>
                                 </div>
                                 <hr className="my-2" />
-                                <div className="flex justify-between px-2">
-                                  <div>
-                                    <span className="font-semibold">{selectedAppointment.treatment?.name}</span>
+                                {showSearch && (
+                                  <div className="rounded-lg bg-white relative mx-2">
+                                    <button
+                                      className="border px-2 rounded-md w-full bg-white"
+                                      onClick={handleDropdownToggle}
+                                    >
+                                      {selectedProduct ? selectedProduct : "Select a product"}
+                                      <span className="ml-2">{isDropdownOpenn ? "▲" : "▼"}</span>
+                                    </button>
+                                    <hr className="my-2" />
+
+                                    {isDropdownOpenn && (
+                                      <div className="absolute mt-2 border rounded-md bg-white w-full shadow-lg z-10">
+                                        <input
+                                          type="text"
+                                          className="border-b p-2 w-full z-10"
+                                          placeholder="Search for a product"
+                                          value={searchTerm}
+                                          onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+
+                                        <ul className="max-h-40 overflow-y-auto px-0 z-auto">
+                                          {filteredProducts.length > 0 ? (
+                                            filteredProducts.map((product) => (
+                                              <li key={product.id}>
+                                                <button
+                                                  className="block w-full text-left p-2 hover:bg-gray-100"
+                                                  onClick={() => handleProductSelect(product)}
+                                                >
+                                                  {product.name} - ${product.cost_price}
+                                                </button>
+                                              </li>
+                                            ))
+                                          ) : (
+                                            <li className="p-2">No products found</li>
+                                          )}
+                                        </ul>
+                                      </div>
+                                    )}
                                   </div>
-                                  <div>
-                                    <span>${selectedAppointment.total_amount}</span>
+                                )}
+                                <div className="flex flex-col px-2">
+                                  {selectedAppointment.treatments?.map((treatment, index) => {
+                                    { console.log(`Hello${selectedAppointment.payment_intent_id}`) }
+                                    return (
+                                      <div key={index} className="flex justify-between py-1">
+                                        <div>
+                                          <span className="font-semibold">{treatment.name}</span>
+                                        </div>
+                                        <div>
+                                          <span>${treatment.amount?.toFixed(2)}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                  <div className="flex justify-between font-bold mt-2 pt-2 border-t">
+                                    <div>Total Amount:</div>
+                                    <div>${selectedAppointment.total_amount?.toFixed(2)}</div>
                                   </div>
                                 </div>
                                 <hr className="m-2" />
@@ -3269,6 +3423,92 @@ const handleCreateGroupModal=()=>{
                                     </>
                                   )}
                                 </div>
+                                {productList.map((product, index) => (
+                                  <div key={index} className="bg-white">
+                                    <hr className="my-2" />
+                                    <div className="flex justify-between items-center px-2">
+                                      <div className="flex items-center gap-x-2">
+                                        <span className="font-semibold">{product.name}</span>
+                                        <button
+                                          onClick={() => handleRemoveProduct(index)}
+                                        >
+                                          <X size={18} style={{ color: '#22D3EE' }} />
+                                        </button>
+                                      </div>
+                                      <span>${product.cost_price}</span>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex justify-between px-2">
+                                      <span>Quantity</span>
+                                      <br />
+
+                                      <div className="flex items-center gap-x-1">
+                                        <button
+                                          className="px-1 py-1/2 rounded bg-gray-300"
+                                          onClick={() => handleQuantityChange(index, 1)}
+                                        >
+                                          +
+                                        </button>
+                                        <button
+                                          className="px-1 py-1/2 rounded bg-gray-300"
+                                          onClick={() => handleQuantityChange(index, -1)}
+                                        >
+                                          -
+                                        </button>
+                                        <span>{product.quantity}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between px-2">
+                                      <div>
+                                        <span>Subtotal</span>
+                                        <br />
+                                        <span>Total</span>
+                                      </div>
+                                      <div>
+                                        <span>${productList.reduce((acc, product) => acc + product.cost_price * product.quantity, 0)}</span>
+                                        <br />
+                                        <span><strong>${productList.reduce((acc, product) => acc + product.cost_price * product.quantity, 0)}</strong></span>
+                                      </div>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex justify-between px-2">
+                                      <div>
+                                        <span className="font-semibold">Invoice #</span>
+                                        <br />
+                                        <span>Total</span>
+                                        <br />
+                                        <span>Balance</span>
+                                        <br />
+                                      </div>
+                                      <div>
+                                        <span className="text-[#22D3EE]">Unpaid</span>
+                                        <br />
+                                        <span>${totalAmount - selectedAppointment?.total_amount}</span>
+                                        <br />
+                                        <span>${totalAmount - selectedAppointment?.remaining_amount}</span>
+                                        <br />
+                                      </div>
+                                    </div>
+                                    <hr className="m-2" />
+
+                                    <div className="flex gap-x-2 p-2">
+                                      <button
+                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                        onClick={() => console.log('Adjustment button clicked')}
+                                      >
+                                        <span>Adjustment</span>
+                                        <Plus />
+                                      </button>
+                                      <button
+                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                        onClick={toggleDrawer}
+                                      >
+                                        <span>Pay</span>
+                                        <MoveRight />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                                 <div className="bg-[#f5f5f5] min-h-8 px-6 py-2">
                                   <div className="flex justify-end gap-8">
                                     <div>
