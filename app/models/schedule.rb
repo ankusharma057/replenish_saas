@@ -105,7 +105,15 @@ class Schedule < ApplicationRecord
         total_amount: schedule.amount,
         paid_amount: schedule.paid_amt,
         remaining_amount: schedule.remaining_amt,
-        payment_intent_id: session_id ? Stripe::Checkout::Session.retrieve(session_id).payment_intent : nil
+        payment_intent_id: session_id ? Stripe::Checkout::Session.retrieve(session_id).payment_intent : nil,
+        products: schedule.products.map do |product|
+          {
+            id: product.id,
+            name: product.name,
+            cost_price: product.cost_price,
+            quantity: schedule.schedule_products.find_by(product_id: product.id)&.quantity || 1
+          }
+        end
       }
     end
   end

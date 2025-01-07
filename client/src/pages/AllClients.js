@@ -24,7 +24,10 @@ import {
     updateGroup,
     uploadFiles,
     getFilesList,
-    getProductsList
+    getProductsList,
+    addProductToAppointment,
+    updateProductQuantity,
+    removeProductFromAppointment,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -1415,8 +1418,6 @@ useEffect(()=>{
     const [filteredProducts, setFilteredProducts] = useState([]);
     
     const [productList, setProductList] = useState([]);
-    
-    const dummyProducts = ["Product A", "Product B", "Product C"];
     const [searchTerm, setSearchTerm] = useState("");
     const [isDropdownOpenn, setIsDropdownOpenn] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1424,6 +1425,12 @@ useEffect(()=>{
     // const filteredProducts = dummyProducts.filter((product) =>
       //   product.toLowerCase().includes(searchTerm.toLowerCase())
     // );
+
+    useEffect(() => {
+      if (selectedAppointment && selectedAppointment.products) {
+        setProductList(selectedAppointment.products);
+      }
+    }, [selectedAppointment]);
     
     const handleDropdownToggle = () => {
       setIsDropdownOpenn(!isDropdownOpenn);
@@ -1440,8 +1447,8 @@ useEffect(()=>{
       const fetchProducts = async () => {
         try {
           const { data } = await getProductsList();
-          setProducts(data); // Store the fetched products
-          setFilteredProducts(data); // Initialize the filtered products
+          setProducts(data);
+          setFilteredProducts(data);
         } catch (error) {
           console.error("Error fetching products:", error);
         }
@@ -1458,39 +1465,53 @@ useEffect(()=>{
         )
       );
     }, [searchTerm, products]);
-    // const handleProductSelect = async (product) => {
-    //     const confirmAdd = window.confirm(`Do you want to add ${product}?`);
-    //     if (confirmAdd) {
-    //     const newProduct = { name: product, quantity: 1, price: 100 };
-    //     const { data } = await getProductsList();
-    //     setProductList(data);
-    //     setProductList([...productList, newProduct]);
-    //     setShowSearch(false);
-    //     }
-    // };
 
-    const handleProductSelect = (product) => {
+    const handleProductSelect = async (product) => {
+      try {
+        await addProductToAppointment(selectedAppointment.id, {
+          product_id: product.id,
+          quantity: 1,
+        });
+
         setProductList((prevList) => [
-            ...prevList,
-            { ...product, quantity: 1 },
+          ...prevList,
+          { ...product, quantity: 1 },
         ]);
-        setIsDropdownOpenn(false);
-    };  
 
-    const handleQuantityChange = (index, change) => {
-        const updatedProductList = [...productList];
-        const updatedProduct = updatedProductList[index];
-        updatedProduct.quantity += change;
-        
-        if (updatedProduct.quantity < 1) updatedProduct.quantity = 1; // Prevent negative or zero quantities
-        
-        setProductList(updatedProductList);
+        toast.success('Product Added successfully');
+      } catch (error) {
+        toast.error('Error saving product');
+      }
     };
 
-    const handleRemoveProduct = (index) => {
-        const updatedProductList = [...productList];
-        updatedProductList.splice(index, 1);
-        setProductList(updatedProductList);
+    const handleQuantityChange = async (index, change) => {
+      try {
+        const product = productList[index];
+        const newQuantity = product.quantity + change;
+        if (newQuantity < 1) return; // Prevent negative or zero quantities
+    
+        await updateProductQuantity(selectedAppointment.id, product.id, { quantity: newQuantity });
+    
+        const updatedList = [...productList];
+        updatedList[index].quantity = newQuantity;
+        setProductList(updatedList);
+      } catch (error) {
+        toast.error('Error updating quantity');
+      }
+    };
+    
+    const handleRemoveProduct = async (index) => {
+      try {
+        const product = productList[index];
+        await removeProductFromAppointment(selectedAppointment.id, product.id);
+    
+        const updatedList = [...productList];
+        updatedList.splice(index, 1);
+        setProductList(updatedList);
+        toast.success('Product removed successfully');
+      } catch (error) {
+        toast.error('Error removing product');
+      }
     };
 
     const toggleDrawer = async () => {
@@ -3002,12 +3023,17 @@ const handleCreateGroupModal=()=>{
                                   >
                                     <div className=" flex flex-col justify-start py-2 px-3 bg-slate-50 hover:bg-blue-50 duration-300">
                                       <div className="flex justify-between mb-1">
-                                        <div>Treatment: <span className="text-blue-500">
-                                          {form?.treatments.map((treatment)=>{
-                                            return <span>{treatment.name},</span>
-                                          })}
+                                        <div>
+                                          Treatment: 
+                                          <span className="text-blue-500">
+                                            {form?.treatments?.map((treatment, index) => (
+                                              <span key={index}>
+                                                {treatment.name}
+                                                {index < form.treatments.length - 1 && ", "}
+                                              </span>
+                                            ))}
                                           </span>
-                                          </div>
+                                        </div>
                                         <div>Client: <span className="text-blue-500">{form?.client?.name}</span></div>
                                       </div>
                                       <div className="flex justify-between mb-1">
@@ -3216,7 +3242,7 @@ const handleCreateGroupModal=()=>{
                                         </span>
                                         <span className="block px-2">
                                           {treatment.name} -
-                                          <span className="font-semibold"> ${treatment.amount?.toFixed(2)}</span>
+                                          <span className="font-semibold"> ${treatment.cost?.toFixed(2)}</span>
                                         </span>
                                       </div>
                                     ))}
@@ -3343,14 +3369,13 @@ const handleCreateGroupModal=()=>{
                                 )}
                                 <div className="flex flex-col px-2">
                                   {selectedAppointment.treatments?.map((treatment, index) => {
-                                    { console.log(`Hello${selectedAppointment.payment_intent_id}`) }
                                     return (
                                       <div key={index} className="flex justify-between py-1">
                                         <div>
                                           <span className="font-semibold">{treatment.name}</span>
                                         </div>
                                         <div>
-                                          <span>${treatment.amount?.toFixed(2)}</span>
+                                          <span>${treatment.cost?.toFixed(2)}</span>
                                         </div>
                                       </div>
                                     );
@@ -3465,9 +3490,9 @@ const handleCreateGroupModal=()=>{
                                         <span>Total</span>
                                       </div>
                                       <div>
-                                        <span>${productList.reduce((acc, product) => acc + product.cost_price * product.quantity, 0)}</span>
+                                        <span>${product.cost_price * product.quantity}</span>
                                         <br />
-                                        <span><strong>${productList.reduce((acc, product) => acc + product.cost_price * product.quantity, 0)}</strong></span>
+                                        <span><strong>${product.cost_price * product.quantity}</strong></span>
                                       </div>
                                     </div>
                                     <hr className="m-2" />

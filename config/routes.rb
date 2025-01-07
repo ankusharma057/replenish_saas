@@ -49,6 +49,12 @@ mount Sidekiq::Web => '/sidekiq'
       resources :schedules, only: %i(index create show destroy) do
         post :remaining_pay, on: :member
         post :reminder, on: :member
+        
+        member do
+          post 'products', to: 'schedules#add_product'
+          patch 'products/:product_id', to: 'schedules#update_product_quantity'
+          patch 'products/:product_id/remove', to: 'schedules#remove_product'
+        end
       end
 
       resources :products, only: %i(index)
