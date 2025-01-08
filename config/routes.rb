@@ -39,7 +39,7 @@ mount Sidekiq::Web => '/sidekiq'
           post 'initiate_ach_account_verification', to: 'stripe#initiate_ach_account_verification'
           post 'create_setup_intent', to: 'stripe#create_setup_intent'
           post "confirm_micro_deposit",to: 'stripe#confirm_micro_deposit'
-          post 'ach_payment', to: 'stripe#create_with_custom_fees'
+          post 'ach_payment', to: 'stripe#finalize_invoice_payment'
         end
       end
 

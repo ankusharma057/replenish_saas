@@ -175,59 +175,53 @@ class Api::Client::StripeController < ClientApplicationController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  def create_with_custom_fees
+  def finalize_invoice_payment
     original_amount = params[:price].to_i
     currency = params[:currency]
     payment_method_id = params[:payment_method_id]
+    invoice_id = params[:invoice_id]
 
     stripe_fee = calculate_stripe_fee(original_amount)
     custom_fee = calculate_custom_fee(original_amount)
     total_amount = original_amount + stripe_fee + custom_fee
 
-    payment_method = Stripe::PaymentMethod.retrieve(id: payment_method_id)
-    payment_intent = Stripe::PaymentIntent.create(
-      amount: total_amount,
-      currency: currency,
-      payment_method: payment_method_id,
-      confirm: true,
-      payment_method_types: ['us_bank_account'],
-      customer: payment_method.customer,
-      mandate_data: {
-        customer_acceptance: {
-          type: 'online',
-          online: {
-            ip_address: request.remote_ip,
-            user_agent: request.user_agent
+    begin
+      payment_method = Stripe::PaymentMethod.retrieve(id: payment_method_id)
+
+      payment_intent = Stripe::PaymentIntent.create(
+        amount: total_amount,
+        currency: currency,
+        payment_method: payment_method_id,
+        confirm: true,
+        payment_method_types: ['us_bank_account'],
+        customer: payment_method.customer,
+        mandate_data: {
+          customer_acceptance: {
+            type: 'online',
+            online: {
+              ip_address: request.remote_ip,
+              user_agent: request.user_agent
+            }
           }
+        },
+        metadata: {
+          original_amount: original_amount,
+          stripe_fee: stripe_fee,
+          Replenish: custom_fee
         }
-      },
-      metadata: {
-        original_amount: original_amount,
-        stripe_fee: stripe_fee,
-        custom_fee: custom_fee
-      }
-    )
-    render json: {
-      client_secret: payment_intent.client_secret,
-      payment_intent_id: payment_intent.id,
-      fees: { amount: total_amount, stripe_fee: stripe_fee, custom_fee: custom_fee }
-    }, status: :ok
-  rescue Stripe::StripeError => e
-    render json: { error: e.message }, status: :unprocessable_entity
-  end
+      )
+      if payment_intent.status == 'succeeded'
+        update_invoice(invoice_id, payment_intent.id)
+      end
 
-  def initiate_refund
-    payment_intent_id = params[:payment_intent_id]
-    refund_amount = params[:amount].to_i
-
-    refund = Stripe::Refund.create({
-      payment_intent: payment_intent_id,
-      amount: refund_amount
-    })
-
-    render json: { message: 'Refund initiated successfully.', refund: refund }, status: :ok
-  rescue Stripe::StripeError => e
-    render json: { error: e.message }, status: :unprocessable_entity
+      render json: {
+        client_secret: payment_intent.client_secret,
+        payment_intent_id: payment_intent.id,
+        fees: { amount: total_amount, stripe_fee: stripe_fee, Replenish: custom_fee }
+      }, status: :ok
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
   end
 
   def stripe_webhook
@@ -356,4 +350,18 @@ class Api::Client::StripeController < ClientApplicationController
       amount: session.amount_total / 100,
     )
   end
+
+  def update_invoice(invoice_id, payment_intent_id)
+    payment_intent = Stripe::PaymentIntent.retrieve(id: payment_intent_id)
+    invoice = Invoice.find_by(id: invoice_id)
+    if invoice
+      invoice.update(
+        is_paid: true,
+        stripe_account_id: payment_intent.customer
+      )
+    else
+      Rails.logger.error "Invoice not found for ID: #{invoice_id}"
+    end
+  end
+
 end
