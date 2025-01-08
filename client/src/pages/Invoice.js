@@ -18,12 +18,13 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import InvoiceTabular from "../components/Tables/InvoiceTabular";
 import FinalizeInvoicesTable from "../components/Tables/FinalizeInvoicesTable";
+import { deleteInvoice } from "../../Server";
 
 const styles = {
   tableWrapper: {
-    width: '90%', // Make it occupy 90% of the viewport width
-    maxWidth: '1200px', // Optionally limit the maximum width
-    margin: '0 auto', // Center the table in the middle of the screen
+    width: '90%',
+    maxWidth: '1200px',
+    margin: '0 auto',
     padding: '10px',
   },
   container: {
@@ -272,21 +273,35 @@ const Invoice = () => {
 
   const [selectedInvoices, setSelectedInvoices] = useState([]);
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     const numberOfInvoices = selectedInvoices.length;
-
-    // Show a confirmation popup with the number of selected invoices
     const confirmation = window.confirm(
       `Are you sure you want to delete ${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""}?`
     );
-
+  
     if (confirmation) {
-      // Add your delete logic here
-      console.log("Deleting invoices:", selectedInvoices);
+      try {
+        // Loop through the selected invoices and delete each one
+        for (const invoice of selectedInvoices) {
+          const { data } = await deleteInvoice(invoice.id, true); // Assuming `true` triggers a refetch after deletion
+          if (!data) {
+            toast.error("Something went wrong while deleting invoices.");
+            return; // Exit early if any deletion fails
+          }
+        }
+        
+        toast.success(`${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""} deleted successfully.`);
+        getInvoices(true); 
+  
+      } catch (error) {
+        toast.error("An error occurred while deleting invoices.");
+      }
+  
       // Optionally, reset the selection after deletion
       setSelectedInvoices([]);
     }
   };
+  
 
   const toggleInvoiceSelection = (invoiceId) => {
     setSelectedInvoices((prevSelected) => {

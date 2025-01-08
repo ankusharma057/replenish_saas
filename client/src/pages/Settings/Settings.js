@@ -8,7 +8,7 @@ const Settings = () => {
         {
           title: "",
           subHeadings: [
-            { title: "Dashboard", route: "/users/all"},
+            { title: "Dashboard", route: "/settings/dashboard"},
             { title: "Account Recommendations", route: "/users/all"},
             { title: "Jane Payments", route: "/users/all"},
           ]

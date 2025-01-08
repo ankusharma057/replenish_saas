@@ -30,7 +30,7 @@ function CustomModal({
 
   const invoiceID = invoiceData.id;
   const employeeName = invoiceData.employee_name;
-  const clientName = invoiceData.client_name;
+  const clientName = invoiceData?.client?.name + " " + invoiceData?.client?.last_name;
   const charge = invoiceData.charge;
   const dateOfService = invoiceData.date_of_service;
   const conciergeFeePaid = invoiceData.conciergeFeePaid;
