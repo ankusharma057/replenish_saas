@@ -1,7 +1,7 @@
 class Api::Client::StripeController < ClientApplicationController
   skip_before_action :authorized_client
-  before_action :set_customer_id, only: [:list_attached_cards, :create_save_card_checkout_session, :confirm_micro_deposit]
-
+  before_action :set_customer_id, only: [:list_attached_cards, :create_save_card_checkout_session]
+  before_action :set_employee_customer_id, only: [:confirm_micro_deposit]
   def success
     update_payment(params[:data][:object])
 
@@ -210,10 +210,17 @@ class Api::Client::StripeController < ClientApplicationController
           Replenish: custom_fee
         }
       )
+
       if payment_intent.status == 'succeeded'
         update_invoice(invoice_id, payment_intent.id)
       end
-
+      client_id = Invoice.find_by(id: invoice_id).client_id
+      payment = Payment.create(
+          session_id: payment_intent.id,
+          amount: total_amount,
+          client_id: client_id,
+          status: "pending"
+        )
       render json: {
         client_secret: payment_intent.client_secret,
         payment_intent_id: payment_intent.id,
@@ -224,7 +231,7 @@ class Api::Client::StripeController < ClientApplicationController
     end
   end
 
-  def stripe_webhook
+  def webhooks
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
     event = nil
@@ -242,10 +249,10 @@ class Api::Client::StripeController < ClientApplicationController
     case event['type']
     when 'payment_intent.succeeded'
       payment_intent = event['data']['object']
-      handle_payment_success(payment_intent)
+      handle_ach_payment_success(payment_intent)
     when 'payment_intent.payment_failed'
       payment_intent = event['data']['object']
-      handle_payment_failure(payment_intent)
+      handle_ach_payment_failure(payment_intent)
     end
 
     render json: { message: 'Webhook received' }, status: :ok
@@ -267,23 +274,25 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   def handle_ach_payment_failure(payment_intent)
+    payment = Payment.find_by(session_id: payment_intent['id'])
+    payment.update(status: 'failed') if payment
     Rails.logger.error("ACH Payment failed for intent: #{payment_intent['id']}")
   end
 
   def set_customer_id
     client = Client.find_by(id: params[:client_id])
-    @customer_id = client&.stripe_id || create_stripe_customer(client)
+    @customer_id = client&.stripe_id || create_stripe_customer(client, 'stripe_id')
   end
 
-  def update_payment(session)
-    payment = Payment.find_by(session_id: session[:id]) 
-    payment.update(status: session[:payment_status]) if payment
+  def set_employee_customer_id
+    employee = Employee.find_by(id: params[:employee_id])
+    @customer_id = employee&.stripe_customer_id || create_stripe_customer(employee, 'stripe_customer_id')
   end
 
-  def create_stripe_customer(client)
+  def create_stripe_customer(record, stripe_id_field)
     stripe_customer = Stripe::Customer.create(
-      email: client.email,
-      name: client.name,
+      email: record.email,
+      name: record.name,
       phone: '9696562201',
       address: {
         line1: '510 Townsend St',
@@ -292,11 +301,16 @@ class Api::Client::StripeController < ClientApplicationController
         postal_code: '98140',
         country: 'US'
       },
-      metadata: { user_id: client.id }
+      metadata: { user_id: record.id }
     )
-
-    client.update_attribute(:stripe_id, stripe_customer.id)
+    record.update_attribute(stripe_id_field, stripe_customer.id)
     stripe_customer.id
+  end
+
+
+  def update_payment(session)
+    payment = Payment.find_by(session_id: session[:id]) 
+    payment.update(status: session[:payment_status]) if payment
   end
 
   def render_error(exception)

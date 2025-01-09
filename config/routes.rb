@@ -40,9 +40,9 @@ mount Sidekiq::Web => '/sidekiq'
           post 'create_setup_intent', to: 'stripe#create_setup_intent'
           post "confirm_micro_deposit",to: 'stripe#confirm_micro_deposit'
           post 'ach_payment', to: 'stripe#finalize_invoice_payment'
+          post 'webhooks', to: 'stripe#webhooks'
         end
       end
-
       resources :employees, only: %i(index show)
 
       resources :intake_forms
