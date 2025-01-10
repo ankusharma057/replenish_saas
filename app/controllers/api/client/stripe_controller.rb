@@ -181,9 +181,8 @@ class Api::Client::StripeController < ClientApplicationController
     payment_method_id = params[:payment_method_id]
     invoice_id = params[:invoice_id]
 
-    stripe_fee = calculate_stripe_fee(original_amount)
     custom_fee = calculate_custom_fee(original_amount)
-    total_amount = original_amount + stripe_fee + custom_fee
+    total_amount = original_amount + custom_fee
 
     begin
       payment_method = Stripe::PaymentMethod.retrieve(id: payment_method_id)
@@ -206,7 +205,6 @@ class Api::Client::StripeController < ClientApplicationController
         },
         metadata: {
           original_amount: original_amount,
-          stripe_fee: stripe_fee,
           Replenish: custom_fee
         }
       )
@@ -224,7 +222,7 @@ class Api::Client::StripeController < ClientApplicationController
       render json: {
         client_secret: payment_intent.client_secret,
         payment_intent_id: payment_intent.id,
-        fees: { amount: total_amount, stripe_fee: stripe_fee, Replenish: custom_fee }
+        fees: { amount: total_amount, Replenish: custom_fee }
       }, status: :ok
     rescue Stripe::StripeError => e
       render json: { error: e.message }, status: :unprocessable_entity
@@ -259,10 +257,6 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   private
-
-  def calculate_stripe_fee(amount)
-    ((amount * 0.029 + 0.30)).round 
-  end
 
   def calculate_custom_fee(amount)
     ((amount * 0.015) + 0.30).round
