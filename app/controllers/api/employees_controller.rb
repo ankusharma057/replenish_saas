@@ -2,7 +2,7 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy locations)
+  before_action :find_employee, only: %i(update destroy locations create_stripe_account)
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
@@ -129,6 +129,37 @@ class Api::EmployeesController < ApplicationController
       render json: { success: false, error: @employee.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+  def create_stripe_account
+    if @employee.stripe_account_id.present?
+      render json: { message: 'Stripe account already exists', stripe_account_id: @employee.stripe_account_id }, status: :ok
+    else
+      begin
+        account = Stripe::Account.create({
+          type: 'express',
+          country: 'US',
+          email: @employee.email,
+          capabilities: {
+            transfers: { requested: true }
+          }
+        })
+
+        @employee.update!(stripe_account_id: account.id)
+
+        account_link = Stripe::AccountLink.create({
+          account: account.id,
+          refresh_url: 'http://localhost:4000/users/all',
+          return_url: 'http://localhost:4000/users/all',
+          type: 'account_onboarding'
+        })
+
+        render json: { message: 'Stripe account created', onboarding_url: account_link.url }, status: :created
+      rescue Stripe::StripeError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+    end
+  end
+
 
   private
 
