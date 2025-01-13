@@ -120,6 +120,16 @@ class Api::InvoiceListsController < ApplicationController
       return render json: {'error' => 'Location not found'}, status: :not_found
     end
   end
+
+  def finalized_invoice
+    invoices = Invoice.includes(:location).where(mentor_id: nil, is_finalized: true).paginated_invoices(params)
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
+  end
   
   private
 

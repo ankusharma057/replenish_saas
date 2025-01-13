@@ -11,11 +11,13 @@ import Vendors from './Vendors';
 import Payments from './Payments'; 
 import Approvals from './Approvals';
 import { Box, ChevronRight, ChevronLeft } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { getFinalizeInvoiceList } from '../Server';
+import { Pagination } from '@mui/material';
 
 const InvoicesToPay = () => {
   const { authUserState } = useAuthContext();
-  const initialInvoices = (authUserState.user.invoices.filter(invoice => invoice.is_finalized) || []);
-  const [invoices, setInvoices] = useState(initialInvoices);
+  const [invoices, setInvoices] = useState();
   const { collapse } = useAsideLayoutContext();
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [currentTab, setCurrentTab] = useState("billings");
@@ -23,11 +25,7 @@ const InvoicesToPay = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const itemsPerPage = 30;
-  const indexOfLastInvoice = currentPage * itemsPerPage;
-  const indexOfFirstInvoice = indexOfLastInvoice - itemsPerPage;
-  const currentInvoices = invoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
-
+  const navigate=useNavigate()
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -52,7 +50,7 @@ const InvoicesToPay = () => {
       isChecked: !isAllChecked,
     }));
     setIsAllChecked(!isAllChecked);
-    setInvoices(updatedInvoices);
+    // setInvoices(updatedInvoices);
   };
 
   const handleCheckboxChange = (id) => {
@@ -76,11 +74,19 @@ const InvoicesToPay = () => {
   };
 
   const handleInvoiceClick = (invoice) => {
-    setSelectedInvoice(invoice);
+    // setSelectedInvoice(invoice);
+    navigate(`/billing-details/${invoice.id}`)
   };
+  const getAllInvoices=async()=>{
+    let response = await getFinalizeInvoiceList();
+    console.log("response",response);
+    setInvoices(response.data)
+    
+  }
 
   useEffect(() => {
     setCurrentTab('bills');
+    getAllInvoices();
 }, []);
 
   const getStatusBadge = (invoice) => {
@@ -137,7 +143,7 @@ const InvoicesToPay = () => {
             {currentTab === "bills" && (
               <>
                 <div className="flex gap-x-4 w-full justify-end my-4">
-                  <Button
+                  {/* <Button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     variant="info"
@@ -152,9 +158,11 @@ const InvoicesToPay = () => {
                     className="text-white"
                   >
                     <ChevronRight />
-                  </Button>
+                  </Button> */}
+                  
                 </div>
                 <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
+                <div className='d-flex justify-content-end align-items-center pb-3'><Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" /></div>
                 <Table responsive bordered hover className="table-sm">
                   <thead className="bg-primary text-white">
                     <tr>
@@ -189,7 +197,7 @@ const InvoicesToPay = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentInvoices.map((invoice) => (
+                    {invoices?.invoices.map((invoice) => (
                       <tr key={invoice.id}>
                         <td className="text-center">
                           <Form.Check

@@ -13,7 +13,11 @@ class Api::InvoicesController < ApplicationController
 
   def show
     invoice = Invoice.find(params[:id])
-    render json: invoice, status: :ok
+    invoice.finalize_and_attach_pdf
+    render json: invoice.as_json.merge(
+      pdf_url: invoice.document.attached? ? url_for(invoice.document) : nil,
+      invoice: invoice
+    ), status: :ok
   end
 
   def update

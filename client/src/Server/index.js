@@ -155,6 +155,21 @@ export const getAllInvoiceList = async (data, refetch) =>
       ...data,
     },
   });
+  export const getFinalizeInvoiceList = async (data, refetch) =>
+    api.get("/api/finalized_invoice", {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      },
+    });
+export const getSingleInvoice = async (invoice_id, refetch) =>
+  api.get(`/api/invoices/${invoice_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
 export const deleteInvoice = async (id, refetch) =>
   api.delete(`/api/invoices/${id}`, {
@@ -1147,6 +1162,42 @@ export const getFilesList = async (clientId,refetch) => {
         ignoreCache: refetch,
       },
     });
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const invoiceACHVerification = async (payload) => {
+  try {
+    const response = await api.post(`api/client/stripe/initiate_ach_account_verification`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const invoiceACHCreateSetupIntent = async (payload) => {
+  try {
+    const response = await api.post(`api/client/stripe/create_setup_intent`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const invoiceACHConfirmMicroDeposit = async (payload) => {
+  try {
+    const response = await api.post(`/api/client/stripe/confirm_micro_deposit`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const finalizeInvoicePayment = async (payload) => {
+  try {
+    const response = await api.post(`/api/client/stripe/ach_payment`,payload);
     return response;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
