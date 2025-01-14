@@ -30,9 +30,9 @@ class Api::EmployeesController < ApplicationController
     @employee = Employee.new(employee_params)
     if @employee.save
       begin
-        create_stripe_account(@employee)
+        onboarding_url = create_stripe_account(@employee)
         @employee.send_reset_password_mail
-        render json: { message: 'Employee and Stripe account created successfully', employee: @employee }, status: :created
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee, onboarding_url: onboarding_url }, status: :created
       rescue => e
         @employee.destroy
         render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
@@ -160,10 +160,7 @@ class Api::EmployeesController < ApplicationController
       type: 'account_onboarding'
     })
 
-      render json: { message: 'Stripe account created', onboarding_url: account_link.url }, status: :created
-    rescue Stripe::StripeError => e
-      render json: { error: e.message }, status: :unprocessable_entity
-    end
+    account_link.url 
   end
 
 
@@ -186,3 +183,4 @@ class Api::EmployeesController < ApplicationController
     params[:password] == params[:confirmPassword] 
   end
 end
+  
