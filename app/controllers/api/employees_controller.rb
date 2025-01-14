@@ -2,7 +2,7 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy locations create_stripe_account)
+  before_action :find_employee, only: %i(update destroy locations)
   before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
 
   def index
@@ -29,12 +29,19 @@ class Api::EmployeesController < ApplicationController
   def create
     @employee = Employee.new(employee_params)
     if @employee.save
-      @employee.send_reset_password_mail
-      render json: @employee, status: :created
+      begin
+        create_stripe_account(@employee)
+        @employee.send_reset_password_mail
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee }, status: :created
+      rescue => e
+        @employee.destroy
+        render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
+      end
     else
-      render json: { 'error': @employee.errors }, status: :bad_request
+      render json: { error: @employee.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
 
   def locations
     locations = @employee.locations
@@ -130,35 +137,35 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
-  def create_stripe_account
-    if @employee.stripe_account_id.present?
-      render json: { message: 'Stripe account already exists', stripe_account_id: @employee.stripe_account_id }, status: :ok
-    else
-      begin
-        account = Stripe::Account.create({
-          type: 'express',
-          country: 'US',
-          email: @employee.email,
-          capabilities: {
-            transfers: { requested: true }
-          }
-        })
+  def create_stripe_account(employee)
+    if employee.stripe_account_id.present?
+      raise StandardError, 'Stripe account already exists for this employee'
+    end
 
-        @employee.update!(stripe_account_id: account.id)
+    account = Stripe::Account.create({
+      type: 'express',
+      country: 'US',
+      email: employee.email,
+      capabilities: {
+        transfers: { requested: true }
+      }
+    })
 
-        account_link = Stripe::AccountLink.create({
-          account: account.id,
-          refresh_url: 'http://localhost:4000/users/all',
-          return_url: 'http://localhost:4000/users/all',
-          type: 'account_onboarding'
-        })
+    employee.update!(stripe_account_id: account.id)
 
-        render json: { message: 'Stripe account created', onboarding_url: account_link.url }, status: :created
-      rescue Stripe::StripeError => e
-        render json: { error: e.message }, status: :unprocessable_entity
-      end
+    account_link = Stripe::AccountLink.create({
+      account: account.id,
+      refresh_url: 'http://localhost:4000/users/all',
+      return_url: 'http://localhost:4000/users/all',
+      type: 'account_onboarding'
+    })
+
+      render json: { message: 'Stripe account created', onboarding_url: account_link.url }, status: :created
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
   end
+
 
 
   private
