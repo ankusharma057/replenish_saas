@@ -176,10 +176,10 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   def finalize_invoice_payment
+    invoice_id = params[:invoice_id]
     original_amount = params[:price].to_i
     currency = params[:currency]
     payment_method_id = params[:payment_method_id]
-    invoice_id = params[:invoice_id]
 
     custom_fee = calculate_custom_fee(original_amount)
     total_amount = original_amount + custom_fee
@@ -204,14 +204,11 @@ class Api::Client::StripeController < ClientApplicationController
           }
         },
         metadata: {
+          invoice_id: invoice_id,
           original_amount: original_amount,
           Replenish: custom_fee
         }
       )
-
-      if payment_intent.status == 'succeeded'
-        update_invoice(invoice_id, payment_intent.id)
-      end
       client_id = Invoice.find_by(id: invoice_id).client_id
       payment = Payment.create(
           session_id: payment_intent.id,
@@ -247,6 +244,8 @@ class Api::Client::StripeController < ClientApplicationController
     case event['type']
     when 'payment_intent.succeeded'
       payment_intent = event['data']['object']
+      invoice_id = payment_intent.metadata['invoice_id'] 
+      update_invoice(invoice_id, payment_intent.id)
       handle_ach_payment_success(payment_intent)
     when 'payment_intent.payment_failed'
       payment_intent = event['data']['object']
