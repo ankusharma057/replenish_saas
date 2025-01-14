@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import { Trash } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-import { getSingleInvoice, invoiceACHConfirmMicroDeposit, invoiceACHCreateSetupIntent, invoiceACHVerification } from '../../Server';
+import { useNavigate, useParams } from 'react-router-dom';
+import { finalizeInvoicePayment, getSingleInvoice, invoiceACHConfirmMicroDeposit, invoiceACHCreateSetupIntent, invoiceACHVerification } from '../../Server';
 import moment from 'moment';
 import { Document, Page } from 'react-pdf';
+import { toast } from 'react-toastify';
+import Loadingbutton from '../Buttons/Loadingbutton';
 const BillingDetails = () => {
+    const navigate = useNavigate();
     const { invoice_id } = useParams();
     const [invoiceData, setInvoiceData] = useState();
     const [openPaymentModal, setOpenPaymentModal] = useState(false)
     const [paymentSteps, setPaymentSteps] = useState(2)
-    const [setupIntentId,setSetupIntentId]=useState("")
+    const [setupIntentId, setSetupIntentId] = useState("")
+    const [screenLoading, setScreenLoading] = useState(false)
+    const [loading, setLoading] = useState(false)    
     const [paymentStep1Data, setPaymentStep1Data] = useState({
         account_number: "",
         routing_number: "",
@@ -18,10 +23,16 @@ const BillingDetails = () => {
         name: "",
     });
     const [paymentStep2Data, setPaymentStep2Data] = useState({
+        "employee_id": invoiceData?.employee_id,
         "setup_intent_id": setupIntentId,
         "deposit_amounts": [0, 0],
-        "client_id": invoiceData?.client_id
     });
+    const [paymentStep3Data, setPaymentStep3Data] = useState({
+        "price": "",
+        "currency": "usd",
+        "payment_method_id": "",
+        "invoice_id": invoice_id
+      });
     const [paymentStep1Error, setPaymentStep1Error] = useState({
         account_number: "",
         routing_number: "",
@@ -29,17 +40,25 @@ const BillingDetails = () => {
         name: "",
     });
     useEffect(() => {
-        getSingleInvoiceItem() 
+        getSingleInvoiceItem()
     }, [invoice_id])
     const getSingleInvoiceItem = async () => {
+        setScreenLoading(true)
         let response = await getSingleInvoice(invoice_id);
         response.data = {
             ...response.data,
             created_at: moment(response.data.created_at).format("YYYY-MM-DD")
         }
-        console.log("@@@@@@response",response.data);
-        
         setInvoiceData(response.data);
+        setPaymentStep2Data((prev)=>({
+            ...prev,
+            employee_id:response.data.employee_id
+        }))
+        setPaymentStep3Data((prev)=>({
+            ...prev,
+            price:response.data.charge
+        }))
+        setScreenLoading(false);
     };
     const handleInvoice = (event) => {
         event.preventDefault()
@@ -79,6 +98,7 @@ const BillingDetails = () => {
     };
     const handlePaymentModal = () => {
         setOpenPaymentModal(!openPaymentModal)
+        setPaymentStep1Data(1)
     }
     const handleStep1Change = (event) => {
         setOpenPaymentModal(true)
@@ -87,8 +107,10 @@ const BillingDetails = () => {
             ...prev,
             [name]: value
         }))
+        validateInput(name, value)
     };
-    const submitStep1 = async(event) => {
+    const submitStep1 = async (event) => {
+        setLoading(true)
         event.preventDefault()
         let payload = {
             "payment_method_data": {
@@ -101,133 +123,74 @@ const BillingDetails = () => {
                     "name": paymentStep1Data.name
                 }
             }
-
         }
-        let response=await invoiceACHVerification(payload);
-        let payload1 = {
-            "payment_method_id": response.paymentMethodId
-          }
-        let response1 = await invoiceACHCreateSetupIntent(payload1)
+        try {
+            let response = await invoiceACHVerification(payload);
+            console.log("@@@@@@@response",response);
+            
+            setPaymentStep3Data((prev)=>({
+                ...prev,
+                payment_method_id:response.data.payment_method_id
+            }))
+            let payload1 = {
+                "payment_method_id": response.data.payment_method_id
+            }
+            try {
+                let response1 = await invoiceACHCreateSetupIntent(payload1);
+                setSetupIntentId(response1?.data?.setup_intent_id)
+                setPaymentStep2Data((prev)=>({
+                    ...prev,
+                    setup_intent_id:response1?.data?.setup_intent_id
+                }))
+                
+                setLoading(false)
+                setPaymentSteps(2)
+            } catch (error) {
+                setLoading(false)
+                toast.error(error.response.data.error)
+            }
+        } catch (error) {
+            setLoading(false)
+            toast.error(error.response.data.error)
+        }
     };
-    const submitStep2 = async(event) => {
+    const submitStep2 = async (event) => {
         event.preventDefault()
-        let response = await invoiceACHConfirmMicroDeposit(paymentStep2Data)
+        setLoading(true)
+        try {
+            let response = await invoiceACHConfirmMicroDeposit(paymentStep2Data);
+            toast.success(response.data.message)
+            setPaymentSteps(3);
+            setLoading(false)
+        } catch (error) {
+            setLoading(false)
+            toast.error(error.response.data.error)
+        }
     };
-    const submitStep3 = async(event) => {
+    const submitStep3 = async (event) => {
         event.preventDefault()
-        let payload = {
-            "payment_method_id": setupIntentId
-          }
-          let response = await invoiceACHCreateSetupIntent(payload)
+        setLoading(true)
+        try {
+            let response = await finalizeInvoicePayment(paymentStep3Data);
+            toast.success(response.data.message);
+            handlePaymentModal();
+            setLoading(false)
+            setPaymentSteps(1)
+            navigate("/clients/payment/success")
+        } catch (error) {
+            setLoading(false)
+            toast.error(error.response.data.error)
+        }
     };
-    const ACHPaymentStep1 = () => {
-        return <Form onSubmit={submitStep1}>
-            <Row>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Account Number</Form.Label>
-                        <Form.Control type="number" name='account_number' required onChange={handleStep1Change} value={paymentStep1Data.account_number} isValid={!!paymentStep1Error.account_number} />
-                        <Form.Control.Feedback type="invalid">{paymentStep1Error.account_number}</Form.Control.Feedback>
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Routing Number</Form.Label>
-                        <Form.Control type="number" name='routing_number' required onChange={handleStep1Change} value={paymentStep1Data.routing_number} isValid={!!paymentStep1Error.routing_number} />
-                        <Form.Control.Feedback type="invalid">{paymentStep1Error.routing_number}</Form.Control.Feedback>
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Account Holder Type</Form.Label>
-                        <Form.Select aria-label="Default select example" name='account_holder_type' required onChange={handleStep1Change} value={paymentStep1Data.account_holder_type} isValid={!!paymentStep1Error.account_holder_type}>
-                            <option>Select Account Type</option>
-                            <option value="business">Business</option>
-                            <option value="individual">Individual</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">{paymentStep1Error.account_holder_type}</Form.Control.Feedback>
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account Holder Name</Form.Label>
-                        <Form.Control type="text" required name='name' onChange={handleStep1Change} value={paymentStep1Data.payment_method_data?.name} isValid={!!paymentStep1Error.name} />
-                        <Form.Control.Feedback type="invalid">{paymentStep1Error.name}</Form.Control.Feedback>
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div className='mt-3'>
-                        <Button type='submit' size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} className='w-100'>Submit Bank Account Details</Button>
-                    </div>
-                </Col>
-            </Row>
-        </Form>
-    }
-    const ACHPaymentStep2 = () => {
-        return <Form onSubmit={submitStep2}>
-            <Form.Label>Enter the two micro deposit amounts to verify your bank account</Form.Label>
-            <Row>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account 1 (in cents)</Form.Label>
-                        <Form.Control type="number" required value={paymentStep2Data[0]} onChange={(event) => { setPaymentStep2Data((prev) => ({ ...prev, deposit_amounts: [event.target.value, paymentStep2Data.deposit_amounts[1]] })) }} />
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account 2 (in cents) </Form.Label>
-                        <Form.Control type="number" required value={paymentStep2Data[1]} onChange={(event) => { setPaymentStep2Data((prev) => ({ ...prev, deposit_amounts: [paymentStep2Data.deposit_amounts[0], event.target.value] })) }} />
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div className='mt-3'>
-                        <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} className='w-100'>Verify Amount</Button>
-                    </div>
-                </Col>
-            </Row>
-        </Form>
-    }
-    const ACHPaymentStep3 = () => {
-        return <Form onSubmit={submitStep3}>
-            <Form.Label>Enter the two micro deposit amounts to verify your bank account</Form.Label>
-            <Row>
-                <Col xs={12}>
-                    <div>
-                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Payment Amount*($)</Form.Label>
-                        <Form.Control type="number" required />
-                    </div>
-                </Col>
-                <Col xs={12}>
-                    <div className='mt-3'>
-                        <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} className='w-100'>Process Payment</Button>
-                    </div>
-                </Col>
-            </Row>
-        </Form>
-    }
-    const ACHPaymentsModal = () => {
-        return <div>
-            <Modal show={openPaymentModal} onHide={handlePaymentModal}>
-                <Modal.Header closeButton>
-                    <div>
-                        <Modal.Title>ACH Account Verification</Modal.Title>
-                        <Form.Text>Complete the steps to verify your bank account & make a payment</Form.Text>
-                    </div>
-                </Modal.Header>
-                <Modal.Body>
-                    <ACHPaymentStep2 />
-                    {/* {paymentSteps === 1 && <ACHPaymentStep1 />} */}
-                    {/* {paymentSteps === 2 && <ACHPaymentStep2 />} */}
-                    {/* {paymentSteps === 3 && <ACHPaymentStep3 />} */}
-                </Modal.Body>
-
-            </Modal>
+    const ScreenLoading = () => {
+        return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+            <Spinner animation="border" variant="info" />
         </div>
     }
     return (
         <div className='p-2'>
-            <ACHPaymentsModal />
-            <div >
+            {screenLoading && <ScreenLoading />}
+            <div>
                 <Row>
                     <Col xs={12} sm={12} md={4} lg={4}>
                         <Card className='p-3 overflow-scroll' style={{ height: "87vh", scrollbarWidth: "none", }}>
@@ -360,6 +323,136 @@ const BillingDetails = () => {
                         </Card>
                     </Col>
                 </Row>
+            </div>
+            <div>
+                <Modal show={paymentSteps===1 && openPaymentModal} onHide={handlePaymentModal}>
+                    <Modal.Header closeButton>
+                        <div>
+                            <Modal.Title>ACH Account Verification</Modal.Title>
+                            <Form.Text>Complete the steps to verify your bank account & make a payment</Form.Text>
+                        </div>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={submitStep1}>
+                            <Row>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Account Number</Form.Label>
+                                        <Form.Control type="number" name='account_number' required onChange={handleStep1Change} value={paymentStep1Data.account_number} isInvalid={!!paymentStep1Error.account_number} />
+                                        <Form.Control.Feedback type="invalid">{paymentStep1Error?.account_number}</Form.Control.Feedback>
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Routing Number</Form.Label>
+                                        <Form.Control type="number" name='routing_number' required onChange={handleStep1Change} value={paymentStep1Data.routing_number} isInvalid={!!paymentStep1Error.routing_number} />
+                                        <Form.Control.Feedback type="invalid">{paymentStep1Error.routing_number}</Form.Control.Feedback>
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Account Holder Type</Form.Label>
+                                        <Form.Select aria-label="Default select example" name='account_holder_type' required onChange={handleStep1Change} value={paymentStep1Data.account_holder_type} isInvalid={!!paymentStep1Error.account_holder_type}>
+                                            <option>Select Account Type</option>
+                                            <option value="company">Company</option>
+                                            <option value="individual">Individual</option>
+                                        </Form.Select>
+                                        <Form.Control.Feedback type="invalid">{paymentStep1Error.account_holder_type}</Form.Control.Feedback>
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account Holder Name</Form.Label>
+                                        <Form.Control type="text" required name='name' onChange={handleStep1Change} value={paymentStep1Data.payment_method_data?.name} isInvalid={!!paymentStep1Error.name} />
+                                        <Form.Control.Feedback type="invalid">{paymentStep1Error.name}</Form.Control.Feedback>
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div className='mt-3'>
+                                        {/* <Button type='submit' size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} className='w-100'>Submit Bank Account Details <Spinner animation="border" variant="light" /></Button> */}
+                                        <Loadingbutton
+                                            isLoading={loading}
+                                            title="Submit Bank Account Details"
+                                            loadingText={"Submitting Bank Account Details..."}
+                                            type="submit"
+                                            className="!bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
+                <Modal show={paymentSteps===2 && openPaymentModal} onHide={handlePaymentModal}>
+                    <Modal.Header closeButton>
+                        <div>
+                            <Modal.Title>ACH Account Verification</Modal.Title>
+                            <Form.Text>Complete the steps to verify your bank account & make a payment</Form.Text>
+                        </div>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={submitStep2}>
+                            <Form.Label>Enter the two micro deposit amounts to verify your bank account</Form.Label>
+                            <Row>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account 1 (in cents)</Form.Label>
+                                        <Form.Control type="number" required value={paymentStep2Data[0]} onChange={(event) => { setPaymentStep2Data((prev) => ({ ...prev, deposit_amounts: [event.target.value, paymentStep2Data.deposit_amounts[1]] })) }} />
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Account 2 (in cents) </Form.Label>
+                                        <Form.Control type="number" required value={paymentStep2Data[1]} onChange={(event) => { setPaymentStep2Data((prev) => ({ ...prev, deposit_amounts: [paymentStep2Data.deposit_amounts[0], event.target.value] })) }} />
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div className='mt-3'>
+                                        <Loadingbutton
+                                            isLoading={loading}
+                                            title="Verify Amount"
+                                            loadingText={"Verifying Amount..."}
+                                            type="submit"
+                                            className="!bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
+                <Modal show={paymentSteps===3 && openPaymentModal} onHide={handlePaymentModal}>
+                    <Modal.Header closeButton>
+                        <div>
+                            <Modal.Title>ACH Account Verification</Modal.Title>
+                            <Form.Text>Complete the steps to verify your bank account & make a payment</Form.Text>
+                        </div>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={submitStep3}>
+                            <Form.Label>Enter the two micro deposit amounts to verify your bank account</Form.Label>
+                            <Row>
+                                <Col xs={12}>
+                                    <div>
+                                        <Form.Label column sm="5" className='text-black-50' style={{ fontSize: "14px" }}>Payment Amount*($)</Form.Label>
+                                        <Form.Control type="number" required value={invoiceData?.charge}/>
+                                    </div>
+                                </Col>
+                                <Col xs={12}>
+                                    <div className='mt-3'>
+                                        <Loadingbutton
+                                            isLoading={loading}
+                                            title="Process Payment"
+                                            loadingText={"Processing Payment..."}
+                                            type="submit"
+                                            className="!bg-cyan-500 !border-cyan-500 w-full  hover:!bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
             </div>
         </div>
     )
