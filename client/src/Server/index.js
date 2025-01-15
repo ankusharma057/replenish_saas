@@ -818,7 +818,7 @@ export const createSaveCardCheckoutSession = async (clientStripeId, clientId) =>
   }
 }
 
-export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId) => {
+export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId, selectedTreatments, selectedProducts) => {
   try {
     const url = `/api/client/stripe/create_checkout_session`;
     const res = await fetch(url, {
@@ -830,7 +830,9 @@ export const createCheckoutSession = async (clientId, appointmentId, amount, str
         client_id: clientId,
         appointment_id: appointmentId,
         amount: amount,
-        stripe_id: stripeId
+        stripe_id: stripeId,
+        selected_treatments: selectedTreatments,
+        selected_products: selectedProducts,
       }),
     });
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_31_104915) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_07_084507) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -279,8 +279,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_31_104915) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "amount"
+    t.bigint "schedule_product_id"
+    t.bigint "schedule_treatment_id"
     t.index ["client_id"], name: "index_payments_on_client_id"
     t.index ["schedule_id"], name: "index_payments_on_schedule_id"
+    t.index ["schedule_product_id"], name: "index_payments_on_schedule_product_id"
+    t.index ["schedule_treatment_id"], name: "index_payments_on_schedule_treatment_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -415,6 +419,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_31_104915) do
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "intake_forms", "employees"
+  add_foreign_key "invoices", "locations"
+  add_foreign_key "payments", "schedule_products"
+  add_foreign_key "payments", "schedule_treatments"
   add_foreign_key "questionnaires", "employees"
   add_foreign_key "schedule_products", "products"
   add_foreign_key "schedule_products", "schedules"

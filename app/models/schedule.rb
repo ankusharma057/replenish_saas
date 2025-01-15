@@ -44,8 +44,7 @@ class Schedule < ApplicationRecord
   end
 
   def amount
-    treatments&.sum(&:cost).to_f
-
+    treatments&.sum(&:cost).to_f + schedule_products.sum { |schedule_product| schedule_product.product.retail_price.to_f * schedule_product.quantity }
   end
 
   def paid_amt
@@ -82,13 +81,17 @@ class Schedule < ApplicationRecord
                         .includes(:treatments, :client, :location, :payments)
 
     schedules.map do |schedule|
-      first_payment = schedule.payments.first
-      session_id = first_payment&.session_id
-
       {
         id: schedule.id,
-        treatments: schedule.treatments.map do |treatment|
-          { name: treatment.name, amount: treatment.cost }
+        treatments: schedule.schedule_treatments.map do |schedule_treatment|
+          { 
+            name: schedule_treatment.treatment.name,
+            amount: schedule_treatment.treatment.cost,
+            total_amt: schedule_treatment.total_amt,
+            paid_amt: schedule_treatment.paid_amt,
+            remaining_amt: schedule_treatment.remaining_amt,        
+            paid: schedule_treatment.remaining_amt.zero?
+          }
         end,
         client: {
           name: schedule.client&.name,
@@ -105,13 +108,14 @@ class Schedule < ApplicationRecord
         total_amount: schedule.amount,
         paid_amount: schedule.paid_amt,
         remaining_amount: schedule.remaining_amt,
-        payment_intent_id: session_id ? Stripe::Checkout::Session.retrieve(session_id).payment_intent : nil,
-        products: schedule.products.map do |product|
+        products: schedule.schedule_products.map do |schedule_product|
           {
-            id: product.id,
-            name: product.name,
-            cost_price: product.cost_price,
-            quantity: schedule.schedule_products.find_by(product_id: product.id)&.quantity || 1
+            id: schedule_product.product.id,
+            name: schedule_product.product.name,
+            product_type: schedule_product.product.product_type,
+            cost_price: schedule_product.product.cost_price,
+            retail_price: schedule_product.product.retail_price,
+            quantity: schedule_product.quantity
           }
         end
       }

@@ -62,6 +62,7 @@ function ClientSignIn() {
             treatment_id: selectedTreatMent?.treatment?.id,
             product_id: selectedTreatMent?.product?.id,
             location_id: locId,
+            treatment_ids: JSON.parse(localStorage.getItem("formateData")).treatments.map((treatment) => treatment.treatment.id)
           };
           const { data } = await createClientSchedule(copyAppointMent);
           if (data?.redirect_url) {
