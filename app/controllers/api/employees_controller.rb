@@ -155,8 +155,8 @@ class Api::EmployeesController < ApplicationController
 
     account_link = Stripe::AccountLink.create({
       account: account.id,
-      refresh_url: 'http://localhost:4000/users/all',
-      return_url: 'http://localhost:4000/users/all',
+      refresh_url: "#{request.base_url}/myprofile",
+      return_url: "#{request.base_url}/myprofile",
       type: 'account_onboarding'
     })
 
