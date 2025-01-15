@@ -226,50 +226,104 @@ class Api::Client::StripeController < ClientApplicationController
     end
   end
 
-  def webhooks
+  def transfer_to_employee
+    employee = Employee.find_by(id: params[:employee_id]) 
+    invoice_id = params[:invoice_id].to_i 
+    invoice = Invoice.find(invoice_id)
+    amount = invoice.charge
+    if employee.stripe_account_id.nil?
+      return render json: { error: 'Employee does not have a connected Stripe account.' }, status: :unprocessable_entity
+    end
+
+    
+    if invoice.instant_pay == "true"
+      instant_fee = (amount * 0.015) + 30 
+      total_amount = amount - instant_fee
+    else
+      total_amount = amount
+    end
+
+    begin
+      
+      account = Stripe::Account.retrieve(employee.stripe_account_id)
+      if account.payouts_enabled && account.payouts_enabled && account.details_submitted
+        
+        payout = Stripe::Payout.create(
+          amount: total_amount, 
+          currency: 'usd', 
+          destination: employee.stripe_account_id, 
+          method: 'instant', 
+          description: 'Payment for services rendered'
+        )
+
+        render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
+      else
+        transfer = Stripe::Transfer.create(
+          amount: total_amount,
+          currency: 'usd',
+          destination: employee.stripe_account_id,
+          description: 'Payment for services rendered'
+        )
+
+        render json: { message: 'Payment sent successfully', transfer_id: transfer.id }, status: :ok
+      end
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
+
+
+  def webhook
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
-    event = nil
+    endpoint_secret = ENV['STRIPE_WEBHOOK_SECRET']
 
     begin
       event = Stripe::Webhook.construct_event(
-        payload, sig_header, ENV['STRIPE_WEBHOOK_SECRET']
+        payload, sig_header, endpoint_secret
       )
     rescue JSON::ParserError => e
-      render json: { error: 'Invalid payload' }, status: 400 and return
+      render json: { error: 'Invalid payload' }, status: :bad_request
+      return
     rescue Stripe::SignatureVerificationError => e
-      render json: { error: 'Invalid signature' }, status: 400 and return
+      render json: { error: 'Invalid signature' }, status: :bad_request
+      return
     end
 
     case event['type']
-    when 'payment_intent.succeeded'
-      payment_intent = event['data']['object']
-      invoice_id = payment_intent.metadata['invoice_id'] 
-      update_invoice(invoice_id, payment_intent.id)
-      handle_ach_payment_success(payment_intent)
-    when 'payment_intent.payment_failed'
-      payment_intent = event['data']['object']
-      handle_ach_payment_failure(payment_intent)
+    when 'payout.paid'
+      payout = event['data']['object']
+      handle_successful_payout(payout)
+    when 'transfer.paid'
+      transfer = event['data']['object']
+      handle_successful_transfer(transfer)
+    else
+      render json: { message: 'Event type not handled' }, status: :ok
+      return
     end
 
-    render json: { message: 'Webhook received' }, status: :ok
+    render json: { message: 'Event received' }, status: :ok
   end
 
   private
 
-  def calculate_custom_fee(amount)
-    ((amount * 0.015) + 0.30).round
+  def handle_successful_payout(payout)
+    invoice_id = payout['metadata']['invoice_id']
+    invoice = Invoice.find_by(id: invoice_id)
+
+    if invoice
+      invoice.update(is_paid: true)
+    end
   end
 
-  def handle_ach_payment_success(payment_intent)
-    payment = Payment.find_by(session_id: payment_intent['id'])
-    payment.update(status: 'paid') if payment
-  end
+  def handle_successful_transfer(transfer)
+    invoice_id = transfer['metadata']['invoice_id']
+    invoice = Invoice.find_by(id: invoice_id)
 
-  def handle_ach_payment_failure(payment_intent)
-    payment = Payment.find_by(session_id: payment_intent['id'])
-    payment.update(status: 'failed') if payment
-    Rails.logger.error("ACH Payment failed for intent: #{payment_intent['id']}")
+    if invoice
+      invoice.update(is_paid: true)
+    end
   end
 
   def set_customer_id
