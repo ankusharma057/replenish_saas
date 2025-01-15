@@ -236,17 +236,16 @@ class Api::Client::StripeController < ClientApplicationController
     end
 
     
-    if invoice.instant_pay == "true"
-      instant_fee = (amount * 0.015) + 30 
-      total_amount = amount - instant_fee
+    if invoice.instant_pay == true
+      instant_fee = (amount * 0.015) + 30
+      total_amount = (amount * 100 - instant_fee * 100).to_i
     else
-      total_amount = amount
+      total_amount = amount.to_i
     end
-
-    begin
-      
+   
+    begin      
       account = Stripe::Account.retrieve(employee.stripe_account_id)
-      if account.payouts_enabled && account.payouts_enabled && account.details_submitted
+      if account.payouts_enabled && account.details_submitted
         
         payout = Stripe::Payout.create(
           amount: total_amount, 
@@ -271,8 +270,6 @@ class Api::Client::StripeController < ClientApplicationController
       render json: { error: e.message }, status: :unprocessable_entity
     end
   end
-
-
 
   def webhook
     payload = request.body.read
