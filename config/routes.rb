@@ -41,6 +41,7 @@ mount Sidekiq::Web => '/sidekiq'
           post "confirm_micro_deposit",to: 'stripe#confirm_micro_deposit'
           post 'ach_payment', to: 'stripe#finalize_invoice_payment'
           post 'webhooks', to: 'stripe#webhooks'
+          post 'transfer_to_employee', to: 'stripe#transfer_to_employee'
         end
       end
       resources :employees, only: %i(index show)
