@@ -234,7 +234,6 @@ class Api::Client::StripeController < ClientApplicationController
     if employee.stripe_account_id.nil?
       return render json: { error: 'Employee does not have a connected Stripe account.' }, status: :unprocessable_entity
     end
-
     
     if invoice.instant_pay == true
       instant_fee = (amount * 0.015) + 30
@@ -245,14 +244,20 @@ class Api::Client::StripeController < ClientApplicationController
    
     begin      
       account = Stripe::Account.retrieve(employee.stripe_account_id)
-      if account.payouts_enabled && account.details_submitted
+      if invoice.instant_pay == true && account.payouts_enabled && account.details_submitted
         
+        external_account_id = account.external_accounts.data.first.id
+
         payout = Stripe::Payout.create(
-          amount: total_amount, 
-          currency: 'usd', 
-          destination: employee.stripe_account_id, 
-          method: 'instant', 
-          description: 'Payment for services rendered'
+          amount: total_amount,
+          currency: 'usd',
+          destination: external_account_id,
+          method: 'instant',
+          description: 'Payment for services rendered',
+          source_type: "bank_account",
+          metadata: {
+            invoice_id: invoice_id,
+          }
         )
 
         render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
@@ -261,7 +266,10 @@ class Api::Client::StripeController < ClientApplicationController
           amount: total_amount,
           currency: 'usd',
           destination: employee.stripe_account_id,
-          description: 'Payment for services rendered'
+          description: 'Payment for services rendered',
+          metadata: {
+            invoice_id: invoice_id,
+          }
         )
 
         render json: { message: 'Payment sent successfully', transfer_id: transfer.id }, status: :ok
@@ -271,7 +279,7 @@ class Api::Client::StripeController < ClientApplicationController
     end
   end
 
-  def webhook
+  def webhooks
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
     endpoint_secret = ENV['STRIPE_WEBHOOK_SECRET']
@@ -287,12 +295,11 @@ class Api::Client::StripeController < ClientApplicationController
       render json: { error: 'Invalid signature' }, status: :bad_request
       return
     end
-
     case event['type']
     when 'payout.paid'
       payout = event['data']['object']
       handle_successful_payout(payout)
-    when 'transfer.paid'
+    when 'transfer.created'
       transfer = event['data']['object']
       handle_successful_transfer(transfer)
     else
