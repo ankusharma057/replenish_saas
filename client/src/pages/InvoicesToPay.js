@@ -81,7 +81,7 @@ const InvoicesToPay = () => {
     let response;
     if(authUserState.user.is_admin){
       response = await getFinalizeInvoiceList();
-      setInvoices(response.data)
+      setInvoices(response.data.invoices)
     }else{
       response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
       setInvoices(response)
@@ -201,7 +201,7 @@ const InvoicesToPay = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices?.invoices.map((invoice) => (
+                    {Array.isArray(invoices)&&invoices.map((invoice) => (
                       <tr key={invoice.id}>
                         <td className="text-center">
                           <Form.Check

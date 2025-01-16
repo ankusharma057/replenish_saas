@@ -805,6 +805,10 @@ export default function AddInvoices() {
       });
       return;
     }
+    let onePercentAmount=Number(getTotal()).toFixed(2) / 100
+    let sameDayPaymentAmount = Number(getTotal()).toFixed(2)-onePercentAmount
+    let charge = formData?.instant_pay === true ? sameDayPaymentAmount : 
+    Number(getTotal()).toFixed(2)
     let invoice = {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
@@ -825,7 +829,7 @@ export default function AddInvoices() {
       comments: formData?.comments,
       products: formData.products,
       retail_products: formData.retailProducts,
-      charge: Number(getTotal()).toFixed(2),
+      charge: charge,
       expected_income: getExpectedReplenishIncome(),
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag(),

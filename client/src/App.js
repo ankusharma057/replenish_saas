@@ -288,6 +288,7 @@ function App() {
                   <Route path="/customers/:clientId" element={<AllClientRoot />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
+                  <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                 </>
               )}
             </>

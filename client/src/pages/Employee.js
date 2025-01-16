@@ -719,7 +719,7 @@ setTitle(title)
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
-              <div className="flex h-[69vh] flex-col pl-2 gap-4 overflow-y-auto">
+              <div className="flex h-[57vh] flex-col pl-2 gap-4 overflow-y-auto" >
                 {(employeeList || []).length > 0 && (
                   <List
                     height={window.innerHeight - 350}

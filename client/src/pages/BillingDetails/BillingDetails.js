@@ -15,6 +15,7 @@ const BillingDetails = () => {
     const [screenLoading, setScreenLoading] = useState(false)
     const [loading, setLoading] = useState(false)    
     const [showConfirmationModal,setShowConfirmationModal]=useState(false)
+    const [note, setNote] = useState("");
     useEffect(() => {
         getSingleInvoiceItem()
     }, [invoice_id])
@@ -39,20 +40,33 @@ const BillingDetails = () => {
         try {
             let payload={
                 employee_id:authUserState.user.id,
-                invoice_id:invoiceData.id
+                invoice_id:invoiceData.id,
+                note:note
             }
             let response = await finalizePayment(payload);
-            toast.success(response.data.message);
-            setLoading(false)
-            navigate("/clients/payment/success");
-            handleClosesConfirmationModal();
+            if(response.data.payout_id){
+                toast.success(response.data.message);
+                setLoading(false)
+                navigate("/clients/payment/success");
+                handleClosesConfirmationModal();
+            } else if (response.data.redirect_url) {
+                const link = document.createElement('a');
+                link.href = response.data.redirect_url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setLoading(false)
+            }
         } catch (error) {
             setLoading(false)
             toast.error(error.response.data.error)
         }
     };
     const handleClosesConfirmationModal=()=>{
-        setShowConfirmationModal(!showConfirmationModal)
+        setShowConfirmationModal(!showConfirmationModal);
+        setLoading(false)
     }
     const ScreenLoading = () => {
         return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
@@ -80,19 +94,14 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50 fs-6'>Vendor Business Name</Form.Label>
-                                                <Form.Select aria-label="Default select example">
-                                                    <option>Open this select menu</option>
-                                                    <option value="1">One</option>
-                                                    <option value="2">Two</option>
-                                                    <option value="3">Three</option>
-                                                </Form.Select>
+                                                <Form.Control placeholder="Vendor Name" value={invoiceData?.vendor_name} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3 '>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
                                                 <InputGroup>
-                                                    <Form.Control placeholder="Recipient's username" value={"$" + invoiceData?.charge} disabled />
+                                                    <Form.Control placeholder="Bill Amount" value={"$" + invoiceData?.charge} disabled />
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -110,12 +119,7 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
-                                                <Form.Select aria-label="Default select example">
-                                                    <option>Open this select menu</option>
-                                                    <option value="1">One</option>
-                                                    <option value="2">Two</option>
-                                                    <option value="3">Three</option>
-                                                </Form.Select>
+                                                <Form.Control type="text" value={invoiceData?.invoice?.instant_pay ===true  ? "One Day payment":"Default"} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
@@ -133,7 +137,7 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to sell</Form.Label>
-                                                <Form.Control as="textarea" rows={3} onChange={(event) => { setInvoiceData((prev) => ({ ...prev, note: event.target.value })) }} />
+                                                <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value ) }} />
                                             </div>
                                         </Col>
                                         <p className='text-black text-start fw-bold' style={{ fontSize: "18px" }}>Line Items</p>
@@ -163,26 +167,27 @@ const BillingDetails = () => {
                                                 </Alert>
                                             </div>
                                         </Col>
-                                        <Col xs={1} sm={1} md={1} lg={1}>
-                                            <div className='mb-3 d-flex justify-content-center'>
-                                                <Form.Label column sm="3" className='text-black fs-6'>1</Form.Label>
-                                            </div>
-                                        </Col>
-                                        <Col xs={5} sm={5} md={5} lg={5}>
-                                            <div className='mb-3'>
-                                                <Form.Control type="text" placeholder='e.g office expence' />
-                                            </div>
-                                        </Col>
-                                        <Col xs={5} sm={5} md={5} lg={5}>
-                                            <div className='mb-3'>
-                                                <Form.Control type="text" placeholder='e.g office expence' />
-                                            </div>
-                                        </Col>
-                                        <Col xs={1} sm={1} md={1} lg={1}>
-                                            <div className='mb-3'>
-                                                <Trash color='red' className='mt-2' />
-                                            </div>
-                                        </Col>
+                                        {invoiceData?.products_hash.products.map((product,index) => {
+                                            return <Row>
+                                                <Col xs={1} sm={1} md={1} lg={1}>
+                                                    <div className='mb-3 d-flex justify-content-center'>
+                                                        <Form.Label column sm="3" className='text-black fs-6'>{index+1}</Form.Label>
+                                                    </div>
+                                                </Col>
+                                                <Col xs={5} sm={5} md={5} lg={5}>
+                                                    <div className='mb-3'>
+                                                        <Form.Control type="text" placeholder='e.g office expence' value={product[0]} disabled/>
+                                                    </div>
+                                                </Col>
+                                                <Col xs={5} sm={5} md={5} lg={5}>
+                                                    <div className='mb-3'>
+                                                        <Form.Control type="text" placeholder='e.g office expence' value={"$"+product[2]} disabled/>
+                                                    </div>
+                                                </Col>
+                                                <Col xs={1} sm={1} md={1} lg={1}>
+                                                </Col>
+                                            </Row>
+                                        })}
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='d-flex justify-content-end gap-[20px]'>
                                                 <Button size='sm' variant='outline-secondary'>Cancel</Button>
