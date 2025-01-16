@@ -78,10 +78,14 @@ const InvoicesToPay = () => {
     navigate(`/billing-details/${invoice.id}`)
   };
   const getAllInvoices=async()=>{
-    let response = await getFinalizeInvoiceList();
-    console.log("response",response);
-    setInvoices(response.data)
-    
+    let response;
+    if(authUserState.user.is_admin){
+      response = await getFinalizeInvoiceList();
+      setInvoices(response.data)
+    }else{
+      response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
+      setInvoices(response)
+    }
   }
 
   useEffect(() => {

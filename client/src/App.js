@@ -60,7 +60,7 @@ const ClientProfileUpdate= lazy(()=>import("./pages/Clients/ClientsProfileUpdate
 const AddNewClient= lazy(()=>import("./pages/Clients/AddNewClient"))
 const Reports= lazy(()=>import("./pages/Reports/Reports"))
 const ReportSummary= lazy(()=>import("./pages/Reports/ReportSummary"))
-const BillingDetails =lazy(()=>import("./components/BillingDetails/BillingDetails"));
+const BillingDetails =lazy(()=>import("./pages/BillingDetails/BillingDetails"));
 function App() {
   const navigate = useNavigate();
   const location = useLocation();

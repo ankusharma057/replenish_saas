@@ -1168,36 +1168,9 @@ export const getFilesList = async (clientId,refetch) => {
     throw error;
   }
 };
-export const invoiceACHVerification = async (payload) => {
+export const finalizePayment = async (payload) => {
   try {
-    const response = await api.post(`api/client/stripe/initiate_ach_account_verification`,payload);
-    return response;
-  } catch (error) {
-    console.error("Unable to load pricing plans:", error);
-    throw error;
-  }
-};
-export const invoiceACHCreateSetupIntent = async (payload) => {
-  try {
-    const response = await api.post(`api/client/stripe/create_setup_intent`,payload);
-    return response;
-  } catch (error) {
-    console.error("Unable to load pricing plans:", error);
-    throw error;
-  }
-};
-export const invoiceACHConfirmMicroDeposit = async (payload) => {
-  try {
-    const response = await api.post(`/api/client/stripe/confirm_micro_deposit`,payload);
-    return response;
-  } catch (error) {
-    console.error("Unable to load pricing plans:", error);
-    throw error;
-  }
-};
-export const finalizeInvoicePayment = async (payload) => {
-  try {
-    const response = await api.post(`/api/client/stripe/ach_payment`,payload);
+    const response = await api.post(`/api/client/stripe/transfer_to_employee`,payload);
     return response;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
