@@ -94,202 +94,26 @@ class Api::Client::StripeController < ClientApplicationController
     end
   end
 
-  # def initiate_ach_account_verification
-  #   payment_method_data = params.require(:payment_method_data).permit(
-  #     us_bank_account: [:account_number, :routing_number, :account_holder_type],
-  #     billing_details: [:name]
-  #   )
-
-  #   payment_method = Stripe::PaymentMethod.create(
-  #     type: 'us_bank_account',
-  #     us_bank_account: {
-  #       account_number: payment_method_data[:us_bank_account][:account_number],
-  #       routing_number: payment_method_data[:us_bank_account][:routing_number],
-  #       account_holder_type: payment_method_data[:us_bank_account][:account_holder_type]
-  #     },
-  #     billing_details: {
-  #       name: payment_method_data[:billing_details][:name]
-  #     }
-  #   )
-
-  #   render json: { 
-  #     payment_method_id: payment_method.id 
-  #   }, status: :ok
-  # rescue Stripe::StripeError => e
-  #   render json: { error: e.message }, status: :unprocessable_entity
-  # end
-
-
-  # def create_setup_intent
-  #   payment_method_id = params[:payment_method_id]
-
-  #   setup_intent = Stripe::SetupIntent.create(
-  #     payment_method: payment_method_id,
-  #     payment_method_types: ['us_bank_account']
-  #   )
-
-  #   render json: { 
-  #     setup_intent_id: setup_intent.id 
-  #   }, status: :ok
-  # rescue Stripe::StripeError => e
-  #   render json: { error: e.message }, status: :unprocessable_entity
-  # end
-
-  # def confirm_micro_deposit
-  #   setup_intent_id = params[:setup_intent_id]
-  #   deposit_amounts = params[:deposit_amounts]
-
-  #   setup_intent = Stripe::SetupIntent.retrieve(setup_intent_id)
-  #   if setup_intent.status == 'requires_confirmation'
-  #     setup_intent = Stripe::SetupIntent.confirm(
-  #       setup_intent.id,
-  #       {
-  #         payment_method: setup_intent.payment_method,
-  #         mandate_data: { 
-  #           customer_acceptance: {
-  #             type: 'online',
-  #             online: {
-  #               ip_address: request.remote_ip,
-  #               user_agent: request.user_agent
-  #             }
-  #           }
-  #         }
-  #       }
-  #     )
-  #   end
-  #   verification = Stripe::SetupIntent.verify_microdeposits(
-  #     setup_intent.id,
-  #     { amounts: deposit_amounts }
-  #   )
-  #   if verification.status == 'succeeded'
-  #     payment_method = Stripe::PaymentMethod.retrieve(id: setup_intent.payment_method)
-  #     attach_customer = payment_method.attach(
-  #       customer: @customer_id
-  #     )
-  #     render json: { message: 'Bank account verified successfully.' }, status: :ok
-  #   else
-  #     render json: { error: 'Verification failed. Please try again.' }, status: :unprocessable_entity
-  #   end
-  # rescue Stripe::StripeError => e
-  #   render json: { error: e.message }, status: :unprocessable_entity
-  # end
-
-  # def finalize_invoice_payment
-  #   invoice_id = params[:invoice_id]
-  #   original_amount = params[:price].to_i
-  #   currency = params[:currency]
-  #   payment_method_id = params[:payment_method_id]
-
-  #   custom_fee = calculate_custom_fee(original_amount)
-  #   total_amount = original_amount + custom_fee
-
-  #   begin
-  #     payment_method = Stripe::PaymentMethod.retrieve(id: payment_method_id)
-
-  #     payment_intent = Stripe::PaymentIntent.create(
-  #       amount: total_amount,
-  #       currency: currency,
-  #       payment_method: payment_method_id,
-  #       confirm: true,
-  #       payment_method_types: ['us_bank_account'],
-  #       customer: payment_method.customer,
-  #       mandate_data: {
-  #         customer_acceptance: {
-  #           type: 'online',
-  #           online: {
-  #             ip_address: request.remote_ip,
-  #             user_agent: request.user_agent
-  #           }
-  #         }
-  #       },
-  #       metadata: {
-  #         invoice_id: invoice_id,
-  #         original_amount: original_amount,
-  #         Replenish: custom_fee
-  #       }
-  #     )
-  #     client_id = Invoice.find_by(id: invoice_id).client_id
-  #     payment = Payment.create(
-  #         session_id: payment_intent.id,
-  #         amount: total_amount,
-  #         client_id: client_id,
-  #         status: "pending"
-  #       )
-  #     render json: {
-  #       client_secret: payment_intent.client_secret,
-  #       payment_intent_id: payment_intent.id,
-  #       fees: { amount: total_amount, Replenish: custom_fee }
-  #     }, status: :ok
-  #   rescue Stripe::StripeError => e
-  #     render json: { error: e.message }, status: :unprocessable_entity
-  #   end
-  # end
-
-  # def transfer_to_employee
-  #   employee = Employee.find_by(id: params[:employee_id]) 
-  #   invoice_id = params[:invoice_id].to_i 
-  #   invoice = Invoice.find(invoice_id)
-  #   amount = invoice.charge
-  #   if employee.stripe_account_id.nil?
-  #     return render json: { error: 'Employee does not have a connected Stripe account.' }, status: :unprocessable_entity
-  #   end
-    
-  #   if invoice.instant_pay == true
-  #     instant_fee = (amount * 0.015) + 0.30
-  #     total_amount = (amount * 100 - instant_fee * 100).to_i
-  #   else
-  #     total_amount = amount.to_i
-  #   end
-   
-  #   begin      
-  #     account = Stripe::Account.retrieve(employee.stripe_account_id)
-  #     if invoice.instant_pay == true && account.payouts_enabled && account.details_submitted
-  #       external_account_id = account.external_accounts.data.first.id
-  #       payout = Stripe::Payout.create(
-  #         {
-  #           amount: total_amount,
-  #           currency: 'usd',
-  #           destination: external_account_id,
-  #           method: 'instant',
-  #           description: 'Payment for services rendered',
-  #           metadata: { invoice_id: invoice_id }
-  #         },
-  #         { stripe_account: account.id }
-  #       )
-
-  #       render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
-  #     else
-  #       transfer = Stripe::Transfer.create(
-  #         amount: total_amount,
-  #         currency: 'usd',
-  #         destination: employee.stripe_account_id,
-  #         description: 'Payment for services rendered',
-  #         metadata: {
-  #           invoice_id: invoice_id,
-  #         }
-  #       )
-
-  #       render json: { message: 'Payment sent successfully', transfer_id: transfer.id }, status: :ok
-  #     end
-  #   rescue Stripe::StripeError => e
-  #     render json: { error: e.message }, status: :unprocessable_entity
-  #   end
-  # end
-
   def transfer_to_employee
     employee = Employee.find_by(id: params[:employee_id])
     invoice = Invoice.find(params[:invoice_id])
 
     if employee.stripe_account_id.nil?
-      account = Stripe::Account.create(type: 'express')
+      account = Stripe::Account.create({
+        type: 'express',
+        country: 'US',
+        email: employee.email,
+        capabilities: {
+          transfers: { requested: true }
+        }
+      })
       employee.update!(stripe_account_id: account.id)
-
-      account_link = Stripe::AccountLink.create(
+      account_link = Stripe::AccountLink.create({
         account: account.id,
-        refresh_url: "#{your_app_url}/retry_connect",
-        return_url: "#{your_app_url}/invoices/#{invoice.id}",
+        refresh_url: "#{request.base_url}/myprofile",
+        return_url: "#{request.base_url}/myprofile",
         type: 'account_onboarding'
-      )
+      })
 
       render json: { redirect_url: account_link.url }, status: :ok
     else
