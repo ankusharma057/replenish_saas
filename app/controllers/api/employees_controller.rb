@@ -137,6 +137,29 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def employee_stripe_connect
+    employee = Employee.find_by(id: params[:employee_id])
+
+    if employee.nil?
+      render json: { error: 'Employee not found' }, status: :not_found
+      return
+    end
+
+    if employee.stripe_account_id.present?
+      render json: { error: 'Stripe account already exists for this employee' }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      redirect_url = create_stripe_account(employee)
+      render json: { message: 'Stripe account created successfully', redirect_url: redirect_url }, status: :ok
+    rescue StandardError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
   def create_stripe_account(employee)
     if employee.stripe_account_id.present?
       raise StandardError, 'Stripe account already exists for this employee'
@@ -151,21 +174,16 @@ class Api::EmployeesController < ApplicationController
       }
     })
 
-    employee.update!(stripe_account_id: account.id)
-
     account_link = Stripe::AccountLink.create({
       account: account.id,
       refresh_url: "#{request.base_url}/myprofile",
       return_url: "#{request.base_url}/myprofile",
       type: 'account_onboarding'
     })
+    employee.update!(stripe_account_id: account.id)
 
     account_link.url 
   end
-
-
-
-  private
 
   def employee_params
     params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo, employee_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy], employee_locations_attributes: [:id, :employee_id, :location_id, :_destroy])

@@ -180,6 +180,7 @@ mount Sidekiq::Web => '/sidekiq'
     get '/location_pdf', to: 'invoice_lists#location_pdf'  
     get '/mentors', to: 'employees#mentors'
     post 'add_note', to: 'schedules#add_note'
+    post 'employee_stripe_connect', to: 'employees#employee_stripe_connect'
   end
   get '*path', to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html?}
 end
