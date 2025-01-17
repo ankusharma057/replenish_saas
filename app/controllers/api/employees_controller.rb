@@ -180,9 +180,8 @@ class Api::EmployeesController < ApplicationController
       return_url: "#{request.base_url}/myprofile",
       type: 'account_onboarding'
     })
-    employee.update!(stripe_account_id: account.id)
-
     account_link.url 
+    employee.update!(stripe_account_id: account.id)
   end
 
   def employee_params

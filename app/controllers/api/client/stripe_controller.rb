@@ -99,66 +99,34 @@ class Api::Client::StripeController < ClientApplicationController
     invoice = Invoice.find(params[:invoice_id])
 
     if employee.stripe_account_id.nil?
-      account = Stripe::Account.create({
-        type: 'express',
-        country: 'US',
-        email: employee.email,
-        capabilities: {
-          transfers: { requested: true }
-        }
-      })
-      employee.update!(stripe_account_id: account.id)
-      account_link = Stripe::AccountLink.create({
-        account: account.id,
-        refresh_url: "#{request.base_url}/myprofile",
-        return_url: "#{request.base_url}/myprofile",
-        type: 'account_onboarding'
-      })
+      render json: { error: 'This employee does not have a Stripe connect account.' }, status: :unprocessable_entity
+      return
+    end
 
-      render json: { redirect_url: account_link.url }, status: :ok
+    total_amount = (invoice.charge).to_i
+
+    account = Stripe::Account.retrieve(employee.stripe_account_id)
+    if account.external_accounts.data.empty?
+      render json: { error: 'This employee has not added a bank account to their Stripe account.' }, status: :unprocessable_entity
+      return
+    end
+    if invoice.instant_pay && account.payouts_enabled && account.details_submitted
+      external_account_id = account.external_accounts.data.first.id
+      payout = Stripe::Payout.create(
+        {
+          amount: total_amount,
+          currency: 'usd',
+          destination: external_account_id,
+          method: 'instant',
+          description: 'Payment for services rendered',
+          metadata: { invoice_id: invoice.id }
+        },
+        { stripe_account: account.id }
+      )
+
+      render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
     else
-      amount = invoice.charge
-
-      if invoice.instant_pay == true
-        instant_fee = (amount * 0.015) + 0.30
-        total_amount = (amount * 100 - instant_fee * 100).to_i
-      else
-        total_amount = (amount * 100).to_i
-      end
-
-      begin
-        account = Stripe::Account.retrieve(employee.stripe_account_id)
-        if invoice.instant_pay == true && account.payouts_enabled && account.details_submitted
-          external_account_id = account.external_accounts.data.first.id
-          payout = Stripe::Payout.create(
-            {
-              amount: total_amount,
-              currency: 'usd',
-              destination: external_account_id,
-              method: 'instant',
-              description: 'Payment for services rendered',
-              metadata: { invoice_id: invoice.id }
-            },
-            { stripe_account: account.id }
-          )
-
-          render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
-        else
-          transfer = Stripe::Transfer.create(
-            amount: total_amount,
-            currency: 'usd',
-            destination: employee.stripe_account_id,
-            description: 'Payment for services rendered',
-            metadata: {
-              invoice_id: invoice.id,
-            }
-          )
-
-          render json: { message: 'Payment sent successfully', transfer_id: transfer.id }, status: :ok
-        end
-      rescue Stripe::StripeError => e
-        render json: { error: e.message }, status: :unprocessable_entity
-      end
+      schedule_payment(employee.id, invoice.id, total_amount)
     end
   end
 
@@ -194,6 +162,18 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   private
+
+  def schedule_payment(employee_id, invoice_id, total_amount)
+    ScheduledPayment.create(
+      employee_id: employee_id,
+      invoice_id: invoice_id,
+      total_amount: total_amount,
+      scheduled_at: Time.current + 3.days
+    )
+    render json: { message: 'payment initiated successfully' }, status: :ok
+
+  end
+
 
   def handle_successful_payout(payout)
     invoice_id = payout['metadata']['invoice_id']
