@@ -47,7 +47,6 @@ const BillingDetails = () => {
             if(response.data.payout_id){
                 toast.success(response.data.message);
                 navigate("/clients/payment/success");
-                handleClosesConfirmationModal();
             } else if (response.data.redirect_url && authUserState.user.is_admin===false) {
                 const link = document.createElement('a');
                 link.href = response.data.redirect_url;
@@ -56,13 +55,18 @@ const BillingDetails = () => {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }else if(response.data.message){
+                toast.success(response.data.message);
+                navigate("/invoices-to-pay");
             }else {
                 toast.error(response.data.error)
             }
-            setLoading(false)
+            setLoading(false);
+            handleClosesConfirmationModal();
         } catch (error) {
             setLoading(false)
-            toast.error(error.response.data.error)
+            toast.error(error.response.data.error);
+            handleClosesConfirmationModal();
         }
     };
     const handleOnboard=async()=>{
@@ -208,8 +212,8 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='d-flex justify-content-end gap-[20px]'>
                                                 <Button size='sm' variant='outline-secondary' onClick={()=>navigate("/invoices-to-pay")}>Cancel</Button>
-                                                {(!authUserState.user.is_admin && authUserState.user.is_mentor && !authUserState.user.stripe_account_id) &&<Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}</Button>}
-                                                {authUserState.user.is_admin && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
+                                                {(!authUserState.user?.is_admin && authUserState?.user?.is_mentor && !authUserState.user.stripe_account_id) &&<Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}</Button>}
+                                                {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                             </div>
                                         </Col>
                                     </Row>
