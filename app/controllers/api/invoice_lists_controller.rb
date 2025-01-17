@@ -134,11 +134,16 @@ class Api::InvoiceListsController < ApplicationController
   def mentors_invoice
     if params[:employee_id].present?
       @employee = Employee.find_by(id: params[:employee_id])
-      invoices = @employee.invoices.where(is_finalized: true).includes(:client)
+      invoices = @employee.invoices.where(is_finalized: true).includes(:client).paginated_invoices(params)
     else
       invoices = []
     end
-    render json: invoices, status: :ok
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
   end
   
   private

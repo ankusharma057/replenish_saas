@@ -14,6 +14,7 @@ import { Box, ChevronRight, ChevronLeft } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList } from '../Server';
 import { Pagination } from '@mui/material';
+import moment from 'moment';
 
 const InvoicesToPay = () => {
   const { authUserState } = useAuthContext();
@@ -80,10 +81,13 @@ const InvoicesToPay = () => {
     let response;
     if(authUserState.user.is_admin){
       response = await getFinalizeInvoiceList();
-      setInvoices(response.data.invoices)
+      setInvoices(response.data)
     }else if(authUserState.user.is_mentor){
-      response = await getMentorFinalizeInvoiceList();
-      setInvoices(response.data.invoices)
+      let payload={
+        employee_id:authUserState.user.id
+      }
+      response = await getMentorFinalizeInvoiceList(payload);
+      setInvoices(response.data)
     }else{
       response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
       setInvoices(response)
@@ -203,7 +207,7 @@ const InvoicesToPay = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Array.isArray(invoices)&&invoices.map((invoice) => (
+                    {Array.isArray(invoices?.invoices)&&invoices?.invoices.map((invoice) => (
                       <tr key={invoice.id}>
                         <td className="text-center">
                           <Form.Check
@@ -214,7 +218,7 @@ const InvoicesToPay = () => {
                         </td>
                         <td>{invoice.client_name}</td>
                         <td>{invoice.id}</td>
-                        <td>{invoice.created_at}</td>
+                        <td>{moment(invoice.created_at).format('YYYY-DD-MM')}</td>
                         <td>{invoice.date_of_service}</td>
                         <td>{getStatusBadge(invoice)}</td>
                         <td>${invoice.charge}</td>
@@ -224,7 +228,9 @@ const InvoicesToPay = () => {
                             className="text-[#22D3EE]"
                             onClick={() => handleInvoiceClick(invoice)}
                           >
-                            {invoice.is_paid === true ? 'Review' : 'Pay'}
+                            {(invoice.is_paid === true && authUserState.user.is_admin ) && 'Review'}
+                            {(invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
+                            {(authUserState.user.is_admin ===false && authUserState.user.is_mentor) && 'Details'}
                           </a>
                         </td>
                       </tr>

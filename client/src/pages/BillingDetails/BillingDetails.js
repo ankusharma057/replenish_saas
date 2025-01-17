@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import { BadgeDollarSign, Trash } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {  getSingleInvoice, finalizePayment } from '../../Server';
+import {  getSingleInvoice, finalizePayment, onboardEmployeeToStripe } from '../../Server';
 import moment from 'moment';
 import { Document, Page } from 'react-pdf';
 import { toast } from 'react-toastify';
@@ -39,14 +39,13 @@ const BillingDetails = () => {
         setLoading(true)
         try {
             let payload={
-                employee_id:authUserState.user.id,
+                employee_id:invoiceData.employee_id,
                 invoice_id:invoiceData.id,
                 note:note
             }
             let response = await finalizePayment(payload);
             if(response.data.payout_id){
                 toast.success(response.data.message);
-                setLoading(false)
                 navigate("/clients/payment/success");
                 handleClosesConfirmationModal();
             } else if (response.data.redirect_url && authUserState.user.is_admin===false) {
@@ -57,13 +56,31 @@ const BillingDetails = () => {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                setLoading(false)
+            }else {
+                toast.error(response.data.error)
             }
+            setLoading(false)
         } catch (error) {
             setLoading(false)
             toast.error(error.response.data.error)
         }
     };
+    const handleOnboard=async()=>{
+        setLoading(true)
+        let payload={
+            employee_id:authUserState?.user?.id
+        }
+        let response = await onboardEmployeeToStripe(payload);
+        const link = document.createElement('a');
+        link.href = response.data.redirect_url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setLoading(false)
+
+    }
     const handleClosesConfirmationModal=()=>{
         setShowConfirmationModal(!showConfirmationModal);
         setLoading(false)
@@ -190,8 +207,9 @@ const BillingDetails = () => {
                                         })}
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='d-flex justify-content-end gap-[20px]'>
-                                                <Button size='sm' variant='outline-secondary'>Cancel</Button>
-                                                <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>
+                                                <Button size='sm' variant='outline-secondary' onClick={()=>navigate("/invoices-to-pay")}>Cancel</Button>
+                                                {(!authUserState.user.is_admin && authUserState.user.is_mentor && !authUserState.user.stripe_account_id) &&<Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}</Button>}
+                                                {authUserState.user.is_admin && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                             </div>
                                         </Col>
                                     </Row>

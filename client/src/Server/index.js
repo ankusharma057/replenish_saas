@@ -1186,3 +1186,12 @@ export const finalizePayment = async (payload) => {
     throw error;
   }
 };
+export const onboardEmployeeToStripe = async (data, refetch) =>
+  api.post("/api/employee_stripe_connect",data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: {
+      ...data,
+    },
+  });
