@@ -118,6 +118,7 @@ class Api::Client::StripeController < ClientApplicationController
         destination: account.id,
         transfer_group: 'ORDER_95',
       })
+      invoice.update(is_paid: true)
       render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)

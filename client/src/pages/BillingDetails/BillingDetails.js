@@ -55,6 +55,9 @@ const BillingDetails = () => {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }else if(response.data.message && response.data.transfer_id){
+                toast.success(response.data.message);
+                navigate("/clients/payment/success");
             }else if(response.data.message){
                 toast.success(response.data.message);
                 navigate("/invoices-to-pay");

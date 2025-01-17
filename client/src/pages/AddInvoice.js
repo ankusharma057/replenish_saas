@@ -70,7 +70,8 @@ export default function AddInvoices() {
   const [formData, setFormData] = useState({
     ...initialFormState,
     dateOfService: dayjs().format('MM-DD-YYYY'),
-    location_id:""
+    location_id:"",
+    instant_pay:false
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
   const totalRef = useRef();
@@ -478,7 +479,11 @@ export default function AddInvoices() {
     ) {
       total = 0;
     }
-
+    if(formData.instant_pay){
+      total=total- total/100
+    }
+    console.log("@@@@@@total",total.toFixed(2));
+    
     // totalRef.current.charge =
     return total.toFixed(2);
   };
@@ -805,10 +810,8 @@ export default function AddInvoices() {
       });
       return;
     }
-    let onePercentAmount=Number(getTotal()).toFixed(2) / 100
-    let sameDayPaymentAmount = Number(getTotal()).toFixed(2)-onePercentAmount
-    let charge = formData?.instant_pay === true ? sameDayPaymentAmount : 
-    Number(getTotal()).toFixed(2)
+
+    let total = Number(getTotal()).toFixed(2)
     let invoice = {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
@@ -829,7 +832,7 @@ export default function AddInvoices() {
       comments: formData?.comments,
       products: formData.products,
       retail_products: formData.retailProducts,
-      charge: charge,
+      charge: total,
       expected_income: getExpectedReplenishIncome(),
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag(),
@@ -889,6 +892,7 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
+    console.log("@@@@@@invoiceData",invoiceData);
     if(invoiceData && (!Array.isArray(invoiceData[0].semag_consult_fee) || (Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0))){
       confirmAlert({
         title: "Confirm to submit",
