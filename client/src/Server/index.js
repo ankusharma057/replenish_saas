@@ -164,6 +164,15 @@ export const getAllInvoiceList = async (data, refetch) =>
         ...data,
       },
     });
+  export const getMentorFinalizeInvoiceList = async (data, refetch) =>
+    api.get("/api/mentors_invoice", {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      },
+    });
 export const getSingleInvoice = async (invoice_id, refetch) =>
   api.get(`/api/invoices/${invoice_id}`, {
     cache: {

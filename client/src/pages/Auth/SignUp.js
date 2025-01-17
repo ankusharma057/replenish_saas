@@ -26,40 +26,58 @@ export default function SignUp() {
   const { authUserState, authUserDispatch } = useAuthContext();
   const navigate = useNavigate();
 
+  const openOnboardingUrl = (url) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
   const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
       const newUser = await createEmployee(formData);
-      const { data } = await loginUser(newUser.data);
-      
-      if (data) {
-        authUserDispatch({ type: LOGIN, payload: data });
-        toast.success("Successfully Signed up & Logged In");
-        navigate("/myprofile", {
-          replace: true,
-        });
+      if (newUser.data.onboarding_url) {
+        setTimeout(() => {
+          openOnboardingUrl(newUser.data.onboarding_url)
+        }, 1000)
       }
+      // console.log("@@@@@@@newUser",newUser);
+      
+      // const { data } = await loginUser(newUser.data.employee);
+      // console.log("@@@@@@data",data);
+      
+      // if (data) {
+      //   authUserDispatch({ type: LOGIN, payload: data });
+      //   toast.success("Successfully Signed up & Logged In");
+      //   navigate("/", {
+      //     replace: true,
+      //   });
+      // }
     } catch (error) {
-      let errorString = "";
-      Object.keys(error.response.data.error || {}).forEach((key) => {
-        errorString =
-          errorString +
-          " " +
-          key +
-          " " +
-          error.response.data.error[key][0] +
-          " ";
-      });
-
-      toast.error(
-        errorString ||
-          error.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to create user"
-      );
+      // let errorString = "";
+      // Object.keys(error.response.data.error || {}).forEach((key) => {
+      //   errorString =
+      //     errorString +
+      //     " " +
+      //     key +
+      //     " " +
+      //     error.response.data.error[key][0] +
+      //     " ";
+      // });
+      console.log("@@@@@@",error.response.data.error);
+      if(Array.isArray(error.response.data.error)){
+        for(let i=0;i<error.response.data.error.length;i++){
+          toast.error(error.response.data.error[i])
+        }
+      }
+      if(error.response.data.error){
+        toast.error(error.response.data.error)
+      }
     } finally {
       setLoading(false);
     }

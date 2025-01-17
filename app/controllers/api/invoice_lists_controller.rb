@@ -130,6 +130,16 @@ class Api::InvoiceListsController < ApplicationController
       total_entries: invoices.total_entries
     }, status: :ok
   end
+
+  def mentors_invoice
+    if params[:employee_id].present?
+      @employee = Employee.find_by(id: params[:employee_id])
+      invoices = @employee.invoices.where(is_finalized: true).includes(:client)
+    else
+      invoices = []
+    end
+    render json: invoices, status: :ok
+  end
   
   private
 

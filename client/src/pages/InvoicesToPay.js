@@ -12,7 +12,7 @@ import Payments from './Payments';
 import Approvals from './Approvals';
 import { Box, ChevronRight, ChevronLeft } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import { getFinalizeInvoiceList } from '../Server';
+import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList } from '../Server';
 import { Pagination } from '@mui/material';
 
 const InvoicesToPay = () => {
@@ -74,13 +74,15 @@ const InvoicesToPay = () => {
   };
 
   const handleInvoiceClick = (invoice) => {
-    // setSelectedInvoice(invoice);
     navigate(`/billing-details/${invoice.id}`)
   };
   const getAllInvoices=async()=>{
     let response;
     if(authUserState.user.is_admin){
       response = await getFinalizeInvoiceList();
+      setInvoices(response.data.invoices)
+    }else if(authUserState.user.is_mentor){
+      response = await getMentorFinalizeInvoiceList();
       setInvoices(response.data.invoices)
     }else{
       response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)

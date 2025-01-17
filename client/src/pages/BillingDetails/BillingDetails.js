@@ -34,7 +34,7 @@ const BillingDetails = () => {
         handleClosesConfirmationModal();
     }
     
-    const submitStep3 = async (event) => {
+    const makeInvoicePayment = async (event) => {
         event.preventDefault()
         setLoading(true)
         try {
@@ -49,7 +49,7 @@ const BillingDetails = () => {
                 setLoading(false)
                 navigate("/clients/payment/success");
                 handleClosesConfirmationModal();
-            } else if (response.data.redirect_url) {
+            } else if (response.data.redirect_url && authUserState.user.is_admin===false) {
                 const link = document.createElement('a');
                 link.href = response.data.redirect_url;
                 link.target = '_blank';
@@ -227,7 +227,7 @@ const BillingDetails = () => {
                             <Button variant="light" onClick={handleClosesConfirmationModal}>
                                 Cancel
                             </Button>
-                            <Button variant="dark" onClick={submitStep3} disabled={loading}>
+                            <Button variant="dark" onClick={makeInvoicePayment} disabled={loading}>
                                 Confirm Payment {loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}
                             </Button>
                         </div>
