@@ -112,19 +112,13 @@ class Api::Client::StripeController < ClientApplicationController
     end
     if invoice.instant_pay && account.payouts_enabled && account.details_submitted
       external_account_id = account.external_accounts.data.first.id
-      payout = Stripe::Payout.create(
-        {
-          amount: total_amount,
-          currency: 'usd',
-          destination: external_account_id,
-          method: 'instant',
-          description: 'Payment for services rendered',
-          metadata: { invoice_id: invoice.id }
-        },
-        { stripe_account: account.id }
-      )
-
-      render json: { message: 'Instant payment sent successfully', payout_id: payout.id }, status: :ok
+      transfer = Stripe::Transfer.create({
+        amount: total_amount,
+        currency: 'usd',
+        destination: account.id,
+        transfer_group: 'ORDER_95',
+      })
+      render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)
     end
@@ -147,9 +141,6 @@ class Api::Client::StripeController < ClientApplicationController
       return
     end
     case event['type']
-    when 'payout.paid'
-      payout = event['data']['object']
-      handle_successful_payout(payout)
     when 'transfer.created'
       transfer = event['data']['object']
       handle_successful_transfer(transfer)
@@ -172,16 +163,6 @@ class Api::Client::StripeController < ClientApplicationController
     )
     render json: { message: 'payment initiated successfully' }, status: :ok
 
-  end
-
-
-  def handle_successful_payout(payout)
-    invoice_id = payout['metadata']['invoice_id']
-    invoice = Invoice.find_by(id: invoice_id)
-
-    if invoice
-      invoice.update(is_paid: true)
-    end
   end
 
   def handle_successful_transfer(transfer)

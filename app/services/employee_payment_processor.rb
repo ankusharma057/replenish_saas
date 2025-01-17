@@ -32,19 +32,13 @@ class EmployeePaymentProcessor
       end
 
       external_account_id = account.external_accounts.data.first.id
-      payout = Stripe::Payout.create(
-        {
-          amount: total_amount,
-          currency: 'usd',
-          destination: external_account_id,
-          method: 'instant',
-          description: 'Payment for services rendered',
-          metadata: { invoice_id: invoice.id }
-        },
-        { stripe_account: account.id }
-      )
-
-      Rails.logger.info "Payment sent successfully for Employee #{employee_id}, Invoice #{invoice_id}, Payout ID: #{payout.id}"
+      transfer = Stripe::Transfer.create({
+        amount: total_amount,
+        currency: 'usd',
+        destination: account.id,
+        transfer_group: 'ORDER_95',
+      })
+      Rails.logger.info "Payment sent successfully for Employee #{employee_id}, Invoice #{invoice_id}, Transfer ID: #{transfer.id}"
 
       invoice.update(is_paid: 'true')
 
