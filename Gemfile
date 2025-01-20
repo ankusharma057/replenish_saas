@@ -69,9 +69,9 @@ gem 'wkhtmltopdf-heroku', '3.0.0', group: [:production, :staging]
 gem 'faker'
 # To use the messaging services:
 gem 'twilio-ruby'
-
 # For Payments
 gem 'stripe'
+gem 'whenever', require: false
 
 # For pagination
 gem 'will_paginate', '~> 4.0', '>= 4.0.1'
