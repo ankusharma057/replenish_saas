@@ -45,9 +45,7 @@ export default function SignUp() {
         setTimeout(() => {
           openOnboardingUrl(newUser.data.onboarding_url)
         }, 1000)
-      }
-      // console.log("@@@@@@@newUser",newUser);
-      
+      }      
       // const { data } = await loginUser(newUser.data.employee);
       // console.log("@@@@@@data",data);
       
@@ -59,17 +57,6 @@ export default function SignUp() {
       //   });
       // }
     } catch (error) {
-      // let errorString = "";
-      // Object.keys(error.response.data.error || {}).forEach((key) => {
-      //   errorString =
-      //     errorString +
-      //     " " +
-      //     key +
-      //     " " +
-      //     error.response.data.error[key][0] +
-      //     " ";
-      // });
-      console.log("@@@@@@",error.response.data.error);
       if(Array.isArray(error.response.data.error)){
         for(let i=0;i<error.response.data.error.length;i++){
           toast.error(error.response.data.error[i])

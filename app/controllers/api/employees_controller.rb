@@ -28,6 +28,8 @@ class Api::EmployeesController < ApplicationController
 
   def create
     @employee = Employee.new(employee_params)
+    default_role = Role.find_by(name: "mentor")
+    @employee.roles << default_role if default_role.present? && @employee.roles.empty?
     if @employee.save
       begin
         onboarding_url = create_stripe_account(@employee)
