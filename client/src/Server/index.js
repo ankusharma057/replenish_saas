@@ -1195,3 +1195,9 @@ export const onboardEmployeeToStripe = async (data, refetch) =>
       ...data,
     },
   });
+export const stripeOnboardComplete = async (data, refetch) =>
+  api.post("/api/stripe_onboarding_complete",data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });

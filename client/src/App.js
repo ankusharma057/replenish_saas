@@ -61,6 +61,7 @@ const AddNewClient= lazy(()=>import("./pages/Clients/AddNewClient"))
 const Reports= lazy(()=>import("./pages/Reports/Reports"))
 const ReportSummary= lazy(()=>import("./pages/Reports/ReportSummary"))
 const BillingDetails =lazy(()=>import("./pages/BillingDetails/BillingDetails"));
+const StripeOnboardSuccess =lazy(()=>import("./pages/BillingDetails/StripeOnboardSuccess"));
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -267,6 +268,7 @@ function App() {
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
+                  <Route path="/stripe-onboard-success" element={<StripeOnboardSuccess />} />
                   {/* <Route path="/settings" element={<Settings />} /> */}
                   <Route path="/settings" element={<Settings2 />} >
                     <Route path="locations" element={<Locations />} />
@@ -290,6 +292,7 @@ function App() {
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
+                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
                 </>
               )}
             </>

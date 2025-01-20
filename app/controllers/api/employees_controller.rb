@@ -158,6 +158,27 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def stripe_onboarding_complete
+    employee_id = params[:employee_id]
+    stripe_account_id = params[:stripe_account_id]
+
+    employee = Employee.find_by(id: employee_id)
+
+    if employee.nil?
+      render json: { error: 'Employee not found' }, status: :not_found
+      return
+    end
+
+    if stripe_account_id.nil?
+      render json: { error: 'Stripe account ID is missing' }, status: :unprocessable_entity
+      return
+    end
+
+    employee.update(stripe_account_id: stripe_account_id)
+
+    render json: { message: 'Stripe account linked successfully', employee_id: employee.id, stripe_account_id: stripe_account_id }, status: :ok
+  end
+
   private
 
   def create_stripe_account(employee)
@@ -174,14 +195,14 @@ class Api::EmployeesController < ApplicationController
       }
     })
 
+    return_url = "#{request.base_url}/stripe-onboard-success/#{employee.id}/#{account.id}"
     account_link = Stripe::AccountLink.create({
       account: account.id,
       refresh_url: "#{request.base_url}/myprofile",
-      return_url: "#{request.base_url}/myprofile",
+      return_url: return_url,
       type: 'account_onboarding'
     })
-    employee.update!(stripe_account_id: account.id)
-    account_link.url 
+    account_link.url
   end
 
   def employee_params
