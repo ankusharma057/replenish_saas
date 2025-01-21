@@ -4,9 +4,10 @@ import { BadgeDollarSign, Trash } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {  getSingleInvoice, finalizePayment, onboardEmployeeToStripe } from '../../Server';
 import moment from 'moment';
-import { Document, Page } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../../context/AuthUserContext';
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 const BillingDetails = () => {
     const { authUserState } = useAuthContext();
     const navigate = useNavigate();
@@ -123,14 +124,14 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50 fs-6'>Vendor Business Name</Form.Label>
-                                                <Form.Control placeholder="Vendor Name" value={invoiceData?.vendor_name} disabled />
+                                                <Form.Control placeholder="Vendor Name" value={invoiceData?.invoice.vendor_name} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3 '>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
                                                 <InputGroup>
-                                                    <Form.Control placeholder="Bill Amount" value={"$" + invoiceData?.charge} disabled />
+                                                    <Form.Control placeholder="Bill Amount" value={"$" + invoiceData?.invoice.charge} disabled />
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -140,7 +141,7 @@ const BillingDetails = () => {
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Invoice#</Form.Label>
-                                                <Form.Control type="number" value={invoiceData?.id} disabled />
+                                                <Form.Control type="number" value={invoiceData?.invoice.id} disabled />
                                                 <Form.Text>Add an invoice number to help your vendor reconcile payments</Form.Text>
                                             </div>
                                         </Col>
@@ -148,19 +149,19 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
-                                                <Form.Control type="text" value={invoiceData?.invoice?.instant_pay ===true  ? "One Day payment":"Default"} disabled />
+                                                <Form.Control type="text" value={invoiceData?.invoice.invoice?.instant_pay ===true  ? "One Day payment":"Default"} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Invoice Date</Form.Label>
-                                                <Form.Control type="date" value={moment(invoiceData?.created_at).format("YYYY-MM-DD")} disabled />
+                                                <Form.Control type="date" value={moment(invoiceData?.invoice.created_at).format("YYYY-MM-DD")} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Due Date</Form.Label>
-                                                <Form.Control type="date" value={moment(invoiceData?.date_of_service, "YYYY-MM-DD").format("YYYY-MM-DD")} disabled />
+                                                <Form.Control type="date" value={moment(invoiceData?.invoice.date_of_service, "YYYY-MM-DD").format("YYYY-MM-DD")} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={12} sm={12} md={12} lg={12}>
@@ -196,7 +197,7 @@ const BillingDetails = () => {
                                                 </Alert>
                                             </div>
                                         </Col>
-                                        {invoiceData?.products_hash.products.map((product,index) => {
+                                        {invoiceData?.invoice.products_hash.products.map((product,index) => {
                                             return <Row key={index}>
                                                 <Col xs={1} sm={1} md={1} lg={1}>
                                                     <div className='mb-3 d-flex justify-content-center'>
@@ -221,7 +222,7 @@ const BillingDetails = () => {
                                             <div className='d-flex justify-content-end gap-[20px]'>
                                                 <Button size='sm' variant='outline-secondary' onClick={()=>navigate("/invoices-to-pay")}>Cancel</Button>
                                                 {(!authUserState.user?.is_admin && authUserState?.user?.is_mentor && !authUserState.user.stripe_account_id) && <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}</Button>}
-                                                {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
+                                                {(authUserState.user?.is_admin && !invoiceData?.invoice.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                             </div>
                                         </Col>
                                     </Row>
@@ -241,7 +242,7 @@ const BillingDetails = () => {
                         </div>
                         <h5 className="fw-bold mt-3">Thanks a lot for putting up this order</h5>
                         <p className="text-muted">
-                            Your payment order for invoice id{" "}<strong>{invoiceData?.id}</strong> has been
+                            Your payment order for invoice id{" "}<strong>{invoiceData?.invoice.id}</strong> has been
                             ready to proceed. You’ll find all the details about your order below, and
                             we’ll send you a payment confirmation email as soon as your payment
                             done.
@@ -249,9 +250,9 @@ const BillingDetails = () => {
                         <div className="border p-3 rounded mb-3">
                             <div className="d-flex justify-content-between">
                                 <span>Order Review</span>
-                                <span>${invoiceData?.charge}</span>
+                                <span>${invoiceData?.invoice.charge}</span>
                             </div>
-                            <small className="text-muted">{invoiceData?.products_hash?.products.length} products in this invoice</small>
+                            <small className="text-muted">{invoiceData?.invoice.products_hash?.products.length} products in this invoice</small>
                         </div>
                         <div className="d-flex justify-content-between">
                             <Button variant="light" onClick={handleClosesConfirmationModal}>
