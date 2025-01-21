@@ -13,12 +13,23 @@ class Api::InvoicesController < ApplicationController
 
   def show
     invoice = Invoice.find(params[:id])
-    invoice.finalize_and_attach_pdf
-    render json: invoice.as_json.merge(
-      pdf_url: invoice.document.attached? ? url_for(invoice.document) : nil,
-      invoice: invoice
-    ), status: :ok
+
+    if invoice.document.attached?
+      pdf_url = Rails.application.routes.url_helpers.rails_blob_url(
+        invoice.document,
+        host: request.host_with_port,
+        only_path: false
+      )
+
+      render json: {
+        pdf_url: pdf_url,
+        invoice: invoice
+      }, status: :ok
+    else
+      render json: { error: 'PDF not found' }, status: :not_found
+    end
   end
+
 
   def update
     if @invoice.update!(invoice_params)
