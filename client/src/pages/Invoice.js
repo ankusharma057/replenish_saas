@@ -18,7 +18,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import InvoiceTabular from "../components/Tables/InvoiceTabular";
 import FinalizeInvoicesTable from "../components/Tables/FinalizeInvoicesTable";
-import { deleteInvoice } from "../../Server";
+import { deleteInvoice } from "../Server";
 
 const styles = {
   tableWrapper: {
