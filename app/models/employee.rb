@@ -11,6 +11,7 @@ class Employee < ApplicationRecord
   validates_uniqueness_of :email, case_sensitive: false
   validates :plan, inclusion: { in: plans.keys }, allow_nil: true
   validate :verify_employee_mentors
+  validates :stripe_account_id, uniqueness: true, allow_nil: true
   has_one_attached :profile_photo
   has_many :invoices
   has_many :products

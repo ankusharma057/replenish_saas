@@ -29,12 +29,19 @@ class Api::EmployeesController < ApplicationController
   def create
     @employee = Employee.new(employee_params)
     if @employee.save
-      @employee.send_reset_password_mail
-      render json: @employee, status: :created
+      begin
+        onboarding_url = create_stripe_account(@employee)
+        @employee.send_reset_password_mail
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee, onboarding_url: onboarding_url }, status: :created
+      rescue => e
+        @employee.destroy
+        render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
+      end
     else
-      render json: { 'error': @employee.errors }, status: :bad_request
+      render json: { error: @employee.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
 
   def locations
     locations = @employee.locations
@@ -130,6 +137,34 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def create_stripe_account(employee)
+    if employee.stripe_account_id.present?
+      raise StandardError, 'Stripe account already exists for this employee'
+    end
+
+    account = Stripe::Account.create({
+      type: 'express',
+      country: 'US',
+      email: employee.email,
+      capabilities: {
+        transfers: { requested: true }
+      }
+    })
+
+    employee.update!(stripe_account_id: account.id)
+
+    account_link = Stripe::AccountLink.create({
+      account: account.id,
+      refresh_url: "#{request.base_url}/myprofile",
+      return_url: "#{request.base_url}/myprofile",
+      type: 'account_onboarding'
+    })
+
+    account_link.url 
+  end
+
+
+
   private
 
   def employee_params
@@ -148,3 +183,4 @@ class Api::EmployeesController < ApplicationController
     params[:password] == params[:confirmPassword] 
   end
 end
+  

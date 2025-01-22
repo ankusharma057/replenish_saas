@@ -831,7 +831,8 @@ export default function AddInvoices() {
       income_flag: replenishIncomeFlag(),
       get_total_price_by_client: getTotalPaidByClient(),
       total_consumable_cost: getConsumableRetailPrice(),
-      location_id:locationId
+      location_id:locationId,
+      instant_pay: formData?.instant_pay
     };    
     const invoiceList = [
       ...invoiceArray,
@@ -1143,7 +1144,16 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
-
+                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
+                    Same Day Payment:
+                    <input
+                      type="checkbox"
+                      name="instant_pay"
+                      checked={formData?.instant_pay}
+                      onChange={(event) => handleInputChange(event)}
+                      className="ml-2"
+                    />
+                  </label>
 
 
                   <div className="border-t-[1px]"></div>

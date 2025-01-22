@@ -58,6 +58,15 @@ export default function CreateStaffCard({ show, onHide }) {
   //     setLoading(false);
   //   }
   // };
+  const openOnboardingUrl = (url) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -73,12 +82,18 @@ export default function CreateStaffCard({ show, onHide }) {
         profile_photo: selectedFiles[0],
       };
   
-      await createEmployee(updatedFormData);
+      let response = await createEmployee(updatedFormData);
       toast.success("User created successfully");
-  
+
       setFormData(formInitialState);
       getEmployeesList(true);
       e.target.reset(); 
+      setSelectedFiles([])
+      if (response?.data?.onboarding_url) {
+        setTimeout(() => {
+          openOnboardingUrl(response?.data?.onboarding_url)
+        }, 1000)
+      }
     } catch (error) {
       let errorString = "";
   
