@@ -1201,3 +1201,7 @@ export const stripeOnboardComplete = async (data, refetch) =>
       ignoreCache: refetch,
     },
   });
+  export const invoicePDFShow = async (invoiceID) =>
+    api.get(`/api/invoices/${invoiceID}/show_pdf`, {
+      responseType: "blob",
+    });
