@@ -196,7 +196,7 @@ class Api::InvoicesController < ApplicationController
     invoice = Invoice.find(params[:id])
 
     if invoice.document.attached?
-      blob = invoice.document
+      blob = invoice.document.download
       send_data blob,
         type: invoice.document.content_type,
         filename: invoice.document.filename.to_s,
