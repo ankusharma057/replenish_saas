@@ -7,7 +7,7 @@ import {
 } from "../Server";
 import InvoiceCard from "../components/Cards/InvoiceCard";
 import DataFilterService from "../services/DataFilterService";
-import { Button, ButtonGroup, Table, ToggleButton } from "react-bootstrap";
+import { Button, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import CustomModal from "../components/Modals/CustomModal";
@@ -16,7 +16,53 @@ import ModalWraper from "../components/Modals/ModalWraper";
 import FinalizeInvoicesCard from "../components/Cards/FinalizeInvoicesCard";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { Pagination } from "@mui/material";
+import InvoiceTabular from "../components/Tables/InvoiceTabular";
+import FinalizeInvoicesTable from "../components/Tables/FinalizeInvoicesTable";
+import { deleteInvoice } from "../../Server";
+
+const styles = {
+  tableWrapper: {
+    width: '90%',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '10px',
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  headerRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    border: '1px solid #333',
+    padding: '10px 15px',
+    fontWeight: 'bold',
+    borderRadius: '4px',
+    backgroundColor: '#e9ecef',
+  },
+  invoiceRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    border: '1px solid #dee2e6',
+    padding: '10px 15px',
+    borderRadius: '4px',
+    backgroundColor: '#f8f9fa',
+  },
+  invoiceColumn: {
+    flexBasis: '20%',
+    flexGrow: 1,
+    textAlign: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '5px',
+  },
+};
+
 
 const Invoice = () => {
   const [radioValue, setRadioValue] = useState("1");
@@ -37,6 +83,7 @@ const Invoice = () => {
   const [finalized, setFinalized] = useState(false);
   const [totalEntries, setTotalEntries] = useState(0);
   const [allInvoices, setAllInvoices] = useState([]);
+  const [inputValue, setInputValue] = useState(pageNumber);
 
   const getInvoices = async (refetch = false) => {
     const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber}, refetch);
@@ -106,8 +153,6 @@ const Invoice = () => {
   ];
 
   const seeMore = (invoice) => {
-    console.log("@@@@invoice",invoice);
-    
     setSingleInvoice(invoice);
     setModalShow(true);
   };
@@ -192,6 +237,108 @@ const Invoice = () => {
     await getInvoices(true);
   };
 
+  const [sortConfig, setSortConfig] = useState({ key: 'invoiceId', direction: 'asc' });
+
+  const [sortedInvoices, setSortedInvoices] = useState([]);
+
+  const sortInvoices = (invoices, key, direction) => {
+    const sortedInvoices = [...invoices];
+    sortedInvoices.sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === 'asc' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+    return sortedInvoices;
+  };
+
+  useEffect(() => {
+    if (invoiceList[selectList]) {
+      const sorted = sortInvoices(invoiceList[selectList], sortConfig.key, sortConfig.direction);
+      setSortedInvoices(sorted);
+    }
+  }, [sortConfig, invoiceList, selectList]);
+
+  // Handle column header click to sort
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const [selectedInvoices, setSelectedInvoices] = useState([]);
+
+  const handleBulkDelete = async () => {
+    const numberOfInvoices = selectedInvoices.length;
+    const confirmation = window.confirm(
+      `Are you sure you want to delete ${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""}?`
+    );
+  
+    if (confirmation) {
+      try {
+        // Loop through the selected invoices and delete each one
+        for (const invoice of selectedInvoices) {
+          const { data } = await deleteInvoice(invoice.id, true); // Assuming `true` triggers a refetch after deletion
+          if (!data) {
+            toast.error("Something went wrong while deleting invoices.");
+            return; // Exit early if any deletion fails
+          }
+        }
+        
+        toast.success(`${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""} deleted successfully.`);
+        getInvoices(true); 
+  
+      } catch (error) {
+        toast.error("An error occurred while deleting invoices.");
+      }
+  
+      // Optionally, reset the selection after deletion
+      setSelectedInvoices([]);
+    }
+  };
+  
+
+  const toggleInvoiceSelection = (invoiceId) => {
+    setSelectedInvoices((prevSelected) => {
+      if (prevSelected.includes(invoiceId)) {
+        // If already selected, remove it
+        return prevSelected.filter((id) => id !== invoiceId);
+      } else {
+        // If not selected, add it
+        return [...prevSelected, invoiceId];
+      }
+    });
+  };
+
+  const handlePageChange = (event) => {
+    const newPage = parseInt(event.target.value);
+    if (newPage > 0 && newPage <= totalPages) {
+      setInputValue(newPage);
+      setPageNumber(newPage);
+    }
+  };
+
+  const handleInputBlur = () => {
+    setInputValue(pageNumber); // Reset the input if user leaves it blank or invalid
+  };
+
+  const handlePageSubmit = (event) => {
+    event.preventDefault();
+    const newPage = parseInt(inputValue);
+    if (newPage > 0 && newPage <= totalPages) {
+      setPageNumber(newPage);
+    } else {
+      setInputValue(pageNumber); // Reset the input if invalid
+    }
+  };
+
+
+
   return (
     <>
       <br />
@@ -271,24 +418,55 @@ const Invoice = () => {
         }
         size="lg"
       >
-        <div className="justify-center flex flex-wrap gap-3 min-h-[5rem] max-h-[35rem] overflow-y-auto">
-          {allInvoices?.map((invoice) => {
-            return (
-              <FinalizeInvoicesCard
-                key={invoice.id}
-                employeeName={invoice.employee_name}
-                clientName={invoice.client?.name}
-                invoiceId={invoice.id}
-                invoice={invoice}
-                finalizeInvoiceSubmit={finalizeInvoiceSubmit}
-                addMultipleFinalize={addMultipleFinalize}
-                multipleInvoiceData={multipleInvoiceData}
-              />
-            );
-          })}
-        </div>
+        <div className="justify-center flex flex-wrap gap-3 min-h-[5rem] max-h-[35rem] overflow-y-auto" style={{ display: 'block' }}>
+  {/* Header Row */}
+  <div style={styles.headerRow}>
+    <div
+      style={styles.invoiceColumn}
+      onClick={() => handleSort('invoice.id')} // Sorting by Invoice Id
+    >
+      <strong>Employee Name</strong>
+      {/* {sortConfig.key === 'invoiceId' ? (sortConfig.direction === 'asc' ? ' ↑' : ' ↓') : ''} */}
+    </div>
+    <div
+      style={styles.invoiceColumn}
+      onClick={() => handleSort('employeeMentor')}
+    >
+      <strong>Invoice Id</strong>
+    </div>
+    <div
+      style={styles.invoiceColumn}
+      onClick={() => handleSort('details')}
+    >
+      <strong>Client Name</strong>
+    </div>
+    <div
+      style={styles.invoiceColumn}
+      onClick={() => handleSort('finalize')}
+    >
+      <strong>Date of Service</strong>
+    </div>
+  </div>
+
+  {/* Table Rows */}
+  {allInvoices?.map((invoice) => {
+    return (
+      <FinalizeInvoicesTable
+        key={invoice.id}
+        employeeName={invoice.employee_name}
+        clientName={invoice.client?.name}
+        invoiceId={invoice.id}
+        invoice={invoice}
+        finalizeInvoiceSubmit={finalizeInvoiceSubmit}
+        addMultipleFinalize={addMultipleFinalize}
+        multipleInvoiceData={multipleInvoiceData}
+      />
+    );
+  })}
+</div>
+
       </ModalWraper>
-      <div className="px-3" >
+      <div className="p-4">
         {modalShow && (
           <CustomModal
             show={modalShow}
@@ -302,6 +480,7 @@ const Invoice = () => {
         )}
 
         {/* <div className="flex gap-x-4  justify-end my-4">
+          {/* Pagination controls *
           <Button
             onClick={() => setPageNumber(pageNumber - 1)}
             className="!bg-cyan-400 !border-cyan-500"
@@ -319,64 +498,139 @@ const Invoice = () => {
             <ChevronRight />
           </Button>
         </div> */}
-        <div className="d-flex justify-content-end align-items-center w-100">
-            <Pagination count={totalPages} variant="outlined" shape="rounded" onChange={(event, value) => { setPageNumber(value) }} />
+        <div className="justify-center flex flex-wrap gap-3">
+        <div style={styles.tableWrapper}>
+      <div style={styles.container}>
+        <div style={styles.headerRow}>
+        <div
+            style={styles.invoiceColumn}
+            onClick={() => handleSort('invoice.id')}  // Sorting by Invoice Id
+          >
+            <strong>Invoice Id</strong>
+            {sortConfig.key === 'invoiceId' ? (sortConfig.direction === 'asc' ? ' ↑' : ' ↓') : ''}
           </div>
-        <div className="justify-center flex flex-wrap gap-3 mt-3" style={{height:"66vh",overflow:"scroll"}}>
-          {/* {invoiceList[selectList]?.map((invoice) => {
-            return (
-              <InvoiceCard
-                key={invoice.id}
-                invoice={invoice}
-                finalizeInvoiceSubmit={finalizeInvoiceSubmit}
-                seeMore={seeMore}
-              />
-            );
-          })} */}
-
-          
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Invoice ID</th>
-                <th>Employee Name</th>
-                <th>Client Name</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoiceList[selectList]?.map((invoice,index) => (
-                <tr>
-                  <td>{index+1}</td>
-                 <td>{invoice.id}</td>
-                 <td>{invoice.employee?.name}</td>
-                 <td>{invoice.client?.name}</td>
-                 <td>
-                  {/* <div> */}
-                  <InvoiceCard
-                    key={invoice.id}
-                    invoice={invoice}
-                    finalizeInvoiceSubmit={finalizeInvoiceSubmit}
-                    seeMore={seeMore}
-                    getInvoices={getInvoices}
-                  />
-                  {/* </div> */}
-                 </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          {/* {invoiceList[selectList]?.map((invoice,index) => (
-          <InvoiceCard
-                    key={invoice.id}
-                    invoice={invoice}
-                    finalizeInvoiceSubmit={finalizeInvoiceSubmit}
-                    seeMore={seeMore}
-                    getInvoices={getInvoices}
-                  />
-                ))} */}
+          <div
+            style={styles.invoiceColumn}
+            onClick={() => handleSort('employeeMentor')}
+          >
+            <strong>Employee/Mentor</strong>
+          </div>
+          <div
+            style={styles.invoiceColumn}
+            onClick={() => handleSort('details')}
+          >
+            <strong>See More Details</strong>
+          </div>
+          <div
+            style={styles.invoiceColumn}
+            onClick={() => handleSort('finalize')}
+          >
+            <strong>Finalize Invoice</strong>
+          </div>
+          {/* <div
+            style={styles.invoiceColumn}
+            onClick={() => handleSort('delete')}
+          >
+            {/* <strong>Delete</strong> 
+          </div> */}
         </div>
+
+        {sortedInvoices.length > 0 ? (
+          sortedInvoices.map((invoice) => (
+            <InvoiceTabular
+              key={invoice.id}
+              invoice={invoice}
+              seeMore={seeMore}
+              finalizeInvoiceSubmit={finalizeInvoiceSubmit}
+              getInvoices={getInvoices}
+              toggleInvoiceSelection={toggleInvoiceSelection}
+            />
+          ))
+        ) : (
+          <div style={styles.invoiceRow}>
+            <div style={styles.invoiceColumn}>
+              No invoices available.
+            </div>
+          </div>
+        )}
+        {selectedInvoices.length > 0 && (
+        <button 
+        onClick={handleBulkDelete}
+        style={{
+          backgroundColor: '#dc3545', // Red background color for delete button
+          color: 'white', // White text color
+          padding: '8px 15px', // Padding around the text
+          border: 'none', // Removing the default border
+          borderRadius: '5px', // Rounded corners
+          fontSize: '14px', // Font size
+          cursor: 'pointer', // Cursor pointer on hover
+          display: 'block', // Makes the button inline
+          marginTop: '10px', // Space at the top
+          fontWeight: 'bold', // Makes text bold
+          width: '150px', // Set a specific width for the button
+          textAlign: 'center' // Center the text inside the button
+        }}
+      >
+        Delete Selected ({selectedInvoices.length})
+      </button>
+      
+      )}
+      </div>
+    </div>
+        </div>
+        {/* <div className="flex gap-x-4  justify-end my-4">
+          {/* Pagination controls *
+          <Button
+            onClick={() => setPageNumber(pageNumber - 1)}
+            className="!bg-cyan-400 !border-cyan-500"
+            disabled={pageNumber === 1}
+          >
+            <ChevronLeft />
+          </Button>
+          <Button
+            onClick={() => setPageNumber(pageNumber + 1)}
+            className="!bg-cyan-400 !border-cyan-500"
+            disabled={
+              pageNumber === totalPages
+            }
+          >
+            <ChevronRight />
+          </Button>
+        </div> */}
+        <div className="flex gap-x-4 justify-end my-4">
+      {/* Left Button */}
+      <Button
+        onClick={() => setPageNumber(pageNumber - 1)}
+        className="!bg-cyan-400 !border-cyan-500"
+        disabled={pageNumber === 1}
+      >
+        <ChevronLeft />
+      </Button>
+
+      {/* Page Input */}
+      <form onSubmit={handlePageSubmit} className="flex items-center">
+        <span>Page</span>
+        <input
+          type="number"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={handleInputBlur}
+          className="mx-2 w-12 text-center"
+          min={1}
+          max={totalPages}
+        />
+        <span>of {totalPages}</span>
+      </form>
+
+      {/* Right Button */}
+      <Button
+        onClick={() => setPageNumber(pageNumber + 1)}
+        className="!bg-cyan-400 !border-cyan-500"
+        disabled={pageNumber === totalPages}
+      >
+        <ChevronRight />
+      </Button>
+    </div>
       </div>
     </>
   );
