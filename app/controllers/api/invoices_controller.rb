@@ -13,23 +13,8 @@ class Api::InvoicesController < ApplicationController
 
   def show
     invoice = Invoice.find(params[:id])
-
-    if invoice.document.attached?
-      pdf_url = Rails.application.routes.url_helpers.rails_blob_url(
-        invoice.document,
-        host: request.host_with_port,
-        only_path: false
-      )
-
-      render json: {
-        pdf_url: pdf_url,
-        invoice: invoice
-      }, status: :ok
-    else
-      render json: { error: 'PDF not found' }, status: :not_found
-    end
+    render json: invoice, status: :ok    
   end
-
 
   def update
     if @invoice.update!(invoice_params)
@@ -204,6 +189,20 @@ class Api::InvoicesController < ApplicationController
       end
     else
       render json: { message: 'Invoice not found' }, status: :not_found
+    end
+  end
+
+  def show_pdf
+    invoice = Invoice.find(params[:id])
+
+    if invoice.document.attached?
+      blob = invoice.document
+      send_data blob,
+        type: invoice.document.content_type,
+        filename: invoice.document.filename.to_s,
+        disposition: 'inline'
+    else
+      render json: { error: 'PDF not found' }, status: :not_found
     end
   end
 

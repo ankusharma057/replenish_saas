@@ -108,6 +108,7 @@ mount Sidekiq::Web => '/sidekiq'
         get :download_attachment
         put :update_images
         patch :mark_paid
+        get :show_pdf
       end
     end
 
