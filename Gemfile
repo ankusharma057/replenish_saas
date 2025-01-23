@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "2.7.4"
+ruby "3.1.0"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.0.4", ">= 7.0.4.2"
@@ -42,7 +42,6 @@ gem "rack-cors"
 # To store the env variables 
 gem 'figaro'
 gem 'axlsx'
-
 gem 'acts_as_list'
 
 group :development, :test do
@@ -65,13 +64,13 @@ end
 gem 'active_model_serializers', '~> 0.10.13'
 gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary', group: [:development, :test]
-gem 'wkhtmltopdf-heroku', '3.0.0', group: [:production, :staging]
+gem 'wkhtmltopdf-heroku', '2.12.6.0', group: :production
 gem 'faker'
 # To use the messaging services:
 gem 'twilio-ruby'
+
 # For Payments
 gem 'stripe'
-gem 'whenever', require: false
 
 # For pagination
 gem 'will_paginate', '~> 4.0', '>= 4.0.1'
