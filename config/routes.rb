@@ -185,6 +185,7 @@ mount Sidekiq::Web => '/sidekiq'
     post 'add_note', to: 'schedules#add_note'
     post 'employee_stripe_connect', to: 'employees#employee_stripe_connect'
     post 'stripe_onboarding_complete', to: 'employees#stripe_onboarding_complete'
+    get 'stripe_account_details', to: "employees#stripe_account_details"
   end
   get '*path', to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html?}
 end

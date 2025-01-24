@@ -32,9 +32,8 @@ class Api::EmployeesController < ApplicationController
     @employee.roles << default_role if default_role.present? && @employee.roles.empty?
     if @employee.save
       begin
-        onboarding_url = create_stripe_account(@employee)
         @employee.send_reset_password_mail
-        render json: { message: 'Employee and Stripe account created successfully', employee: @employee, onboarding_url: onboarding_url }, status: :created
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee}, status: :created
       rescue => e
         @employee.destroy
         render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
@@ -179,6 +178,30 @@ class Api::EmployeesController < ApplicationController
     employee.update(stripe_account_id: stripe_account_id)
 
     render json: { message: 'Stripe account linked successfully', employee_id: employee.id, stripe_account_id: stripe_account_id }, status: :ok
+  end
+
+  def stripe_account_details
+    employee = Employee.find(params[:employee_id])
+    stripe_account_id = employee.stripe_account_id
+    begin
+      account = Stripe::Account.retrieve(stripe_account_id)
+      bank_accounts = account.external_accounts.data
+
+      bank_account_details = bank_accounts.map do |bank_account|
+        {
+          id: bank_account.id,
+          bank_name: bank_account.bank_name,
+          last4: bank_account.last4,
+          routing_number: bank_account.routing_number,
+          status: bank_account.status
+        }
+      end
+
+      render json: { bank_accounts: bank_account_details }, status: :ok
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+    
   end
 
   private
