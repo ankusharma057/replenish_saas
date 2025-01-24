@@ -2,7 +2,7 @@ class Invoice < ApplicationRecord
   require 'wicked_pdf'
 
   include PdfDownloadable
-
+  has_paper_trail only: [:charge, :instant_pay]
   belongs_to :employee
   belongs_to :mentor, class_name: "Employee", optional: true
   belongs_to :client
