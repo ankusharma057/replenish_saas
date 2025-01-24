@@ -107,6 +107,7 @@ class Api::Client::StripeController < ClientApplicationController
 
     account = Stripe::Account.retrieve(employee.stripe_account_id)
     if account.external_accounts.data.empty?
+      EmployeeMailer.notify_missing_bank_account(employee).deliver_now
       render json: { error: 'This employee has not added a bank account to their Stripe account.' }, status: :unprocessable_entity
       return
     end
@@ -119,9 +120,11 @@ class Api::Client::StripeController < ClientApplicationController
         transfer_group: 'ORDER_95',
       })
       invoice.update(is_paid: true)
+      EmployeeMailer.payment_initiated(employee, invoice).deliver_now
       render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)
+
     end
   end
 
@@ -160,8 +163,9 @@ class Api::Client::StripeController < ClientApplicationController
       employee_id: employee_id,
       invoice_id: invoice_id,
       total_amount: total_amount,
-      scheduled_at: Time.current + 3.days
+      scheduled_at: Time.current + 10.days
     )
+    EmployeeMailer.scheduled_payment_notification(employee_id, invoice_id, total_amount).deliver_now
     render json: { message: 'payment initiated successfully' }, status: :ok
 
   end
