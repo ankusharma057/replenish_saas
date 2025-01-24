@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   Receipt,
   CalendarCheck,
+  Landmark,
 } from "lucide-react";
 import { ImProfile } from "react-icons/im";
 import Treatment from "./Treatment";
@@ -51,6 +52,7 @@ import { FaRegEdit } from "react-icons/fa";
 import Mentorship from "./Mentorship";
 import MPInvoice from "./MPInvoice";
 import PlanSubscription from "./PlanSubscription";
+import BankDetails from "./BankDetails";
 
 
 const MyProfile = () => {
@@ -572,6 +574,20 @@ const MyProfile = () => {
             >
               <Settings /> Settings
             </div>
+            <div
+              role="button"
+              onClick={() => {
+                currentTab !== "bank details" && setCurrentTab("bank details");
+                if (window.innerWidth < 1024) {
+                  collapse();
+                }
+              }}
+              className={`p-2 flex gap-x-2 border-b cursor-pointer hover:bg-gray-200 rounded-md ${
+                currentTab === "bank details" && "pointer-events-none bg-gray-200"
+              } `}
+            >
+              <Landmark /> Bank Details
+            </div>
           </div>
         }
       >
@@ -1088,8 +1104,12 @@ const MyProfile = () => {
             </div>
           )}
 
+
           {currentTab === "mp" && (
             <Mentorship employee={authUserState.user} />
+          )}
+          {currentTab === "bank details" && (
+            <BankDetails employee={authUserState.user} />
           )}
 
           {currentTab === "mp_invoice" && (

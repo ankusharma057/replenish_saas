@@ -14,7 +14,7 @@ const formInitialState = {
   vendor_name: "",
   password: "",
   gfe: false,
-  service_percentage: 0,
+  service_percentage: 50,
   retail_percentage: 0,
   is_inv_manager: false,
   is_admin: false,
@@ -25,37 +25,14 @@ export default function SignUp() {
   const [formData, setFormData] = useState(formInitialState);
   const { authUserState, authUserDispatch } = useAuthContext();
   const navigate = useNavigate();
-
-  const openOnboardingUrl = (url) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
   const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
       const newUser = await createEmployee(formData);
-      if (newUser.data.onboarding_url) {
-        setTimeout(() => {
-          openOnboardingUrl(newUser.data.onboarding_url)
-        }, 1000)
-      }      
-      // const { data } = await loginUser(newUser.data.employee);
-      // console.log("@@@@@@data",data);
-      
-      // if (data) {
-      //   authUserDispatch({ type: LOGIN, payload: data });
-      //   toast.success("Successfully Signed up & Logged In");
-      //   navigate("/", {
-      //     replace: true,
-      //   });
-      // }
+      setFormData(formInitialState);
+        navigate("/", {replace: true,});
     } catch (error) {
       if(Array.isArray(error.response.data.error)){
         for(let i=0;i<error.response.data.error.length;i++){

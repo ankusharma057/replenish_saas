@@ -186,7 +186,7 @@ const InvoicesToPay = () => {
                         />
                       </th>
                       <th onClick={() => sortTable('client_name')} style={{ cursor: 'pointer' }}>
-                        Vendor {getSortIcon('client_name')}
+                        Client {getSortIcon('client_name')}
                       </th>
                       <th onClick={() => sortTable('id')} style={{ cursor: 'pointer' }}>
                         Bill {getSortIcon('id')}
@@ -218,7 +218,7 @@ const InvoicesToPay = () => {
                         </td>
                         <td>{invoice.client_name}</td>
                         <td>{invoice.id}</td>
-                        <td>{moment(invoice.created_at).format('YYYY-DD-MM')}</td>
+                        <td>{moment(invoice?.created_at).format('YYYY-DD-MM')}</td>
                         <td>{invoice.date_of_service}</td>
                         <td>{getStatusBadge(invoice)}</td>
                         <td>${invoice.charge}</td>

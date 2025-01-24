@@ -871,6 +871,21 @@ setTitle(title)
                             </div>
                           </td>
                         </tr>}
+                        {authUserState?.user && <tr>
+                          <th className="px-4">Stripe onboarding approved</th>
+                          <td>
+                            <div className="flex items-center">
+                              <input
+                                defaultChecked={selectedEmployeeData?.is_inv_manager}
+                                name="is_inv_manager"
+                                type="checkbox"
+                                onChange={handleUpdateChange}
+                                disabled
+                                className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                            </div>
+                          </td>
+                        </tr>}
 
                         {!selectedEmployeeData?.is_admin &&  <tr>
                           <th className="px-4">Service Percentage:</th>

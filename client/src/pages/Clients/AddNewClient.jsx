@@ -450,25 +450,29 @@ const ClientsProfileUpdate = () => {
     if (selectedFiles.length > 0) {
       formDataPayload.append('client[profile_photo]', selectedFiles[0]);
     }
-  
-    let response = await CreateClient(params.id, true, formDataPayload)
-    if (response.status === 200) {
-      toast.success("Client Created Successfully");
-      Navigate(`/customers/${response.data.id}`)
-      try {
-        const { data } = await getClients();
-        if (data?.length > 0) {
-          const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
-          setEmployeeList(newData);
+    try {
+      let response = await CreateClient(params.id, true, formDataPayload);
+     
+      if (response.status === 200) {
+        toast.success("Client Created Successfully");
+        Navigate(`/customers/${response.data.id}`)
+        try {
+          const { data } = await getClients();
+          if (data?.length > 0) {
+            const newData = data.filter((client) => client?.email !== null && client?.email !== undefined && client?.email.trim() !== "");
+            setEmployeeList(newData);
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        if (response.error.email) {
+          toast.error(response.error.email)
+        }
+        toast.error("Something went wrong")
       }
-    } else {
-      if (response.error.email) {
-        toast.error(response.error.email)
-      }
-      toast.error("Something went wrong")
+    } catch (error) {
+      toast.error(error.response.data.error.email[0])
     }
   };
 

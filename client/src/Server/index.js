@@ -1204,4 +1204,10 @@ export const stripeOnboardComplete = async (data, refetch) =>
   export const invoicePDFShow = async (invoiceID) =>
     api.get(`/api/invoices/${invoiceID}/show_pdf`, {
       responseType: "blob",
-    });
+  });
+  export const getEmployeeBankDetails = async (payload,refetch) =>
+    api.get(`/api/stripe_account_details`,payload, {
+      cache: {
+        ignoreCache: refetch,
+      },
+  });

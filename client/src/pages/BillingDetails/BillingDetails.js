@@ -17,6 +17,8 @@ const BillingDetails = () => {
     const [showConfirmationModal,setShowConfirmationModal]=useState(false)
     const [note, setNote] = useState("");
     const [invoicePdfBlob, setInvoicePdfBlob] = useState("");
+    const [paymentFrequency,setPaymentFrequency]=useState(false)
+    const [charge,setCharge]=useState("")
     useEffect(() => {
         getSingleInvoiceItem()
     }, [invoice_id])
@@ -28,6 +30,8 @@ const BillingDetails = () => {
             created_at: moment(response.data.created_at).format("YYYY-MM-DD")
         }
         setInvoiceData(response.data);
+        setPaymentFrequency(response?.data?.instant_pay);
+        setCharge(response?.data?.charge);
         if(response.status===200){
             let response1 = await invoicePDFShow(response.data.id)
             const blob = new Blob([response1.data], { type: 'application/pdf' });
@@ -79,31 +83,20 @@ const BillingDetails = () => {
             handleClosesConfirmationModal();
         }
     };
-    const handleOnboard=async()=>{
-        setLoading(true)
-        let payload={
-            employee_id:authUserState?.user?.id
-        }
-        try {
-        let response = await onboardEmployeeToStripe(payload);
-        const link = document.createElement('a');
-        link.href = response.data.redirect_url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setLoading(false)
-    } catch (error) {
-        toast.error(error.response.data.error)
-        setLoading(false)
-    }
-
-    }
     const handleClosesConfirmationModal=()=>{
         setShowConfirmationModal(!showConfirmationModal);
         setLoading(false)
     }
+    const handlePaymentFrequency=(event)=>{
+        if(event.target.value === "Same Day Payment"){
+            setPaymentFrequency(event.target.value)
+        }else if(event.target.value==="Default"){
+            setPaymentFrequency(event.target.value)
+        }
+    };
+    const handleChargeChange=(event)=>{
+        setCharge(event.target.value)
+    };
     const ScreenLoading = () => {
         return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
             <Spinner animation="border" variant="info" />
@@ -123,21 +116,22 @@ const BillingDetails = () => {
                     </Col>
                     <Col xs={12} sm={12} md={8} lg={8}>
                         <Card className='p-3 h-[50vh] overflow-scroll' style={{ height: "87vh", scrollbarWidth: "none", }}>
-                            <p className='text-black text-start fs-5 fw-bold' >Bill details</p>
+                            <p className='text-black text-start fs-5 fw-bold' >Bill Details</p>
                             <div>
                                 <Form onSubmit={handleInvoice}>
                                     <Row>
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50 fs-6'>Vendor Business Name</Form.Label>
-                                                <Form.Control placeholder="Vendor Name" value={invoiceData?.vendor_name} disabled />
+                                                <Form.Control placeholder="Vendor Name" value={invoiceData?.employee.vendor_name} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3 '>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
-                                                <InputGroup>
-                                                    <Form.Control placeholder="Bill Amount" value={"$" + invoiceData?.charge} disabled />
+                                                <InputGroup size='sm'>
+                                                    <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
+                                                    <Form.Control type='number' placeholder="Bill Amount" value={charge} onChange={handleChargeChange} disabled={authUserState.user.is_admin===true?false:true}/>
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -148,14 +142,16 @@ const BillingDetails = () => {
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Invoice#</Form.Label>
                                                 <Form.Control type="number" value={invoiceData?.id} disabled />
-                                                <Form.Text>Add an invoice number to help your vendor reconcile payments</Form.Text>
                                             </div>
                                         </Col>
-                                        <p className='text-black text-start fw-bold' style={{ fontSize: "18px" }}>Additional details</p>
+                                        <p className='text-black text-start fw-bold' style={{ fontSize: "18px" }}>Additional Details</p>
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
-                                                <Form.Control type="text" value={invoiceData?.instant_pay ===true  ? "One Day payment":"Default"} disabled />
+                                                <Form.Select aria-label="Default select example" value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency}>
+                                                    <option value={"Same Day Payment"}>Same Day Payment</option>
+                                                    <option value="Default">Default</option>
+                                                </Form.Select>
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
@@ -167,15 +163,17 @@ const BillingDetails = () => {
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Due Date</Form.Label>
-                                                <Form.Control type="date" value={moment(invoiceData?.date_of_service, "YYYY-MM-DD").format("YYYY-MM-DD")} disabled />
+                                                <Form.Control type="date" value={moment(invoiceData?.due_date, "YYYY-MM-DD").format("YYYY-MM-DD")} disabled />
                                             </div>
                                         </Col>
-                                        <Col xs={12} sm={12} md={12} lg={12}>
-                                            <div className='mb-3'>
-                                                <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to sell</Form.Label>
-                                                <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value ) }} />
-                                            </div>
-                                        </Col>
+                                        {authUserState.user.is_admin &&
+                                            <Col xs={12} sm={12} md={12} lg={12}>
+                                                <div className='mb-3'>
+                                                    <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to sell</Form.Label>
+                                                    <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value) }} />
+                                                </div>
+                                            </Col>
+                                        }
                                         <p className='text-black text-start fw-bold' style={{ fontSize: "18px" }}>Line Items</p>
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
@@ -227,7 +225,6 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='d-flex justify-content-end gap-[20px]'>
                                                 <Button size='sm' variant='outline-secondary' onClick={()=>navigate("/invoices-to-pay")}>Cancel</Button>
-                                                {(!authUserState.user?.is_admin && authUserState?.user?.is_mentor && !authUserState.user.stripe_account_id) && <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}</Button>}
                                                 {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                             </div>
                                         </Col>
@@ -246,19 +243,15 @@ const BillingDetails = () => {
                         <div className="my-4">
                             <BadgeDollarSign style={{ marginRight: '8px', margin: "auto" }} size={40} />
                         </div>
-                        <h5 className="fw-bold mt-3">Thanks a lot for putting up this order</h5>
                         <p className="text-muted">
-                            Your payment order for invoice id{" "}<strong>{invoiceData?.id}</strong> has been
-                            ready to proceed. You’ll find all the details about your order below, and
-                            we’ll send you a payment confirmation email as soon as your payment
-                            done.
+                        The payment order for your invoice ID 48 is ready to be processed. The product's details are provided here, and you will receive an email confirming payment completion as soon as it is completed.
                         </p>
                         <div className="border p-3 rounded mb-3">
                             <div className="d-flex justify-content-between">
                                 <span>Order Review</span>
                                 <span>${invoiceData?.charge}</span>
                             </div>
-                            <small className="text-muted">{invoiceData?.products_hash?.products.length} products in this invoice</small>
+                            <small className="text-muted">{invoiceData?.products_hash?.products.length} product(s) in this invoice</small>
                         </div>
                         <div className="d-flex justify-content-between">
                             <Button variant="light" onClick={handleClosesConfirmationModal}>
