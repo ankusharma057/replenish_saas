@@ -193,7 +193,8 @@ class Api::EmployeesController < ApplicationController
       country: 'US',
       email: employee.email,
       capabilities: {
-        transfers: { requested: true }
+        transfers: { requested: true },
+        card_payments: { requested: true }
       }
     })
 
