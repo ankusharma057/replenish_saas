@@ -11,6 +11,7 @@ import {
   getQuestionnaires,
   getEmployeesOnly,
   getEmployeeInvoicesOnly,
+  getEmployeeBankDetails,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -23,7 +24,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Image } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Image, Row, Col, Form, Container } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -80,6 +81,7 @@ const Employee = () => {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
   const [formChanges,setFormChanges] = useState(false)
+  const [bankDetails, setBankDetails] = useState();
 
   // Questionnaires
   const navigate = useNavigate();
@@ -98,6 +100,14 @@ const Employee = () => {
       console.log(error);
     }
   };
+  const getSelectedEmployeeBankDetails = async () => {
+    try {
+        let response = await getEmployeeBankDetails({ employee_id: authUserState.user.id });
+        setBankDetails(response.data)
+    } catch (error) {
+        toast.error(error.response.data.error)
+    }
+}
 
   const getEmployeeInvoices = async (employeeId, refetch = false) => {
     try {
@@ -196,6 +206,7 @@ const Employee = () => {
 
   useEffect(() => {
     getEmployees();
+    getSelectedEmployeeBankDetails();
     // getInvoices();
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -390,6 +401,7 @@ const Employee = () => {
         value: "invoice",
         // data: getRequestInventoryData,
       },
+      { name: "Bank Details", value: "bankDetails" },
      
     ];
     if (emp) {
@@ -1293,6 +1305,44 @@ setTitle(title)
                       </div>}
                   </div>
                   </div>
+                )}
+                {currentTab === "bankDetails" && (
+                  <Container>
+                    <Row>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Control type="text" disabled />
+                          </Form.Group>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Control type="text" disabled />
+                          </Form.Group>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Control type="text" disabled />
+                          </Form.Group>
+                        </div>
+                      </Col>
+                      <Col xs={6} sm={6} md={6} lg={6}>
+                        <div>
+                          <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Control type="text" disabled />
+                          </Form.Group>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Container>
                 )}
 
               </div>

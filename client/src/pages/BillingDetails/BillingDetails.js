@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
-import { BadgeDollarSign, Trash } from 'lucide-react';
+import { BadgeDollarSign } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {  getSingleInvoice, finalizePayment, onboardEmployeeToStripe, invoicePDFShow } from '../../Server';
+import {  getSingleInvoice, finalizePayment, invoicePDFShow, updateInvoice } from '../../Server';
 import moment from 'moment';
-import { Document, Page, pdfjs } from 'react-pdf';
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../../context/AuthUserContext';
 const BillingDetails = () => {
@@ -18,7 +17,11 @@ const BillingDetails = () => {
     const [note, setNote] = useState("");
     const [invoicePdfBlob, setInvoicePdfBlob] = useState("");
     const [paymentFrequency,setPaymentFrequency]=useState(false)
-    const [charge,setCharge]=useState("")
+    const [updateInvoiceDataPayload,setUpdateInvoiceDataPayload]=useState({
+        charge:0,
+        instant_pay:false,
+        showUpdateBtn:false
+    })
     useEffect(() => {
         getSingleInvoiceItem()
     }, [invoice_id])
@@ -31,13 +34,17 @@ const BillingDetails = () => {
         }
         setInvoiceData(response.data);
         setPaymentFrequency(response?.data?.instant_pay);
-        setCharge(response?.data?.charge);
         if(response.status===200){
             let response1 = await invoicePDFShow(response.data.id)
             const blob = new Blob([response1.data], { type: 'application/pdf' });
             const blobUrl = URL.createObjectURL(blob);
             setInvoicePdfBlob(blobUrl);
             setScreenLoading(false);
+            setUpdateInvoiceDataPayload((prev) => ({
+                ...prev,
+                instant_pay: response.data.instant_pay,
+                charge: response.data.charge,
+            }));
         }
     };
     const handleInvoice = async(event) => {
@@ -88,14 +95,39 @@ const BillingDetails = () => {
         setLoading(false)
     }
     const handlePaymentFrequency=(event)=>{
-        if(event.target.value === "Same Day Payment"){
-            setPaymentFrequency(event.target.value)
+        if(event.target.value === "Instant Pay"){
+            setPaymentFrequency(true)
+            setUpdateInvoiceDataPayload((prev)=>({
+                ...prev,
+                instant_pay:true,
+                showUpdateBtn:true
+            }))
         }else if(event.target.value==="Default"){
-            setPaymentFrequency(event.target.value)
+            setPaymentFrequency(false)
+            setUpdateInvoiceDataPayload((prev)=>({
+                ...prev,
+                instant_pay:false,
+                showUpdateBtn:true
+            }))
         }
     };
-    const handleChargeChange=(event)=>{
-        setCharge(event.target.value)
+    const handleChargeChange = (event) => {
+        let { value } = event.target
+        setUpdateInvoiceDataPayload((prev) => ({
+            ...prev,
+            charge: value,
+            showUpdateBtn:invoiceData?.charge == updateInvoiceDataPayload?.charge?false:true
+        }));
+    };
+    const updateInvoiceData=async()=>{
+        try {
+            let response = await updateInvoice(); 
+             if(response.status===200){
+                await getSingleInvoiceItem();
+             }
+        } catch (error) {
+            toast.error(error.response.data)
+        }
     };
     const ScreenLoading = () => {
         return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
@@ -131,7 +163,7 @@ const BillingDetails = () => {
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
                                                 <InputGroup size='sm'>
                                                     <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
-                                                    <Form.Control type='number' placeholder="Bill Amount" value={charge} onChange={handleChargeChange} disabled={authUserState.user.is_admin===true?false:true}/>
+                                                    <Form.Control type='number' placeholder="Bill Amount" value={updateInvoiceDataPayload?.charge} onChange={handleChargeChange} disabled={invoiceData?.is_paid ?true:authUserState.user.is_admin===true?false:true}name={"charge"}/>
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -148,8 +180,8 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
-                                                <Form.Select aria-label="Default select example" value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency}>
-                                                    <option value={"Same Day Payment"}>Same Day Payment</option>
+                                                <Form.Select value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency} name='instant_pay' disabled={invoiceData?.is_paid ?true:authUserState.user.is_admin===true?false:true}>
+                                                    <option value={"Instant Pay"}>Instant Pay</option>
                                                     <option value="Default">Default</option>
                                                 </Form.Select>
                                             </div>
@@ -169,7 +201,7 @@ const BillingDetails = () => {
                                         {authUserState.user.is_admin &&
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='mb-3'>
-                                                    <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to sell</Form.Label>
+                                                    <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to self</Form.Label>
                                                     <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value) }} />
                                                 </div>
                                             </Col>
@@ -222,12 +254,20 @@ const BillingDetails = () => {
                                                 </Col>
                                             </Row>
                                         })}
-                                        <Col xs={12} sm={12} md={12} lg={12}>
-                                            <div className='d-flex justify-content-end gap-[20px]'>
-                                                <Button size='sm' variant='outline-secondary' onClick={()=>navigate("/invoices-to-pay")}>Cancel</Button>
-                                                {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
-                                            </div>
-                                        </Col>
+                                        {(invoiceData?.charge != updateInvoiceDataPayload.charge|| invoiceData?.instant_pay != updateInvoiceDataPayload.instant_pay ||updateInvoiceDataPayload?.showUpdateBtn) ?
+                                            <Col>
+                                                <div className='d-flex justify-content-end gap-[20px]'>
+                                                    <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={updateInvoiceData()}>Update Invoice</Button>
+                                                </div>
+                                            </Col>
+                                            :
+                                            <Col xs={12} sm={12} md={12} lg={12}>
+                                                <div className='d-flex justify-content-end gap-[20px]'>
+                                                    <Button size='sm' variant='outline-secondary' onClick={() => navigate("/invoices-to-pay")}>Cancel</Button>
+                                                    {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
+                                                </div>
+                                            </Col>
+                                        }
                                     </Row>
                                 </Form>
                             </div>

@@ -10,11 +10,13 @@ import InvoiceDetails from './InvoiceDetails';
 import Vendors from './Vendors';
 import Payments from './Payments'; 
 import Approvals from './Approvals';
-import { Box, ChevronRight, ChevronLeft } from "lucide-react";
+import { Box, } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList } from '../Server';
+import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList, payMultipleInvoices } from '../Server';
 import { Pagination } from '@mui/material';
 import moment from 'moment';
+import { Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 
 const InvoicesToPay = () => {
   const { authUserState } = useAuthContext();
@@ -25,6 +27,8 @@ const InvoicesToPay = () => {
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [multipleInvoiceSelectionId,setMultipleInvoiceSelectionId]=useState([])
+  const [multipleInvoiceSelectionData,setMultipleInvoiceSelectionData]=useState([])
   const itemsPerPage = 30;
   const navigate=useNavigate()
   const handlePageChange = (newPage) => {
@@ -45,26 +49,21 @@ const InvoicesToPay = () => {
     setInvoices(sortedInvoices);
   };  
 
-  const handleSelectAll = () => {
-    const updatedInvoices = invoices.map((invoice) => ({
-      ...invoice,
-      isChecked: !isAllChecked,
-    }));
-    setIsAllChecked(!isAllChecked);
-    // setInvoices(updatedInvoices);
+  const handleSelectAll = (event) => {
+    let { checked } = event.target
+    setMultipleInvoiceSelectionId(
+      checked 
+        ? invoices.invoices.filter((item) => !item.is_paid).map((invoice) => invoice.id) 
+        : []
+    );
   };
 
-  const handleCheckboxChange = (id) => {
-    const updatedInvoices = invoices.map((invoice) => {
-      if (invoice.id === id) {
-        return { ...invoice, isChecked: !invoice.isChecked };
-      }
-      return invoice;
-    });
-
-    const allSelected = updatedInvoices.every((invoice) => invoice.isChecked);
-    setIsAllChecked(allSelected);
-    setInvoices(updatedInvoices);
+  const handleCheckboxChange = (id,checked) => {
+    if (checked) {
+      setMultipleInvoiceSelectionId((prev) => [...prev, id]);
+    } else {
+      setMultipleInvoiceSelectionId((prev) => prev.filter((itemId) => itemId !== id));
+    }
   };
 
   const getSortIcon = (key) => {
@@ -115,6 +114,22 @@ const InvoicesToPay = () => {
     return <Badge bg="secondary">{'Due Later'}</Badge>;
   };
 
+  const checkAllIDAvailable=()=>{
+    return invoices?.invoice?.filter((item) => !item.is_paid).every((item) => multipleInvoiceSelectionId.includes(item.id));
+  };
+  const handleCloseModal=()=>{
+    const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
+    setMultipleInvoiceSelectionData(matchedData)
+    setIsAllChecked(!isAllChecked)
+  };
+  const handleMultipleInvoicePay = async () => {
+    let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
+    try {
+      let response = await payMultipleInvoices(payload);
+    } catch (error) {
+      toast.error(error.response.data)
+    }
+  };
   return (
     <AsideLayout
       asideContent={
@@ -172,14 +187,17 @@ const InvoicesToPay = () => {
                   
                 </div>
                 <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
-                <div className='d-flex justify-content-end align-items-center pb-3'><Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" /></div>
+                <div className='d-flex justify-content-end align-items-end gap-[20px] pb-3 flex-column'>
+                  <Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" />
+                  {multipleInvoiceSelectionId.length>0 && <Button onClick={handleCloseModal}style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Pay Multiple Invoices</Button>}
+                </div>
                 <Table responsive bordered hover className="table-sm">
                   <thead className="bg-primary text-white">
                     <tr>
                       <th className="text-center">
                         <Form.Check
                           type="checkbox"
-                          checked={isAllChecked}
+                          checked={checkAllIDAvailable()}
                           onChange={handleSelectAll}
                           aria-label="select all"
                           style={{ cursor: 'pointer' }}
@@ -212,8 +230,9 @@ const InvoicesToPay = () => {
                         <td className="text-center">
                           <Form.Check
                             type="checkbox"
-                            checked={invoice.isChecked || false}
-                            onChange={() => handleCheckboxChange(invoice.id)}
+                            checked={invoice?.isChecked || multipleInvoiceSelectionId.includes(invoice.id)}
+                            disabled={invoice.is_paid}
+                            onChange={(e) => handleCheckboxChange(invoice.id, e.target.checked)}
                           />
                         </td>
                         <td>{invoice.client_name}</td>
@@ -255,6 +274,39 @@ const InvoicesToPay = () => {
           </>
         )}
       </div>
+      <Modal show={isAllChecked} onHide={handleCloseModal} size='xl' centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Pay for multiple invoices</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{ height: "max-content", maxHeight: "55vh", overflow: "scroll" }}>
+            <Table striped bordered>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Charge</th>
+                  <th>Payment Frequency</th>
+                  <th>Invoice Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {multipleInvoiceSelectionData.filter((inv) => !inv.is_paid).map((invoice, index) => {
+                  return <tr key={index}>
+                    <td>{invoice?.id}</td>
+                    <td>{invoice?.charge}</td>
+                    <td>{invoice?.instant_pay === true ? "Pay Faster" : "Default"}</td>
+                    <td>{moment(invoice?.created_at).format("MM-DD-YYYY")}</td>
+                  </tr>
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={handleCloseModal}>Close</Button>
+          <Button style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleMultipleInvoicePay}>Pay</Button>
+        </Modal.Footer>
+      </Modal>
     </AsideLayout>
   );
 };

@@ -479,9 +479,9 @@ export default function AddInvoices() {
     ) {
       total = 0;
     }
-    // if(formData.instant_pay){
-    //   total=total- total/100
-    // }
+    if(formData.instant_pay){
+      total=total- total/100
+    }
     
     // totalRef.current.charge =
     return total.toFixed(2);
@@ -1151,8 +1151,8 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
-                  {/* <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Same Day Payment:
+                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
+                    Pay Faster:
                     <input
                       type="checkbox"
                       name="instant_pay"
@@ -1160,7 +1160,7 @@ export default function AddInvoices() {
                       onChange={(event) => handleInputChange(event)}
                       className="ml-2"
                     />
-                  </label> */}
+                  </label>
 
 
                   <div className="border-t-[1px]"></div>

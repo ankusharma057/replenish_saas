@@ -1206,7 +1206,16 @@ export const stripeOnboardComplete = async (data, refetch) =>
       responseType: "blob",
   });
   export const getEmployeeBankDetails = async (payload,refetch) =>
-    api.get(`/api/stripe_account_details`,payload, {
+    api.get(`/api/stripe_account_details`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...payload,
+      },
+  });
+  export const payMultipleInvoices = async (payload,refetch) =>
+    api.patch(`/api/client/stripe/pay_multiple_invoice`,payload,{
       cache: {
         ignoreCache: refetch,
       },
