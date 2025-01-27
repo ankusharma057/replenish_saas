@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html>
+  <head>
+  </head>
   <body>
-    <h1>Hi <%= @employee.name %>,</h1>
-    <p>
-      We have initiated your payment for the invoice "#{@invoice.id}".
-    </p>
-    <p>Thank you!</p>
+    <div>
+      <h1>Hi <%= @employee.name %>,</h1>
+      <p>
+        We have successfully initiated your payment for the invoice 
+        "<strong><%= @invoice.id %></strong>".
+      </p>
+      <div>
+        <p>
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
   </body>
 </html>
