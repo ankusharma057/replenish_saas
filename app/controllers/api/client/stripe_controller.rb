@@ -124,7 +124,7 @@ class Api::Client::StripeController < ClientApplicationController
       render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)
-
+      render json: { message: 'payment initiated successfully' }, status: :ok
     end
   end
 
@@ -186,8 +186,6 @@ class Api::Client::StripeController < ClientApplicationController
         }
       end
     end
-
-    # Ensure a single render call at the end
     render json: response_messages, status: :ok
   end
 
