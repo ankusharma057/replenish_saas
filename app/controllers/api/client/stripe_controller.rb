@@ -103,8 +103,7 @@ class Api::Client::StripeController < ClientApplicationController
       return
     end
 
-    total_amount = (invoice.charge).to_i
-
+    total_amount = (invoice.charge * 100).to_i
     account = Stripe::Account.retrieve(employee.stripe_account_id)
     if account.external_accounts.data.empty?
       EmployeeMailer.notify_missing_bank_account(employee).deliver_now
@@ -158,7 +157,7 @@ class Api::Client::StripeController < ClientApplicationController
         end
 
         if invoice.instant_pay && account.payouts_enabled && account.details_submitted
-          total_amount = invoice.charge.to_i
+          total_amount = (invoice.charge * 100).to_i
           transfer = Stripe::Transfer.create({
             amount: total_amount,
             currency: 'usd',
