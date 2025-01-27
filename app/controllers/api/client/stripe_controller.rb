@@ -117,7 +117,7 @@ class Api::Client::StripeController < ClientApplicationController
         amount: total_amount,
         currency: 'usd',
         destination: account.id,
-        transfer_group: 'ORDER_95',
+        transfer_group: "ORDER_#{invoice.id}",
       })
       invoice.update(is_paid: true)
       EmployeeMailer.payment_initiated(employee, invoice).deliver_now
@@ -126,6 +126,69 @@ class Api::Client::StripeController < ClientApplicationController
       schedule_payment(employee.id, invoice.id, total_amount)
 
     end
+  end
+
+
+  def pay_multiple_invoice
+    invoice_ids = params["_json"].pluck(:invoice_id)
+    invoices = Invoice.includes(:employee).where(id: invoice_ids)
+
+    response_messages = { success: [], errors: [] }
+
+    invoices.each do |invoice|
+      begin
+        employee = invoice.employee
+
+        if employee.stripe_account_id.nil?
+          response_messages[:errors] << {
+            invoice_id: invoice.id,
+            error: 'This employee does not have a Stripe connect account.'
+          }
+          next
+        end
+
+        account = Stripe::Account.retrieve(employee.stripe_account_id)
+        if account.external_accounts.data.empty?
+          EmployeeMailer.notify_missing_bank_account(employee).deliver_now
+          response_messages[:errors] << {
+            invoice_id: invoice.id,
+            error: 'This employee has not added a bank account to their Stripe account.'
+          }
+          next
+        end
+
+        if invoice.instant_pay && account.payouts_enabled && account.details_submitted
+          total_amount = invoice.charge.to_i
+          transfer = Stripe::Transfer.create({
+            amount: total_amount,
+            currency: 'usd',
+            destination: account.id,
+            transfer_group: "ORDER_#{invoice.id}",
+          })
+          invoice.update!(is_paid: true)
+          EmployeeMailer.payment_initiated(employee, invoice).deliver_now
+          response_messages[:success] << {
+            invoice_id: invoice.id,
+            message: 'Instant payment sent successfully',
+            transfer_id: transfer.id
+          }
+        else
+          schedule_payment(employee.id, invoice.id, invoice.charge.to_i)
+          response_messages[:success] << {
+            invoice_id: invoice.id,
+            message: 'Payment scheduled for later'
+          }
+        end
+      rescue StandardError => e
+        response_messages[:errors] << {
+          invoice_id: invoice.id,
+          error: e.message
+        }
+      end
+    end
+
+    # Ensure a single render call at the end
+    render json: response_messages, status: :ok
   end
 
   def webhooks
@@ -166,8 +229,6 @@ class Api::Client::StripeController < ClientApplicationController
       scheduled_at: Time.current + 10.days
     )
     EmployeeMailer.scheduled_payment_notification(employee_id, invoice_id, total_amount).deliver_now
-    render json: { message: 'payment initiated successfully' }, status: :ok
-
   end
 
   def handle_successful_transfer(transfer)

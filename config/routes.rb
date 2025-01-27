@@ -38,6 +38,7 @@ mount Sidekiq::Web => '/sidekiq'
           delete '/remove_card', to: 'stripe#remove_card'
           post 'webhooks', to: 'stripe#webhooks'
           post 'transfer_to_employee', to: 'stripe#transfer_to_employee'
+          post 'pay_multiple_invoice', to: 'stripe#pay_multiple_invoice'
         end
       end
       resources :employees, only: %i(index show)
