@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList, payMultipleInvoices } from '../Server';
 import { Pagination } from '@mui/material';
 import moment from 'moment';
-import { Modal } from 'react-bootstrap';
+import { Modal, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 
 const InvoicesToPay = () => {
@@ -30,7 +30,8 @@ const InvoicesToPay = () => {
   const [multipleInvoiceSelectionId,setMultipleInvoiceSelectionId]=useState([])
   const [multipleInvoiceSelectionData,setMultipleInvoiceSelectionData]=useState([])
   const itemsPerPage = 30;
-  const navigate=useNavigate()
+  const navigate=useNavigate();
+  const [loading, setLoading] = useState(false);
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -118,16 +119,32 @@ const InvoicesToPay = () => {
     return invoices?.invoice?.filter((item) => !item.is_paid).every((item) => multipleInvoiceSelectionId.includes(item.id));
   };
   const handleCloseModal=()=>{
-    const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
-    setMultipleInvoiceSelectionData(matchedData)
-    setIsAllChecked(!isAllChecked)
+    if(isAllChecked===false){
+      const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
+      setMultipleInvoiceSelectionData(matchedData)
+      setIsAllChecked(true);
+      setLoading(false);
+
+    }else{
+      setIsAllChecked(false);
+      setLoading(false);
+    }
   };
   const handleMultipleInvoicePay = async () => {
+    setLoading(true)
     let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
     try {
       let response = await payMultipleInvoices(payload);
+      if (response.data.success.length) {
+        toast.success(response.data.success[0].message)
+        setLoading(false);
+        handleCloseModal();
+      } else if (response.data.errors.length) {
+        toast.error(response.data.errors[0].error)
+        setLoading(false);
+        handleCloseModal();
+      }
     } catch (error) {
-      toast.error(error.response.data)
     }
   };
   return (
@@ -304,7 +321,9 @@ const InvoicesToPay = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={handleCloseModal}>Close</Button>
-          <Button style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleMultipleInvoicePay}>Pay</Button>
+          <Button variant="dark" disabled={loading} style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleMultipleInvoicePay}>
+            Pay {loading && <Spinner animation="border" variant="white" style={{ width: "15px", height: "15px" }} />}
+          </Button>
         </Modal.Footer>
       </Modal>
     </AsideLayout>

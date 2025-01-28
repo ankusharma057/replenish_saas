@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Button, Card, Form } from "react-bootstrap";
+import { Badge, Button, Card, Form, Modal, Spinner } from "react-bootstrap";
 import CustomModal from "../components/Modals/CustomModal";
 import Table from "react-bootstrap/Table";
 import AssignModal from "../components/Modals/AssignModal";
@@ -41,6 +41,7 @@ import {
   getFinalizeInvoiceList,
   getMentorFinalizeInvoiceList,
   getAllInvoicesList,
+  getEmployeeInvoices,
 } from "../Server";
 import { LOGIN } from "../Constants/AuthConstants";
 import AsideLayout from "../components/Layouts/AsideLayout";
@@ -359,8 +360,6 @@ const MyProfile = () => {
     }
   };
 
-  const currentInvoices =
-    (authUserState.user?.invoices.filter(invoice => !invoice.mentor_id) || [])?.slice(startIndex, endIndex) || [];
 
   const handlePageChange = async(event, value) => {
     await getAllInvoices(value);
@@ -457,19 +456,33 @@ const MyProfile = () => {
     }
   };
   const handleCloseModal=()=>{
-    const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
-    setMultipleInvoiceSelectionData(matchedData)
-    setIsAllChecked(!isAllChecked)
+    if(isAllChecked===false){
+      const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
+      setMultipleInvoiceSelectionData(matchedData)
+      setIsAllChecked(true)
+
+    }else{
+      setIsAllChecked(false)
+    }
   };
   const checkAllIDAvailable=()=>{
     return invoices?.invoice?.filter((item) => !item.is_paid).every((item) => multipleInvoiceSelectionId.includes(item.id));
   };
   const handleMultipleInvoicePay = async () => {
+    setLoading(true)
     let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
     try {
       let response = await payMultipleInvoices(payload);
+      if (response.data.success.length) {
+        toast.success(response.data.success[0].message)
+        setLoading(false);
+        handleCloseModal();
+      } else if (response.data.errors.length) {
+        toast.error(response.data.errors[0].error)
+        setLoading(false);
+        handleCloseModal();
+      }
     } catch (error) {
-      toast.error(error.response.data)
     }
   };
   const sortTable = (key) => {
@@ -509,27 +522,28 @@ const MyProfile = () => {
   const handleInvoiceClick = (invoice) => {
     navigate(`/billing-details/${invoice.id}`)
   };
-  const getAllInvoices=async(page)=>{
+  const getAllInvoices = async (page, tab = 1) => {
     let response;
-    if(authUserState.user.is_admin){
-      response = await getAllInvoicesList({page:page},true);
+    if (authUserState.user.is_admin && tab == 1) {
+      response = await getAllInvoicesList({ page: page }, true);
       setInvoices(response.data)
-    }else {
-      response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
-      setInvoices(authUserState.user.invoices);
+    } else if (authUserState.user.is_admin && tab == 2) {
+      response = await getFinalizeInvoiceList();
+      setInvoices(response.data)
+    } else if (authUserState.user.is_mentor && tab == 2) {
+      let payload = {
+        employee_id: authUserState.user.id
+      }
+      response = await getMentorFinalizeInvoiceList(payload);
+      setInvoices(response.data)
+    } else {
+      response = await getEmployeeInvoices({ page: page }, true);
+      setInvoices(response.data);
     }
-    
   }
-  
   const handleTopTab=(count)=>{
-    if(count===1){
-      getAllInvoices(1);
-    }else if(count===2){
-      let data = Array.isArray(invoices)&& invoices.filter((invoice)=>invoice.is_finalized);
-      console.log("@@@data",data);
-      
-    }
     setTopTab(count)
+    getAllInvoices(1,count);
   }
   return (
       <AsideLayout
@@ -1064,7 +1078,7 @@ const MyProfile = () => {
               <Table responsive bordered hover >
                 <thead className="bg-primary text-white">
                   <tr>
-                    <th className="text-center">
+                  {(authUserState.user.is_admin && topTab==2) && <th className="text-center">
                       <Form.Check
                         type="checkbox"
                         checked={checkAllIDAvailable()}
@@ -1072,7 +1086,7 @@ const MyProfile = () => {
                         aria-label="select all"
                         style={{ cursor: 'pointer' }}
                       />
-                    </th>
+                    </th>}
                     <th onClick={() => sortTable('client_name')} style={{ cursor: 'pointer' }}>
                       Client {getSortIcon('client_name')}
                     </th>
@@ -1095,16 +1109,16 @@ const MyProfile = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(invoices) && invoices.map((invoice) => (
+                  {Array.isArray(invoices.invoices) && invoices.invoices.map((invoice) => (
                     <tr key={invoice.id}>
-                      <td className="text-center">
+                      {(authUserState.user.is_admin && topTab==2) && <td className="text-center">
                         <Form.Check
                           type="checkbox"
                           checked={invoice?.isChecked || multipleInvoiceSelectionId.includes(invoice.id)}
                           disabled={invoice.is_paid}
                           onChange={(e) => handleCheckboxChange(invoice.id, e.target.checked)}
                         />
-                      </td>
+                      </td>}
                       <td>{invoice.client_name}</td>
                       <td>{invoice.id}</td>
                       <td>{moment(invoice?.created_at).format('YYYY-DD-MM')}</td>
@@ -1118,8 +1132,8 @@ const MyProfile = () => {
                           onClick={() => handleInvoiceClick(invoice)}
                         >
                           {(invoice.is_paid === true && authUserState.user.is_admin) && 'Review'}
-                          {(invoice.is_paid === false && authUserState.user.is_admin) && 'Pay'}
-                          {(authUserState.user.is_admin === false && authUserState.user.is_mentor) && 'Details'}
+                          {(invoice.is_finalized && invoice.is_paid === false && authUserState.user.is_admin) && 'Pay'}
+                          {(!invoice.is_finalized || authUserState.user.is_admin === false && authUserState.user.is_mentor) && 'Details'}
                         </a>
                       </td>
                     </tr>
@@ -1286,6 +1300,41 @@ const MyProfile = () => {
             </>
           )}
         </div>
+        <Modal show={isAllChecked} onHide={handleCloseModal} size='xl' centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Pay for multiple invoices</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{ height: "max-content", maxHeight: "55vh", overflow: "scroll" }}>
+            <Table striped bordered>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Charge</th>
+                  <th>Payment Frequency</th>
+                  <th>Invoice Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {multipleInvoiceSelectionData.filter((inv) => !inv.is_paid).map((invoice, index) => {
+                  return <tr key={index}>
+                    <td>{invoice?.id}</td>
+                    <td>{invoice?.charge}</td>
+                    <td>{invoice?.instant_pay === true ? "Pay Faster" : "Default"}</td>
+                    <td>{moment(invoice?.created_at).format("MM-DD-YYYY")}</td>
+                  </tr>
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={handleCloseModal}>Close</Button>
+          <Button variant="dark" disabled={loading} style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleMultipleInvoicePay}>
+            Pay {loading && <Spinner animation="border" variant="white" style={{ width: "15px", height: "15px" }} />}
+          </Button>
+        </Modal.Footer>
+      </Modal>
       </AsideLayout>
   );
 };

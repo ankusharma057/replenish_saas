@@ -169,7 +169,7 @@ const BillingDetails = () => {
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
                                                 <InputGroup size='sm'>
                                                     <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
-                                                    <Form.Control type='number' placeholder="Bill Amount" value={updateInvoiceDataPayload?.charge} onChange={handleChargeChange} disabled={invoiceData?.is_paid ?true:authUserState.user.is_admin===true?false:true}name={"charge"}/>
+                                                    <Form.Control type='number' placeholder="Bill Amount" value={updateInvoiceDataPayload?.charge} onChange={handleChargeChange} disabled={true}name={"charge"}/>
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -186,7 +186,7 @@ const BillingDetails = () => {
                                         <Col xs={12} sm={12} md={12} lg={12}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
-                                                <Form.Select value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency} name='instant_pay' disabled={invoiceData?.is_paid ?true:authUserState.user.is_admin===true?false:true}>
+                                                <Form.Select value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency} name='instant_pay' disabled={true}>
                                                     <option value={"Instant Pay"}>Instant Pay</option>
                                                     <option value="Default">Default</option>
                                                 </Form.Select>

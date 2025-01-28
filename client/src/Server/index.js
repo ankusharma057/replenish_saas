@@ -1215,13 +1215,22 @@ export const stripeOnboardComplete = async (data, refetch) =>
       },
   });
   export const payMultipleInvoices = async (payload,refetch) =>
-    api.patch(`/api/client/stripe/pay_multiple_invoice`,payload,{
+    api.post(`/api/client/stripe/pay_multiple_invoice`,payload,{
       cache: {
         ignoreCache: refetch,
       },
   });
-  export const getAllInvoicesList = async (data,refetch) =>
-    api.get("/api/invoices", {
+export const getAllInvoicesList = async (data, refetch) =>
+  api.get("/api/invoices/invoices_list", {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: {
+      ...data,
+    }
+  });
+  export const getEmployeeInvoices = async (data, refetch) =>
+    api.get(`/api/employees_invoice`, {
       cache: {
         ignoreCache: refetch,
       },

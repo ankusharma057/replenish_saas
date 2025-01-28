@@ -208,6 +208,18 @@ class Api::EmployeesController < ApplicationController
     
   end
 
+  def employees_invoice
+    if current_employee.present?
+      invoices = Invoice.where(employee_id: current_employee.id).where.not(client_id: nil).paginated_invoices(params)
+        render json: {
+        invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+        current_page: invoices.current_page,
+        total_pages: invoices.total_pages,
+        total_entries: invoices.total_entries
+      }, status: :ok
+    end 
+  end
+
   private
 
   def create_stripe_account(employee)
