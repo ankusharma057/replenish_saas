@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Form } from "react-bootstrap";
+import { Badge, Button, Card, Form } from "react-bootstrap";
 import CustomModal from "../components/Modals/CustomModal";
 import Table from "react-bootstrap/Table";
 import AssignModal from "../components/Modals/AssignModal";
@@ -37,6 +37,10 @@ import {
   updateVendore,
   getQuestionnaires,
   deleteInvoice,
+  payMultipleInvoices,
+  getFinalizeInvoiceList,
+  getMentorFinalizeInvoiceList,
+  getAllInvoicesList,
 } from "../Server";
 import { LOGIN } from "../Constants/AuthConstants";
 import AsideLayout from "../components/Layouts/AsideLayout";
@@ -53,6 +57,9 @@ import Mentorship from "./Mentorship";
 import MPInvoice from "./MPInvoice";
 import PlanSubscription from "./PlanSubscription";
 import BankDetails from "./BankDetails";
+import InvoicesToPay from "./InvoicesToPay";
+import { Pagination } from "@mui/material";
+import moment from "moment";
 
 
 const MyProfile = () => {
@@ -88,7 +95,13 @@ const MyProfile = () => {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
   const [formChanges,setFormChanges] = useState(false)
-
+  const [invoices, setInvoices] = useState();
+  const [multipleInvoiceSelectionId,setMultipleInvoiceSelectionId]=useState([])
+  const [multipleInvoiceSelectionData,setMultipleInvoiceSelectionData]=useState([])
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
+  const navigate=useNavigate()
+  const [topTab,setTopTab]=useState(1)
   // added
   const getInventory = async (refetch = false) => {
     try {
@@ -130,6 +143,7 @@ const MyProfile = () => {
       }
     };
     fetchData();
+    getAllInvoices(1);
   }, [templateTabs]);
 
   // added
@@ -348,8 +362,8 @@ const MyProfile = () => {
   const currentInvoices =
     (authUserState.user?.invoices.filter(invoice => !invoice.mentor_id) || [])?.slice(startIndex, endIndex) || [];
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+  const handlePageChange = async(event, value) => {
+    await getAllInvoices(value);
   };
 
   const handleChargeClient = (event) => {
@@ -426,7 +440,97 @@ const MyProfile = () => {
       setTemplateTabs("templates list");
     }
   }
+  const handleSelectAll = (event) => {
+    let { checked } = event.target
+    setMultipleInvoiceSelectionId(
+      checked 
+        ? invoices.invoices.filter((item) => !item.is_paid).map((invoice) => invoice.id) 
+        : []
+    );
+  };
 
+  const handleCheckboxChange = (id,checked) => {
+    if (checked) {
+      setMultipleInvoiceSelectionId((prev) => [...prev, id]);
+    } else {
+      setMultipleInvoiceSelectionId((prev) => prev.filter((itemId) => itemId !== id));
+    }
+  };
+  const handleCloseModal=()=>{
+    const matchedData = invoices.invoices.filter(item => multipleInvoiceSelectionId.includes(item.id));
+    setMultipleInvoiceSelectionData(matchedData)
+    setIsAllChecked(!isAllChecked)
+  };
+  const checkAllIDAvailable=()=>{
+    return invoices?.invoice?.filter((item) => !item.is_paid).every((item) => multipleInvoiceSelectionId.includes(item.id));
+  };
+  const handleMultipleInvoicePay = async () => {
+    let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
+    try {
+      let response = await payMultipleInvoices(payload);
+    } catch (error) {
+      toast.error(error.response.data)
+    }
+  };
+  const sortTable = (key) => {
+    let sortedInvoices = [...invoices];
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+  
+    sortedInvoices.sort((a, b) => {
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  
+    setSortConfig({ key, direction });
+    setInvoices(sortedInvoices);
+  };
+  const getSortIcon = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'asc' ? '▲' : '▼';
+    }
+    return '';
+  };
+  const getStatusBadge = (invoice) => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    if (invoice.is_paid === true) {
+      return <Badge bg="success" text="light">{'Paid'}</Badge>;
+    } else if(formattedDate > invoice.date_of_service) {
+      return <Badge bg="warning">{'Overdue'}</Badge>;
+    }
+
+    return <Badge bg="secondary">{'Due Later'}</Badge>;
+  };
+  const handleInvoiceClick = (invoice) => {
+    navigate(`/billing-details/${invoice.id}`)
+  };
+  const getAllInvoices=async(page)=>{
+    let response;
+    if(authUserState.user.is_admin){
+      response = await getAllInvoicesList({page:page},true);
+      setInvoices(response.data)
+    }else {
+      response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
+      setInvoices(authUserState.user.invoices);
+    }
+    
+  }
+  
+  const handleTopTab=(count)=>{
+    if(count===1){
+      getAllInvoices(1);
+    }else if(count===2){
+      let data = Array.isArray(invoices)&& invoices.filter((invoice)=>invoice.is_finalized);
+      console.log("@@@data",data);
+      
+    }
+    setTopTab(count)
+  }
   return (
       <AsideLayout
         asideContent={
@@ -940,101 +1044,90 @@ const MyProfile = () => {
             ))}
 
           {currentTab === "invoice" && (
-            <>
-              <div className="flex gap-x-4  w-full justify-end my-4">
-                {/* Pagination controls */}
-                <Button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  variant="info"
-                  className="text-white"
-                >
-                  <ChevronLeft />
+          <>
+            <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
+            <div className="d-flex justify-content-center align-items-center">
+              <div className="d-flex gap-[20px]">
+                <Button size="lg" variant={topTab===2&&"outline-secondary"} style={{width:"200px",color:topTab===1&&"#fff",backgroundColor:topTab===1&&"#22D3EE",border:topTab===1&&"#22D3EE"}} onClick={()=>handleTopTab(1)}>
+                  All Invoices
                 </Button>
-                <Button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={
-                    currentPage ===
-                    Math.ceil(
-                      (authUserState.user?.invoices || []).length / itemPerPage
-                    )
-                  }
-                  variant="info"
-                  className="text-white"
-                >
-                  <ChevronRight />
+                <Button size="lg" variant={topTab===1&&"outline-secondary"} style={{width:"200px",color:topTab===2&&"#fff",backgroundColor:topTab===2&&"#22D3EE",border:topTab===2&&"#22D3EE"}} onClick={()=>handleTopTab(2)}>
+                  Finalized Invoices
                 </Button>
               </div>
-              <ul className=" mx-1 mb-3 justify-center flex flex-wrap gap-3 ">
-                {authUserState.user?.invoices?.length > 0 ? (
-                  (currentInvoices || []).map((invoice) => {
-                    return (
-                      <li key={invoice?.id}>
-                        <Card
-                          className="text-center"
-                          border="info"
-                          style={{ width: "18rem" }}
+            </div>
+            <div className='w-100 d-flex justify-content-end align-items-end gap-[20px] pb-3 flex-column'>
+              <Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" onChange={handlePageChange}/>
+              {multipleInvoiceSelectionId.length > 0 && <Button onClick={handleCloseModal} style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Pay Multiple Invoices</Button>}
+            </div>
+            <div className="w-100">
+              <Table responsive bordered hover >
+                <thead className="bg-primary text-white">
+                  <tr>
+                    <th className="text-center">
+                      <Form.Check
+                        type="checkbox"
+                        checked={checkAllIDAvailable()}
+                        onChange={handleSelectAll}
+                        aria-label="select all"
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </th>
+                    <th onClick={() => sortTable('client_name')} style={{ cursor: 'pointer' }}>
+                      Client {getSortIcon('client_name')}
+                    </th>
+                    <th onClick={() => sortTable('id')} style={{ cursor: 'pointer' }}>
+                      Bill {getSortIcon('id')}
+                    </th>
+                    <th onClick={() => sortTable('created_at')} style={{ cursor: 'pointer' }}>
+                      Creation Date {getSortIcon('created_at')}
+                    </th>
+                    <th onClick={() => sortTable('date_of_service')} style={{ cursor: 'pointer' }}>
+                      Due Date {getSortIcon('date_of_service')}
+                    </th>
+                    <th onClick={() => sortTable('status')} style={{ cursor: 'pointer' }}>
+                      Status {getSortIcon('status')}
+                    </th>
+                    <th onClick={() => sortTable('charge')} style={{ cursor: 'pointer' }}>
+                      Amount {getSortIcon('charge')}
+                    </th>
+                    <th className="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(invoices) && invoices.map((invoice) => (
+                    <tr key={invoice.id}>
+                      <td className="text-center">
+                        <Form.Check
+                          type="checkbox"
+                          checked={invoice?.isChecked || multipleInvoiceSelectionId.includes(invoice.id)}
+                          disabled={invoice.is_paid}
+                          onChange={(e) => handleCheckboxChange(invoice.id, e.target.checked)}
+                        />
+                      </td>
+                      <td>{invoice.client_name}</td>
+                      <td>{invoice.id}</td>
+                      <td>{moment(invoice?.created_at).format('YYYY-DD-MM')}</td>
+                      <td>{invoice.date_of_service}</td>
+                      <td>{getStatusBadge(invoice)}</td>
+                      <td>${invoice.charge}</td>
+                      <td className="text-center">
+                        <a
+                          href="#"
+                          className="text-[#22D3EE]"
+                          onClick={() => handleInvoiceClick(invoice)}
                         >
-                          <Card.Header as="h5">
-                            Invoice ID {invoice.id}
-                          </Card.Header>
-                          <Card.Body className="flex justify-between">
-                            <Button
-                                onClick={async () => {
-                                  confirmAlert({
-                                    title: "Confirm to delete",
-                                    message: "Are you sure you want to delete this invoice?",
-                                    buttons: [
-                                      {
-                                        label: "Yes",
-                                        onClick: async () => {
-                                          try {
-                                            const {data} = await deleteInvoice(invoice?.id)
-                                            if(data){
-                                              toast.success(` Deleted Successfully.`);
-                                              getEmployees();
-                                            }else{
-                                              toast.error("Something went wrong")
-                                            }
-                                          } catch (error) {
-                                            toast.error("Something went wrong")
-                                          }
-                                        },
-                                      },
-                                      {
-                                        label: "No",
-                                        onClick: () => console.log("Click No"),
-                                      },
-                                    ],
-                                  });
-                                }}
-                                variant="danger"
-                                className="text-white"
-                              >
-                              Delete
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                await setinvoiceData(invoice);
-                                handleClick();
-                              }}
-                              variant="info"
-                              className="text-white"
-                            >
-                              See More Details
-                            </Button>
-                          </Card.Body>
-                        </Card>
-                      </li>
-                    );
-                  })
-                ) : (
-                  <h2 className="text-4xl font-bold text-center text-cyan-400">
-                    No Invoice Found
-                  </h2>
-                )}
-              </ul>
-            </>
+                          {(invoice.is_paid === true && authUserState.user.is_admin) && 'Review'}
+                          {(invoice.is_paid === false && authUserState.user.is_admin) && 'Pay'}
+                          {(authUserState.user.is_admin === false && authUserState.user.is_mentor) && 'Details'}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </>
           )}
           {currentTab === "settings" && (
             <div className="sm:container p-4 bg-white border-2 rounded-lg">

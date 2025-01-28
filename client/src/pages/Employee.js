@@ -100,12 +100,12 @@ const Employee = () => {
       console.log(error);
     }
   };
-  const getSelectedEmployeeBankDetails = async () => {
+  const getSelectedEmployeeBankDetails = async (employeeId) => {
     try {
-        let response = await getEmployeeBankDetails({ employee_id: authUserState.user.id });
-        setBankDetails(response.data)
-    } catch (error) {
-        toast.error(error.response.data.error)
+        let response = await getEmployeeBankDetails({ employee_id: employeeId });
+        setBankDetails(response.data.bank_accounts[0])
+    } catch (error) {      
+        // toast.error(error.response.data.error)
     }
 }
 
@@ -206,7 +206,6 @@ const Employee = () => {
 
   useEffect(() => {
     getEmployees();
-    getSelectedEmployeeBankDetails();
     // getInvoices();
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -394,6 +393,8 @@ const Employee = () => {
     setRadioTabs([]);
     setUpdateEmployeeInput({});
     setCurrentTab("profile");
+    getSelectedEmployeeBankDetails(emp.id);
+    getEmployeeInvoices(selectedEmployeeData.id);
     let addTabs = [
       { name: "Profile", value: "profile" },
       {
@@ -891,8 +892,6 @@ setTitle(title)
                                 defaultChecked={selectedEmployeeData?.is_inv_manager}
                                 name="is_inv_manager"
                                 type="checkbox"
-                                onChange={handleUpdateChange}
-                                disabled
                                 className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                               />
                             </div>
@@ -1307,42 +1306,46 @@ setTitle(title)
                   </div>
                 )}
                 {currentTab === "bankDetails" && (
-                  <Container>
-                    <Row>
-                      <Col xs={6} sm={6} md={6} lg={6}>
-                        <div>
-                          <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control type="text" disabled />
-                          </Form.Group>
-                        </div>
-                      </Col>
-                      <Col xs={6} sm={6} md={6} lg={6}>
-                        <div>
-                          <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control type="text" disabled />
-                          </Form.Group>
-                        </div>
-                      </Col>
-                      <Col xs={6} sm={6} md={6} lg={6}>
-                        <div>
-                          <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control type="text" disabled />
-                          </Form.Group>
-                        </div>
-                      </Col>
-                      <Col xs={6} sm={6} md={6} lg={6}>
-                        <div>
-                          <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control type="text" disabled />
-                          </Form.Group>
-                        </div>
-                      </Col>
-                    </Row>
-                  </Container>
+                  <>
+                    <Container>
+                      {!selectedEmployeeData?.stripe_account_id?<div className="d-flex justify-content-center align-items-center">
+                      <h3>Employee is not onboarded on stripe</h3>
+                      </div>:<Form>
+                        <Row>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Bank Name</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.bank_name} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Bank Account ID</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.bank_name} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Routing Number</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.routing_number} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Status</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.status} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={12} lg={12}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Account Number</Form.Label>
+                              <Form.Control type="text" disabled value={"*******" + bankDetails?.last4} />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Form>}
+                    </Container>
+                  </>
                 )}
 
               </div>

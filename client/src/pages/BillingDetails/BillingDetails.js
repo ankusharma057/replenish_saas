@@ -35,7 +35,8 @@ const BillingDetails = () => {
         setInvoiceData(response.data);
         setPaymentFrequency(response?.data?.instant_pay);
         if(response.status===200){
-            let response1 = await invoicePDFShow(response.data.id)
+            try {
+                let response1 = await invoicePDFShow(response.data.id)
             const blob = new Blob([response1.data], { type: 'application/pdf' });
             const blobUrl = URL.createObjectURL(blob);
             setInvoicePdfBlob(blobUrl);
@@ -45,6 +46,11 @@ const BillingDetails = () => {
                 instant_pay: response.data.instant_pay,
                 charge: response.data.charge,
             }));
+            } catch (error) {
+                toast.error(error.response.data.error)
+                setScreenLoading(false);
+            }
+            
         }
     };
     const handleInvoice = async(event) => {
@@ -142,7 +148,7 @@ const BillingDetails = () => {
                     <Col xs={12} sm={12} md={4} lg={4}>
                         <Card className='p-3 overflow-scroll' style={{ height: "87vh", scrollbarWidth: "none", }}>
                             {invoicePdfBlob ? <iframe src={invoicePdfBlob} width="100%" height="100%" title="PDF Viewer"></iframe> : (
-                                <p>Loading...</p>
+                                <>Invoice pdf not found</>
                             )}
                         </Card>
                     </Col>
@@ -254,20 +260,12 @@ const BillingDetails = () => {
                                                 </Col>
                                             </Row>
                                         })}
-                                        {(invoiceData?.charge != updateInvoiceDataPayload.charge|| invoiceData?.instant_pay != updateInvoiceDataPayload.instant_pay ||updateInvoiceDataPayload?.showUpdateBtn) ?
-                                            <Col>
-                                                <div className='d-flex justify-content-end gap-[20px]'>
-                                                    <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={updateInvoiceData()}>Update Invoice</Button>
-                                                </div>
-                                            </Col>
-                                            :
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='d-flex justify-content-end gap-[20px]'>
-                                                    <Button size='sm' variant='outline-secondary' onClick={() => navigate("/invoices-to-pay")}>Cancel</Button>
+                                                    <Button size='sm' variant='outline-secondary' onClick={() => navigate("/myprofile")}>Cancel</Button>
                                                     {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                                 </div>
                                             </Col>
-                                        }
                                     </Row>
                                 </Form>
                             </div>

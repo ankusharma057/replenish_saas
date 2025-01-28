@@ -370,7 +370,7 @@ export default memo(function Header() {
                   </Link>
                 </button>
 
-                {authUserState?.user?.is_mentor &&
+                {/* {authUserState?.user?.is_mentor &&
                   <button
                     onClick={handleMenuSHow}
                     className={`${(location.pathname === "/invoices-to-pay" || location.pathname === "/invoices-to-pay") && "bg-[#008989a1]"}  hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}
@@ -382,7 +382,7 @@ export default memo(function Header() {
                       Invoices to Pay
                     </Link>
                   </button>
-                }
+                } */}
                 <button
                   onClick={handleMenuSHow}
                   className={`${location.pathname === "/myprofile" && "bg-[#008989a1]"} hover:bg-[#008989a1] w-full xl:text-sm xl:w-auto px-3 py-2.5 transition-all text-lg  font-medium `}

@@ -1220,3 +1220,12 @@ export const stripeOnboardComplete = async (data, refetch) =>
         ignoreCache: refetch,
       },
   });
+  export const getAllInvoicesList = async (data,refetch) =>
+    api.get("/api/invoices", {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      }
+    });

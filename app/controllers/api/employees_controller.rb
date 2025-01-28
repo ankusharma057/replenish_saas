@@ -183,6 +183,10 @@ class Api::EmployeesController < ApplicationController
   def stripe_account_details
     employee = Employee.find(params[:employee_id])
     stripe_account_id = employee.stripe_account_id
+    if stripe_account_id.blank?
+      render json: { error: 'Stripe account ID is missing for this employee.' }, status: :unprocessable_entity
+      return
+    end
     begin
       account = Stripe::Account.retrieve(stripe_account_id)
       bank_accounts = account.external_accounts.data
