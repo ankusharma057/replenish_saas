@@ -206,6 +206,17 @@ class Api::InvoicesController < ApplicationController
     end
   end
 
+  def invoices_list
+    invoices = Invoice.where.not(client_id: nil).paginated_invoices(params)
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
+    
+  end
+
 
   private
 

@@ -99,6 +99,7 @@ mount Sidekiq::Web => '/sidekiq'
       collection do
         post :finalize_multiple
         get :print_receipt
+        get :invoices_list
       end
 
       member do
