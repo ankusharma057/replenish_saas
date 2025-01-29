@@ -209,8 +209,9 @@ class Api::EmployeesController < ApplicationController
   end
 
   def employees_invoice
+    finalized = params[:is_finalized]
     if current_employee.present?
-      invoices = Invoice.where(employee_id: current_employee.id).where.not(client_id: nil ).paginated_invoices(params)
+      invoices = Invoice.where(employee_id: current_employee.id, is_finalized: finalized).where.not(client_id: nil ).paginated_invoices(params)
         render json: {
         invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
         current_page: invoices.current_page,
