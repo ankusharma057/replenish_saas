@@ -36,4 +36,13 @@ class EmployeeMailer < ApplicationMailer
   		subject: "Payment failed due to account verification is pending"
   	)
   end
+
+
+  def onboard_to_stripe(employee)
+    @employee = employee
+    mail(
+      to: @employee.email,
+      subject: 'Reminder: On-board to Stripe'
+    )
+  end
 end

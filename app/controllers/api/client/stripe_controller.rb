@@ -99,6 +99,7 @@ class Api::Client::StripeController < ClientApplicationController
     invoice = Invoice.find(params[:invoice_id])
 
     if employee.stripe_account_id.nil?
+      EmployeeMailer.onboard_to_stripe(employee).deliver_now
       render json: { error: 'This employee does not have a Stripe connect account.' }, status: :unprocessable_entity
       return
     end
@@ -118,9 +119,11 @@ class Api::Client::StripeController < ClientApplicationController
             currency: 'usd',
             destination: account.id,
             transfer_group: "ORDER_#{invoice.id}",
+            metadata: { invoice_id: invoice.id }
+
           })
           
-          EmployeeMailer.payment_failed(employee, invoice).deliver_now
+          EmployeeMailer.payment_initiated(employee, invoice).deliver_now
           render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
         rescue Stripe::StripeError => e
           render json: { message: 'Instant payment failed', error: e.message }, status: :unprocessable_entity
@@ -146,8 +149,8 @@ class Api::Client::StripeController < ClientApplicationController
     invoices.each do |invoice|
       employee = invoice.employee
   
-      # Check if employee has a Stripe account
       if employee.stripe_account_id.nil?
+        EmployeeMailer.onboard_to_stripe(employee).deliver_now
         response_messages[:errors] << {
           invoice_id: invoice.id,
           error: 'This employee does not have a Stripe Connect account.'
@@ -156,9 +159,9 @@ class Api::Client::StripeController < ClientApplicationController
       end
   
       begin
+
         account = Stripe::Account.retrieve(employee.stripe_account_id)
   
-        # Check if employee has added a bank account
         if account.external_accounts.data.empty?
           EmployeeMailer.notify_missing_bank_account(employee).deliver_now
           response_messages[:errors] << {
@@ -176,6 +179,7 @@ class Api::Client::StripeController < ClientApplicationController
                 currency: 'usd',
                 destination: account.id,
                 transfer_group: "ORDER_#{invoice.id}",
+                metadata: { invoice_id: invoice.id }
               })
   
               EmployeeMailer.payment_initiated(employee, invoice).deliver_now
@@ -199,7 +203,7 @@ class Api::Client::StripeController < ClientApplicationController
             }
           end
         else
-          EmployeeMailer.payment_initiated(employee, invoice).deliver_now
+          EmployeeMailer.payment_failed(employee, invoice).deliver_now
           response_messages[:errors] << {
             invoice_id: invoice.id,
             error: "Payout is not enabled or account details are incomplete for  Employee: #{employee.name}"

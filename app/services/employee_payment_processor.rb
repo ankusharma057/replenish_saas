@@ -36,7 +36,9 @@ class EmployeePaymentProcessor
         amount: total_amount,
         currency: 'usd',
         destination: account.id,
-        transfer_group: 'ORDER_95',
+        transfer_group: "ORDER_#{invoice.id}",
+        metadata: { invoice_id: invoice.id }
+
       })
       Rails.logger.info "Payment sent successfully for Employee #{employee_id}, Invoice #{invoice_id}, Transfer ID: #{transfer.id}"
 
