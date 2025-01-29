@@ -33,9 +33,6 @@ const InvoicesToPay = () => {
   const navigate=useNavigate();
   const [loading, setLoading] = useState(false);
   const [screenLoading, setScreenLoading] = useState(false)
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
 
   const sortTable = (key) => {
     let sortedInvoices = [...invoices];
@@ -78,16 +75,17 @@ const InvoicesToPay = () => {
   const handleInvoiceClick = (invoice) => {
     navigate(`/billing-details/${invoice.id}`)
   };
-  const getAllInvoices=async()=>{
+  const getAllInvoices=async(page=1)=>{
     setScreenLoading(true);
     let response;
     if(authUserState.user.is_admin){
-      response = await getFinalizeInvoiceList();
+      response = await getFinalizeInvoiceList({page:page},true);
       setInvoices(response.data);
       setScreenLoading(false);
     }else if(authUserState.user.is_mentor){
       let payload={
-        employee_id:authUserState.user.id
+        employee_id:authUserState.user.id,
+        page:page
       }
       response = await getMentorFinalizeInvoiceList(payload);
       setInvoices(response.data)
@@ -115,6 +113,10 @@ const InvoicesToPay = () => {
       return <Badge bg="success" text="light">{'Paid'}</Badge>;
     }else if(invoice.payment_status ===  "initiated"){
       return <Badge bg="warning">{'Initiated'}</Badge>;
+    }else if(invoice.payment_status ===  "pending"){
+      return <Badge bg="warning">{'Pending'}</Badge>;
+    }else if(invoice.payment_status ===  "completed"){
+      return <Badge bg="success">{'Completed'}</Badge>;
     } else if(formattedDate > invoice.date_of_service) {
       return <Badge bg="warning">{'Overdue'}</Badge>;
     }
@@ -138,30 +140,34 @@ const InvoicesToPay = () => {
     }
   };
   const handleMultipleInvoicePay = async () => {
-    setScreenLoading(false);
+    setScreenLoading(true);
     setLoading(true)
     let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
     try {
       let response = await payMultipleInvoices(payload);
       if (response.data.success.length>0) {
-        response.data.success.map((message)=>{
-          toast.success(message.message)
-        })
+        response.data.success.map((success) => toast.success(success.message));
         setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
         getAllInvoices();
       } else if (response.data.errors.length>0) {
-        for(let i=0;i<=response.data.success.length;i++){
-          toast.success(response.data.success[i].error)
-        }
+        response.data.errors.map((error) => toast.error(error.error));
         setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
         getAllInvoices();
       }
+      if(response.status === 200){
+        setMultipleInvoiceSelectionId([])
+        setMultipleInvoiceSelectionData([]);
+        getAllInvoices();
+      }
     } catch (error) {
     }
+  };
+  const handlePageChange = async(event, value) => {
+    await getAllInvoices(value);
   };
   const ScreenLoading = () => {
     return <div style={{ width: "81%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
@@ -225,9 +231,9 @@ const InvoicesToPay = () => {
                   </Button> */}
                   
                 </div>
-                <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
+                <h2 className="text-center mb-2" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
                 <div className='d-flex justify-content-end align-items-end gap-[20px] pb-3 flex-column'>
-                  <Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" />
+                  <Pagination count={invoices?.total_pages} variant="outlined" shape="rounded" onChange={handlePageChange}/>
                   {multipleInvoiceSelectionId.length>0 && <Button onClick={handleCloseModal}style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Pay Multiple Invoices</Button>}
                 </div>
                 <Table responsive bordered hover className="table-sm">
@@ -281,15 +287,11 @@ const InvoicesToPay = () => {
                         <td>{getStatusBadge(invoice)}</td>
                         <td>${invoice.charge}</td>
                         <td className="text-center">
-                          <a
-                            href="#"
-                            className="text-[#22D3EE]"
-                            onClick={() => handleInvoiceClick(invoice)}
-                          >
+                          <p className="text-[#22D3EE]" onClick={() => handleInvoiceClick(invoice)}>
                             {(invoice.payment_status==="completed" || invoice.is_paid === true) && 'Review'}
                             {((invoice.payment_status===null||invoice.payment_status==="pending") && invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
                             {(invoice.payment_status==="initiated") && 'Details'}
-                          </a>
+                          </p>
                         </td>
                       </tr>
                     ))}
@@ -342,7 +344,7 @@ const InvoicesToPay = () => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={handleCloseModal}>Close</Button>
+          <Button variant="outline-secondary" onClick={handleCloseModal} disabled={screenLoading}>Close</Button>
           <Button variant="dark" disabled={loading} style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleMultipleInvoicePay}>
             Pay {loading && <Spinner animation="border" variant="white" style={{ width: "15px", height: "15px" }} />}
           </Button>
