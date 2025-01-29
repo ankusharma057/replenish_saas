@@ -52,8 +52,8 @@ const BankDetails = ({ employee }) => {
     return (
         <div className='p-3 w-100 rounded h-[80vh] position-relative' style={{position:"relative"}}>
              {screenLoading && <ScreenLoading />}
-            {(authUserState.user?.is_admin && !authUserState?.user?.is_mentor && authUserState.user.stripe_account_id) &&<p className='fs-4 fw-semibold'>Bank Details</p>}
-            {(!authUserState.user?.is_admin && authUserState?.user?.is_mentor && !authUserState.user.stripe_account_id) ? <div className='d-flex justify-content-center flex-column'>
+            { authUserState.user.stripe_account_id &&<p className='fs-4 fw-semibold'>Bank Details</p>}
+            {authUserState.user.stripe_account_id===null ? <div className='d-flex justify-content-center flex-column'>
                 <h1 className="text-4xl font-extrabold text-center mb-12 text-gray-800">
                     Kindly Onboard Yourself To <span className="text-cyan-500"> Stripe</span> To Proceed
                 </h1>
