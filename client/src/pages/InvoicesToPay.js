@@ -32,6 +32,7 @@ const InvoicesToPay = () => {
   const itemsPerPage = 30;
   const navigate=useNavigate();
   const [loading, setLoading] = useState(false);
+  const [screenLoading, setScreenLoading] = useState(false)
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -78,19 +79,23 @@ const InvoicesToPay = () => {
     navigate(`/billing-details/${invoice.id}`)
   };
   const getAllInvoices=async()=>{
+    setScreenLoading(true);
     let response;
     if(authUserState.user.is_admin){
       response = await getFinalizeInvoiceList();
-      setInvoices(response.data)
+      setInvoices(response.data);
+      setScreenLoading(false);
     }else if(authUserState.user.is_mentor){
       let payload={
         employee_id:authUserState.user.id
       }
       response = await getMentorFinalizeInvoiceList(payload);
       setInvoices(response.data)
+    setScreenLoading(false);
     }else{
       response = authUserState.user.invoices.filter((invoice)=>invoice.is_finalized)
       setInvoices(response)
+      setScreenLoading(false);
     }
   }
 
@@ -131,22 +136,32 @@ const InvoicesToPay = () => {
     }
   };
   const handleMultipleInvoicePay = async () => {
+    setScreenLoading(false);
     setLoading(true)
     let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
     try {
       let response = await payMultipleInvoices(payload);
       if (response.data.success.length) {
         toast.success(response.data.success[0].message)
+        setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
+        getAllInvoices();
       } else if (response.data.errors.length) {
         toast.error(response.data.errors[0].error)
+        setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
+        getAllInvoices();
       }
     } catch (error) {
     }
   };
+  const ScreenLoading = () => {
+    return <div style={{ width: "81%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+        <Spinner animation="border" variant="info" />
+    </div>
+}
   return (
     <AsideLayout
       asideContent={
@@ -173,6 +188,7 @@ const InvoicesToPay = () => {
         </div>
       }
     >
+      {screenLoading && <ScreenLoading />}
       <div className="container mt-4">
         {selectedInvoice ? (
           <InvoiceDetails 

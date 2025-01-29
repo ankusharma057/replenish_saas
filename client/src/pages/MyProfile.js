@@ -1051,7 +1051,6 @@ const MyProfile = () => {
 
           {currentTab === "invoice" && (
           <>
-            <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
             <div className="d-flex justify-content-center align-items-center">
               <div className="d-flex gap-[20px]">
                 <Button size="md" variant={topTab===2&&"outline-secondary"} style={{width:"250px",color:topTab===1&&"#fff",backgroundColor:topTab===1&&"#22D3EE",border:topTab===1&&"#22D3EE"}} onClick={()=>handleTopTab(1)}>
@@ -1107,10 +1106,7 @@ const MyProfile = () => {
                           href="#"
                           className="text-[#22D3EE]"
                           onClick={() => handleInvoiceClick(invoice)}
-                        >
-                          {(invoice.is_paid === true && authUserState.user.is_admin) && 'Review'}
-                          {(invoice.is_finalized && invoice.is_paid === false && authUserState.user.is_admin) && 'Pay'}
-                          {(!invoice.is_finalized || authUserState.user.is_admin === false && authUserState.user.is_mentor) && 'Details'}
+                        >Details
                         </a>
                       </td>
                     </tr>
