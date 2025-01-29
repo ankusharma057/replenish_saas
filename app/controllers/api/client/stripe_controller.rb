@@ -103,50 +103,62 @@ class Api::Client::StripeController < ClientApplicationController
       return
     end
 
-    total_amount = (invoice.charge * 100).to_i
+    total_amount = (invoice.charge).to_i
     account = Stripe::Account.retrieve(employee.stripe_account_id)
     if account.external_accounts.data.empty?
       EmployeeMailer.notify_missing_bank_account(employee).deliver_now
       render json: { error: 'This employee has not added a bank account to their Stripe account.' }, status: :unprocessable_entity
       return
     end
-    if invoice.instant_pay && account.payouts_enabled && account.details_submitted
-      external_account_id = account.external_accounts.data.first.id
-      transfer = Stripe::Transfer.create({
-        amount: total_amount,
-        currency: 'usd',
-        destination: account.id,
-        transfer_group: "ORDER_#{invoice.id}",
-      })
-      EmployeeMailer.payment_initiated(employee, invoice).deliver_now
-      render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
+    if account.payouts_enabled && account.details_submitted
+      if invoice.instant_pay
+        begin
+          transfer = Stripe::Transfer.create({
+            amount: total_amount,
+            currency: 'usd',
+            destination: account.id,
+            transfer_group: "ORDER_#{invoice.id}",
+          })
+          
+          EmployeeMailer.payment_failed(employee, invoice).deliver_now
+          render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
+        rescue Stripe::StripeError => e
+          render json: { message: 'Instant payment failed', error: e.message }, status: :unprocessable_entity
+        end
+      else
+        schedule_payment(employee.id, invoice.id, total_amount)
+        invoice.update(payment_status: "initiated")
+        render json: { message: 'Payment initiated successfully' }, status: :ok
+      end
     else
-      schedule_payment(employee.id, invoice.id, total_amount)
-      invoice.update(payment_status: "initiated")
-      render json: { message: 'payment initiated successfully' }, status: :ok
-    end
+      EmployeeMailer.payment_failed(employee, invoice).deliver_now
+      render json: { message: "Payout is not enabled for this account Emplopyee: #{employee.name}" }, status: :unprocessable_entity
+    end    
   end
 
 
   def pay_multiple_invoice
     invoice_ids = params["_json"].pluck(:invoice_id)
     invoices = Invoice.includes(:employee).where(id: invoice_ids)
-
+  
     response_messages = { success: [], errors: [] }
-
+  
     invoices.each do |invoice|
+      employee = invoice.employee
+  
+      # Check if employee has a Stripe account
+      if employee.stripe_account_id.nil?
+        response_messages[:errors] << {
+          invoice_id: invoice.id,
+          error: 'This employee does not have a Stripe Connect account.'
+        }
+        next
+      end
+  
       begin
-        employee = invoice.employee
-
-        if employee.stripe_account_id.nil?
-          response_messages[:errors] << {
-            invoice_id: invoice.id,
-            error: 'This employee does not have a Stripe connect account.'
-          }
-          next
-        end
-
         account = Stripe::Account.retrieve(employee.stripe_account_id)
+  
+        # Check if employee has added a bank account
         if account.external_accounts.data.empty?
           EmployeeMailer.notify_missing_bank_account(employee).deliver_now
           response_messages[:errors] << {
@@ -155,38 +167,55 @@ class Api::Client::StripeController < ClientApplicationController
           }
           next
         end
-
-        if invoice.instant_pay && account.payouts_enabled && account.details_submitted
-          total_amount = (invoice.charge * 100).to_i
-          transfer = Stripe::Transfer.create({
-            amount: total_amount,
-            currency: 'usd',
-            destination: account.id,
-            transfer_group: "ORDER_#{invoice.id}",
-          })
-          EmployeeMailer.payment_initiated(employee, invoice).deliver_now
-          response_messages[:success] << {
-            invoice_id: invoice.id,
-            message: 'Instant payment sent successfully',
-            transfer_id: transfer.id
-          }
+        if account.payouts_enabled && account.details_submitted
+          if invoice.instant_pay
+            begin
+              total_amount = (invoice.charge * 100).to_i
+              transfer = Stripe::Transfer.create({
+                amount: total_amount,
+                currency: 'usd',
+                destination: account.id,
+                transfer_group: "ORDER_#{invoice.id}",
+              })
+  
+              EmployeeMailer.payment_initiated(employee, invoice).deliver_now
+              response_messages[:success] << {
+                invoice_id: invoice.id,
+                message: 'Instant payment sent successfully for Invoice_id: #{invoice.id}' ,
+                transfer_id: transfer.id
+              }
+            rescue Stripe::StripeError => e
+              response_messages[:errors] << {
+                invoice_id: invoice.id,
+                error: "Stripe transfer failed: #{e.message}"
+              }
+            end
+          else
+            schedule_payment(employee.id, invoice.id, invoice.charge.to_i)
+            invoice.update!(payment_status: "initiated")
+            response_messages[:success] << {
+              invoice_id: invoice.id,
+              message: 'Payment scheduled for later '
+            }
+          end
         else
-          schedule_payment(employee.id, invoice.id, invoice.charge.to_i)
-          invoice.update(payment_status: "initiated")
-          response_messages[:success] << {
+          EmployeeMailer.payment_initiated(employee, invoice).deliver_now
+          response_messages[:errors] << {
             invoice_id: invoice.id,
-            message: 'Payment scheduled for later'
+            error: "Payout is not enabled or account details are incomplete for  Employee: #{employee.name}"
           }
         end
       rescue StandardError => e
         response_messages[:errors] << {
           invoice_id: invoice.id,
-          error: e.message
+          error: "Processing error: #{e.message}"
         }
       end
     end
+  
     render json: response_messages, status: :ok
   end
+  
 
   def webhooks
     payload = request.body.read

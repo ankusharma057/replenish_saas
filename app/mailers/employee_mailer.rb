@@ -27,4 +27,13 @@ class EmployeeMailer < ApplicationMailer
   		subject: "Payment Initiated successfully"
   	)
   end
+
+  def payment_failed(employee, invoice)
+  	@employee = employee
+  	@invoice = invoice
+  	mail(
+  		to: @employee.email,
+  		subject: "Payment failed due to account verification is pending"
+  	)
+  end
 end

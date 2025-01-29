@@ -143,14 +143,18 @@ const InvoicesToPay = () => {
     let payload = multipleInvoiceSelectionData.filter(item => multipleInvoiceSelectionId.includes(item.id)).map(item => ({ invoice_id: item.id }));
     try {
       let response = await payMultipleInvoices(payload);
-      if (response.data.success.length) {
-        toast.success(response.data.success[0].message)
+      if (response.data.success.length>0) {
+        response.data.success.map((message)=>{
+          toast.success(message.message)
+        })
         setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
         getAllInvoices();
-      } else if (response.data.errors.length) {
-        toast.error(response.data.errors[0].error)
+      } else if (response.data.errors.length>0) {
+        for(let i=0;i<=response.data.success.length;i++){
+          toast.success(response.data.success[i].error)
+        }
         setScreenLoading(false);
         setLoading(false);
         handleCloseModal();
@@ -266,7 +270,7 @@ const InvoicesToPay = () => {
                           <Form.Check
                             type="checkbox"
                             checked={invoice?.isChecked || multipleInvoiceSelectionId.includes(invoice.id)}
-                            disabled={invoice.is_paid}
+                            disabled={invoice.is_paid || invoice.payment_status==="initiated"}
                             onChange={(e) => handleCheckboxChange(invoice.id, e.target.checked)}
                           />
                         </td>
