@@ -118,11 +118,11 @@ class Api::Client::StripeController < ClientApplicationController
         destination: account.id,
         transfer_group: "ORDER_#{invoice.id}",
       })
-      invoice.update(is_paid: true)
       EmployeeMailer.payment_initiated(employee, invoice).deliver_now
       render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)
+      invoice.update(payment_status: "Initiated")
       render json: { message: 'payment initiated successfully' }, status: :ok
     end
   end
@@ -164,7 +164,6 @@ class Api::Client::StripeController < ClientApplicationController
             destination: account.id,
             transfer_group: "ORDER_#{invoice.id}",
           })
-          invoice.update!(is_paid: true)
           EmployeeMailer.payment_initiated(employee, invoice).deliver_now
           response_messages[:success] << {
             invoice_id: invoice.id,
@@ -173,6 +172,7 @@ class Api::Client::StripeController < ClientApplicationController
           }
         else
           schedule_payment(employee.id, invoice.id, invoice.charge.to_i)
+          invoice.update(payment_status: "Initiated")
           response_messages[:success] << {
             invoice_id: invoice.id,
             message: 'Payment scheduled for later'
@@ -233,7 +233,7 @@ class Api::Client::StripeController < ClientApplicationController
     invoice = Invoice.find_by(id: invoice_id)
 
     if invoice
-      invoice.update(is_paid: true)
+      invoice.update(is_paid: true, payment_status: "Completed")
     end
   end
 

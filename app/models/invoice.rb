@@ -27,7 +27,9 @@ class Invoice < ApplicationRecord
  
   validates_presence_of :overhead_fee_type, on: :update, if: lambda{ |invoice| invoice.overhead_fee_value.present? }
 
+  enum payment_status: { pending: "pending", initiated: "initiated", completed: "completed" }
   # before_update :revise_charge
+  before_create :set_default_status
   before_destroy -> { return_inventory if !self.is_finalized }, if: -> { !self.is_finalized }
   before_destroy -> { verify_fellow_invoices if !self.is_finalized }, if: -> { !self.is_finalized }
 
@@ -144,5 +146,9 @@ class Invoice < ApplicationRecord
     unless fellow_invoices.any? 
       SendRejectInvoiceGroupMail.with(invoice: self).send_group_rejection_mail.deliver_now
     end
+  end
+
+  def set_default_status
+    self.payment_status ||= "pending"
   end
 end
