@@ -449,7 +449,7 @@ const Invoice = () => {
   </div>
 
   {/* Table Rows */}
-  {allInvoices?.map((invoice) => {
+  {allInvoices?.map((invoice) => {  
     return (
       <FinalizeInvoicesTable
         key={invoice.id}

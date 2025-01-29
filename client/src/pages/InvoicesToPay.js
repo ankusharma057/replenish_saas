@@ -113,6 +113,8 @@ const InvoicesToPay = () => {
     
     if (invoice.is_paid === true) {
       return <Badge bg="success" text="light">{'Paid'}</Badge>;
+    }else if(invoice.payment_status ===  "initiated"){
+      return <Badge bg="warning">{'Initiated'}</Badge>;
     } else if(formattedDate > invoice.date_of_service) {
       return <Badge bg="warning">{'Overdue'}</Badge>;
     }
@@ -280,9 +282,9 @@ const InvoicesToPay = () => {
                             className="text-[#22D3EE]"
                             onClick={() => handleInvoiceClick(invoice)}
                           >
-                            {(invoice.is_paid === true && authUserState.user.is_admin ) && 'Review'}
-                            {(invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
-                            {(authUserState.user.is_admin ===false && authUserState.user.is_mentor) && 'Details'}
+                            {(invoice.payment_status==="completed" || invoice.is_paid === true) && 'Review'}
+                            {((invoice.payment_status===null||invoice.payment_status==="pending") && invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
+                            {(invoice.payment_status==="initiated") && 'Details'}
                           </a>
                         </td>
                       </tr>

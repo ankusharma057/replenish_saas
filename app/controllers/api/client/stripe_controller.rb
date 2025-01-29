@@ -122,7 +122,7 @@ class Api::Client::StripeController < ClientApplicationController
       render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
     else
       schedule_payment(employee.id, invoice.id, total_amount)
-      invoice.update(payment_status: "Initiated")
+      invoice.update(payment_status: "initiated")
       render json: { message: 'payment initiated successfully' }, status: :ok
     end
   end
@@ -157,7 +157,7 @@ class Api::Client::StripeController < ClientApplicationController
         end
 
         if invoice.instant_pay && account.payouts_enabled && account.details_submitted
-          total_amount = (invoice.charge * 100).to_i
+          total_amount = (invoice.charge).to_i
           transfer = Stripe::Transfer.create({
             amount: total_amount,
             currency: 'usd',
@@ -172,7 +172,7 @@ class Api::Client::StripeController < ClientApplicationController
           }
         else
           schedule_payment(employee.id, invoice.id, invoice.charge.to_i)
-          invoice.update(payment_status: "Initiated")
+          invoice.update(payment_status: "initiated")
           response_messages[:success] << {
             invoice_id: invoice.id,
             message: 'Payment scheduled for later'
@@ -233,7 +233,7 @@ class Api::Client::StripeController < ClientApplicationController
     invoice = Invoice.find_by(id: invoice_id)
 
     if invoice
-      invoice.update(is_paid: true, payment_status: "Completed")
+      invoice.update(is_paid: true, payment_status: "completed")
     end
   end
 

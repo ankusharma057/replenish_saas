@@ -263,7 +263,7 @@ const BillingDetails = () => {
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='d-flex justify-content-end gap-[20px]'>
                                                     <Button size='sm' variant='outline-secondary' onClick={() => navigate("/invoices-to-pay")}>Cancel</Button>
-                                                    {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
+                                                    {(authUserState.user?.is_admin && !invoiceData?.is_paid && (invoiceData?.payment_status === "pending" || invoiceData?.payment_status === null)) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                                 </div>
                                             </Col>
                                     </Row>
