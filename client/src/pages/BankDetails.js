@@ -15,9 +15,12 @@ const BankDetails = ({ employee }) => {
     },[])
     const getSelectedEmployeeBankDetails=async()=>{
         try {
+            setScreenLoading(true)
             let response = await getEmployeeBankDetails({employee_id:employee.id});
             setBankDetails(response.data.bank_accounts[0])
+            setScreenLoading(false)
         } catch (error) {
+            setScreenLoading(false)
         }
     }
     const handleOnboard=async()=>{

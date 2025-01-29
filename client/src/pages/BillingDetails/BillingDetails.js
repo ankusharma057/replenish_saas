@@ -70,7 +70,7 @@ const BillingDetails = () => {
             let response = await finalizePayment(payload);
             if(response.data.payout_id){
                 toast.success(response.data.message);
-                navigate("/clients/payment/success");
+                navigate("/clients/payment/success", { replace: true });
             } else if (response.data.redirect_url && authUserState.user.is_admin===false) {
                 const link = document.createElement('a');
                 link.href = response.data.redirect_url;
@@ -81,10 +81,10 @@ const BillingDetails = () => {
                 document.body.removeChild(link);
             }else if(response.data.message && response.data.transfer_id){
                 toast.success(response.data.message);
-                navigate("/clients/payment/success");
+                navigate("/clients/payment/success", { replace: true });
             }else if(response.data.message){
                 toast.success(response.data.message);
-                navigate("/invoices-to-pay");
+                navigate("/invoices-to-pay", { replace: true });
             }else {
                 toast.error(response.data.error)
             }

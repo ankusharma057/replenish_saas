@@ -48,7 +48,7 @@ const StripeOnboardSuccess = () => {
                     <p> Have a great day!</p>
                     <div className="py-10 text-center">
                         <Link
-                            to="/invoices-to-pay"
+                            to="/myprofile"
                             state={"success"}
                             className="px-12 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3"
                         >
