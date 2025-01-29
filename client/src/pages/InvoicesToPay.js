@@ -254,8 +254,8 @@ const InvoicesToPay = () => {
                         </td>
                         <td>{invoice.client_name}</td>
                         <td>{invoice.id}</td>
-                        <td>{moment(invoice?.created_at).format('YYYY-DD-MM')}</td>
-                        <td>{invoice.date_of_service}</td>
+                        <td>{moment(invoice?.created_at).format('MM-DD-YYYY')}</td>
+                        <td>{moment(invoice?.date_of_service).format('MM-DD-YYYY')}</td>
                         <td>{getStatusBadge(invoice)}</td>
                         <td>${invoice.charge}</td>
                         <td className="text-center">

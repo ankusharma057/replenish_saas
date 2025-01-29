@@ -8,6 +8,8 @@ const BankDetails = ({ employee }) => {
     const { authUserState } = useAuthContext();
     const [loading, setLoading] = useState(false);
     const [bankDetails, setBankDetails] = useState();
+  const [screenLoading, setScreenLoading] = useState(false)
+
     useEffect(()=>{
         getSelectedEmployeeBankDetails();
     },[])
@@ -16,10 +18,10 @@ const BankDetails = ({ employee }) => {
             let response = await getEmployeeBankDetails({employee_id:employee.id});
             setBankDetails(response.data.bank_accounts[0])
         } catch (error) {
-            toast.error(error.response.data.error)
         }
     }
     const handleOnboard=async()=>{
+        setScreenLoading(true)
         setLoading(true)
         let payload={
             employee_id:authUserState?.user?.id
@@ -34,18 +36,26 @@ const BankDetails = ({ employee }) => {
             link.click();
             document.body.removeChild(link);
             setLoading(false)
+            setScreenLoading(false)
         } catch (error) {
             toast.error(error.response.data.error)
             setLoading(false)
+            setScreenLoading(false)
         }
-
+        setScreenLoading(false)
+    }
+    const ScreenLoading = () => {
+        return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+            <Spinner animation="border" variant="info" />
+        </div>
     }
     return (
-        <div className='p-3 w-100 rounded h-[80vh]'>
-            <p className='fs-4 fw-semibold'>Bank Details</p>
+        <div className='p-3 w-100 rounded h-[80vh] position-relative' style={{position:"relative"}}>
+             {screenLoading && <ScreenLoading />}
+            {(authUserState.user?.is_admin && !authUserState?.user?.is_mentor && authUserState.user.stripe_account_id) &&<p className='fs-4 fw-semibold'>Bank Details</p>}
             {(!authUserState.user?.is_admin && authUserState?.user?.is_mentor && !authUserState.user.stripe_account_id) ? <div className='d-flex justify-content-center flex-column'>
                 <h1 className="text-4xl font-extrabold text-center mb-12 text-gray-800">
-                    Kindly Onboard Yourself to <span className="text-cyan-500"> Stripe</span> to Proceed
+                    Kindly Onboard Yourself To <span className="text-cyan-500"> Stripe</span> To Proceed
                 </h1>
                 <Button n className='w-[300px] m-auto' size='md' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={handleOnboard} disabled={loading}>Add Your Bank Details{loading && <Spinner animation="border" variant="white" style={{ width: "15px", height: "15px" }} />}</Button>
             </div>:

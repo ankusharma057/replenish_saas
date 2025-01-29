@@ -37,6 +37,7 @@ const Schedule = lazy(() => import("./pages/Schedule"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
 const InvoicesToPay = lazy(() => import("./pages/InvoicesToPay"));
+const InvoicesDetails2 = lazy(() => import("./pages/InvoiceDetails2"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Settings2 = lazy(() => import("./pages/Settings/Settings"));
 const Locations = lazy(() => import("./pages/Settings/Locations"));
@@ -267,6 +268,7 @@ function App() {
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
+                  <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
                   <Route path="/stripe-onboard-success" element={<StripeOnboardSuccess />} />
                   {/* <Route path="/settings" element={<Settings />} /> */}
@@ -292,6 +294,7 @@ function App() {
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   {/* <Route path="/invoices-to-pay" element={<InvoicesToPay />} /> */}
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
+                  <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
                   <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
                 </>
               )}

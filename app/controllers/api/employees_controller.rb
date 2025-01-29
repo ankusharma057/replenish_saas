@@ -210,7 +210,7 @@ class Api::EmployeesController < ApplicationController
 
   def employees_invoice
     if current_employee.present?
-      invoices = Invoice.where(employee_id: current_employee.id).where.not(client_id: nil).paginated_invoices(params)
+      invoices = Invoice.where(employee_id: current_employee.id).where.not(client_id: nil ).paginated_invoices(params)
         render json: {
         invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
         current_page: invoices.current_page,

@@ -520,31 +520,23 @@ const MyProfile = () => {
     return <Badge bg="secondary">{'Due Later'}</Badge>;
   };
   const handleInvoiceClick = (invoice) => {
-    navigate(`/billing-details/${invoice.id}`)
+    navigate(`/invoices-details/${invoice.id}`)
   };
   const getAllInvoices = async (page, tab = 1) => {
     let response;
-    if (authUserState.user.is_admin && tab == 1) {
-      response = await getAllInvoicesList({ page: page }, true);
-      setInvoices(response.data)
-    } else if (authUserState.user.is_admin && tab == 2) {
-      response = await getFinalizeInvoiceList();
-      setInvoices(response.data)
-    } else if (authUserState.user.is_mentor && tab == 2) {
-      let payload = {
-        employee_id: authUserState.user.id
-      }
-      response = await getMentorFinalizeInvoiceList(payload);
-      setInvoices(response.data)
-    } else {
-      response = await getEmployeeInvoices({ page: page }, true);
-      setInvoices(response.data);
+    let payload = {
+      employee_id: authUserState.user.id,
+      is_finalized: tab == 2 ? true : false,
+      page: page
     }
+    response = await getEmployeeInvoices(payload, true);
+    setInvoices(response.data);
   }
-  const handleTopTab=(count)=>{
+  const handleTopTab = (count) => {
     setTopTab(count)
-    getAllInvoices(1,count);
+    getAllInvoices(1, count);
   }
+  
   return (
       <AsideLayout
         asideContent={
@@ -829,7 +821,7 @@ const MyProfile = () => {
           show={vendorUpdateModalShow}
           onHide={hideUpdateVendorModal}
           title="Update Vendor Name"
-        >
+         >
           <Form className="flex flex-col gap-4" onSubmit={updateVendoreSubmit}>
             <LabelInput
               label="Enter New Vendor Name"
@@ -1062,10 +1054,10 @@ const MyProfile = () => {
             <h2 className="text-center mb-4" style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Invoices To Pay</h2>
             <div className="d-flex justify-content-center align-items-center">
               <div className="d-flex gap-[20px]">
-                <Button size="lg" variant={topTab===2&&"outline-secondary"} style={{width:"200px",color:topTab===1&&"#fff",backgroundColor:topTab===1&&"#22D3EE",border:topTab===1&&"#22D3EE"}} onClick={()=>handleTopTab(1)}>
-                  All Invoices
+                <Button size="md" variant={topTab===2&&"outline-secondary"} style={{width:"250px",color:topTab===1&&"#fff",backgroundColor:topTab===1&&"#22D3EE",border:topTab===1&&"#22D3EE"}} onClick={()=>handleTopTab(1)}>
+                  Non Finalized Invoices
                 </Button>
-                <Button size="lg" variant={topTab===1&&"outline-secondary"} style={{width:"200px",color:topTab===2&&"#fff",backgroundColor:topTab===2&&"#22D3EE",border:topTab===2&&"#22D3EE"}} onClick={()=>handleTopTab(2)}>
+                <Button size="md" variant={topTab===1&&"outline-secondary"} style={{width:"250px",color:topTab===2&&"#fff",backgroundColor:topTab===2&&"#22D3EE",border:topTab===2&&"#22D3EE"}} onClick={()=>handleTopTab(2)}>
                   Finalized Invoices
                 </Button>
               </div>
@@ -1078,15 +1070,7 @@ const MyProfile = () => {
               <Table responsive bordered hover >
                 <thead className="bg-primary text-white">
                   <tr>
-                  {(authUserState.user.is_admin && topTab==2) && <th className="text-center">
-                      <Form.Check
-                        type="checkbox"
-                        checked={checkAllIDAvailable()}
-                        onChange={handleSelectAll}
-                        aria-label="select all"
-                        style={{ cursor: 'pointer' }}
-                      />
-                    </th>}
+                  <th className="text-center">#</th>
                     <th onClick={() => sortTable('client_name')} style={{ cursor: 'pointer' }}>
                       Client {getSortIcon('client_name')}
                     </th>
@@ -1109,20 +1093,13 @@ const MyProfile = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(invoices.invoices) && invoices.invoices.map((invoice) => (
+                  {Array.isArray(invoices.invoices) && invoices.invoices.map((invoice,index) => (
                     <tr key={invoice.id}>
-                      {(authUserState.user.is_admin && topTab==2) && <td className="text-center">
-                        <Form.Check
-                          type="checkbox"
-                          checked={invoice?.isChecked || multipleInvoiceSelectionId.includes(invoice.id)}
-                          disabled={invoice.is_paid}
-                          onChange={(e) => handleCheckboxChange(invoice.id, e.target.checked)}
-                        />
-                      </td>}
+                      <td className="text-center">{index+1}</td>
                       <td>{invoice.client_name}</td>
                       <td>{invoice.id}</td>
-                      <td>{moment(invoice?.created_at).format('YYYY-DD-MM')}</td>
-                      <td>{invoice.date_of_service}</td>
+                      <td>{moment(invoice?.created_at).format('MM-DD-YYYY')}</td>
+                      <td>{moment(invoice.date_of_service).format('MM-DD-YYYY')}</td>
                       <td>{getStatusBadge(invoice)}</td>
                       <td>${invoice.charge}</td>
                       <td className="text-center">

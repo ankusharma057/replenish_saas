@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import { BadgeDollarSign } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {  getSingleInvoice, finalizePayment, invoicePDFShow, updateInvoice } from '../../Server';
+import {  getSingleInvoice, finalizePayment, invoicePDFShow, updateInvoice } from '../Server/index';
 import moment from 'moment';
 import { toast } from 'react-toastify';
-import { useAuthContext } from '../../context/AuthUserContext';
-const BillingDetails = () => {
+import { useAuthContext } from '../context/AuthUserContext';
+const InvoiceDetails2 = () => {
     const { authUserState } = useAuthContext();
     const navigate = useNavigate();
     const { invoice_id } = useParams();
@@ -142,7 +142,6 @@ const BillingDetails = () => {
     }
     return (
         <div className='p-2'>
-            {screenLoading && <ScreenLoading />}
             <div>
                 <Row>
                     <Col xs={12} sm={12} md={4} lg={4}>
@@ -195,13 +194,13 @@ const BillingDetails = () => {
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Invoice Date</Form.Label>
-                                                <Form.Control type="date" value={moment(invoiceData?.created_at).format("YYYY-MM-DD")} disabled />
+                                                <Form.Control type="text" value={moment(invoiceData?.created_at).format("MM-DD-YYYY")} disabled />
                                             </div>
                                         </Col>
                                         <Col xs={6} sm={6} md={6} lg={6}>
                                             <div className='mb-3'>
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Due Date</Form.Label>
-                                                <Form.Control type="date" value={moment(invoiceData?.due_date, "YYYY-MM-DD").format("YYYY-MM-DD")} disabled />
+                                                <Form.Control type="text" value={moment(invoiceData?.due_date).format("MM-DD-YYYY")} disabled />
                                             </div>
                                         </Col>
                                         {authUserState.user.is_admin &&
@@ -262,8 +261,7 @@ const BillingDetails = () => {
                                         })}
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='d-flex justify-content-end gap-[20px]'>
-                                                    <Button size='sm' variant='outline-secondary' onClick={() => navigate("/invoices-to-pay")}>Cancel</Button>
-                                                    {(authUserState.user?.is_admin && !invoiceData?.is_paid) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
+                                                    <Button size='sm' variant='outline-secondary' onClick={() => navigate("/myprofile")}>Cancel</Button>
                                                 </div>
                                             </Col>
                                     </Row>
@@ -273,37 +271,8 @@ const BillingDetails = () => {
                     </Col>
                 </Row>
             </div>
-            <div>    
-                <Modal show={showConfirmationModal} onHide={handleClosesConfirmationModal} centered>
-                    <Modal.Body className="text-center p-4">
-                        <h2 className="fw-bold mb-1">Please Confirm your payment</h2>
-                        <p className="text-muted">Proceed to Complete Your Payment</p>
-                        <div className="my-4">
-                            <BadgeDollarSign style={{ marginRight: '8px', margin: "auto" }} size={40} />
-                        </div>
-                        <p className="text-muted">
-                        The payment order for your invoice ID 48 is ready to be processed. The product's details are provided here, and you will receive an email confirming payment completion as soon as it is completed.
-                        </p>
-                        <div className="border p-3 rounded mb-3">
-                            <div className="d-flex justify-content-between">
-                                <span>Order Review</span>
-                                <span>${invoiceData?.charge}</span>
-                            </div>
-                            <small className="text-muted">{invoiceData?.products_hash?.products.length} product(s) in this invoice</small>
-                        </div>
-                        <div className="d-flex justify-content-between">
-                            <Button variant="light" onClick={handleClosesConfirmationModal}>
-                                Cancel
-                            </Button>
-                            <Button variant="dark" onClick={makeInvoicePayment} disabled={loading}>
-                                Confirm Payment {loading &&<Spinner animation="border" variant="white" style={{width:"15px",height:"15px"}}/>}
-                            </Button>
-                        </div>
-                    </Modal.Body>
-                </Modal>
-            </div>
         </div>
     )
 }
 
-export default BillingDetails
+export default InvoiceDetails2
