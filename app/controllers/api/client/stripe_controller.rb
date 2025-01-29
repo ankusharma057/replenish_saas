@@ -104,7 +104,7 @@ class Api::Client::StripeController < ClientApplicationController
       return
     end
 
-    total_amount = (invoice.charge).to_i
+    total_amount = (invoice.charge * 100).to_i
     account = Stripe::Account.retrieve(employee.stripe_account_id)
     if account.external_accounts.data.empty?
       EmployeeMailer.notify_missing_bank_account(employee).deliver_now
@@ -185,7 +185,7 @@ class Api::Client::StripeController < ClientApplicationController
               EmployeeMailer.payment_initiated(employee, invoice).deliver_now
               response_messages[:success] << {
                 invoice_id: invoice.id,
-                message: 'Instant payment sent successfully for Invoice_id: #{invoice.id}' ,
+                message: "Instant payment sent successfully for Invoice ID: #{invoice.id}" ,
                 transfer_id: transfer.id
               }
             rescue Stripe::StripeError => e
