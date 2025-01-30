@@ -67,21 +67,13 @@ const BillingDetails = () => {
                 invoice_id:invoiceData?.id,
                 note:note
             }
-            let response = await finalizePayment(payload);
+            let response = await finalizePayment(payload);            
             if(response.data.payout_id){
                 toast.success(response.data.message);
-                navigate("/clients/payment/success", { replace: true });
-            } else if (response.data.redirect_url && authUserState.user.is_admin===false) {
-                const link = document.createElement('a');
-                link.href = response.data.redirect_url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                navigate("/invoices-to-pay", { replace: true });
             }else if(response.data.message && response.data.transfer_id){
                 toast.success(response.data.message);
-                navigate("/clients/payment/success", { replace: true });
+                navigate("/invoices-to-pay", { replace: true });
             }else if(response.data.message){
                 toast.success(response.data.message);
                 navigate("/invoices-to-pay", { replace: true });
@@ -92,7 +84,7 @@ const BillingDetails = () => {
             handleClosesConfirmationModal();
         } catch (error) {
             setLoading(false)
-            toast.error(error.response.data.error);
+            toast.error(error.response.data.message);
             handleClosesConfirmationModal();
         }
     };

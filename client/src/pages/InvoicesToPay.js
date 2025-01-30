@@ -11,7 +11,7 @@ import Vendors from './Vendors';
 import Payments from './Payments'; 
 import Approvals from './Approvals';
 import { Box, } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getFinalizeInvoiceList, getMentorFinalizeInvoiceList, payMultipleInvoices } from '../Server';
 import { Pagination } from '@mui/material';
 import moment from 'moment';
@@ -96,11 +96,12 @@ const InvoicesToPay = () => {
       setScreenLoading(false);
     }
   }
-
+  let location = useLocation();
+  
   useEffect(() => {
     setCurrentTab('bills');
     getAllInvoices();
-}, []);
+}, [location]);
 
   const getStatusBadge = (invoice) => {
     const today = new Date();
@@ -248,23 +249,23 @@ const InvoicesToPay = () => {
                           style={{ cursor: 'pointer' }}
                         />
                       </th>
-                      <th onClick={() => sortTable('client_name')} style={{ cursor: 'pointer' }}>
-                        Client {getSortIcon('client_name')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Client
                       </th>
-                      <th onClick={() => sortTable('id')} style={{ cursor: 'pointer' }}>
-                        Bill {getSortIcon('id')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Invoice ID
                       </th>
-                      <th onClick={() => sortTable('created_at')} style={{ cursor: 'pointer' }}>
-                        Creation Date {getSortIcon('created_at')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Creation Date
                       </th>
-                      <th onClick={() => sortTable('date_of_service')} style={{ cursor: 'pointer' }}>
-                        Due Date {getSortIcon('date_of_service')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Due Date
                       </th>
-                      <th onClick={() => sortTable('status')} style={{ cursor: 'pointer' }}>
-                        Status {getSortIcon('status')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Status
                       </th>
-                      <th onClick={() => sortTable('charge')} style={{ cursor: 'pointer' }}>
-                        Amount {getSortIcon('charge')}
+                      <th style={{ cursor: 'pointer' }}>
+                        Amount
                       </th>
                       <th className="text-center">Actions</th>
                     </tr>
@@ -287,7 +288,7 @@ const InvoicesToPay = () => {
                         <td>{getStatusBadge(invoice)}</td>
                         <td>${invoice.charge}</td>
                         <td className="text-center">
-                          <p className="text-[#22D3EE]" onClick={() => handleInvoiceClick(invoice)}>
+                          <p className="text-[#22D3EE] cursor-pointer" onClick={() => handleInvoiceClick(invoice)}>
                             {(invoice.payment_status==="completed" || invoice.is_paid === true) && 'Review'}
                             {((invoice.payment_status===null||invoice.payment_status==="pending") && invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
                             {(invoice.payment_status==="initiated") && 'Details'}
