@@ -124,9 +124,10 @@ class Api::Client::StripeController < ClientApplicationController
           })
           
           EmployeeMailer.payment_initiated(employee, invoice).deliver_now
-          render json: { message: 'Instant payment sent successfully', transfer_id: transfer.id }, status: :ok
+          invoice.update(payment_status: 'initiated')
+          render json: { message: 'Fast payment has been processed successfully!', transfer_id: transfer.id }, status: :ok
         rescue Stripe::StripeError => e
-          render json: { message: 'Instant payment failed', error: e.message }, status: :unprocessable_entity
+          render json: { message: 'Fast payment failed', error: e.message }, status: :unprocessable_entity
         end
       else
         schedule_payment(employee.id, invoice.id, total_amount)
@@ -185,7 +186,7 @@ class Api::Client::StripeController < ClientApplicationController
               EmployeeMailer.payment_initiated(employee, invoice).deliver_now
               response_messages[:success] << {
                 invoice_id: invoice.id,
-                message: "Instant payment sent successfully for Invoice ID: #{invoice.id}" ,
+                message: "Fast payment has been processed successfully! for Invoice ID: #{invoice.id}" ,
                 transfer_id: transfer.id
               }
             rescue Stripe::StripeError => e
