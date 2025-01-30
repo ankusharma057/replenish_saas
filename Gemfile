@@ -75,3 +75,5 @@ gem 'stripe'
 # For pagination
 gem 'will_paginate', '~> 4.0', '>= 4.0.1'
 gem 'paper_trail'
+
+gem "whenever", "~> 1.0"
