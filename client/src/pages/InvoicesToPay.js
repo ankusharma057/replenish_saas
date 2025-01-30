@@ -110,16 +110,16 @@ const InvoicesToPay = () => {
     const day = String(today.getDate()).padStart(2, '0');
     const formattedDate = `${year}-${month}-${day}`;
     
-    if (invoice.is_paid === true) {
-      return <Badge bg="success" text="light">{'Paid'}</Badge>;
-    }else if(invoice.payment_status ===  "initiated"){
+    if(invoice.payment_status ===  "initiated"){
       return <Badge bg="warning">{'Initiated'}</Badge>;
     }else if(invoice.payment_status ===  "pending"){
       return <Badge bg="warning">{'Pending'}</Badge>;
     }else if(invoice.payment_status ===  "completed"){
-      return <Badge bg="success">{'Completed'}</Badge>;
+      return <Badge bg="success">{'Paid'}</Badge>;
     } else if(formattedDate > invoice.date_of_service) {
       return <Badge bg="warning">{'Overdue'}</Badge>;
+    }if (invoice.is_paid === true) {
+      return <Badge bg="success" text="light">{'Paid'}</Badge>;
     }
 
     return <Badge bg="secondary">{'Due Later'}</Badge>;
@@ -289,7 +289,7 @@ const InvoicesToPay = () => {
                         <td>${invoice.charge}</td>
                         <td className="text-center">
                           <p className="text-[#22D3EE] cursor-pointer" onClick={() => handleInvoiceClick(invoice)}>
-                            {(invoice.payment_status==="completed" || invoice.is_paid === true) && 'Review'}
+                            {(invoice.payment_status==="completed" && invoice.is_paid === true) && 'Review'}
                             {((invoice.payment_status===null||invoice.payment_status==="pending") && invoice.is_paid === false && authUserState.user.is_admin ) && 'Pay'}
                             {(invoice.payment_status==="initiated") && 'Details'}
                           </p>

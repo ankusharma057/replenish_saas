@@ -8,7 +8,7 @@ import { confirmAlert } from "react-confirm-alert"; // Import
 import ModalWraper from "../components/Modals/ModalWraper";
 import { useAuthContext } from "../context/AuthUserContext";
 import DataFilterService from "../services/DataFilterService";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   RotateCw,
@@ -131,7 +131,7 @@ const MyProfile = () => {
       // handle error
     }
   };
-
+  let location =useLocation();
   useEffect(() => {
     const fetchData = async (refetch = true) => {
       try {
@@ -145,7 +145,7 @@ const MyProfile = () => {
     };
     fetchData();
     getAllInvoices(1);
-  }, [templateTabs]);
+  }, [templateTabs,location]);
 
   // added
   const getEmployees = async () => {

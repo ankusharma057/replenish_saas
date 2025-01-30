@@ -3,16 +3,17 @@ import { useAuthContext } from '../context/AuthUserContext';
 import { Button, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { getEmployeeBankDetails, onboardEmployeeToStripe } from '../Server';
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
 
 const BankDetails = ({ employee }) => {
     const { authUserState } = useAuthContext();
     const [loading, setLoading] = useState(false);
     const [bankDetails, setBankDetails] = useState();
   const [screenLoading, setScreenLoading] = useState(false)
-
+    let location = useLocation();
     useEffect(()=>{
         getSelectedEmployeeBankDetails();
-    },[])
+    },[location])
     const getSelectedEmployeeBankDetails=async()=>{
         try {
             setScreenLoading(true)
