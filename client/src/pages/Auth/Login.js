@@ -21,7 +21,7 @@ function Login() {
   const navigate = useNavigate();
   useEffect(() => {
     if (authUserState.user && location.pathname === "/") {
-      return navigate("/myprofile", {
+      return navigate("/schedule", {
         replace: true,
       });
     }
@@ -38,7 +38,7 @@ function Login() {
       if (data) {
         authUserDispatch({ type: LOGIN, payload: data });
         toast.success("Successfully Logged In");
-        navigate("/myprofile", {
+        navigate("/schedule", {
           replace: true,
         });
       }
