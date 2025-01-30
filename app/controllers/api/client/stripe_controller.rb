@@ -23,8 +23,8 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   def create_checkout_session
-    line_items = build_line_items(params[:appointment_id], params[:amount])
-    session = Stripe::Session.create_checkout_session(customer: params[:stripe_id], line_items: line_items, return_url: build_return_url(params[:client_id], params[:appointment_id]))
+    line_items = build_line_items(params[:selected_treatments], params[:selected_products])
+    session = Stripe::Session.create_checkout_session(customer: params[:stripe_id], line_items: line_items, return_url: build_return_url(params[:client_id], params[:appointment_id]), products: params[:selected_products], treatments: params[:selected_treatments])
 
     render json: { clientSecret: session.client_secret }
   rescue Stripe::StripeError => e
@@ -309,17 +309,58 @@ class Api::Client::StripeController < ClientApplicationController
     render json: { error: exception.message }, status: :unprocessable_entity
   end
 
-  def build_line_items(appointment_id, price)
-    [{
+  def build_line_items(selected_treatments, selected_products)
+    line_items = []
+    stripe_fee_percentage = 0.029
+    stripe_fixed_fee = 0.30
+    
+    selected_treatments&.each do |treatment_id|
+      treatment = Treatment.find(treatment_id)
+      line_items << {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: treatment.name || 'Treatment'
+          },
+          unit_amount: (treatment.cost.to_f * 100).to_i
+        },
+        quantity: 1
+      }
+    end
+
+    selected_products&.each do |prod|
+      schedule_product = ScheduleProduct.find(prod[:schedule_product_id])
+      product = schedule_product.product
+      line_items << {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: product.name || 'Product'
+          },
+          unit_amount: (product.retail_price.to_f * 100).to_i
+        },
+        quantity: prod[:quantity]
+      }
+    end
+
+    total_amount = line_items.sum do |item|
+      item[:price_data][:unit_amount] * item[:quantity]
+    end / 100.0
+
+    stripe_fee = (total_amount * stripe_fee_percentage + stripe_fixed_fee).round(2) * 2
+
+    line_items << {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: Schedule.find_by(id: appointment_id).treatment.name
+          name: 'Stripe Fee'
         },
-        unit_amount: price.to_i * 100
+        unit_amount: (stripe_fee * 100).to_i
       },
       quantity: 1
-    }]
+    }
+
+    line_items
   end
   
   def build_return_url(client_id, appointment_id)
@@ -349,12 +390,34 @@ class Api::Client::StripeController < ClientApplicationController
   end
 
   def create_payment_record(schedule, session)
-    schedule.client.payments.create(
-      session_id: session.id,
-      status: "paid",
-      schedule_id: schedule.id,
-      amount: session.amount_total / 100,
-    )
+    treatments = JSON.parse(session.metadata['treatments'] || '[]')
+    products = JSON.parse(session.metadata['products'] || '[]')
+    
+    ActiveRecord::Base.transaction do
+      treatments.each do |treatment_id|
+        schedule.client.payments.create!(
+          session_id: session.id,
+          status: 'paid',
+          schedule_id: schedule.id,
+          schedule_treatment_id: schedule.schedule_treatments.find_by(treatment_id: treatment_id).id,
+          amount: Treatment.find(treatment_id).cost.to_f
+        )
+      end
+  
+      products.each do |product_data|
+        schedule_product = ScheduleProduct.find_by(id: product_data['schedule_product_id'])
+        next unless schedule_product
+  
+        product = schedule_product.product
+        schedule.client.payments.create!(
+          session_id: session.id,
+          status: 'paid',
+          schedule_id: schedule.id,
+          schedule_product_id: schedule_product.id,
+          amount: product.retail_price.to_f * product_data['quantity'].to_i
+        )
+      end
+    end
   end
 
   def update_invoice(invoice_id, payment_intent_id)

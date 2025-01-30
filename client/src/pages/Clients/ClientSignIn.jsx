@@ -46,11 +46,11 @@ function ClientSignIn() {
         toast.success("Successfully Logged In");
         window.location.replace(window.location.href);
         if (
-          localStorage.getItem("treatment") &&
+          // localStorage.getItem("treatment") &&
           localStorage.getItem("formateData") &&
           localStorage.getItem("appointmentData")
         ) {
-          let selectedTreatMent = JSON.parse(localStorage.getItem("treatment"));
+          // let selectedTreatMent = JSON.parse(localStorage.getItem("treatment"));
           let appointment = JSON.parse(localStorage.getItem("appointmentData"));
           const locId = params.get("locId");
           const empId = params.get("empId");
@@ -59,16 +59,17 @@ function ClientSignIn() {
             date: appointment?.date,
             end_time: appointment?.selectedTimeSlot?.end,
             employee_id: empId,
-            treatment_id: selectedTreatMent?.treatment?.id,
-            product_id: selectedTreatMent?.product?.id,
+            // treatment_id: selectedTreatMent?.treatment?.id,
+            // product_id: selectedTreatMent?.product?.id,
             location_id: locId,
+            treatment_ids: JSON.parse(localStorage.getItem("formateData")).treatments.map((treatment) => treatment.treatment.id)
           };
           const { data } = await createClientSchedule(copyAppointMent);
           if (data?.redirect_url) {
             const stateObject = {
                 locId,
                 empId,
-                selectedTreatMent,
+                // selectedTreatMent,
                 id: data?.schedule.id,
             };
       
@@ -77,7 +78,7 @@ function ClientSignIn() {
             }else{
               stateObject.redirect_url = `/clients/appointments`;
             }
-            navigate(`/clients/payment/confirm_payment?empId=${empId}&treatment_id=${selectedTreatMent?.treatment?.id}`, {
+            navigate(`/clients/payment/confirm_payment?empId=${empId}`, {
               state: stateObject,
             });
           } else if(data.schedule) {

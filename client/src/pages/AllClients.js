@@ -23,7 +23,11 @@ import {
     deleteGroup,
     updateGroup,
     uploadFiles,
-    getFilesList
+    getFilesList,
+    getProductsList,
+    addProductToAppointment,
+    updateProductQuantity,
+    removeProductFromAppointment,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -33,7 +37,7 @@ import { toast } from "react-toastify";
 // import { Form, Popover } from "react-bootstrap";
 // import LabelInput from "../components/Input/LabelInput";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
-import { ChevronDown, Plus, MoveRight, X, SlidersHorizontal, CalendarDays, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, MoveRight, X, SlidersHorizontal, CalendarDays, Trash2, CheckCircle, XCircle } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
 import { ButtonGroup, ToggleButton, Button, Row, Col, Tooltip, OverlayTrigger, Dropdown, DropdownButton, FormControl, Form, Popover, ListGroup, Badge, Offcanvas, Modal, Card } from "react-bootstrap";
@@ -220,7 +224,7 @@ const AllClientRoot = () => {
     useEffect(() => {
         async function loadConfig() {
         const publicKey = await fetchConfig();
-        setStripePublicKey(publicKey);
+        setStripePublicKey("pk_test_51LB9bEBZZntSWQ9mTfXQdmFLUArwS1bGxqZmwR41fRs9waoUdV7Keg35ew885hCIug4aFlmI04EKn8Ah3T8RjV4s00M9v95cmy");
         }
         loadConfig();
         getAllEmployeeLocation();
@@ -977,6 +981,8 @@ const handleAppointmentClick = (form) => {
 };
 
 let confirmationInProgress = false;
+const urlParams = new URLSearchParams(window.location.search);
+let retrievedSessionId = urlParams.get('session_id');
 
 const fetchPaymentConfirmation = async (retrievedSessionId) => {
     if (confirmationInProgress) return;
@@ -1000,14 +1006,12 @@ const fetchPaymentConfirmation = async (retrievedSessionId) => {
 };
 
 useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('payment_success');
-    const retrievedSessionId = urlParams.get('session_id');
 
     if (success && retrievedSessionId) {
         fetchPaymentConfirmation(retrievedSessionId);
     }
-}, []);
+}, [retrievedSessionId]);
 
 const confirmToAddTemplate = (templateId) => {
     confirmAlert({
@@ -1083,7 +1087,6 @@ const handleCreateChartEntries = () => {
             chart_histroy:{formData:qutionaryFields}})
             setTimeout(()=>{ getChartEntriess();setChartTab("chart_entries_list")},500)
     }
-   
 }
 
 //Return to Charts Discard Fucntion
@@ -1100,7 +1103,6 @@ const handleUndoField = (index) => {
                     setChartTab("chart_entries_list"); 
                     setQutionaryFields([]); 
                     setEditId(null);
-               
                 },
             },
             {
@@ -1401,6 +1403,7 @@ useEffect(()=>{
         return () => clearTimeout(timer);
     };
 
+    
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
@@ -1408,28 +1411,180 @@ useEffect(()=>{
     const [showNotes, setShowNotes] = useState(false);
     const [showBillingInfo, setShowBillingInfo] = useState(false);
     const [isAddingNote, setIsAddingNote] = useState(false);
+    const [showSearch, setShowSearch] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    
+    const [productList, setProductList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isDropdownOpenn, setIsDropdownOpenn] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
-    const toggleDrawer = async () => {
-        if (selectedAppointment) {
-            try {
-                const { clientSecret } = await createCheckoutSession(
-                    selectedEmployeeData.id,
-                    selectedAppointment.id,
-                    selectedAppointment.remaining_amount,
-                    selectedEmployeeData.stripe_id
-                );
-                
-        
-                if (clientSecret) {
-                    setClientSecret(clientSecret);
-                    setIsDrawerOpen(true);
-                }
-            } catch (error) {
-                toast.error("Error creating checkout session:", error);
-            }
+    useEffect(() => {
+      if (selectedAppointment && selectedAppointment.products) {
+        setProductList(selectedAppointment.products);
+      }
+    }, [selectedAppointment]);
+    
+    const handleDropdownToggle = () => {
+      setIsDropdownOpenn(!isDropdownOpenn);
+    };
+    
+    const handleAddItemm = () => {
+      setShowSearch(true);
+    };
+    
+    
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const { data } = await getProductsList();
+          setProducts(data);
+          setFilteredProducts(data);
+        } catch (error) {
+          console.error("Error fetching products:", error);
         }
+      };
+
+      fetchProducts();
+    }, []);
+
+    useEffect(() => {
+      setFilteredProducts(
+        products.filter((product) =>
+          product.name?.toLowerCase().includes(searchTerm?.toLowerCase())
+        )
+      );
+    }, [searchTerm, products]);
+
+    const handleProductSelect = async (product) => {
+      let response;
+      try {
+        response = await addProductToAppointment(selectedAppointment.id, {
+          product_id: product.id,
+          quantity: 1,
+        });
+
+        setProductList((prevList) => [
+          ...prevList,
+          { ...product, quantity: 1, schedule_product_id: response.id },
+        ]);
+
+        toast.success('Product Added successfully');
+      } catch (error) {
+        toast.error('Error saving product');
+      }
     };
 
+    const handleQuantityChange = async (index, change) => {
+      try {
+        const product = productList[index];
+        const newQuantity = product.quantity + change;
+        if (newQuantity < 1) return;
+    
+        await updateProductQuantity(selectedAppointment.id, product.id, { quantity: newQuantity });
+    
+        const updatedList = [...productList];
+        updatedList[index].quantity = newQuantity;
+        setProductList(updatedList);
+      } catch (error) {
+        toast.error('Error updating quantity');
+      }
+    };
+    
+    const handleRemoveProduct = async (index) => {
+      try {
+        const product = productList[index];
+        await removeProductFromAppointment(selectedAppointment.id, product.id);
+    
+        const updatedList = [...productList];
+        updatedList.splice(index, 1);
+        setProductList(updatedList);
+        toast.success('Product removed successfully');
+      } catch (error) {
+        toast.error('Error removing product');
+      }
+    };
+
+  const toggleDrawer = async () => {
+    setIsDrawerOpen(true);
+  };
+
+  const [selectedTreatments, setSelectedTreatments] = useState(new Set());
+  const [selectedProducts, setSelectedProducts] = useState(new Set());
+
+  const handleItemSelection = (e, type) => {
+    const { value, checked } = e.target;
+    const productId = parseInt(value);
+
+    if (type === 'treatment') {
+      setSelectedTreatments((prev) => {
+        const updated = new Set(prev);
+        if (checked) {
+          updated.add(value);
+        } else {
+          updated.delete(value);
+        }
+        return updated;
+      });
+    } else if (type === 'product') {
+      setSelectedProducts((prev) => {
+        const updated = new Set(prev);
+        let productFound = false;
+
+        updated.forEach((product) => {
+          if (product.schedule_product_id === productId) {
+            productFound = true;
+            if (checked) {
+              product.quantity += 1;
+            } else {
+              updated.delete(product);
+            }
+          }
+        });
+
+        if (!productFound && checked) {
+          const product = productList.find((prod) => prod.schedule_product_id === productId);
+          updated.add({ schedule_product_id: productId, quantity: product ? product.quantity : 1 });
+        }
+
+        return updated;
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setSelectedTreatments(new Set());
+      setSelectedProducts(new Set());
+    }
+  }, [isDrawerOpen]);
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setClientSecret(null);
+  };
+
+  const handleProceedToCheckout = async () => {
+    if (selectedAppointment) {
+      try {
+        const { clientSecret } = await createCheckoutSession(
+          selectedEmployeeData.id,
+          selectedAppointment.id,
+          selectedAppointment.remaining_amount,
+          selectedEmployeeData.stripe_id,
+          Array.from(selectedTreatments) || [],
+          Array.from(selectedProducts) || [],
+        );
+
+        if (clientSecret) {
+          setClientSecret(clientSecret);
+        }
+      } catch (error) {
+        toast.error("Error creating checkout session:", error);
+      }
+    }
+  };
     const getStatus = (totalAmount, remainingAmount) => {
         if(totalAmount === remainingAmount) return 'Unpaid'
         if(remainingAmount === 0) return 'Paid'
@@ -2472,11 +2627,11 @@ const handleAppointmentTabs=(tab)=>{
   setAppointmentTab(tab);
 };
 const filteredLocationItems = serviceLocation.filter((item) =>
-  item.label.toLowerCase().includes(searchLocation.toLowerCase())
+  item.label?.toLowerCase().includes(searchLocation?.toLowerCase())
 );
 const filteredClientList = searchClient
   ? employeeList.filter((item) =>
-      item.name.toLowerCase().startsWith(searchClient.toLowerCase()) &&
+      item.name?.toLowerCase().startsWith(searchClient?.toLowerCase()) &&
       !createGroupPayload.client_ids.includes(item.id)
     )
   : [];
@@ -2918,12 +3073,17 @@ const handleCreateGroupModal=()=>{
                                   >
                                     <div className=" flex flex-col justify-start py-2 px-3 bg-slate-50 hover:bg-blue-50 duration-300">
                                       <div className="flex justify-between mb-1">
-                                        <div>Treatment: <span className="text-blue-500">
-                                          {form?.treatments.map((treatment)=>{
-                                            return <span>{treatment.name},</span>
-                                          })}
+                                        <div>
+                                          Treatment: 
+                                          <span className="text-blue-500">
+                                            {form?.treatments?.map((treatment, index) => (
+                                              <span key={index}>
+                                                {treatment.name}
+                                                {index < form.treatments.length - 1 && ", "}
+                                              </span>
+                                            ))}
                                           </span>
-                                          </div>
+                                        </div>
                                         <div>Client: <span className="text-blue-500">{form?.client?.name}</span></div>
                                       </div>
                                       <div className="flex justify-between mb-1">
@@ -3121,10 +3281,26 @@ const handleCreateGroupModal=()=>{
                                   {new Date(selectedAppointment?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                                 </p>
                                 <hr className="my-2" />
-                                <span className="px-2"><strong>Treatment:</strong></span>
-                                <br />
-                                <span className="px-2 ">{selectedAppointment?.treatment?.name} - <span className="font-semibold"> ${selectedAppointment?.total_amount}</span></span>
-                                <br />
+                                <div className="px-2">
+                                  <span className="font-bold">Treatments:</span>
+                                  <hr className="my-2" />
+                                  <div className="mt-2 space-y-2">
+                                    {selectedAppointment?.treatments?.map((treatment, index) => (
+                                      <div key={index} className="border-b pb-2">
+                                        <span className="block">
+                                          <strong className="text-gray-700">Treatment {index + 1}:</strong>
+                                        </span>
+                                        <span className="block px-2">
+                                          {treatment.name} -
+                                          <span className="font-semibold"> ${treatment.cost?.toFixed(2)}</span>
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="px-2">
+                                  <span className="font-bold">Location:</span>
+                                </div>
                                 <span className="px-2 ">{selectedAppointment?.employee?.name}</span>
                               </div>
                             )}
@@ -3162,6 +3338,7 @@ const handleCreateGroupModal=()=>{
                                     <button
                                       className="bg-[#22D3EE] text-white py-1 px-4 rounded hover:bg-[#1cb3cd]"
                                       onClick={() => {
+                                        console.log("API for adding the note will be handled later");
                                         setIsAddingNote(false);
                                       }}
                                     >
@@ -3192,83 +3369,275 @@ const handleCreateGroupModal=()=>{
 
                                   <button
                                     className="flex text-[#22D3EE] rounded"
+                                    onClick={() => handleAddItemm()}
                                   >
                                     Add Item
                                     <Plus />
                                   </button>
                                 </div>
                                 <hr className="my-2" />
-                                <div className="flex justify-between px-2">
-                                  <div>
-                                    <span className="font-semibold">{selectedAppointment.treatment?.name}</span>
-                                  </div>
-                                  <div>
-                                    <span>${selectedAppointment.total_amount}</span>
-                                  </div>
-                                </div>
-                                <hr className="m-2" />
-                                <div className="flex justify-between px-2">
-                                  <div>
-                                    <span>Subtotal</span>
-                                    <br />
-                                    <span>Total</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <span>${selectedAppointment.total_amount}</span>
-                                    <br />
-                                    <span><strong>${selectedAppointment.total_amount}</strong></span>
-                                  </div>
-                                </div>
-                                <hr className="m-2" />
-                                <div className="flex justify-between px-2">
-                                  <div>
-                                    <span className="font-semibold">Invoice # </span>
-                                    {selectedAppointment?.payment_intent_id && (
-                                      <a
-                                        href={`https://dashboard.stripe.com/payments/${selectedAppointment.payment_intent_id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 hover:underline"
-                                      >
-                                        {selectedAppointment.payment_intent_id.slice(0, 6) + '...'}
-                                      </a>
-                                    )}
-                                    <br />
-                                    <span>Total</span>
-                                    <br />
-                                    <span>Balance</span>
-                                    <br />
-                                  </div>
-                                  <div className="text-right">
-                                    <span className="text-[#22D3EE]">{selectedAppointment.status}</span>
-                                    <br />
-                                    <span>${selectedAppointment.total_amount}</span>
-                                    <br />
-                                    <span>${selectedAppointment.remaining_amount}</span>
-                                    <br />
-                                  </div>
-                                </div>
+                                {showSearch && (
+                                  <div className="rounded-lg bg-white relative mx-2">
+                                    <button
+                                      className="border px-2 rounded-md w-full bg-white"
+                                      onClick={handleDropdownToggle}
+                                    >
+                                      {selectedProduct ? selectedProduct : "Select a product"}
+                                      <span className="ml-2">{isDropdownOpenn ? "▲" : "▼"}</span>
+                                    </button>
+                                    <hr className="my-2" />
 
-                                <div className="flex p-2 gap-x-2">
-                                  {selectedAppointment.remaining_amount > 0 && (
-                                    <>
-                                      <button
-                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
-                                        onClick={() => console.log('Adjustment button clicked')}
-                                      >
-                                        <span>Adjustment</span>
-                                        <Plus />
-                                      </button>
-                                      <button
-                                        className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
-                                        onClick={toggleDrawer}
-                                      >
-                                        <span>Pay</span>
-                                        <MoveRight />
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
+                                    {isDropdownOpenn && (
+                                      <div className="absolute mt-2 border rounded-md bg-white w-full shadow-lg z-10">
+                                        <input
+                                          type="text"
+                                          className="border-b p-2 w-full z-10"
+                                          placeholder="Search for a product"
+                                          value={searchTerm}
+                                          onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+
+                                        <ul className="max-h-40 overflow-y-auto px-0 z-auto">
+                                          {filteredProducts.length > 0 ? (
+                                            filteredProducts.map((product) => (
+                                              <li key={product.id}>
+                                                <button
+                                                  className="block w-full text-left p-2 hover:bg-gray-100"
+                                                  onClick={() => handleProductSelect(product)}
+                                                >
+                                                  {product.name} - ${product.retail_price}
+                                                </button>
+                                              </li>
+                                            ))
+                                          ) : (
+                                            <li className="p-2">No products found</li>
+                                          )}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                {selectedAppointment.treatments?.map((treatment, index) => (
+                                  <div key={index} className="flex flex-col px-2">
+                                    <div className="flex py-1 items-center justify-between">
+                                      <div className="flex-1">
+                                        <span className="font-semibold break-words">{treatment.name}</span>
+                                      </div>
+                                      {
+                                        treatment.paid ? (
+                                          <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                            <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                            Paid
+                                          </span>
+                                        ) : (
+                                          <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1 flex-shrink-0">
+                                            <XCircle size={16} style={{ color: '#FFB800' }} />
+                                            Unpaid
+                                          </span>
+                                        )
+                                      }
+                                    </div>
+
+                                    <div className="flex justify-between font-bold mt-2 pt-2 border-t">
+                                      <div>Total Amount:</div>
+                                      <div>${treatment.total_amt}</div>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex justify-between px-2">
+                                      <div>
+                                        <span>Subtotal</span>
+                                        <br />
+                                        <span>Total</span>
+                                      </div>
+                                      <div className="text-right">
+                                        <span>${treatment.total_amt}</span>
+                                        <br />
+                                        <span><strong>${treatment.total_amt}</strong></span>
+                                      </div>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex px-2">
+                                      <div className="flex flex-col w-full">
+                                        <div className="flex justify-between items-center">
+                                          <div className="flex">
+                                            <span className="font-semibold">Invoice #</span>
+                                            {treatment.payment_intent && (
+                                              <a
+                                                href={`https://dashboard.stripe.com/payments/${treatment.payment_intent}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 hover:underline"
+                                              >
+                                                {treatment.payment_intent.slice(0, 6) + '...'}
+                                              </a>
+                                            )}
+                                          </div>
+                                          {treatment.paid ? (
+                                            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                              <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                              Paid
+                                            </span>
+                                          ) : (
+                                            <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                              <XCircle size={16} style={{ color: '#FFB800' }} />
+                                              Unpaid
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span>Total</span>
+                                          <span>${treatment.total_amt}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span>Balance</span>
+                                          <span>${treatment.remaining_amt}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className={`flex ${!treatment.paid ? 'p-2' : ''} gap-x-2`}>
+                                      {!treatment.paid && (
+                                        <>
+                                          <button
+                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                            onClick={() => console.log('Adjustment button clicked')}
+                                          >
+                                            <span>Adjustment</span>
+                                            <Plus />
+                                          </button>
+                                          <button
+                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-2 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                            onClick={toggleDrawer}
+                                          >
+                                            <span>Pay</span>
+                                            <MoveRight />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                    {index !== selectedAppointment.treatments.length - 1 && <hr className="my-2" />}
+                                  </div>
+                                ))}
+                                {productList.map((product, index) => (
+                                  <div key={index} className="bg-white">
+                                    <hr className="my-2" />
+                                    <div className="flex justify-between items-center px-2">
+                                      <div className="flex items-center gap-x-2">
+                                        <span className="font-semibold">{product.name}</span>
+
+                                        {product.paid ? (
+                                          <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                            <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                            Paid
+                                          </span>
+                                        ) : (
+                                          <>
+                                            <button
+                                              onClick={() => handleRemoveProduct(index)}
+                                              disabled={product.paid}
+                                            >
+                                              <X size={18} style={{ color: '#22D3EE' }} />
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                      <span>${product.retail_price}</span>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex justify-between px-2">
+                                      <span>Quantity</span>
+                                      <br />
+
+                                      <div className="flex items-center gap-x-1">
+                                        <button
+                                          className="px-1 py-1/2 rounded bg-gray-300"
+                                          onClick={() => handleQuantityChange(index, 1)}
+                                          disabled={product.paid === true}
+                                        >
+                                          +
+                                        </button>
+                                        <button
+                                          className="px-1 py-1/2 rounded bg-gray-300"
+                                          onClick={() => handleQuantityChange(index, -1)}
+                                          disabled={product.paid === true}
+                                        >
+                                          -
+                                        </button>
+                                        <span>{product.quantity}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between px-2">
+                                      <div>
+                                        <span>Subtotal</span>
+                                        <br />
+                                        <span>Total</span>
+                                      </div>
+                                      <div>
+                                        <span>${product.retail_price * product.quantity}</span>
+                                        <br />
+                                        <span><strong>${product.retail_price * product.quantity}</strong></span>
+                                      </div>
+                                    </div>
+                                    <hr className="m-2" />
+                                    <div className="flex px-2">
+                                      <div className="flex flex-col w-full">
+                                        <div className="flex justify-between items-center">
+                                          <div className="flex">
+                                            <span className="font-semibold">Invoice #</span>
+                                            {product.payment_intent && (
+                                              <a
+                                                href={`https://dashboard.stripe.com/payments/${product.payment_intent}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 hover:underline"
+                                              >
+                                                {product.payment_intent.slice(0, 6) + '...'}
+                                              </a>
+                                            )}
+                                          </div>
+                                          {product.paid ? (
+                                            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                              <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                              Paid
+                                            </span>
+                                          ) : (
+                                            <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                              <XCircle size={16} style={{ color: '#FFB800' }} />
+                                              Unpaid
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span>Total</span>
+                                          <span>${product.total_amt || (product.retail_price * product.quantity)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span>Balance</span>
+                                          <span>${product.remaining_amt || (product.retail_price * product.quantity)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {!product.paid && (
+                                      <div>
+                                        <div className="flex gap-x-4 p-2">
+                                          <button
+                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                            onClick={() => console.log('Adjustment button clicked')}
+                                          >
+                                            <Plus />
+                                            <span>Adjustment</span>
+                                          </button>
+                                          <button
+                                            className="flex items-center bg-[#22D3EE] text-white py-2 px-4 rounded hover:bg-[#1cb3cd] gap-x-2"
+                                            onClick={toggleDrawer}
+                                          >
+                                            <MoveRight />
+                                            <span>Pay</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
                                 <div className="bg-[#f5f5f5] min-h-8 px-6 py-2">
                                   <div className="flex justify-end gap-8">
                                     <div>
@@ -3291,10 +3660,7 @@ const handleCreateGroupModal=()=>{
                         <div className="flex justify-end items-center mb-4 pt-20">
                           <button
                             className="text-gray-500 hover:text-red-500 focus:outline-none"
-                            onClick={() => {
-                              setIsDrawerOpen(false);
-                              setClientSecret(null);
-                            }}
+                            onClick={closeDrawer}
                             aria-label="Close drawer"
                           >
                             <X size={24} />
@@ -3302,11 +3668,142 @@ const handleCreateGroupModal=()=>{
                         </div>
 
                         {clientSecret ? (
-                          <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-                            <EmbeddedCheckout />
-                          </EmbeddedCheckoutProvider>
+                          <>
+                            <div className="mb-4">
+                              <button
+                                onClick={() => setClientSecret(null)} // Reset clientSecret to go back
+                                className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+                              >
+                                ← Back to Products
+                              </button>
+                            </div>
+                            <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                              <EmbeddedCheckout />
+                            </EmbeddedCheckoutProvider>
+                          </>
                         ) : (
-                          <p>Loading payment details...</p>
+                          <div>
+                            <div className="mb-4">
+                              <button
+                                onClick={closeDrawer}
+                                className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+                              >
+                                ← Back
+                              </button>
+                            </div>
+                            <div className="mt-8">
+                              <h4 className="text-xl font-medium text-gray-700">Treatments</h4>
+                              <div className="space-y-4 mt-4">
+                                {selectedAppointment?.treatments &&
+                                  selectedAppointment?.treatments.map((treatment) => (
+                                    <div
+                                      key={treatment.id}
+                                      className="flex items-center justify-between p-4 border border-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
+                                    >
+                                      <div className="flex items-center space-x-4">
+                                        <input
+                                          type="checkbox"
+                                          value={treatment.id}
+                                          checked={selectedTreatments.has(treatment.id.toString())}
+                                          onChange={(e) => handleItemSelection(e, 'treatment')}
+                                          disabled={treatment.paid}
+                                          className="h-5 w-5 text-blue-500 rounded transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                        <label
+                                          className={`text-lg font-semibold ${
+                                            treatment.paid ? 'text-gray-400' : 'text-gray-800'
+                                          }`}
+                                        >
+                                          {treatment.name}
+                                        </label>
+                                        {treatment.paid && (
+                                          <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                            <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                            Paid
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <div className="flex flex-col items-end space-y-1">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-sm text-gray-600">Cost:</span>
+                                          <span className="font-semibold text-gray-800">
+                                            ${treatment.cost.toFixed(2)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+
+                            <div className="mt-8">
+                              <h4 className="text-xl font-medium text-gray-700">Products</h4>
+                              <div className="space-y-4 mt-4">
+                                {productList.map((product) => (
+                                  <div
+                                    key={product.schedule_product_id}
+                                    className="flex items-center justify-between p-4 border border-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
+                                  >
+                                    <div className="flex items-center space-x-4">
+                                      <input
+                                        type="checkbox"
+                                        value={product.schedule_product_id}
+                                        checked={Array.from(selectedProducts).some(
+                                          (item) => item.schedule_product_id === product.schedule_product_id
+                                        )}
+                                        onChange={(e) => handleItemSelection(e, 'product')}
+                                        disabled={product.paid === true} // Disable checkbox if product is paid
+                                        className="h-5 w-5 text-blue-500 rounded transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      />
+                                      <label
+                                        className={`text-lg font-semibold ${
+                                          product.paid ? 'text-gray-400' : 'text-gray-800'
+                                        }`}
+                                      >
+                                        {product.name}
+                                      </label>
+                                      {product.paid && (
+                                        <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-x-1">
+                                          <CheckCircle size={16} style={{ color: '#4CAF50' }} />
+                                          Paid
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex flex-col items-end space-y-1">
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-sm text-gray-600">Unit Price:</span>
+                                        <span className="font-semibold text-gray-800">
+                                          ${product.retail_price.toFixed(2)}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-sm text-gray-600">Quantity:</span>
+                                        <span className="font-semibold text-gray-800">{product.quantity}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-sm text-gray-600">Total:</span>
+                                        <span className="font-semibold text-gray-800">
+                                          ${(product.retail_price * product.quantity).toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+
+                            <div className="mt-8">
+                              <button
+                                  onClick={handleProceedToCheckout}
+                                  className="w-full bg-cyan-600 text-white py-3 rounded-lg hover:bg-cyan-700 transition duration-200"
+                              >
+                                  Proceed to Payment
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>

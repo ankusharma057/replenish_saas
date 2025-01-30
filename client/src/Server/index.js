@@ -818,7 +818,7 @@ export const createSaveCardCheckoutSession = async (clientStripeId, clientId) =>
   }
 }
 
-export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId) => {
+export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId, selectedTreatments, selectedProducts) => {
   try {
     const url = `/api/client/stripe/create_checkout_session`;
     const res = await fetch(url, {
@@ -830,7 +830,9 @@ export const createCheckoutSession = async (clientId, appointmentId, amount, str
         client_id: clientId,
         appointment_id: appointmentId,
         amount: amount,
-        stripe_id: stripeId
+        stripe_id: stripeId,
+        selected_treatments: selectedTreatments,
+        selected_products: selectedProducts,
       }),
     });
 
@@ -970,12 +972,32 @@ export const fetchBillingPortal = async () => {
   }
 };
 
+export const addProductToAppointment = async (appointmentId, payload) => {
+  try {
+    const response = await api.post(`/api/client/schedules/${appointmentId}/products`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding product to appointment:', error);
+    throw error;
+  }
+};
+
 export const fetchPricingPlans = async () => {
   try {
     const response = await api.get("/api/stripe/pricing");
     return response.data;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+
+export const updateProductQuantity = async (appointmentId, productId, payload) => {
+  try {
+    const response = await api.patch(`/api/client/schedules/${appointmentId}/products/${productId}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating product quantity:', error);
     throw error;
   }
 };
@@ -1177,6 +1199,17 @@ export const getFilesList = async (clientId,refetch) => {
     throw error;
   }
 };
+
+export const removeProductFromAppointment = async (appointmentId, productId) => {
+  try {
+    const response = await api.patch(`/api/client/schedules/${appointmentId}/products/${productId}/remove`);
+    return response.data;
+  } catch (error) {
+    console.error('Error removing product from appointment:', error);
+    throw error;
+  }
+};
+
 export const finalizePayment = async (payload) => {
   try {
     const response = await api.post(`/api/client/stripe/transfer_to_employee`,payload);
