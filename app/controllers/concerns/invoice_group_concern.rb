@@ -11,8 +11,9 @@ module InvoiceGroupConcern
   def create_invoice_group
     @invoice_group = InvoiceGroup.create!
     params['_json'].each do |invoice_param|
-      client = @employee.clients.find_by(name: invoice_param['clientname']) ||
-         @employee.clients.create(
+      client = @employee.is_admin? ? Client.all : @employee.clients
+      client = client.find_by(name: invoice_param['clientname']) ||
+         client.create(
            name: invoice_param['clientname'],
            last_name: invoice_param['lastname'],
            email: invoice_param['email']
