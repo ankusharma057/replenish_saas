@@ -9,20 +9,21 @@ import {
 export const authReducer = (state, action) => {
   switch (action.type) {
     case LOGIN: {
-      sessionStorage.setItem("user", JSON.stringify(action.payload));
+      localStorage.setItem("user", JSON.stringify(action.payload));
       return { ...state, isAuthenticated: true, user: action.payload };
     }
     case CLIENT_LOGIN: {
-      sessionStorage.setItem("client", JSON.stringify(action.payload));
+      localStorage.setItem("client", JSON.stringify(action.payload));
       return { ...state, isAuthenticated: true, client: action.payload };
     }
     case LOGOUT: {
-      sessionStorage.removeItem("user");
+      localStorage.removeItem("user");
+      localStorage.removeItem('user')
       return { ...state, isAuthenticated: false, user: null };
     }
 
     case CLIENT_LOGOUT: {
-      sessionStorage.removeItem("client");
+      localStorage.removeItem("client");
       return { ...state, isAuthenticated: false, client: null };
     }
     default:
