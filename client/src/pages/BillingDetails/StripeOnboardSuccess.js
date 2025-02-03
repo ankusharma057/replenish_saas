@@ -2,17 +2,14 @@ import React, { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { stripeOnboardComplete } from "../../Server";
+import {useLocation} from "react-router-dom"
 
 const StripeOnboardSuccess = () => {
     const { employee_id, stripe_account_id } = useParams();
-    const calledRef = React.useRef(false);
-
+    const location = useLocation();
     useEffect(() => {
-        if (!calledRef.current) {
             completeOnboard();
-            calledRef.current = true;
-        }
-    }, [employee_id, stripe_account_id]);
+    }, [employee_id, stripe_account_id,location]);
     const completeOnboard = async () => {
         try {
             let payload = {

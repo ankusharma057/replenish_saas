@@ -124,7 +124,6 @@ class Api::Client::StripeController < ClientApplicationController
           })
           
           EmployeeMailer.payment_initiated(employee, invoice).deliver_now
-          invoice.update(payment_status: 'initiated')
           render json: { message: 'Fast payment has been processed successfully!', transfer_id: transfer.id }, status: :ok
         rescue Stripe::StripeError => e
           render json: { message: 'Fast payment failed', error: e.message }, status: :unprocessable_entity
@@ -238,7 +237,7 @@ class Api::Client::StripeController < ClientApplicationController
       render json: { error: 'Invalid signature' }, status: :bad_request
       return
     end
-    case event['type']
+    case event['type']      
     when 'transfer.created'
       transfer = event['data']['object']
       handle_successful_transfer(transfer)
