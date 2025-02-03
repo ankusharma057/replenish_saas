@@ -270,7 +270,7 @@ function App() {
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                   <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
-                  <Route path="/stripe-onboard-success" element={<StripeOnboardSuccess />} />
+                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
                   {/* <Route path="/settings" element={<Settings />} /> */}
                   <Route path="/settings" element={<Settings2 />} >
                     <Route path="locations" element={<Locations />} />
