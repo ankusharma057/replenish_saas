@@ -255,6 +255,8 @@ function App() {
                     {/* <Route path="/new-intake-form" element={<NewIntakeForm />} /> */}
                   </>
                 )}
+                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
+
 
               {authUserState.user && authUserState.user?.is_admin ? (
                 <>

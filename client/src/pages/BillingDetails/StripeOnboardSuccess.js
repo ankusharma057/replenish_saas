@@ -11,14 +11,8 @@ const StripeOnboardSuccess = () => {
     const location = useLocation();
   const { authUserDispatch } = useAuthContext();
     useEffect(() => {
-            completeOnboard();
+        completeOnboard();
     }, [employee_id, stripe_account_id,location]);
-    const updateLoggedInUserData = async () => {
-        const { data } = await getUpdatedUserProfile();    
-        if (data) {
-            localStorage.setItem("user", JSON.stringify(data));
-        }
-    }
     const completeOnboard = async () => {
         try {
             let payload = {
@@ -27,9 +21,12 @@ const StripeOnboardSuccess = () => {
             };
             let response = await stripeOnboardComplete(payload);
             toast.success(response.data.message);
-            updateLoggedInUserData();
+            if (response.status === 200 && response.data.employee) {
+                localStorage.setItem("user", JSON.stringify(response?.data?.employee));
+                authUserDispatch({ type: LOGIN, payload: response?.data?.employee });
+            }
         } catch (error) {
-            toast.error(error.response.data.message);
+            toast.error(error.response.data.error);
         }
     };
 

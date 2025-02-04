@@ -177,7 +177,7 @@ class Api::EmployeesController < ApplicationController
 
     employee.update(stripe_account_id: stripe_account_id)
 
-    render json: { message: 'Stripe account linked successfully', employee_id: employee.id, stripe_account_id: stripe_account_id }, status: :ok
+    render json: { message: 'Stripe account linked successfully', employee: employee }, status: :ok
   end
 
   def stripe_account_details
