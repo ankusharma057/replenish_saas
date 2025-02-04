@@ -191,6 +191,7 @@ function App() {
         ) : null}
 
         <Routes>
+          <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
           <Route path="/healthz" element={<Health />} />
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
@@ -238,7 +239,6 @@ function App() {
             path="/clients/schedule/:employee_id"
             element={<ClientAppointment />}
           />
-
           {/* <Route path="/clients/schedule" element={<ClientSchedule />} /> */}
           {authUserState.user && (
             <>
@@ -255,9 +255,6 @@ function App() {
                     {/* <Route path="/new-intake-form" element={<NewIntakeForm />} /> */}
                   </>
                 )}
-                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
-
-
               {authUserState.user && authUserState.user?.is_admin ? (
                 <>
                   <Route path="/addproduct" element={<AddProduct />} />
@@ -272,7 +269,6 @@ function App() {
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
                   <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
-                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
                   {/* <Route path="/settings" element={<Settings />} /> */}
                   <Route path="/settings" element={<Settings2 />} >
                     <Route path="locations" element={<Locations />} />
@@ -297,7 +293,6 @@ function App() {
                   {/* <Route path="/invoices-to-pay" element={<InvoicesToPay />} /> */}
                   <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
                   <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
-                  <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
                 </>
               )}
             </>
