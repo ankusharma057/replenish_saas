@@ -23,7 +23,7 @@ const StripeOnboardSuccess = () => {
             toast.success(response.data.message);
             if (response.status === 200 && response.data.employee) {
                 localStorage.setItem("user", JSON.stringify(response?.data?.employee));
-                authUserDispatch({ type: LOGIN, payload: response?.data?.employee });
+                // authUserDispatch({ type: LOGIN, payload: response?.data?.employee });
             }
         } catch (error) {
             toast.error(error.response.data.error);
@@ -56,7 +56,7 @@ const StripeOnboardSuccess = () => {
                             state={"success"}
                             className="px-12 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3"
                         >
-                            Check your invoices
+                            Go to Profile
                         </Link>
                     </div>
                 </div>
