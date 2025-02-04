@@ -419,7 +419,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_07_084507) do
   add_foreign_key "employee_locations", "employees"
   add_foreign_key "employee_locations", "locations"
   add_foreign_key "intake_forms", "employees"
-  add_foreign_key "invoices", "locations"
   add_foreign_key "payments", "schedule_products"
   add_foreign_key "payments", "schedule_treatments"
   add_foreign_key "questionnaires", "employees"
