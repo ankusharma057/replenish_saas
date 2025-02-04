@@ -14,9 +14,9 @@ const StripeOnboardSuccess = () => {
             completeOnboard();
     }, [employee_id, stripe_account_id,location]);
     const updateLoggedInUserData = async () => {
-        const { data } = await getUpdatedUserProfile();
+        const { data } = await getUpdatedUserProfile();    
         if (data) {
-            authUserDispatch({ type: LOGIN, payload: data });
+            localStorage.setItem("user", JSON.stringify(data));
         }
     }
     const completeOnboard = async () => {
