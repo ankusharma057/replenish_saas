@@ -1,15 +1,24 @@
 import React, { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { stripeOnboardComplete } from "../../Server";
+import { getUpdatedUserProfile, stripeOnboardComplete } from "../../Server";
 import {useLocation} from "react-router-dom"
+import { LOGIN } from "../../Constants/AuthConstants";
+import { useAuthContext } from "../../context/AuthUserContext";
 
 const StripeOnboardSuccess = () => {
     const { employee_id, stripe_account_id } = useParams();
     const location = useLocation();
+  const { authUserDispatch } = useAuthContext();
     useEffect(() => {
             completeOnboard();
     }, [employee_id, stripe_account_id,location]);
+    const updateLoggedInUserData = async () => {
+        const { data } = await getUpdatedUserProfile();
+        if (data) {
+            authUserDispatch({ type: LOGIN, payload: data });
+        }
+    }
     const completeOnboard = async () => {
         try {
             let payload = {
@@ -18,6 +27,7 @@ const StripeOnboardSuccess = () => {
             };
             let response = await stripeOnboardComplete(payload);
             toast.success(response.data.message);
+            updateLoggedInUserData();
         } catch (error) {
             toast.error(error.response.data.message);
         }

@@ -5,8 +5,8 @@ import { authReducer } from "../store/reducers/authReducer";
 // Define the initial state for your authentication context
 const initialState = {
   isAuthenticated: false,
-  user: JSON.parse(sessionStorage.getItem("user")),
-  client: JSON.parse(sessionStorage.getItem("client")),
+  user: JSON.parse(localStorage.getItem("user")),
+  client: JSON.parse(localStorage.getItem("client")),
 };
 
 // Create an authentication context
@@ -16,6 +16,10 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const [isFillingForm, setIsFillingForm] = React.useState(false)
+  React.useEffect(() => {
+    localStorage.setItem("user", JSON.stringify(state.user));
+    localStorage.setItem("client", JSON.stringify(state.client));
+  }, [state.user, state.client]);
   return (
     <AuthContext.Provider
       value={{ authUserState: state, authUserDispatch: dispatch, isFillingForm: isFillingForm, setIsFillingForm }}
