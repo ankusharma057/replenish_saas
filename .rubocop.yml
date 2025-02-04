@@ -55,3 +55,6 @@ Lint/UnifiedInteger:
 
 Style/OptionalBooleanParameter:
   Enabled: false
+
+Style/BlockComments:
+  Enabled: false
