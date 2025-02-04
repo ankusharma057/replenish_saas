@@ -49,6 +49,10 @@ group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
   # To check for N+1 queries
   gem 'bullet', '~> 7.2'
+  gem 'rspec-rails', '~> 7.0.0'
+  gem 'rubocop', require: false
+  gem 'rubocop-performance'
+  gem 'rubocop-rails'
 end
 
 group :development do
