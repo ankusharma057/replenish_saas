@@ -903,7 +903,6 @@ export default function AddInvoices() {
             onClick: async () => {
               try {
                 setLoading(true);
-                setScreenLoading(true)
                 await createGroupInvoices(invoiceData);
                 toast.success("Invoice created successfully.");
                 await getInvoiceList(true);
@@ -936,7 +935,6 @@ export default function AddInvoices() {
                 );
               } finally {
                 setLoading(false);
-                setScreenLoading(false);
               }
             },
           },
