@@ -9,7 +9,7 @@ import {
 export const authReducer = (state, action) => {
   switch (action.type) {
     case LOGIN: {
-      localStorage.setItem("user", JSON.stringify(action.payload));
+      sessionStorage.setItem("user", JSON.stringify(action.payload));
       return { ...state, isAuthenticated: true, user: action.payload };
     }
     case CLIENT_LOGIN: {
@@ -17,7 +17,7 @@ export const authReducer = (state, action) => {
       return { ...state, isAuthenticated: true, client: action.payload };
     }
     case LOGOUT: {
-      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
       return { ...state, isAuthenticated: false, user: null };
     }
 
