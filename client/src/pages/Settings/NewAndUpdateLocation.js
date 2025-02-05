@@ -129,9 +129,11 @@ const NewAndUpdateLocation = () => {
                     <div className='mb-3'>
                         <Form.Label className={"text-secondary fw-light d-flex align-items-center"}>Employee - </Form.Label>
                         <DropdownButton variant='outline-secondary' id="dropdown-basic-button" title="Select Employee" className='w-100'>
+                            <div style={{maxHeight:"300px", overflow:"scroll"}}>
                             {Array.isArray(employeeList) && employeeList.map((employee, index) => {
                                 return <Dropdown.Item key={index} className='d-flex justify-content-between align-items-center w-100 gap-[20px]' onClick={(e) => handleEmployeeSelection(e, employee?.id)}>{employee?.name}<Form.Check type='checkbox' checked={formData?.employee_ids.includes(employee?.id)} /></Dropdown.Item>
                             })}
+                            </div>
                         </DropdownButton>
                     </div>
                     <div className='mb-3'>

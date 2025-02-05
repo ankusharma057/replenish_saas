@@ -20,13 +20,13 @@ const StripeOnboardSuccess = () => {
                 stripe_account_id,
             };
             let response = await stripeOnboardComplete(payload);
-            toast.success(response.data.message);
             if (response.status === 200 && response.data.employee) {
+                toast.success(response.data.message+". Please Login To Continue");
                 sessionStorage.setItem("user", JSON.sptringify(response?.data?.employee));
                 authUserDispatch({ type: LOGIN, payload: response?.data?.employee });
             }
         } catch (error) {
-            toast.error(error.response.data.error);
+            toast.error(error?.response?.data?.error);
         }
     };
 

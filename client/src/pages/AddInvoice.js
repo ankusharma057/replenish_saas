@@ -1,6 +1,6 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Button, Form, ListGroup, ListGroupItem, Table } from "react-bootstrap";
+import { Alert, Button, Form, ListGroup, ListGroupItem, Spinner, Table } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { toast } from "react-toastify";
 import { LOGIN } from "../Constants/AuthConstants";
@@ -100,6 +100,7 @@ export default function AddInvoices() {
   const [createClient,setCreateClient]=useState(false)
   const [showClientList,setShowClientList]=useState(false)
   const Navigate=useNavigate();
+  const [screenLoading, setScreenLoading] = useState(false)
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getClients();
@@ -902,6 +903,7 @@ export default function AddInvoices() {
             onClick: async () => {
               try {
                 setLoading(true);
+                setScreenLoading(true)
                 await createGroupInvoices(invoiceData);
                 toast.success("Invoice created successfully.");
                 await getInvoiceList(true);
@@ -934,6 +936,7 @@ export default function AddInvoices() {
                 );
               } finally {
                 setLoading(false);
+                setScreenLoading(false);
               }
             },
           },
@@ -1006,13 +1009,18 @@ export default function AddInvoices() {
     }
   };
 
-
+  const ScreenLoading = () => {
+    return <div style={{ width: "100%", height: "100%", position: "absolute", zIndex: 99999, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+      <Spinner animation="border" variant="info" />
+    </div>
+  }
 
   return (
     <>
       {/* <Header /> */}
 
-      <div className="bg-blue-200 p-1 sm:p-4 ">
+      <div className="bg-blue-200 p-1 sm:p-4 position-relative" style={{position:"relative"}}>
+      {screenLoading && <ScreenLoading />}
         <div className="bg-blue-200 min-h-screen pb-8 flex items-center justify-center flex-col md:p-4">
           {isAlert.maxInvoice && (
             <Alert variant="warning">{isAlert.message}</Alert>

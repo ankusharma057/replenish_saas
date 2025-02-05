@@ -34,7 +34,7 @@ const BankDetails = ({ employee }) => {
             let response = await onboardEmployeeToStripe(payload);
             const link = document.createElement('a');
             link.href = response.data.redirect_url;
-            link.target = '_blank';
+            link.target = '_self';
             link.rel = 'noopener noreferrer';
             document.body.appendChild(link);
             link.click();
