@@ -22,6 +22,8 @@ const StripeOnboardSuccess = () => {
             let response = await stripeOnboardComplete(payload);
             if (response.status === 200 && response.data.employee) {
                 toast.success(response.data.message+". Please Login To Continue");
+                sessionStorage.removeItem("user");
+                authUserDispatch({ type: LOGOUT });
             }
         } catch (error) {
             toast.error(error?.response?.data?.error);
