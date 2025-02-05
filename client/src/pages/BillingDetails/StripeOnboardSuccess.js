@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getUpdatedUserProfile, stripeOnboardComplete } from "../../Server";
 import {useLocation} from "react-router-dom"
-import { LOGIN } from "../../Constants/AuthConstants";
+import { LOGIN, LOGOUT } from "../../Constants/AuthConstants";
 import { useAuthContext } from "../../context/AuthUserContext";
 
 const StripeOnboardSuccess = () => {
