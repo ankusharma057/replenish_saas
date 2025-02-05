@@ -193,7 +193,7 @@ function App() {
         <Routes>
           <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
           <Route path="/healthz" element={<Health />} />
-          <Route path="/" element={<Login />} />
+          <Route path="/:employee_id?/:stripe_account_id?" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />

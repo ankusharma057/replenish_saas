@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import LabelInput from "../../components/Input/LabelInput";
-import { loginUser } from "../../Server";
+import { loginUser, stripeOnboardComplete } from "../../Server";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { useAuthContext } from "../../context/AuthUserContext";
-import { LOGIN } from "../../Constants/AuthConstants";
+import { LOGIN, LOGOUT } from "../../Constants/AuthConstants";
 
 function Login() {
   const [isLoading, setLoading] = useState(false);
@@ -19,6 +19,28 @@ function Login() {
   const [formData, setFormData] = useState(loginState);
   const location = useLocation();
   const navigate = useNavigate();
+  const { employee_id, stripe_account_id } = useParams();
+    useEffect(() => {
+      if(employee_id && stripe_account_id){
+        completeOnboard();
+      }
+    }, [location]);
+    const completeOnboard = async () => {
+        try {
+            let payload = {
+                employee_id,
+                stripe_account_id,
+            };
+            let response = await stripeOnboardComplete(payload);
+            if (response.status === 200 && response.data.employee) {
+                toast.success(response.data.message+". Please Login To Continue");
+                sessionStorage.removeItem("user");
+                authUserDispatch({ type: LOGOUT });
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.error);
+        }
+    };
   useEffect(() => {
     if (authUserState.user && location.pathname === "/") {
       return navigate("/schedule", {

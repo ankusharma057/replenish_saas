@@ -238,7 +238,7 @@ class Api::EmployeesController < ApplicationController
       }
     })
 
-    return_url = "#{request.base_url}/stripe-onboard-success/#{employee.id}/#{account.id}"
+    return_url = "#{request.base_url}/#{employee.id}/#{account.id}"
     account_link = Stripe::AccountLink.create({
       account: account.id,
       refresh_url: "#{request.base_url}/myprofile",
