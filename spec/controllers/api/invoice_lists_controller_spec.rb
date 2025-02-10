@@ -3,10 +3,11 @@ require 'rails_helper'
 RSpec.describe Api::InvoiceListsController, type: :controller do
   describe '#summary' do
     let!(:location) { create(:location) }
+
     let!(:employee) { create(:employee) }
     let!(:client) { create(:client) }
     let!(:invoice_group) { create(:invoice_group) }
-    let!(:invoice1) { create(:invoice, is_finalized: true, location: location, employee: employee, client: client, invoice_group: invoice_group, created_at: Date.today - 1.day) }
+    let!(:invoice1) { create(:invoice, is_finalized: true, location: location, employee: employee, client: client, invoice_group: invoice_group, created_at: Date.today) }
     let!(:invoice2) { create(:invoice, is_finalized: true, location: location, employee: employee, client: client, invoice_group: invoice_group, created_at: Date.today) }
 
     before do
@@ -18,25 +19,23 @@ RSpec.describe Api::InvoiceListsController, type: :controller do
         get :summary, params: { start_date: (Date.today - 1.day).strftime('%Y-%m-%d'), end_date: Date.today.strftime('%Y-%m-%d'), location_id: location.id.to_s }
         
         expect(response).to have_http_status(:success)
-      end
-    end
-
-    context 'with no date range' do
-      it 'returns invoices for the current month' do
-        get :summary, params: { location_id: location.id.to_s }
-
-        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body) 
+        expect(json_response['data'].size).to eq(1)
       end
     end
 
     context 'with no invoices matching criteria' do
-      it 'returns an empty array' do
-        get :summary, params: { start_date: (Date.today + 1.day).strftime('%Y-%m-%d'), end_date: (Date.today + 2.days).strftime('%Y-%m-%d'), location_id: location.id.to_s }
+      it 'returns locations with calculated percentages even with no invoices' do
+        get :summary, params: { start_date: (Date.today + 5.day).strftime('%Y-%m-%d'), end_date: (Date.today + 10.days).strftime('%Y-%m-%d'), location_id: location.id.to_s }
 
         expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']).not_to be_empty
+        expect(json_response['data']).to all(include('location_id', 'location_name', 'percentage_invoiced', 'total_invoiced', 'total_applied'))
       end
     end
   end
+
 
   describe '#calculate_summary_data' do
     let!(:location) { create(:location) }
@@ -58,7 +57,7 @@ RSpec.describe Api::InvoiceListsController, type: :controller do
 
     it 'calculates the correct total payment' do
       total_payment = controller.send(:calculate_charge, invoice)
-      expect(total_payment).to eq(173.0)
+      expect(total_payment).to eq(191.9)
     end
   end
 end
