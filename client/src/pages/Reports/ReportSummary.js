@@ -1,19 +1,16 @@
 import { SlidersHorizontal, MoreHorizontal, SearchIcon } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
-import { Dropdown, Form, ListGroup, Nav, NavDropdown, Overlay, OverlayTrigger, Popover, Table } from 'react-bootstrap'
+import { Dropdown, Form, ListGroup, Nav, NavDropdown, Overlay, OverlayTrigger, Popover, Spinner, Table } from 'react-bootstrap'
 import { GenerateExcelForInvoices, GetAllSummaryInvoices, getEmployeesList, getLocations, GenerateSingleSummaryReport } from '../../Server'
 import { BiSolidDownArrow } from 'react-icons/bi'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuthContext } from '../../context/AuthUserContext'
 import moment from 'moment'
+import { toast } from 'react-toastify'
 
 const ReportSummary = () => {
   const [key, setKey] = useState(0);
-
-  const reloadComponent = () => {
-    window.location.reload()
-  };
   const { authUserState } = useAuthContext();
   const [locationSearchQuery, setLocationSearchQuery] = useState("")
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState("")
@@ -29,9 +26,10 @@ const ReportSummary = () => {
   const buttonRef = useRef(null);
   const [salesByLocationData, setSalesByLocationData] = useState([]);
   const [payload, setPayload] = useState({})
-  const [showOptions,setShowOptions]=useState(false)
+  const [showOptions,setShowOptions]=useState(false);
+  const [screenLoading, setScreenLoading] = useState(false)
   useEffect(() => {
-    GetAllLocations();
+      GetAllLocations();
     GetAllEmployees();
     GetAllSummaryReport()
   }, [])
@@ -179,16 +177,38 @@ const ReportSummary = () => {
     return '';
   };
   const generateSingleSummaryReport = async (locationId) => {
-    let response = await GenerateSingleSummaryReport(locationId, true)
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, '_blank');
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-    setShowOptions(false);
+    try {
+      setScreenLoading(true);
+      let response = await GenerateSingleSummaryReport(locationId, true)
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      setShowOptions(false);
+      setScreenLoading(false);
+    } catch (error) {
+      toast.error(error.message);
+      setScreenLoading(false);
+    }
   };
+  const reloadComponent = () => {
+    setLocationSearchQuery("");
+    setPayload({});
+    setEndDate("");
+    setStartDate("");
+    setSelectedLocationsName("");
+    GetAllLocations();
+    GetAllEmployees();
+    GetAllSummaryReport()
+  };
+  const ScreenLoading = () => {
+    return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+        <Spinner animation="border" variant="info" />
+    </div>
+}
   return (
-    <div className='p-3 w-full' key={key}>
-
+    <div className='p-3 w-full' key={key} style={{position:"relative"}}>
+      {screenLoading && <ScreenLoading />}
       <h1 className='text-black-50 font-weight-semibold mt-4'>Billing Summary Report</h1>
       <div className='p-3 bg-white px-3 w-100 rounded mt-3'>
         <div className='d-flex justify-content-between align-items-center'>
@@ -209,14 +229,16 @@ const ReportSummary = () => {
                     />
                     <SearchIcon className="absolute left-2 pointer-events-none text-gray-400" size={15} />
                   </div>
-                  {Array.isArray(filteredLocation) && filteredLocation.map((item, index) => {
-                    return <Dropdown.Item eventKey={item?.name}>
-                      {item?.name}
-                    </Dropdown.Item>
-                  })}
+                  <div style={{ maxHeight: "350px", overflow: "scroll",scrollbarWidth:"none" }}>
+                    {Array.isArray(filteredLocation) && filteredLocation.map((item, index) => {
+                      return <Dropdown.Item eventKey={item?.name}>
+                        {item?.name}
+                      </Dropdown.Item>
+                    })}
+                  </div>
                 </Dropdown.Menu>
               </Dropdown>
-            </div>
+              </div>
             <div className='d-flex justify-content-start align-items-center'>
               <Dropdown className="d-inline mx-2">
                 <Dropdown.Toggle id="dropdown-autoclose-true" variant='outline' style={{ color: "#696977" }}>
@@ -237,6 +259,7 @@ const ReportSummary = () => {
                     <Form.Check checked={areAllEmployeesSelected()} onChange={handleSelectAllEmployees} />
                   </div>
                   <hr />
+            <div style={{maxHeight:"350px",overflow:"scroll",scrollbarWidth:"none"}}>
                   {Array.isArray(filteredEmployee) && filteredEmployee?.map((item, index) => {
                     return <div className='d-flex justify-content-between align-items-center' >
                       <Dropdown.Item onClick={(e) => e.stopPropagation()} className='px-0'>
@@ -245,6 +268,7 @@ const ReportSummary = () => {
                       <Form.Check className='z-10' checked={allEmployeesIds.includes(item.id)} onChange={(event) => handleEmployeeCheckbox(event, item.id)} />
                     </div>
                   })}
+              </div>
                 </Dropdown.Menu>
               </Dropdown>
             </div>
@@ -320,8 +344,8 @@ const ReportSummary = () => {
                     employee_id:allEmployeesIds
                   }))
                   setSelectedLocationsName("")
-                  let response = await GetAllSummaryInvoices({}, true);
-                  setSalesByLocationData(response.data.data)
+                  let response = await GetAllSummaryInvoices({end_date:"",start_date:"",employee_id:allEmployees.map((item) => { return item.id })}, true);
+                  setSalesByLocationData(response.data)
                 }}>Reset</span>
               </div>
             }

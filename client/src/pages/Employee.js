@@ -889,7 +889,7 @@ setTitle(title)
                           <td>
                             <div className="flex items-center">
                               <input
-                                defaultChecked={selectedEmployeeData?.is_inv_manager}
+                                checked={selectedEmployeeData?.is_inv_manager}
                                 name="is_inv_manager"
                                 type="checkbox"
                                 className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"

@@ -892,7 +892,6 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-    console.log("@@@@@@invoiceData",invoiceData);
     if(invoiceData && (!Array.isArray(invoiceData[0].semag_consult_fee) || (Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0))){
       confirmAlert({
         title: "Confirm to submit",
@@ -905,10 +904,8 @@ export default function AddInvoices() {
                 setLoading(true);
                 await createGroupInvoices(invoiceData);
                 toast.success("Invoice created successfully.");
-                await getInvoiceList(true);
                 const { data: useData } = await getUpdatedUserProfile(true);
                 authUserDispatch({ type: LOGIN, payload: useData });
-
                 setClientName("");
                 setInvoiceArray([]);
                 setFormData(initialFormState);
@@ -926,6 +923,7 @@ export default function AddInvoices() {
                 setClient("");
                 setLocationName("");
                 setClient("");
+                setCreateClient(false);
               } catch (error) {
                 toast.error(
                   error?.response?.data?.exception ||
