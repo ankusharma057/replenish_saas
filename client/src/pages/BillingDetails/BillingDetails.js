@@ -22,17 +22,20 @@ const BillingDetails = () => {
         instant_pay:false,
         showUpdateBtn:false
     })
+    const [invoiceAmount,setInvoiceAmount]=useState("")
     useEffect(() => {
         getSingleInvoiceItem()
     }, [invoice_id])
     const getSingleInvoiceItem = async () => {
         setScreenLoading(true)
-        let response = await getSingleInvoice(invoice_id);
+        let response = await getSingleInvoice(invoice_id,true);
         response.data = {
             ...response.data,
             created_at: moment(response.data.created_at).format("YYYY-MM-DD")
         }
         setInvoiceData(response.data);
+        setInvoiceAmount(response?.data?.charge);
+        setNote(response.data.notes)
         setPaymentFrequency(response?.data?.instant_pay);
         if(response.status===200){
             try {
@@ -94,7 +97,7 @@ const BillingDetails = () => {
         setLoading(false)
     }
     const handlePaymentFrequency=(event)=>{
-        if(event.target.value === "Instant Pay"){
+        if(event.target.value === "Pay Faster"){
             setPaymentFrequency(true)
             setUpdateInvoiceDataPayload((prev)=>({
                 ...prev,
@@ -112,15 +115,15 @@ const BillingDetails = () => {
     };
     const handleChargeChange = (event) => {
         let { value } = event.target
-        setUpdateInvoiceDataPayload((prev) => ({
-            ...prev,
-            charge: value,
-            showUpdateBtn:invoiceData?.charge == updateInvoiceDataPayload?.charge?false:true
-        }));
+        setInvoiceAmount(value);
     };
     const updateInvoiceData=async()=>{
+        let payload={
+            charge:invoiceAmount,
+            notes:note
+        }
         try {
-            let response = await updateInvoice(); 
+            let response = await updateInvoice(invoice_id,payload); 
              if(response.status===200){
                 await getSingleInvoiceItem();
              }
@@ -162,7 +165,7 @@ const BillingDetails = () => {
                                                 <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Bill Amount*</Form.Label>
                                                 <InputGroup size='sm'>
                                                     <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
-                                                    <Form.Control type='number' placeholder="Bill Amount" value={updateInvoiceDataPayload?.charge} onChange={handleChargeChange} disabled={true}name={"charge"}/>
+                                                    <Form.Control type='number' placeholder="Bill Amount" value={invoiceAmount} onChange={handleChargeChange} name={"charge"}/>
                                                     <InputGroup.Text id="basic-addon2">
                                                         <Button disabled variant="Secondary" size='sm' className='d-flex align-items-center gap-[5px] border-0'><img src={"https://cdn-icons-png.flaticon.com/512/197/197484.png"} className='w-[10px] h-[10px]' alt='country_flag' />USD</Button>
                                                     </InputGroup.Text>
@@ -180,7 +183,7 @@ const BillingDetails = () => {
                                             <div className='mb-3'>
                                                 <Form.Label column sm="4" className='text-black-50' style={{ fontSize: "14px" }}>Payment Frequency</Form.Label>
                                                 <Form.Select value={paymentFrequency === true ? "One Day Payment" : "Default"} onChange={handlePaymentFrequency} name='instant_pay' disabled={true}>
-                                                    <option value={"Instant Pay"}>Instant Pay</option>
+                                                    <option value={"Pay Faster"}>Pay Faster</option>
                                                     <option value="Default">Default</option>
                                                 </Form.Select>
                                             </div>
@@ -201,7 +204,7 @@ const BillingDetails = () => {
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='mb-3'>
                                                     <Form.Label column sm="3" className='text-black-50' style={{ fontSize: "14px" }}>Note to self</Form.Label>
-                                                    <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value) }} />
+                                                    <Form.Control as="textarea" rows={3} onChange={(event) => { setNote(event.target.value) }} value={note}/>
                                                 </div>
                                             </Col>
                                         }
@@ -253,12 +256,20 @@ const BillingDetails = () => {
                                                 </Col>
                                             </Row>
                                         })}
+                                        {(invoiceAmount !== invoiceData?.charge || note !== invoiceData?.notes) ?
+                                            <Col xs={12} sm={12} md={12} lg={12}>
+                                                <div className='d-flex justify-content-end gap-[20px]'>
+                                                    <Button size='sm' variant='outline-secondary' onClick={() => {setNote("");setInvoiceAmount(invoiceData.charge)}}>Cancel</Button>
+                                                    <Button size='sm' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }} onClick={()=>updateInvoiceData()}>Update Invoice</Button>
+                                                </div>
+                                            </Col> :
                                             <Col xs={12} sm={12} md={12} lg={12}>
                                                 <div className='d-flex justify-content-end gap-[20px]'>
                                                     <Button size='sm' variant='outline-secondary' onClick={() => navigate("/invoices-to-pay")}>Cancel</Button>
                                                     {(authUserState.user?.is_admin && !invoiceData?.is_paid && (invoiceData?.payment_status === "pending" || invoiceData?.payment_status === null)) && <Button size='sm' type='submit' style={{ backgroundColor: "#22D3EE", border: "1px solid #22D3EE" }}>Save & Pay</Button>}
                                                 </div>
                                             </Col>
+                                        }
                                     </Row>
                                 </Form>
                             </div>
