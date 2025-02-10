@@ -51,13 +51,18 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
             
-            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div> 
-
-            <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
-            <div style="text-align: right;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
-
-            <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
+            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>'
+            if is_old_invoice?
+              str += '
+                  <div style="text-align: right;">Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
+                  <div style="text-align: left;">Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>
+                  <div style="text-align: right;">Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if paid_by_client_cash && paid_by_client_credit)&.round(2)}"'</div>
+              '
+            end
+            
+            str += '
+            <div style="text-align: right;">  Total Amount Client Paid: '"#{total_amount_paid_by_client&.round(2)}"'</div> 
+            <div style="text-align: left;">  Payment Type: '"#{payment_type}"'</div>
             <div style="text-align: right;">  Tip: '"#{tip}"'</div>
 
           </div>
@@ -90,6 +95,13 @@ module PdfDownloadable
 
           table_str += '<tbody>
           </table>'
+
+          amt_paid_key = "amt_paid_for_#{key}".to_sym
+          amt_paid = binding.local_variable_get(amt_paid_key) rescue 0.0
+
+          table_str += '<div style="margin: 20px 0; font-size: 20px; color: #323aa8;">
+            <strong>Amount Paid for ' "#{key.titleize}" ': $' "#{!amt_paid.nil? ? amt_paid&.to_f&.round(2) : 0.00}" '</strong>
+          </div>'
 
           str += table_str
         end
@@ -145,13 +157,19 @@ module PdfDownloadable
             <div style="text-align: left;">  GFE: '"#{gfe ? 'Yes' : 'No'}"'</div>  
             <div style="text-align: right;">  Provider Purchased: '"#{provider_purchased ? 'Yes' : 'No'}"'</div>  
 
-            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-            <div style="text-align: right;">  Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
+            <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{semag_consult_fee ? 'Yes' : 'No'}"'</div>'
+            if is_old_invoice?
+              str += '
+                  <div style="text-align: right;">Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
+                  <div style="text-align: left;">Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>
+                  <div style="text-align: right;">Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if paid_by_client_cash && paid_by_client_credit)&.round(2)}"'</div>
+              '
+            end
+            
+            str += '
+            <div style="text-align: right;">  Total Amount Client Paid: '"#{total_amount_paid_by_client&.round(2)}"'</div>
 
-            <div style="text-align: left;">  Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>  
-            <div style="text-align: right;">  Client Paid: '"#{(paid_by_client_cash.to_f + paid_by_client_credit.to_f if (paid_by_client_cash && paid_by_client_credit))&.round(2)}"'</div>  
-
-            <div style="text-align: left;">  Personal Discount: '"#{personal_discount}"'</div>
+            <div style="text-align: left;">  Payment Type: '"#{payment_type}"'</div>
             <div style="text-align: right;">  Tip: '"#{tip}"'</div>
 
             <div style="text-align: left;">  Overhead Fee Type: '"#{overhead_fee_type&.capitalize}"'</div>
@@ -187,11 +205,26 @@ module PdfDownloadable
           table_str += '<tbody>
           </table>'
 
+          amt_paid_key = "amt_paid_for_#{key}".to_sym
+          amt_paid = binding.local_variable_get(amt_paid_key) rescue 0.0
+
+          table_str += '<div style="margin: 20px 0; font-size: 20px; color: #323aa8;">
+            <strong>Amount Paid for ' "#{key.titleize}" ': $' "#{!amt_paid.nil? ? amt_paid&.to_f&.round(2) : 0.00}" '</strong>
+          </div>'
+
           str += table_str
         end
           str +=  ' </div>
         </body>
       </html>'
+    end
+
+    def is_old_invoice?
+      amt_paid_for_mp_products.nil? && amt_paid_for_products.nil? && amt_paid_for_retail_products.nil? && amt_paid_for_wellness_products.nil?
+    end
+
+    def total_amount_paid_by_client
+      amt_paid_for_products.to_f + amt_paid_for_retail_products.to_f + amt_paid_for_wellness_products.to_f + amt_paid_for_mp_products.to_f
     end
   end
 end

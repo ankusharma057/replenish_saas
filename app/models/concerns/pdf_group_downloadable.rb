@@ -56,11 +56,16 @@ module PdfGroupDownloadable
                   <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
                   <div style="text-align: right;">  Provider Purchased: '"#{invoice.provider_purchased ? 'Yes' : 'No'}"'</div>  
 
-                  <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                  <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
-
-                  <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
-                  <div style="text-align: right;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
+                  <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>'
+                  if is_old_invoice?(invoice)
+                    complete_table_str += '
+                        <div style="text-align: right;">Client Cash: '"#{invoice&.paid_by_client_cash&.round(2)}"'</div>
+                        <div style="text-align: left;">Client Credit: '"#{invoice&.paid_by_client_credit&.round(2)}"'</div>
+                        <div style="text-align: right;">Client Paid: '"#{(invoice&.paid_by_client_cash&.to_f + invoice&.paid_by_client_credit&.to_f if invoice.paid_by_client_cash && invoice.paid_by_client_credit)&.round(2)}"'</div>
+                    '
+                  end
+                  complete_table_str += '
+                  <div style="text-align: right;">  Total Amount Client Paid: '"#{total_amount_paid_by_client(invoice)&.round(2)}"'</div> 
 
                   <div style="text-align: left;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
                   <div style="text-align: right;">  Tip: '"#{invoice.tip}"'</div>
@@ -94,6 +99,13 @@ module PdfGroupDownloadable
 
                   table_str += '<tbody>
                   </table>'
+                  
+                  amt_paid_key = "amt_paid_for_#{key}"
+                  amt_paid = invoice.public_send(amt_paid_key) rescue 0.0
+
+                  table_str += '<div style="margin: 20px 0; font-size: 20px; color: #323aa8;">
+                    <strong>Amount Client Paid for ' "#{key.titleize}" ': $' "#{!amt_paid.nil? ? amt_paid&.to_f&.round(2) : 0.00 }" '</strong>
+                  </div>'
 
                   complete_table_str += table_str
                 end
@@ -156,11 +168,17 @@ module PdfGroupDownloadable
                 <div style="text-align: left;">  GFE: '"#{invoice.gfe ? 'Yes' : 'No'}"'</div>  
                 <div style="text-align: right;">  Provider Purchased: '"#{invoice.provider_purchased ? 'Yes' : 'No'}"'</div>
 
-                <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>  
-                <div style="text-align: right;">  Client Cash: '"#{invoice.paid_by_client_cash&.round(2)}"'</div>  
-
-                <div style="text-align: left;">  Client Credit: '"#{invoice.paid_by_client_credit&.round(2)}"'</div>  
-                <div style="text-align: right;">  Client Paid: '"#{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f if (invoice.paid_by_client_cash && invoice.paid_by_client_credit))&.round(2)}"'</div>  
+                <div style="text-align: left;">  Semaglutide Consultation Fee: '"#{invoice.semag_consult_fee ? 'Yes' : 'No'}"'</div>'
+                if is_old_invoice?(invoice)
+                  str += '
+                      <div style="text-align: right;">Client Cash: '"#{paid_by_client_cash&.round(2)}"'</div>
+                      <div style="text-align: left;">Client Credit: '"#{paid_by_client_credit&.round(2)}"'</div>
+                      <div style="text-align: right;">Client Paid: '"#{(paid_by_client_cash&.to_f + paid_by_client_credit&.to_f if paid_by_client_cash && paid_by_client_credit)&.round(2)}"'</div>
+                  '
+                end
+                
+                str += '
+                <div style="text-align: right;">  Total Amount Client Paid: '"#{total_amount_paid_by_client(invoice).round(2)}"'</div>   
 
                 <div style="text-align: left;">  Personal Discount: '"#{invoice.personal_discount}"'</div>
                 <div style="text-align: right;">  Tip: '"#{invoice.tip}"'</div>
@@ -198,6 +216,12 @@ module PdfGroupDownloadable
                 table_str += '<tbody>
                 </table>'
 
+                amt_paid_key = "amt_paid_for_#{key}"
+                amt_paid = invoice.public_send(amt_paid_key) rescue 0.0
+                table_str += '<div style="margin: 20px 0; font-size: 20px; color: #323aa8;">
+                  <strong>Amount Client Paid for ' "#{key.titleize}" ': $' "#{!amt_paid.nil? ? amt_paid&.to_f&.round(2) : 0.00}" '</strong>
+                </div>'
+
                 complete_table_str += table_str
               end
           complete_table_str +=  ' </div>
@@ -206,6 +230,14 @@ module PdfGroupDownloadable
           str += complete_table_str
         end
       str
+    end
+
+    def is_old_invoice?(invoice)
+      invoice.amt_paid_for_mp_products.nil? && invoice.amt_paid_for_products.nil? && invoice.amt_paid_for_retail_products.nil? && invoice.amt_paid_for_wellness_products.nil?
+    end
+
+    def total_amount_paid_by_client(invoice)
+      invoice.amt_paid_for_products.to_f + invoice.amt_paid_for_retail_products.to_f + invoice.amt_paid_for_mp_products.to_f + invoice.amt_paid_for_wellness_products.to_f
     end
   end
 end

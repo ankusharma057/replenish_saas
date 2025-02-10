@@ -249,7 +249,7 @@ class Api::EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo, employee_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy], employee_locations_attributes: [:id, :employee_id, :location_id, :_destroy])
+    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :wellness_percentage, :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo, employee_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy], employee_locations_attributes: [:id, :employee_id, :location_id, :_destroy])
   end
 
   def find_employee

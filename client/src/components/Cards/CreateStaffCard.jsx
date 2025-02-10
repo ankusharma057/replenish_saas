@@ -223,6 +223,18 @@ export default function CreateStaffCard({ show, onHide }) {
             min="0"
           />
 
+          <LabelInput
+            label=" Wellness Percentage"
+            controlId="wellness_percentage"
+            placeholder={`Enter Wellness Percentage`}
+            required={true}
+            labelClassName="font-medium text-cyan-800"
+            onChange={handleChange}
+            type="number"
+            name="wellness_percentage"
+            min="0"
+          />
+
           <div className="mb-4">
             <label
               htmlFor="gfe"

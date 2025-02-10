@@ -62,15 +62,17 @@ module InvoiceGroupConcern
     products = invoice_param['products']&.pluck("name", "quantity", "retail_price")
     retail_products = invoice_param['retail_products']&.pluck("name", "quantity", "retail_price")
     mp_products = invoice_param['mp_products']&.pluck("name", "quantity", "retail_price") || []
+    wellness_products = invoice_param['wellness_products']&.pluck("name", "quantity", "retail_price") || []
 
     invoice.products_hash = {
       "products" => products,
       "retail_products" => retail_products,
-      "mp_products" => mp_products
+      "mp_products" => mp_products,
+      "wellness_products" => wellness_products
     }
 
     if invoice.source_invoice_id.blank? && invoice.products_hash && invoice.products_hash.any?
-      invoice.products_hash.values.flatten(1).map { |arr| { arr[0] => arr[1] } }.each do |product_quantity|
+      invoice.products_hash.values.flatten(1).map { |arr| { arr[0] => arr[1] } }&.each do |product_quantity|
         emp_inventory = employee.employees_inventories.where(product: Product.find_by(name: product_quantity.keys.first)).first
         emp_inventory&.update(quantity: (emp_inventory.quantity - product_quantity.values.first.to_f))
       end
@@ -91,12 +93,13 @@ module InvoiceGroupConcern
 
   def calculate_charge(source_employee, mentor_or_employee, invoice_param)
     return invoice_param['charge'] if source_employee.blank?
-
     employee_mentor = EmployeeMentor.where(employee_id: source_employee.id, mentor_id: mentor_or_employee.id).select(:mentor_percentage).first
-    mentor_percentage = employee_mentor.mentor_percentage.to_f
-    client_cash = invoice_param['paid_by_client_cash'].to_f
-    client_credit = invoice_param['paid_by_client_credit'].to_f
-    mentor_price = (client_cash + (client_credit - (client_credit * 0.031)) - invoice_param[:total_consumable_cost]) * (mentor_percentage/100)
+    mentor_percentage = employee_mentor&.mentor_percentage.to_f
+  
+    total_price_by_client = invoice_param['get_total_price_by_client'].to_f
+    total_consumable_cost = invoice_param[:total_consumable_cost].to_f
+  
+    mentor_price = (total_price_by_client - total_consumable_cost) * (mentor_percentage / 100)
     mentor_price.round(2)
   end
 

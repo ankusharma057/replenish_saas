@@ -185,17 +185,21 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def calculate_charge(invoice)
-    cash = invoice.paid_by_client_cash.to_f
-    credit = invoice.paid_by_client_credit.to_f
-    adjusted_credit = credit - (credit * 0.031)
-    consumable_cost = invoice.total_consumable_cost.to_f
-    tip = invoice.tip.to_f
-    discount = invoice.personal_discount.to_f
-    concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
-    gfe_fee = invoice.gfe? ? 20 : 0
-    semag_consult_fee = (cash + credit) * 0.2
+    if invoice.old_invoice? 
+      cash = invoice.paid_by_client_cash.to_f
+      credit = invoice.paid_by_client_credit.to_f
+      adjusted_credit = credit - (credit * 0.031)
+      consumable_cost = invoice.total_consumable_cost.to_f
+      tip = invoice.tip.to_f
+      discount = invoice.personal_discount.to_f
+      concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
+      gfe_fee = invoice.gfe? ? 20 : 0
+      semag_consult_fee = (cash + credit) * 0.2
 
-    cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
+      cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
+    else
+      total = invoice.charge
+    end
   end
 
   def filtered_invoices_with_date_range
@@ -261,7 +265,14 @@ class Api::InvoiceListsController < ApplicationController
     invoices.sum do |invoice|
       concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
       gfe_fee = invoice.gfe? ? 20 : 0
-      semag_consult_fee = (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+      semag_consult_fee = if invoice.old_invoice?
+        (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+      else
+        invoice.amt_paid_for_products.to_f +
+        invoice.amt_paid_for_retail_products.to_f +
+        invoice.amt_paid_for_wellness_products.to_f +
+        invoice.amt_paid_for_mp_products.to_f
+      end      
       discount = invoice.personal_discount.to_f
 
       concierge_fee + gfe_fee + semag_consult_fee - discount

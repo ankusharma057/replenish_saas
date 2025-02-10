@@ -167,6 +167,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_13_094931) do
     t.string "plan"
     t.string "stripe_account_id"
     t.string "stripe_customer_id"
+    t.integer "wellness_percentage", default: 0
   end
 
   create_table "employees_inventories", force: :cascade do |t|
@@ -264,6 +265,11 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_13_094931) do
     t.text "comfort_with_modality_reason", default: ""
     t.text "mentor_value_provided_reason", default: ""
     t.integer "mentor_id"
+    t.integer "payment_type"
+    t.float "amt_paid_for_products"
+    t.float "amt_paid_for_retail_products"
+    t.float "amt_paid_for_wellness_products"
+    t.float "amt_paid_for_mp_products"
   end
 
   create_table "locations", force: :cascade do |t|

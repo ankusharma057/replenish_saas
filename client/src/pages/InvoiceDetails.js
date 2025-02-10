@@ -142,7 +142,7 @@ const InvoiceDetails = ({ invoice, onBack }) => {
         </div>
       </div>
 
-      <div className="row mb-3">
+      {/* <div className="row mb-3">
         <div className="col-md-6 mb-3">
           <label><strong>Paid by Client Cash:</strong></label>
           <Form.Control
@@ -161,7 +161,7 @@ const InvoiceDetails = ({ invoice, onBack }) => {
             className="form-control-lg"
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="row mb-3">
         <div className="col-md-6 mb-3">

@@ -15,6 +15,26 @@ const Mentorship = ({employee}) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
+  const calculatePercentage = (value) => {
+    switch (value) {
+      case "credit_card":
+        return 0.06;
+      case "cherry":
+        return 0.15;
+      case "other":
+        return 0.03
+      default:
+        return 0
+    }
+  };
+
+  const getTotalAfterTax = (invoice) => {
+    let percentage = calculatePercentage(invoice.payment_type);
+    let afterTaxprice = invoice.amt_paid_for_mp_products - invoice.amt_paid_for_mp_products * percentage;
+
+    return afterTaxprice
+  }
+
   useEffect(() => {
     const fetchMentorshipInvoices = async () => {
       try {
@@ -75,7 +95,7 @@ const Mentorship = ({employee}) => {
     const mpProductMatch = invoice?.products_hash?.mp_products?.some(
       (mp_product) => mp_product[0].toLowerCase().includes(lowercasedQuery)
     );
-    const calculatedTotal = invoice.paid_by_client_cash + (invoice.paid_by_client_credit * (1 - 0.03));
+    const calculatedTotal = getTotalAfterTax(invoice);
     return (
       invoice.id.toString().includes(lowercasedQuery) ||
       invoice.date_of_service.toLowerCase().includes(lowercasedQuery) ||
@@ -141,7 +161,7 @@ const Mentorship = ({employee}) => {
                 {[
                   { key: 'id', label: 'ID' },
                   { key: 'date_of_service', label: 'Date of Service' },
-                  { key: 'paid_by_client_cash', label: 'Total Paid by Client' },
+                  { key: 'amt_paid_for_mp_products', label: 'Total Paid by Client' },
                   { key: 'client.name', label: 'Client Name' },
                   { key: 'mentor.name', label: 'Mentor Name' },
                   { key: 'employee.name', label: 'Provider' },
@@ -166,7 +186,7 @@ const Mentorship = ({employee}) => {
                 <tr key={invoice.id}>
                   <td>{invoice.id}</td>
                   <td>{invoice.date_of_service}</td>
-                  <td>{invoice.paid_by_client_cash + (invoice.paid_by_client_credit * (1 - 0.03))}</td>
+                  <td>{getTotalAfterTax(invoice)}</td>
                   <td>{invoice.client ? invoice.client.name : 'N/A'}</td>
                   <td>{invoice.mentor ? invoice.mentor.name : 'N/A'}</td>
                   <td>{invoice.employee ? invoice.employee.name : 'N/A'}</td>
