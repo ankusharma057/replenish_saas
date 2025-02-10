@@ -32,7 +32,6 @@ class Api::InvoiceListsController < ApplicationController
   def summary
     invoices = filtered_invoices_with_date_range
     summary_data = calculate_summary_data(invoices)
-
     total_invoiced_sum = summary_data.sum { |data| data[:total_invoiced] }
     total_applied_sum = summary_data.sum { |data| data[:total_applied] }
 
@@ -149,19 +148,23 @@ class Api::InvoiceListsController < ApplicationController
   private
 
   def calculate_summary_data(invoices)
-    invoices.group_by(&:location_id).map do |location_id, grouped_invoices|
-      location_name = location_id ? Location.find(location_id).name : "Unknown Location"
-
+    all_locations = Location.all.index_by(&:id)
+    invoices_by_location = invoices.group_by(&:location_id)
+    all_locations.map do |location_id, location|
+      grouped_invoices = invoices_by_location[location_id] || []
+      
       total_invoiced = grouped_invoices.sum { |invoice| calculate_charge(invoice) }
+      
       {
         location_id: location_id,
-        location_name: location_name,
+        location_name: location.name,
         percentage_invoiced: calculate_percentage_invoiced(grouped_invoices),
-        total_invoiced: total_invoiced,
-        total_applied: calculate_total_applied(grouped_invoices)
+        total_invoiced: total_invoiced.round(2),
+        total_applied: calculate_total_applied(grouped_invoices).round(2)
       }
     end
   end
+
 
   def calculate_product_income(invoice)
     products = invoice.products_hash["products"] || []
@@ -193,7 +196,7 @@ class Api::InvoiceListsController < ApplicationController
       end_date = current_date.end_of_month
     end
 
-    invoices = Invoice.all
+    invoices = Invoice.where(is_finalized: true)
     location_ids = params[:location_id].is_a?(String) ? params[:location_id].split(',') : params[:location_id]
     employee_ids = params[:employee_id].is_a?(String) ? params[:employee_id].split(',') : params[:employee_id]
 
@@ -208,7 +211,7 @@ class Api::InvoiceListsController < ApplicationController
       workbook = package.workbook
 
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
-
+        sheet.add_row ["Sales by Location"]
         sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
         summary_data.each do |data|
           sheet.add_row [
@@ -226,18 +229,28 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def calculate_location_invoices(invoices)
-    total_invoices = Invoice.where(location_id: invoices.first.location_id).count
+    total_invoices = Invoice.where(location_id: invoices.first.location_id, is_finalized:true).count
     return 0 if total_invoices.zero?
 
     (invoices.size.to_f / total_invoices * 100).round(2)
   end
 
   def calculate_percentage_invoiced(invoices)
-    total_invoices = Invoice.count
+    if params[:start_date].blank? || params[:end_date].blank?
+      current_date = Date.today
+      start_date = current_date.beginning_of_month
+      end_date = current_date.end_of_month
+    else
+      start_date = Date.strptime(params[:start_date], "%Y-%m-%d")
+      end_date = Date.strptime(params[:end_date], "%Y-%m-%d")
+    end
+    
+    total_invoices = Invoice.where(created_at: start_date..end_date, is_finalized: true).where.not(location_id: nil).count
     return 0 if total_invoices.zero?
 
     (invoices.size.to_f / total_invoices * 100).round(2)
   end
+
 
   def calculate_total_applied(invoices)
     invoices.sum do |invoice|
