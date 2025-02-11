@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :location do
-    name { "Location Name" }
+    sequence(:name) { |n| "Location ##{n}" }
   end
 end
