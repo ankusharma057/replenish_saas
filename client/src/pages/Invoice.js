@@ -18,7 +18,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import InvoiceTabular from "../components/Tables/InvoiceTabular";
 import FinalizeInvoicesTable from "../components/Tables/FinalizeInvoicesTable";
-import { deleteInvoice } from "../Server";
+import { deleteInvoice, deleteMultipleInvoices  } from "../Server";
 
 const styles = {
   tableWrapper: {
@@ -282,26 +282,17 @@ const Invoice = () => {
     const confirmation = window.confirm(
       `Are you sure you want to delete ${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""}?`
     );
-  
+
     if (confirmation) {
       try {
-        // Loop through the selected invoices and delete each one
-        for (const invoice of selectedInvoices) {
-          const { data } = await deleteInvoice(invoice.id, true); // Assuming `true` triggers a refetch after deletion
-          if (!data) {
-            toast.error("Something went wrong while deleting invoices.");
-            return; // Exit early if any deletion fails
-          }
-        }
-        
+        const { data } = await deleteMultipleInvoices(selectedInvoices, true); // Use the updated function
         toast.success(`${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""} deleted successfully.`);
-        getInvoices(true); 
-  
+        getInvoices(true);
       } catch (error) {
         toast.error("An error occurred while deleting invoices.");
       }
-  
-      // Optionally, reset the selection after deletion
+
+      // Reset selection after deletion
       setSelectedInvoices([]);
     }
   };
