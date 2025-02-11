@@ -113,7 +113,24 @@ class Api::InvoiceListsController < ApplicationController
         pdf = WickedPdf.new.pdf_from_string(pdf_html)
         send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
       else
-        return render json: {'error' => 'Invoice not found'}, status: :not_found
+        pdf_html = ActionController::Base.new.render_to_string(
+          template: "api/invoice_lists/location_report_blank", # You can create a blank template if needed
+          layout: "pdf",
+          locals: {
+            location: @location,
+            invoices: [],
+            treatment_income: 0,
+            product_income: 0,
+            total_invoiced: 0,
+            percentage_invoiced: 0,
+            start_date: @start_date,
+            end_date: @end_date,
+            applied_income: 0
+          }
+        )
+
+        pdf = WickedPdf.new.pdf_from_string(pdf_html)
+        send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
       end
     else
       return render json: {'error' => 'Location not found'}, status: :not_found
