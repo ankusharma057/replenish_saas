@@ -27,7 +27,7 @@ class InvoiceGroup < ApplicationRecord
   end
 
   def save_pdfs_and_send_mail
-    pdf_string = get_html_for_group
+    pdf_string = html_for_group
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
     File.open("public/#{source_invoices.first.employee&.name}-Non-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|
@@ -65,7 +65,7 @@ class InvoiceGroup < ApplicationRecord
   end
 
   def send_finalized_mail
-    pdf_string = get_html_for_group_finalized
+    pdf_string = html_for_group_finalized
     pdf_modified_string = pdf_string.blank? ? "<div>No Data</div>" : pdf_string
     pdf = WickedPdf.new.pdf_from_string(pdf_modified_string)
     File.open("public/#{source_invoices.first.employee&.name}-Finalized-Invoice-Group-#{source_invoices.ids}.pdf", 'wb') do |file|

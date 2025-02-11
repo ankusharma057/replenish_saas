@@ -167,6 +167,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_13_094931) do
     t.string "plan"
     t.string "stripe_account_id"
     t.string "stripe_customer_id"
+    t.string "stripe_account_id"
     t.integer "wellness_percentage", default: 0
   end
 

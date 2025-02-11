@@ -31,6 +31,7 @@ Style/DoubleNegation:
   Enabled: false
 
 Metrics/BlockLength:
+  Max: 250
   Exclude:
     - 'spec/**/*'
     - 'config/routes.rb'
@@ -58,3 +59,19 @@ Style/OptionalBooleanParameter:
 
 Style/BlockComments:
   Enabled: false
+
+Rails/LexicallyScopedActionFilter:
+  Enabled: false
+
+Naming/VariableNumber:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Max: 300
+
+Naming/PredicateName:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: true
+  Max: 200

@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 class EmployeeSerializer < ActiveModel::Serializer
-   attributes :id, :name, :vendor_name, :email, :password, :gfe,
+  attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :wellness_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
              :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url,
              :plan, :stripe_customer_id, :stripe_account_id, :instant_pay
-
 
   has_many :invoices
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
@@ -25,12 +26,10 @@ class EmployeeSerializer < ActiveModel::Serializer
   #   end
   # end
 
-  def roles
-    object.roles
-  end
+  delegate :roles, to: :object
 
   def pending_requests
-    object.inventory_requests.where.not(is_approved: true) 
+    object.inventory_requests.where.not(is_approved: true)
   end
 
   def is_admin
@@ -46,10 +45,8 @@ class EmployeeSerializer < ActiveModel::Serializer
   end
 
   def profile_photo_url
-    if object.profile_photo.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(object.profile_photo, only_path: true)
-    else
-      nil
-    end
+    return unless object.profile_photo.attached?
+
+    Rails.application.routes.url_helpers.rails_blob_url(object.profile_photo, only_path: true)
   end
 end

@@ -1,17 +1,22 @@
+# frozen_string_literal: true
+
 class InvoiceSerializer < ActiveModel::Serializer
   include Rails.application.routes.url_helpers
-  attributes :id, :employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :amt_paid_for_products, :payment_type, :amt_paid_for_retail_products, :amt_paid_for_wellness_products, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value, :products_hash, :source_invoice_id, :created_at, :is_paid, :mentor_id, :instant_pay, :notes, :stripe_account_id, :payment_status
+  attributes :id, :employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :amt_paid_for_products,
+             :payment_type, :amt_paid_for_retail_products, :amt_paid_for_wellness_products, :comments, :personal_discount, :tip, :concierge_fee_paid,
+             :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value, :products_hash, :source_invoice_id, :created_at, :is_paid, :mentor_id,
+             :instant_pay, :notes, :stripe_account_id, :payment_status
 
   attribute :created_at do
     object.created_at.strftime('%Y-%m-%d')
   end
 
   attribute :before_images do
-    object.before_images.map{|image| rails_blob_path(image, only_path: true)}
+    object.before_images.map { |image| rails_blob_path(image, only_path: true) }
   end
 
   attribute :after_images do
-    object.after_images.map{|image| rails_blob_path(image, only_path: true)}
+    object.after_images.map { |image| rails_blob_path(image, only_path: true) }
   end
 
   belongs_to :employee
@@ -27,8 +32,6 @@ class InvoiceSerializer < ActiveModel::Serializer
   end
 
   attribute :fellow_non_finalized_invoices do
-    if object.invoice_group
-      object.fellow_invoices.where(is_finalized: false)&.ids
-    end
+    object.fellow_invoices.where(is_finalized: false)&.ids if object.invoice_group
   end
 end

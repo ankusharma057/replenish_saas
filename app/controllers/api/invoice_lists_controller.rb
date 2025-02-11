@@ -105,6 +105,7 @@ class Api::InvoiceListsController < ApplicationController
                     Time.zone.today.end_of_month
                   end
       @invoices = Invoice.where(location_id: location_id, created_at: @start_date..@end_date)
+
       if @invoices.present?
         @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
         @treatment_income = @invoices.sum { |invoice| calculate_charge(invoice) } - @product_income
@@ -185,7 +186,7 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def calculate_charge(invoice)
-    if invoice.old_invoice? 
+    if invoice.old_invoice?
       cash = invoice.paid_by_client_cash.to_f
       credit = invoice.paid_by_client_credit.to_f
       adjusted_credit = credit - (credit * 0.031)
@@ -198,7 +199,7 @@ class Api::InvoiceListsController < ApplicationController
 
       cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
     else
-      total = invoice.charge
+      invoice.charge
     end
   end
 
@@ -231,8 +232,8 @@ class Api::InvoiceListsController < ApplicationController
           sheet.add_row [
             data[:location_name],
             "#{data[:percentage_invoiced]}%",
-            format('$%.2f', data[:total_invoiced]),
-            format('$%.2f', data[:total_applied])
+            "$#{format('%.2f', total_invoiced)}",
+            "$#{format('%.2f', total_applied)}"
           ]
         end
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
@@ -240,8 +241,8 @@ class Api::InvoiceListsController < ApplicationController
         sheet.add_row [
           'Total inclusive of taxes',
           nil,
-          format('$%.2f', total_invoiced),
-          format('$%.2f', total_applied)
+          "$#{format('%.2f', total_invoiced)}",
+          "$#{format('%.2f', total_applied)}"
         ]
       end
     end
@@ -266,13 +267,13 @@ class Api::InvoiceListsController < ApplicationController
       concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
       gfe_fee = invoice.gfe? ? 20 : 0
       semag_consult_fee = if invoice.old_invoice?
-        (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
-      else
-        invoice.amt_paid_for_products.to_f +
-        invoice.amt_paid_for_retail_products.to_f +
-        invoice.amt_paid_for_wellness_products.to_f +
-        invoice.amt_paid_for_mp_products.to_f
-      end      
+                            (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+                          else
+                            invoice.amt_paid_for_products.to_f +
+                              invoice.amt_paid_for_retail_products.to_f +
+                              invoice.amt_paid_for_wellness_products.to_f +
+                              invoice.amt_paid_for_mp_products.to_f
+                          end
       discount = invoice.personal_discount.to_f
 
       concierge_fee + gfe_fee + semag_consult_fee - discount
