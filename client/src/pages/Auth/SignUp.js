@@ -14,7 +14,7 @@ const formInitialState = {
   vendor_name: "",
   password: "",
   gfe: false,
-  service_percentage: 0,
+  service_percentage: 50,
   retail_percentage: 0,
   is_inv_manager: false,
   is_admin: false,
@@ -25,41 +25,23 @@ export default function SignUp() {
   const [formData, setFormData] = useState(formInitialState);
   const { authUserState, authUserDispatch } = useAuthContext();
   const navigate = useNavigate();
-
   const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
       const newUser = await createEmployee(formData);
-      const { data } = await loginUser(newUser.data);
-      
-      if (data) {
-        authUserDispatch({ type: LOGIN, payload: data });
-        toast.success("Successfully Signed up & Logged In");
-        navigate("/myprofile", {
-          replace: true,
-        });
-      }
+      setFormData(formInitialState);
+        navigate("/", {replace: true,});
     } catch (error) {
-      let errorString = "";
-      Object.keys(error.response.data.error || {}).forEach((key) => {
-        errorString =
-          errorString +
-          " " +
-          key +
-          " " +
-          error.response.data.error[key][0] +
-          " ";
-      });
-
-      toast.error(
-        errorString ||
-          error.response?.data?.exception ||
-          error?.response?.statusText ||
-          error.message ||
-          "Failed to create user"
-      );
+      if(Array.isArray(error.response.data.error)){
+        for(let i=0;i<error.response.data.error.length;i++){
+          toast.error(error.response.data.error[i])
+        }
+      }
+      if(error.response.data.error){
+        toast.error(error.response.data.error)
+      }
     } finally {
       setLoading(false);
     }

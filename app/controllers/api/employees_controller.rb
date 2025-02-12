@@ -28,11 +28,12 @@ class Api::EmployeesController < ApplicationController
 
   def create
     @employee = Employee.new(employee_params)
+    default_role = Role.find_by(name: "mentor")
+    @employee.roles << default_role if default_role.present? && @employee.roles.empty?
     if @employee.save
       begin
-        onboarding_url = create_stripe_account(@employee)
         @employee.send_reset_password_mail
-        render json: { message: 'Employee and Stripe account created successfully', employee: @employee, onboarding_url: onboarding_url }, status: :created
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee}, status: :created
       rescue => e
         @employee.destroy
         render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
@@ -137,6 +138,91 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
+  def employee_stripe_connect
+    employee = Employee.find_by(id: params[:employee_id])
+
+    if employee.nil?
+      render json: { error: 'Employee not found' }, status: :not_found
+      return
+    end
+
+    if employee.stripe_account_id.present?
+      render json: { error: 'Stripe account already exists for this employee' }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      redirect_url = create_stripe_account(employee)
+      render json: { message: 'Stripe account created successfully', redirect_url: redirect_url }, status: :ok
+    rescue StandardError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
+  def stripe_onboarding_complete
+    employee_id = params[:employee_id]
+    stripe_account_id = params[:stripe_account_id]
+
+    employee = Employee.find_by(id: employee_id)
+
+    if employee.nil?
+      render json: { error: 'Employee not found' }, status: :not_found
+      return
+    end
+
+    if stripe_account_id.nil?
+      render json: { error: 'Stripe account ID is missing' }, status: :unprocessable_entity
+      return
+    end
+
+    employee.update(stripe_account_id: stripe_account_id)
+
+    render json: { message: 'Stripe account linked successfully', employee: employee }, status: :ok
+  end
+
+  def stripe_account_details
+    employee = Employee.find(params[:employee_id])
+    stripe_account_id = employee.stripe_account_id
+    if stripe_account_id.blank?
+      render json: { error: 'Stripe account ID is missing for this employee.' }, status: :unprocessable_entity
+      return
+    end
+    begin
+      account = Stripe::Account.retrieve(stripe_account_id)
+      bank_accounts = account.external_accounts.data
+
+      bank_account_details = bank_accounts.map do |bank_account|
+        {
+          id: bank_account.id,
+          bank_name: bank_account.bank_name,
+          last4: bank_account.last4,
+          routing_number: bank_account.routing_number,
+          status: bank_account.status
+        }
+      end
+
+      render json: { bank_accounts: bank_account_details }, status: :ok
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+    
+  end
+
+  def employees_invoice
+    finalized = params[:is_finalized]
+    if current_employee.present?
+      invoices = Invoice.where(employee_id: current_employee.id, is_finalized: finalized).where.not(client_id: nil ).paginated_invoices(params)
+        render json: {
+        invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+        current_page: invoices.current_page,
+        total_pages: invoices.total_pages,
+        total_entries: invoices.total_entries
+      }, status: :ok
+    end 
+  end
+
+  private
+
   def create_stripe_account(employee)
     if employee.stripe_account_id.present?
       raise StandardError, 'Stripe account already exists for this employee'
@@ -147,25 +233,20 @@ class Api::EmployeesController < ApplicationController
       country: 'US',
       email: employee.email,
       capabilities: {
-        transfers: { requested: true }
+        transfers: { requested: true },
+        card_payments: { requested: true }
       }
     })
 
-    employee.update!(stripe_account_id: account.id)
-
+    return_url = "#{request.base_url}/#{employee.id}/#{account.id}"
     account_link = Stripe::AccountLink.create({
       account: account.id,
       refresh_url: "#{request.base_url}/myprofile",
-      return_url: "#{request.base_url}/myprofile",
+      return_url: return_url,
       type: 'account_onboarding'
     })
-
-    account_link.url 
+    account_link.url
   end
-
-
-
-  private
 
   def employee_params
     params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo, employee_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy], employee_locations_attributes: [:id, :employee_id, :location_id, :_destroy])

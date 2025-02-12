@@ -1,0 +1,2 @@
+class ScheduledPayment < ApplicationRecord
+end

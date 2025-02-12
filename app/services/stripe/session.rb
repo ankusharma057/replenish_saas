@@ -9,14 +9,11 @@ module Stripe
       })
     end
 
-    def self.create_checkout_session(customer:, line_items:, return_url:)
-      Stripe::Checkout::Session.create(
-        customer: customer,
-        mode: 'payment',
-        ui_mode: 'embedded',
-        line_items: line_items,
-        return_url: return_url
-      )
+    def self.create_checkout_session(customer:, line_items:, return_url:, products:, treatments:)
+      Stripe::Checkout::Session.create(customer: customer, mode: 'payment', ui_mode: 'embedded', line_items: line_items, return_url: return_url, metadata: {
+        treatments: treatments.to_json,
+        products: products.to_json
+      })
     end
 
     def self.create_save_card_checkout_session(customer_id:, return_url:)

@@ -13,7 +13,7 @@ class Api::InvoicesController < ApplicationController
 
   def show
     invoice = Invoice.find(params[:id])
-    render json: invoice, status: :ok
+    render json: invoice, status: :ok    
   end
 
   def update
@@ -192,6 +192,42 @@ class Api::InvoicesController < ApplicationController
     end
   end
 
+  def show_pdf
+    invoice = Invoice.find(params[:id])
+
+    if invoice.document.attached?
+      blob = invoice.document.download
+      send_data blob,
+        type: invoice.document.content_type,
+        filename: invoice.document.filename.to_s,
+        disposition: 'inline'
+    else
+      render json: { error: 'PDF not found' }, status: :not_found
+    end
+  end
+
+  def invoices_list
+    invoices = Invoice.where.not(client_id: nil).paginated_invoices(params)
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
+    
+  end
+
+  def destroy_multiple
+    invoice_ids = params[:ids]
+    invoices = Invoice.where(id: invoice_ids)
+
+    if invoices.any? && invoices.destroy_all
+      render json: { message: "#{invoices.count} invoice(s) deleted successfully." }, status: :ok
+    else
+      render json: { error: 'Invoices not found or Unable to delete' }, status: :not_found
+    end
+  end
+
 
   private
 
@@ -203,7 +239,7 @@ class Api::InvoicesController < ApplicationController
   end
   
   def invoice_params
-    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value)
+    params.require(:invoice).permit(:employee_id, :client_id, :charge, :is_finalized, :date_of_service, :paid_by_client_cash, :paid_by_client_credit, :comments, :personal_discount, :tip, :concierge_fee_paid, :gfe, :provider_purchased, :overhead_fee_type, :overhead_fee_value, :notes, :instant_pay)
   end
 
   def find_invoice

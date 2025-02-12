@@ -2,7 +2,7 @@ module InvoiceGroupConcern
   extend ActiveSupport::Concern
 
   MENTOR_INVOICE_EXCLUDE_COLUMNS = %w[employee_id paid_by_client_cash paid_by_client_credit comments personal_discount tip concierge_fee_paid gfe provider_purchased overhead_fee_type 
-                                      overhead_fee_value semag_consult_fee  total_consumable_cos total_consumable_cost source_invoice_id]
+                                      overhead_fee_value semag_consult_fee  total_consumable_cos total_consumable_cost source_invoice_id notes instant_pay]
 
   included do
     before_action :find_employee, only: :create
@@ -11,8 +11,9 @@ module InvoiceGroupConcern
   def create_invoice_group
     @invoice_group = InvoiceGroup.create!
     params['_json'].each do |invoice_param|
-      client = @employee.clients.find_by(name: invoice_param['clientname']) ||
-         @employee.clients.create(
+      clients = @employee.is_admin? ? Client.all : @employee.clients
+      client = clients.find_by(name: invoice_param['clientname']) ||
+         clients.create(
            name: invoice_param['clientname'],
            last_name: invoice_param['lastname'],
            email: invoice_param['email']

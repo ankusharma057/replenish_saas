@@ -89,11 +89,11 @@ export default function CreateStaffCard({ show, onHide }) {
       getEmployeesList(true);
       e.target.reset(); 
       setSelectedFiles([])
-      if (response?.data?.onboarding_url) {
-        setTimeout(() => {
-          openOnboardingUrl(response?.data?.onboarding_url)
-        }, 1000)
-      }
+      // if (response?.data?.onboarding_url) {
+      //   setTimeout(() => {
+      //     openOnboardingUrl(response?.data?.onboarding_url)
+      //   }, 1000)
+      // }
     } catch (error) {
       let errorString = "";
   

@@ -155,9 +155,41 @@ export const getAllInvoiceList = async (data, refetch) =>
       ...data,
     },
   });
+  export const getFinalizeInvoiceList = async (data, refetch) =>
+    api.get("/api/finalized_invoice", {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      },
+    });
+  export const getMentorFinalizeInvoiceList = async (data, refetch) =>
+    api.get("/api/mentors_invoice", {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      },
+    });
+export const getSingleInvoice = async (invoice_id, refetch) =>
+  api.get(`/api/invoices/${invoice_id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
 
 export const deleteInvoice = async (id, refetch) =>
   api.delete(`/api/invoices/${id}`, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
+export const deleteMultipleInvoices = async (invoiceIds, refetch) =>
+  api.delete('/api/invoices/destroy_multiple', {
+    data: { ids: invoiceIds },
     cache: {
       ignoreCache: refetch,
     },
@@ -794,7 +826,7 @@ export const createSaveCardCheckoutSession = async (clientStripeId, clientId) =>
   }
 }
 
-export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId) => {
+export const createCheckoutSession = async (clientId, appointmentId, amount, stripeId, selectedTreatments, selectedProducts) => {
   try {
     const url = `/api/client/stripe/create_checkout_session`;
     const res = await fetch(url, {
@@ -806,7 +838,9 @@ export const createCheckoutSession = async (clientId, appointmentId, amount, str
         client_id: clientId,
         appointment_id: appointmentId,
         amount: amount,
-        stripe_id: stripeId
+        stripe_id: stripeId,
+        selected_treatments: selectedTreatments,
+        selected_products: selectedProducts,
       }),
     });
 
@@ -946,12 +980,32 @@ export const fetchBillingPortal = async () => {
   }
 };
 
+export const addProductToAppointment = async (appointmentId, payload) => {
+  try {
+    const response = await api.post(`/api/client/schedules/${appointmentId}/products`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding product to appointment:', error);
+    throw error;
+  }
+};
+
 export const fetchPricingPlans = async () => {
   try {
     const response = await api.get("/api/stripe/pricing");
     return response.data;
   } catch (error) {
     console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+
+export const updateProductQuantity = async (appointmentId, productId, payload) => {
+  try {
+    const response = await api.patch(`/api/client/schedules/${appointmentId}/products/${productId}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating product quantity:', error);
     throw error;
   }
 };
@@ -1153,3 +1207,75 @@ export const getFilesList = async (clientId,refetch) => {
     throw error;
   }
 };
+
+export const removeProductFromAppointment = async (appointmentId, productId) => {
+  try {
+    const response = await api.patch(`/api/client/schedules/${appointmentId}/products/${productId}/remove`);
+    return response.data;
+  } catch (error) {
+    console.error('Error removing product from appointment:', error);
+    throw error;
+  }
+};
+
+export const finalizePayment = async (payload) => {
+  try {
+    const response = await api.post(`/api/client/stripe/transfer_to_employee`,payload);
+    return response;
+  } catch (error) {
+    console.error("Unable to load pricing plans:", error);
+    throw error;
+  }
+};
+export const onboardEmployeeToStripe = async (data, refetch) =>
+  api.post("/api/employee_stripe_connect",data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: {
+      ...data,
+    },
+  });
+export const stripeOnboardComplete = async (data, refetch) =>
+  api.post("/api/stripe_onboarding_complete",data, {
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+  export const invoicePDFShow = async (invoiceID) =>
+    api.get(`/api/invoices/${invoiceID}/show_pdf`, {
+      responseType: "blob",
+  });
+  export const getEmployeeBankDetails = async (payload,refetch) =>
+    api.get(`/api/stripe_account_details`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...payload,
+      },
+  });
+  export const payMultipleInvoices = async (payload,refetch) =>
+    api.post(`/api/client/stripe/pay_multiple_invoice`,payload,{
+      cache: {
+        ignoreCache: refetch,
+      },
+  });
+export const getAllInvoicesList = async (data, refetch) =>
+  api.get("/api/invoices/invoices_list", {
+    cache: {
+      ignoreCache: refetch,
+    },
+    params: {
+      ...data,
+    }
+  });
+  export const getEmployeeInvoices = async (data, refetch) =>
+    api.get(`/api/employees_invoice`, {
+      cache: {
+        ignoreCache: refetch,
+      },
+      params: {
+        ...data,
+      }
+    });

@@ -36,9 +36,11 @@ mount Sidekiq::Web => '/sidekiq'
           post '/create_save_card_checkout_session', to: 'stripe#create_save_card_checkout_session'
           post '/confirm_payment', to: 'stripe#confirm_payment'
           delete '/remove_card', to: 'stripe#remove_card'
+          post 'webhooks', to: 'stripe#webhooks'
+          post 'transfer_to_employee', to: 'stripe#transfer_to_employee'
+          post 'pay_multiple_invoice', to: 'stripe#pay_multiple_invoice'
         end
       end
-
       resources :employees, only: %i(index show)
 
       resources :intake_forms
@@ -47,6 +49,12 @@ mount Sidekiq::Web => '/sidekiq'
       resources :schedules, only: %i(index create show destroy) do
         post :remaining_pay, on: :member
         post :reminder, on: :member
+        
+        member do
+          post 'products', to: 'schedules#add_product'
+          patch 'products/:product_id', to: 'schedules#update_product_quantity'
+          patch 'products/:product_id/remove', to: 'schedules#remove_product'
+        end
       end
 
       resources :products, only: %i(index)
@@ -97,6 +105,8 @@ mount Sidekiq::Web => '/sidekiq'
       collection do
         post :finalize_multiple
         get :print_receipt
+        get :invoices_list
+        delete :destroy_multiple
       end
 
       member do
@@ -107,6 +117,7 @@ mount Sidekiq::Web => '/sidekiq'
         get :download_attachment
         put :update_images
         patch :mark_paid
+        get :show_pdf
       end
     end
 
@@ -174,11 +185,17 @@ mount Sidekiq::Web => '/sidekiq'
     get '/employee_invoices', to: 'invoice_lists#employee_invoices'
     get 'client_schedules_only', to: 'schedules#get_client_schedule_only'
     get '/mentorship_invoices', to: 'invoice_lists#mentorship_invoices'
+    get 'finalized_invoice', to: 'invoice_lists#finalized_invoice'
+    get 'mentors_invoice', to: 'invoice_lists#mentors_invoice'
     get '/export_invoices', to: 'invoice_lists#export_invoices'
     get '/summary', to: 'invoice_lists#summary'  
     get '/location_pdf', to: 'invoice_lists#location_pdf'  
     get '/mentors', to: 'employees#mentors'
     post 'add_note', to: 'schedules#add_note'
+    post 'employee_stripe_connect', to: 'employees#employee_stripe_connect'
+    post 'stripe_onboarding_complete', to: 'employees#stripe_onboarding_complete'
+    get 'stripe_account_details', to: "employees#stripe_account_details"
+    get 'employees_invoice', to: "employees#employees_invoice"
   end
   get '*path', to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html?}
 end

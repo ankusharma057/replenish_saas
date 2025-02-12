@@ -7,7 +7,7 @@ import {
 } from "../Server";
 import InvoiceCard from "../components/Cards/InvoiceCard";
 import DataFilterService from "../services/DataFilterService";
-import { Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Button, ButtonGroup, Spinner, ToggleButton } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import CustomModal from "../components/Modals/CustomModal";
@@ -18,7 +18,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import InvoiceTabular from "../components/Tables/InvoiceTabular";
 import FinalizeInvoicesTable from "../components/Tables/FinalizeInvoicesTable";
-import { deleteInvoice } from "../Server";
+import { deleteInvoice, deleteMultipleInvoices  } from "../Server";
 
 const styles = {
   tableWrapper: {
@@ -84,7 +84,7 @@ const Invoice = () => {
   const [totalEntries, setTotalEntries] = useState(0);
   const [allInvoices, setAllInvoices] = useState([]);
   const [inputValue, setInputValue] = useState(pageNumber);
-
+  const [screenLoading, setScreenLoading] = useState(false)
   const getInvoices = async (refetch = false) => {
     const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber}, refetch);
     setTotalPages(data?.total_pages)
@@ -115,11 +115,13 @@ const Invoice = () => {
           label: "Yes",
           onClick: async () => {
             try {
+              setScreenLoading(true);
               await invoiceFinalize(invoice.id, invoice);
               toast.success(
                 "Invoice finalized successfully and the mail has been sent on the email id"
               );
               await getInvoices(true);
+              setScreenLoading(false);
             } catch (error) {
               console.log(error);
               toast.error(
@@ -135,7 +137,9 @@ const Invoice = () => {
                     invoice?.fellow_non_finalized_invoices +
                     " to get the mail please."
                 );
+                setScreenLoading(false);
               }
+              setScreenLoading(false);
             }
           },
         },
@@ -278,26 +282,17 @@ const Invoice = () => {
     const confirmation = window.confirm(
       `Are you sure you want to delete ${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""}?`
     );
-  
+
     if (confirmation) {
       try {
-        // Loop through the selected invoices and delete each one
-        for (const invoice of selectedInvoices) {
-          const { data } = await deleteInvoice(invoice.id, true); // Assuming `true` triggers a refetch after deletion
-          if (!data) {
-            toast.error("Something went wrong while deleting invoices.");
-            return; // Exit early if any deletion fails
-          }
-        }
-        
+        const { data } = await deleteMultipleInvoices(selectedInvoices, true); // Use the updated function
         toast.success(`${numberOfInvoices} invoice${numberOfInvoices > 1 ? "s" : ""} deleted successfully.`);
-        getInvoices(true); 
-  
+        getInvoices(true);
       } catch (error) {
         toast.error("An error occurred while deleting invoices.");
       }
-  
-      // Optionally, reset the selection after deletion
+
+      // Reset selection after deletion
       setSelectedInvoices([]);
     }
   };
@@ -336,11 +331,14 @@ const Invoice = () => {
       setInputValue(pageNumber); // Reset the input if invalid
     }
   };
-
-
-
+  const ScreenLoading = () => {
+    return <div style={{ width: "100%", height: "87vh", position: "absolute", zIndex: 9, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+        <Spinner animation="border" variant="info" />
+    </div>
+}
   return (
     <>
+    {screenLoading && <ScreenLoading />}
       <br />
       <div className="flex  flex-col lg:flex-row items-center relative">
         <div className="w-full flex justify-center">
@@ -449,7 +447,7 @@ const Invoice = () => {
   </div>
 
   {/* Table Rows */}
-  {allInvoices?.map((invoice) => {
+  {allInvoices?.map((invoice) => {  
     return (
       <FinalizeInvoicesTable
         key={invoice.id}

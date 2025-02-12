@@ -1,0 +1,60 @@
+require:
+  - rubocop-performance
+  - rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 3.2.2
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - db/data_schema.rb
+    - db/schema.rb
+    - db/seeds.rb
+    - db/migrate/*
+    - bin/**/*
+    - vendor/assets/**/*
+    - vendor/bundle/**/*
+    - app/views/**/*
+    - config/environments/*
+    - config/initializers/*
+
+Style/Encoding:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Lint/UnifiedInteger:
+  Enabled: false
+
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+Style/BlockComments:
+  Enabled: false

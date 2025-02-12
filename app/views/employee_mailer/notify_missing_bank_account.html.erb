@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Hi <%= @employee.name %>,</h1>
+    <p>
+      We noticed that you haven't added a bank account to your Stripe account yet. 
+      Please log in to your Replenish  account and add your bank account to ensure smooth transactions.
+    </p>
+    <p>
+      <br>
+      Please click here to login:
+      <%= link_to("Replenish Aesthetics & Wellness", "#{Rails.env.development? ? 'localhost:4000/signin' : 'https://inv.replenishaw.com/signin'}") %>
+    </p>
+    <p>Thank you!</p>
+  </body>
+</html>

@@ -490,6 +490,15 @@ function CustomModal({
                 )?.toFixed() || paidByClientCredit + paidByClientCash}
               </span>
             </div>
+            <label className="d-flex align-items-center ">
+              Pay Faster:
+              <input
+                type="checkbox"
+                name="instant_pay"
+                checked={invoiceData?.instant_pay}
+                className="ml-2"
+              />
+            </label>
           </div>
 
           <div className="border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">

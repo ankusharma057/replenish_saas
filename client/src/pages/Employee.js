@@ -11,6 +11,7 @@ import {
   getQuestionnaires,
   getEmployeesOnly,
   getEmployeeInvoicesOnly,
+  getEmployeeBankDetails,
 } from "../Server";
 import { useAuthContext } from "../context/AuthUserContext";
 // import InventoryModal from "../components/Modals/InventoryModal";
@@ -23,7 +24,7 @@ import Loadingbutton from "../components/Buttons/Loadingbutton";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "../components/Input/SearchInput";
 import { FixedSizeList as List } from "react-window";
-import { ButtonGroup, ToggleButton, Button, Image } from "react-bootstrap";
+import { ButtonGroup, ToggleButton, Button, Image, Row, Col, Form, Container } from "react-bootstrap";
 import LineInput from "../components/Input/LineInput";
 import InventoryTab from "../components/Tabs/InventoryTab";
 import CustomModal from "../components/Modals/CustomModal";
@@ -80,6 +81,7 @@ const Employee = () => {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState();
   const [duplicateQuestionnaire, setDuplicateQuestionnaire] = useState();
   const [formChanges,setFormChanges] = useState(false)
+  const [bankDetails, setBankDetails] = useState();
 
   // Questionnaires
   const navigate = useNavigate();
@@ -98,6 +100,14 @@ const Employee = () => {
       console.log(error);
     }
   };
+  const getSelectedEmployeeBankDetails = async (employeeId) => {
+    try {
+        let response = await getEmployeeBankDetails({ employee_id: employeeId });
+        setBankDetails(response.data.bank_accounts[0])
+    } catch (error) {      
+        // toast.error(error.response.data.error)
+    }
+}
 
   const getEmployeeInvoices = async (employeeId, refetch = false) => {
     try {
@@ -383,6 +393,8 @@ const Employee = () => {
     setRadioTabs([]);
     setUpdateEmployeeInput({});
     setCurrentTab("profile");
+    getSelectedEmployeeBankDetails(emp.id);
+    getEmployeeInvoices(selectedEmployeeData.id);
     let addTabs = [
       { name: "Profile", value: "profile" },
       {
@@ -390,6 +402,7 @@ const Employee = () => {
         value: "invoice",
         // data: getRequestInventoryData,
       },
+      { name: "Bank Details", value: "bankDetails" },
      
     ];
     if (emp) {
@@ -719,7 +732,7 @@ setTitle(title)
               <h1 className="text-xl flex gap-x-2 items-center justify-center">
                 All Staff <ChevronDown />
               </h1>
-              <div className="flex h-[69vh] flex-col pl-2 gap-4 overflow-y-auto">
+              <div className="flex h-[57vh] flex-col pl-2 gap-4 overflow-y-auto" >
                 {(employeeList || []).length > 0 && (
                   <List
                     height={window.innerHeight - 350}
@@ -866,6 +879,19 @@ setTitle(title)
                                 name="is_inv_manager"
                                 type="checkbox"
                                 onChange={handleUpdateChange}
+                                className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                            </div>
+                          </td>
+                        </tr>}
+                        {authUserState?.user && <tr>
+                          <th className="px-4">Stripe onboarding approved</th>
+                          <td>
+                            <div className="flex items-center">
+                              <input
+                                checked={selectedEmployeeData?.is_inv_manager}
+                                name="is_inv_manager"
+                                type="checkbox"
                                 className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                               />
                             </div>
@@ -1278,6 +1304,48 @@ setTitle(title)
                       </div>}
                   </div>
                   </div>
+                )}
+                {currentTab === "bankDetails" && (
+                  <>
+                    <Container>
+                      {!selectedEmployeeData?.stripe_account_id?<div className="d-flex justify-content-center align-items-center">
+                      <h3>Employee is not onboarded on stripe</h3>
+                      </div>:<Form>
+                        <Row>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Bank Name</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.bank_name} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Bank Account ID</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.bank_name} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Routing Number</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.routing_number} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={6} lg={6}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Status</Form.Label>
+                              <Form.Control type="text" disabled value={bankDetails?.status} />
+                            </Form.Group>
+                          </Col>
+                          <Col xs={12} sm={12} md={12} lg={12}>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                              <Form.Label>Account Number</Form.Label>
+                              <Form.Control type="text" disabled value={"*******" + bankDetails?.last4} />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Form>}
+                    </Container>
+                  </>
                 )}
 
               </div>

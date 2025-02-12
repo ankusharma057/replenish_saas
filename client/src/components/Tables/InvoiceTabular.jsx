@@ -235,15 +235,15 @@ const InvoiceTabular = ({
             />
           </div>
           <div style={styles.invoiceColumn}>
-            {invoice.source_invoice_id ? "Mentor " : ""}Invoice Id {invoice.id}
+            {invoice.id}
           </div>
           <div style={styles.invoiceColumn}>
-            {invoice.source_invoice_id ? "Mentor:" : "Employee:"} {invoice.employee?.name}
+            {invoice.employee?.name}
           </div>
           <div style={styles.invoiceColumn}>
             <Button
               onClick={() => seeMore(invoice)}
-              className="mb-3 text-white"
+              className="text-white"
               variant="info"
               style={styles.button}
             >

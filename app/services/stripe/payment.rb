@@ -12,7 +12,7 @@ module Stripe
 
     def get_session_url
       stripe_customer_id = @client.stripe_id || create_stripe_customer
-      success_url = 'http://localhost:4000/clients/payment/success'
+      success_url = 'http://localhost:4000/stripe-onboard-success'
       cancel_url = "http://localhost:4000/clients/appointments"
       session = Stripe::Checkout::Session.create(
         payment_method_types: ['card'],
@@ -20,7 +20,7 @@ module Stripe
           price_data: {
             currency: 'usd',
             product_data: {
-              name: "#{@schedule.product.name}(#{@schedule.product.product_type})",
+              name: "Testing",
             },
             unit_amount: (@amount * 100), # multiply with 100 to convert into Doller
           },

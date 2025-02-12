@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  </head>
+    <div class="header">
+      1818 Washington Ave, Houston, TX 77007-6131<br>
+      (346) 955-7943<br>
+      <h5>Replenish - <%= location.name %></h5>
+    </div>
+
+    <h1>Billings Summary Report</h1>
+    <p>This report was generated on <%= Time.now.strftime("%A, %B %d, %Y at %I:%M%p") %>.</p>
+    <p><%= start_date.strftime("%B %-d, %Y") %> to <%= end_date.strftime("%B %-d, %Y") %></p>
+    <h2>Replenish - <%= location.name %></h2>
+
+    </style>
+  </head>
+  <body>
+    <h1>No invoices found for the selected location</h1>
+  </body>
+</html>

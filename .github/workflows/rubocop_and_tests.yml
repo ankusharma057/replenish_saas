@@ -1,0 +1,98 @@
+name: RuboCop & Tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  rubocop:
+    name: Run RuboCop on Changed Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1.0'
+
+      - name: Install Rubocop and dependencies
+        run: |
+          echo "Installing only RuboCop and dependencies"
+          gem install rubocop rubocop-performance rubocop-rails
+
+      - name: Fetch main branch
+        run: |
+          git fetch origin main
+
+      - name: Get changed Ruby files
+        id: changed_files
+        run: |
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep '\.rb$' || true)
+          if [ -n "$CHANGED_FILES" ]; then
+            printf "files<<EOF\n%s\nEOF\n" "$CHANGED_FILES" >> $GITHUB_ENV
+          else
+            echo "files=" >> $GITHUB_ENV
+          fi
+
+      - name: Run RuboCop on Changed Files
+        if: env.files != ''
+        run: |
+          rubocop --force-exclusion $files
+
+      - name: No files to check
+        if: env.files == ''
+        run: echo "No Ruby files changed. Skipping RuboCop."
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: replenish_md_app_test
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1.0'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Set up database
+        run: |
+          cp config/database.yml.github-actions config/database.yml
+          bundle exec rails db:create db:schema:load db:migrate
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/replenish_md_app_test
+
+      - name: Run tests
+        run: bundle exec rspec
+        env:
+          RAILS_ENV: test

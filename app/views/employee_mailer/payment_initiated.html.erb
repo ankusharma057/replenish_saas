@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Notification</title>
+</head>
+<body>
+    <div>
+        <h1>Hi <%= @employee.name %>,</h1>
+        <p>
+            We have successfully initiated your payment for invoice 
+            "<strong><%= @invoice.id %></strong>". You can expect to receive payment within 5-7 days.
+        </p>
+        <div>
+            <p>
+                This is an automated email. Please do not reply to this message.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 class Api::Client::SchedulesController < ClientApplicationController
-  skip_before_action :authorized_client, only: [:index, :employee_unavailability]
+  skip_before_action :authorized_client, only: [:index, :employee_unavailability, :add_product, :update_product_quantity, :remove_product]
 
   DEFAULT_DOWN_PAYMENT = 50
 
@@ -32,12 +32,19 @@ class Api::Client::SchedulesController < ClientApplicationController
   def create
     schedule = current_client.schedules.new(schedule_param)
     if schedule.save
+      treatment_ids = params[:treatment_ids]
+      
+      treatment_ids.each do |treatment_id|
+        ScheduleTreatment.create!(schedule_id: schedule.id, treatment_id: treatment_id)
+      end
+      
       response_data = Stripe::Payment.create(schedule)
       amount = schedule.employee.pay_50 ? DEFAULT_DOWN_PAYMENT : 0
       record_payment_from_session(response_data, schedule, amount)
 
       render json: {schedule: ScheduleSerializer.new(schedule)}.merge!({redirect_url: response_data['url']}), status: :created
     else
+      raise ActiveRecord::Rollback
       render json: {error: schedule.errors}, status: :unprocessable_entity
     end
   end
@@ -78,6 +85,54 @@ class Api::Client::SchedulesController < ClientApplicationController
       render json: {error: "Something went wrong or schedule not found."}, status: :unprocessable_entity
     end
   end
+
+  def add_product
+    schedule = Schedule.find_by(id: params[:id])
+
+    if schedule
+      product = schedule.schedule_products.build(product_id: params[:product_id], quantity: params[:quantity] || 1)
+      if product.save
+        render json: product, status: :created
+      else
+        render json: { error: product.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end
+
+  def update_product_quantity
+    schedule = Schedule.find_by(id: params[:id])
+    if schedule
+      product = schedule.schedule_products.find_by(product_id: params[:product_id])
+      if product
+        if product.update(quantity: params[:quantity])
+          render json: product, status: :ok
+        else
+          render json: { error: product.errors.full_messages }, status: :unprocessable_entity
+        end
+      else
+        render json: { error: "Product not found in schedule" }, status: :not_found
+      end
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end
+  
+  def remove_product
+    schedule = Schedule.find_by(id: params[:id])
+    if schedule
+      product = schedule.schedule_products.find_by(product_id: params[:product_id])
+      if product
+        product.destroy
+        render json: { message: "Product removed successfully" }, status: :ok
+      else
+        render json: { error: "Product not found in schedule" }, status: :not_found
+      end
+    else
+      render json: { error: "Schedule not found" }, status: :not_found
+    end
+  end  
 
   private
 

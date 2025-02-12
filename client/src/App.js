@@ -37,6 +37,7 @@ const Schedule = lazy(() => import("./pages/Schedule"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const MyProfile = lazy(() => import("./pages/MyProfile"));
 const InvoicesToPay = lazy(() => import("./pages/InvoicesToPay"));
+const InvoicesDetails2 = lazy(() => import("./pages/InvoiceDetails2"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Settings2 = lazy(() => import("./pages/Settings/Settings"));
 const Locations = lazy(() => import("./pages/Settings/Locations"));
@@ -60,6 +61,8 @@ const ClientProfileUpdate= lazy(()=>import("./pages/Clients/ClientsProfileUpdate
 const AddNewClient= lazy(()=>import("./pages/Clients/AddNewClient"))
 const Reports= lazy(()=>import("./pages/Reports/Reports"))
 const ReportSummary= lazy(()=>import("./pages/Reports/ReportSummary"))
+const BillingDetails =lazy(()=>import("./pages/BillingDetails/BillingDetails"));
+const StripeOnboardSuccess =lazy(()=>import("./pages/BillingDetails/StripeOnboardSuccess"));
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -188,8 +191,9 @@ function App() {
         ) : null}
 
         <Routes>
+          <Route path="/stripe-onboard-success/:employee_id/:stripe_account_id" element={<StripeOnboardSuccess />} />
           <Route path="/healthz" element={<Health />} />
-          <Route path="/" element={<Login />} />
+          <Route path="/:employee_id?/:stripe_account_id?" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/clients/signup" element={<ClientSignup />} />
@@ -235,7 +239,6 @@ function App() {
             path="/clients/schedule/:employee_id"
             element={<ClientAppointment />}
           />
-
           {/* <Route path="/clients/schedule" element={<ClientSchedule />} /> */}
           {authUserState.user && (
             <>
@@ -252,7 +255,6 @@ function App() {
                     {/* <Route path="/new-intake-form" element={<NewIntakeForm />} /> */}
                   </>
                 )}
-
               {authUserState.user && authUserState.user?.is_admin ? (
                 <>
                   <Route path="/addproduct" element={<AddProduct />} />
@@ -265,12 +267,16 @@ function App() {
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/invoices-to-pay" element={<InvoicesToPay />} />
+                  <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
+                  <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
                   {/* <Route path="/settings" element={<Settings />} /> */}
                   <Route path="/settings" element={<Settings2 />} >
                     <Route path="locations" element={<Locations />} />
                     <Route path="locations/:newOrUpdate" element={<NewAndUpdateLocation />} />
                     <Route path="dashboard" element={<DashboardSettings />} />
                   </Route>
+                  <Route path="/payment-interface" element={<BillingDetails />} />
+
                 </>
               ) : (
                 <>
@@ -284,6 +290,9 @@ function App() {
                   <Route path="/customers/:clientId" element={<AllClientRoot />} />
                   <Route path="/add-new-client" element={<AddNewClient />} />
                   <Route path="/client-profile-update/:id/:type" element={<ClientProfileUpdate />} />
+                  {/* <Route path="/invoices-to-pay" element={<InvoicesToPay />} /> */}
+                  <Route path="/billing-details/:invoice_id" element={<BillingDetails />} />
+                  <Route path="/invoices-details/:invoice_id" element={<InvoicesDetails2 />} />
                 </>
               )}
             </>

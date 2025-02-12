@@ -42,7 +42,6 @@ gem "rack-cors"
 # To store the env variables 
 gem 'figaro'
 gem 'axlsx'
-
 gem 'acts_as_list'
 
 group :development, :test do
@@ -50,6 +49,11 @@ group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
   # To check for N+1 queries
   gem 'bullet', '~> 7.2'
+  gem 'rspec-rails', '~> 7.0.0'
+  gem 'rubocop', require: false
+  gem 'rubocop-performance'
+  gem 'rubocop-rails'
+  gem 'factory_bot_rails'
 end
 
 group :development do
@@ -75,3 +79,6 @@ gem 'stripe'
 
 # For pagination
 gem 'will_paginate', '~> 4.0', '>= 4.0.1'
+gem 'paper_trail'
+
+gem "whenever", "~> 1.0"

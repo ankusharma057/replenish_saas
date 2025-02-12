@@ -6,7 +6,7 @@ class ApplicationController < ActionController::API
 
   private
   def current_employee
-    if session[:employee_id].blank? && Rails.env.development?
+    if session[:employee_id].blank? && (Rails.env.development? || Rails.env.production?)
       employee_id = params[:current_employee_id]
     else
       employee_id = session[:employee_id]

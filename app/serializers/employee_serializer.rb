@@ -3,7 +3,7 @@ class EmployeeSerializer < ActiveModel::Serializer
              :service_percentage, :retail_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
              :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url,
-             :plan, :stripe_customer_id
+             :plan, :stripe_customer_id, :stripe_account_id, :instant_pay
 
 
   has_many :invoices

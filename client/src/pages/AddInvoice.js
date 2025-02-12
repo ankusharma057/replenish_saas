@@ -1,6 +1,6 @@
 /* eslint-disable eqeqeq */
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Button, Form, ListGroup, ListGroupItem, Table } from "react-bootstrap";
+import { Alert, Button, Form, ListGroup, ListGroupItem, Spinner, Table } from "react-bootstrap";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import { toast } from "react-toastify";
 import { LOGIN } from "../Constants/AuthConstants";
@@ -70,7 +70,8 @@ export default function AddInvoices() {
   const [formData, setFormData] = useState({
     ...initialFormState,
     dateOfService: dayjs().format('MM-DD-YYYY'),
-    location_id:""
+    location_id:"",
+    instant_pay:false
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
   const totalRef = useRef();
@@ -99,6 +100,7 @@ export default function AddInvoices() {
   const [createClient,setCreateClient]=useState(false)
   const [showClientList,setShowClientList]=useState(false)
   const Navigate=useNavigate();
+  const [screenLoading, setScreenLoading] = useState(false)
   const getEmployees = async (refetch = false) => {
     try {
       const { data } = await getClients();
@@ -478,7 +480,10 @@ export default function AddInvoices() {
     ) {
       total = 0;
     }
-
+    if(formData.instant_pay){
+      total=total- total/100
+    }
+    
     // totalRef.current.charge =
     return total.toFixed(2);
   };
@@ -805,6 +810,8 @@ export default function AddInvoices() {
       });
       return;
     }
+
+    let total = Number(getTotal()).toFixed(2)
     let invoice = {
       employee_id: authUserState.user.id,
       user_name: authUserState.user?.name,
@@ -825,7 +832,7 @@ export default function AddInvoices() {
       comments: formData?.comments,
       products: formData.products,
       retail_products: formData.retailProducts,
-      charge: Number(getTotal()).toFixed(2),
+      charge: total,
       expected_income: getExpectedReplenishIncome(),
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag(),
@@ -897,10 +904,8 @@ export default function AddInvoices() {
                 setLoading(true);
                 await createGroupInvoices(invoiceData);
                 toast.success("Invoice created successfully.");
-                await getInvoiceList(true);
                 const { data: useData } = await getUpdatedUserProfile(true);
                 authUserDispatch({ type: LOGIN, payload: useData });
-
                 setClientName("");
                 setInvoiceArray([]);
                 setFormData(initialFormState);
@@ -918,6 +923,7 @@ export default function AddInvoices() {
                 setClient("");
                 setLocationName("");
                 setClient("");
+                setCreateClient(false);
               } catch (error) {
                 toast.error(
                   error?.response?.data?.exception ||
@@ -999,13 +1005,18 @@ export default function AddInvoices() {
     }
   };
 
-
+  const ScreenLoading = () => {
+    return <div style={{ width: "100%", height: "100%", position: "absolute", zIndex: 99999, background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(2px)" }} className='d-flex justify-content-center align-items-center'>
+      <Spinner animation="border" variant="info" />
+    </div>
+  }
 
   return (
     <>
       {/* <Header /> */}
 
-      <div className="bg-blue-200 p-1 sm:p-4 ">
+      <div className="bg-blue-200 p-1 sm:p-4 position-relative" style={{position:"relative"}}>
+      {screenLoading && <ScreenLoading />}
         <div className="bg-blue-200 min-h-screen pb-8 flex items-center justify-center flex-col md:p-4">
           {isAlert.maxInvoice && (
             <Alert variant="warning">{isAlert.message}</Alert>
@@ -1145,7 +1156,7 @@ export default function AddInvoices() {
                     />
                   </label>
                   <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Same Day Payment:
+                    Pay Faster:
                     <input
                       type="checkbox"
                       name="instant_pay"
