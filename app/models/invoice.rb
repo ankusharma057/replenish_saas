@@ -133,6 +133,12 @@ class Invoice < ApplicationRecord
       .paginate(page: params[:page], per_page: params[:per_page] || 12)
   end
 
+  def self.search(query)
+    return self if query.blank?
+
+    where(id: query.to_i)
+  end
+
   def return_inventory
     if products_hash && products_hash.any?
       products_hash.values.flatten(1).map {|arr| {arr[0] => arr[1]}}.each do |product_quantity|
