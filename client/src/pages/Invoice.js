@@ -86,7 +86,7 @@ const Invoice = () => {
   const [inputValue, setInputValue] = useState(pageNumber);
   const [screenLoading, setScreenLoading] = useState(false)
   const getInvoices = async (refetch = false) => {
-    const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber}, refetch);
+    const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber, query: searchQuery }, refetch);
     setTotalPages(data?.total_pages)
     const invoiceList = data.invoices || [];
     if(!finalized){
@@ -100,10 +100,23 @@ const Invoice = () => {
     setAllInvoices(data?.invoices || []);
   }
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || /^[0-9\b]+$/.test(value)) {
+      setInputValue(value);
+      const newPage = parseInt(value, 10);
+      if (newPage > 0 && newPage <= totalPages) {
+        setPageNumber(newPage);
+      }
+    }
+  };
+
   useEffect(() => {
     getInvoices();
     return () => {};
-  }, [finalized,pageNumber]);
+  }, [finalized, pageNumber, searchQuery]);
 
   const finalizeInvoiceSubmit = (invoice) => {
     confirmAlert({
@@ -486,6 +499,16 @@ const Invoice = () => {
           />
         )}
 
+        <div className="flex justify-center items-center mb-4">
+          <input
+            type="text"
+            placeholder="Search invoice by ID, Client Name, Employee Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-3/4 p-3 border-2 border-gray-300 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition duration-200"
+          />
+        </div>
+
         {/* <div className="flex gap-x-4  justify-end my-4">
           {/* Pagination controls *
           <Button
@@ -615,12 +638,14 @@ const Invoice = () => {
       </Button>
 
       {/* Page Input */}
-      <form onSubmit={handlePageSubmit} className="flex items-center">
+      <form
+        className="flex items-center">
         <span>Page</span>
         <input
           type="number"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          // onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onBlur={handleInputBlur}
           className="mx-2 w-12 text-center"
           min={1}
