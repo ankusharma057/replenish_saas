@@ -165,6 +165,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_13_094931) do
     t.string "reference_number"
     t.boolean "pay_50", default: false
     t.string "plan"
+    t.string "stripe_account_id"
     t.string "stripe_customer_id"
   end
 
