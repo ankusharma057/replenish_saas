@@ -133,10 +133,22 @@ class Invoice < ApplicationRecord
       .paginate(page: params[:page], per_page: params[:per_page] || 12)
   end
 
-  def self.search(query)
+  def self.search(query, field = nil)
     return self if query.blank?
 
-    where(id: query.to_i)
+    case field
+    when 'invoice_id'
+      where('CAST(id AS TEXT) LIKE ?', "%#{query}%")
+    when 'client_name'
+      joins(:client).where(
+        'clients.name ILIKE :query OR clients.last_name ILIKE :query OR CONCAT(clients.name, \' \', clients.last_name) ILIKE :query',
+        query: "%#{query}%"
+      )
+    when 'employee_name'
+      joins(:employee).where('employees.name ILIKE ?', "%#{query}%")
+    else
+      none
+    end
   end
 
   def return_inventory

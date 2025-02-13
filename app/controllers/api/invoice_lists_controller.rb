@@ -1,6 +1,6 @@
 class Api::InvoiceListsController < ApplicationController
   def index
-    invoices = Invoice.includes(:location).where(mentor_id: nil).search(params[:query]).paginated_invoices(params)
+    invoices = Invoice.includes(:location).where(mentor_id: nil).search(params[:query], params[:field]).paginated_invoices(params)
     render json: {
       invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
       current_page: invoices.current_page,
