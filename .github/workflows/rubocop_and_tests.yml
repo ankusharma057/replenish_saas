@@ -44,10 +44,12 @@ jobs:
             echo "files=" >> $GITHUB_ENV
           fi
 
-      - name: Run RuboCop on Changed Files
-        if: env.files != ''
+      - name: Run RuboCop on changed lines
+        if: env.FILES != ''
         run: |
-          rubocop --force-exclusion $files
+          for file in $FILES; do
+            git diff -U0 origin/${{ github.base_ref }} -- $file | rubocop --force-exclusion --stdin $file --format progress
+          done
 
       - name: No files to check
         if: env.files == ''
