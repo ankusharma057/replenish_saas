@@ -403,8 +403,9 @@ export default function AddInvoices() {
 
   const getProviderPurchasedCostPrice = () => {
     let sum = 0;
+    
     formData.products.forEach((product) => {
-      if(product.provider_purchased){
+      if(product.purchased_type == 'provider_purchased'){
         sum += getTotalCostPrice(product);
       }
     });
@@ -471,10 +472,12 @@ export default function AddInvoices() {
     const totalProductPriceSum = getConsumableCostPrice();
     const paidByClientProducts = calculateTax(formData.paidByClientProducts);
   
-    let productsTotal = (paidByClientProducts - totalProductPriceSum) * servicePercentage;
+    let total = 0;
+    let providerPurchasedCostPrice = getProviderPurchasedCostPrice();
+    let productsTotal = ((paidByClientProducts - totalProductPriceSum) * servicePercentage) + providerPurchasedCostPrice;
     let retailProductsTotal = calculateTax(formData.paidByClientRetailProducts) * retailPercentage; 
     let wellnessTotal = calculateTax(formData.paidByClientWellnessProducts) * wellnessPercentage;
-    let total = productsTotal + retailProductsTotal + wellnessTotal - ((formData.personalDiscount * 0.5) || 0);
+    total = productsTotal + retailProductsTotal + wellnessTotal - ((formData.personalDiscount * 0.5) || 0);
 
     if(formData.instant_pay) {
       total = total - total/100
