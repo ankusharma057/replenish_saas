@@ -1723,7 +1723,7 @@ export default function AddInvoices() {
                               className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                             />
                           </td>
-                          <td className="text-center">{product.quantity * product.retail_price}</td>
+                          <td className="text-center">{product.quantity * product.cost_price}</td>
                           <td>
                             <button
                               type="button"
@@ -1879,7 +1879,7 @@ export default function AddInvoices() {
                               />
                             </td>
                             <td className="text-center">
-                              {product.quantity * product.retail_price}
+                              {product.quantity * product.cost_price}
                             </td>
                             <td>
                               <button

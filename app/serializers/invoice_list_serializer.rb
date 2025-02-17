@@ -62,6 +62,6 @@ class InvoiceListSerializer < ActiveModel::Serializer
   end
 
   attribute :fellow_non_finalized_invoices do
-    object.invoice_group.invoices.select { |invoice| !invoice.is_finalized && invoice.id != object.id }.map(&:id) if object.invoice_group
+    object.invoice_group&.invoices&.filter_map { |invoice| invoice.id if !invoice.is_finalized && invoice.id != object.id }
   end
 end

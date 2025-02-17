@@ -75,10 +75,12 @@ module InvoiceGroupConcern
     }
 
     if invoice.source_invoice_id.blank? && invoice.products_hash&.any?
-      invoice.products_hash.values.flatten(1).map { |arr| { arr[0] => arr[1] } }&.each do |product_quantity|
+      invoice.products_hash.values.flatten(1).each do |arr|
+        product_quantity = { arr[0] => arr[1] }
         emp_inventory = employee.employees_inventories
-                                .where(product: Product.find_by(name: product_quantity.keys.first)).first
-        emp_inventory&.update(quantity: (emp_inventory.quantity - product_quantity.values.first.to_f))
+                                .where(product: Product.find_by(name: product_quantity.keys.first))
+                                .first
+        emp_inventory&.update(quantity: (emp_inventory.quantity.to_f - product_quantity.values.first.to_f))
       end
     end
 
@@ -115,7 +117,7 @@ module InvoiceGroupConcern
     end
     decoded_before_images_data.each_with_index do |before_image, index|
       filename = "#{id}-before-image-#{index + 1}.png"
-      file_path = Rails.root.join('public', filename).to_s
+      file_path = Rails.public_path.join(filename).to_s
       File.binwrite(file_path, before_image)
       invoice.before_images.attach(io: File.open(file_path), filename: filename)
       FileUtils.rm_f(file_path)
@@ -126,7 +128,7 @@ module InvoiceGroupConcern
     end
     decoded_after_images_data.each_with_index do |after_image, index|
       filename = "#{id}-after-image-#{index + 1}.png"
-      file_path = Rails.root.join('public', filename).to_s
+      file_path = Rails.public_path.join(filename).to_s
       File.binwrite(file_path, after_image)
       invoice.after_images.attach(io: File.open(file_path), filename: filename)
       FileUtils.rm_f(file_path)

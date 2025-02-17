@@ -137,7 +137,8 @@ class Invoice < ApplicationRecord
   def return_inventory
     return unless products_hash&.any?
 
-    products_hash.values.flatten(1).map { |arr| { arr[0] => arr[1] } }.each do |product_quantity|
+    products_hash.values.flatten(1).each do |arr|
+      product_quantity = { arr[0] => arr[1] }
       emp_inventory = employee.employees_inventories.find_or_create_by(
         product: Product.find_by(name: product_quantity.keys.first)
       )

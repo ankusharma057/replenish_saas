@@ -18,6 +18,17 @@ AllCops:
     - config/environments/*
     - config/initializers/*
 
+Rails/HelperInstanceVariable:
+  Exclude:
+    - 'app/controllers/**/*'
+
+Rails/SaveBang:
+  Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Exclude:
+    - 'app/serializers/**/*'
+
 Style/Encoding:
   Enabled: false
 

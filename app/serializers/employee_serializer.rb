@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Rails/InverseOf
 class EmployeeSerializer < ActiveModel::Serializer
   attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :wellness_percentage, :pay_50, :inventory_prompts,
@@ -50,3 +51,4 @@ class EmployeeSerializer < ActiveModel::Serializer
     Rails.application.routes.url_helpers.rails_blob_url(object.profile_photo, only_path: true)
   end
 end
+# rubocop:enable Rails/InverseOf
