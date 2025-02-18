@@ -58,3 +58,9 @@ Style/OptionalBooleanParameter:
 
 Style/BlockComments:
   Enabled: false
+
+Rails/HelperInstanceVariable:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false

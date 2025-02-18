@@ -93,9 +93,9 @@ class Api::EmployeesController < ApplicationController
       product = Product.find_by(id: product_id)
       emp_inventory = @selected_employee.employees_inventories.where(product_id: product_id).first
       emp_inventory_previous_quantity = emp_inventory.quantity.to_f
-      emp_inventory.update(quantity: quantity_hash['quantity'].to_f)
+      emp_inventory.update!(quantity: quantity_hash['quantity'].to_f)
 
-      main_inventory = Inventory.find_or_create_by(product: product)
+      main_inventory = Inventory.find_or_create_by!(product: product)
 
       main_inventory.quantity =
         if emp_inventory_previous_quantity > quantity_hash['quantity'].to_f
@@ -106,7 +106,7 @@ class Api::EmployeesController < ApplicationController
             (quantity_hash['quantity'].to_f - emp_inventory_previous_quantity.to_f)
         end
 
-      main_inventory.save
+      main_inventory.save!
       text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} " \
              "from #{quantity_hash['quantity']} for #{@selected_employee.name.capitalize}."
 
@@ -120,7 +120,7 @@ class Api::EmployeesController < ApplicationController
 
       main_inventory = Inventory.where(product: Product.where(name: product['product_name'])).first
       main_inventory.quantity -= product['quantity'].to_f
-      main_inventory.save
+      main_inventory.save!
 
       text = "#{current_employee.name.capitalize} added #{product['quantity']} of " \
              "#{record.name} for #{@selected_employee.name.capitalize}."
@@ -182,7 +182,7 @@ class Api::EmployeesController < ApplicationController
       return
     end
 
-    employee.update(stripe_account_id: stripe_account_id)
+    employee.update!(stripe_account_id: stripe_account_id)
 
     render json: { message: 'Stripe account linked successfully', employee: employee }, status: :ok
   end
@@ -233,23 +233,23 @@ class Api::EmployeesController < ApplicationController
   def create_stripe_account(employee)
     raise StandardError, 'Stripe account already exists for this employee' if employee.stripe_account_id.present?
 
-    account = Stripe::Account.create({
-                                       type: 'express',
-                                       country: 'US',
-                                       email: employee.email,
-                                       capabilities: {
-                                         transfers: { requested: true },
-                                         card_payments: { requested: true }
-                                       }
-                                     })
+    account = Stripe::Account.create!({
+                                        type: 'express',
+                                        country: 'US',
+                                        email: employee.email,
+                                        capabilities: {
+                                          transfers: { requested: true },
+                                          card_payments: { requested: true }
+                                        }
+                                      })
 
     return_url = "#{request.base_url}/#{employee.id}/#{account.id}"
-    account_link = Stripe::AccountLink.create({
-                                                account: account.id,
-                                                refresh_url: "#{request.base_url}/myprofile",
-                                                return_url: return_url,
-                                                type: 'account_onboarding'
-                                              })
+    account_link = Stripe::AccountLink.create!({
+                                                 account: account.id,
+                                                 refresh_url: "#{request.base_url}/myprofile",
+                                                 return_url: return_url,
+                                                 type: 'account_onboarding'
+                                               })
     account_link.url
   end
 
