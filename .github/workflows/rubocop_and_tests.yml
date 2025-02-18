@@ -33,19 +33,21 @@ jobs:
         run: |
           git fetch origin main
 
-      - name: Get changed Ruby files in PR
-        id: changed-files
+      - name: Get changed Ruby files
+        id: changed_files
         run: |
-          FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...${{ github.head_ref }} | grep '\.rb$' || true)
-          echo "FILES=$FILES" >> $GITHUB_ENV
-          echo "Changed files: $FILES"
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep '\.rb$' || true)
+          if [ -n "$CHANGED_FILES" ]; then
+            printf "files<<EOF\n%s\nEOF\n" "$CHANGED_FILES" >> $GITHUB_ENV
+          else
+            echo "files=" >> $GITHUB_ENV
+          fi
 
-      - name: Run RuboCop on changed lines
-        if: env.FILES != ''
+      - name: Run RuboCop on Changed Files
+        if: env.files != ''
         run: |
-          for file in $FILES; do
-            git diff -U0 origin/${{ github.base_ref }}...${{ github.head_ref }} -- $file | rubocop --force-exclusion --stdin $file --format progress
-          done
+          rubocop --force-exclusion $files
 
       - name: No files to check
         if: env.files == ''
