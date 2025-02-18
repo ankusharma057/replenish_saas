@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Naming/VariableNumber
+
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
   before_action :find_employee, only: %i[update destroy locations]
@@ -253,7 +255,6 @@ class Api::EmployeesController < ApplicationController
     account_link.url
   end
 
-  # rubocop:disable Naming/VariableNumber
   def employee_params
     params.permit(
       :name, :vendor_name, :email, :password, :gfe,
@@ -267,7 +268,6 @@ class Api::EmployeesController < ApplicationController
       ]
     )
   end
-  # rubocop:enable Naming/VariableNumber
 
   def find_employee
     @employee = Employee.find_by(id: params[:id] || session[:employee_id])
@@ -281,3 +281,5 @@ class Api::EmployeesController < ApplicationController
     params[:password] == params[:confirmPassword]
   end
 end
+
+# rubocop:enable Naming/VariableNumber

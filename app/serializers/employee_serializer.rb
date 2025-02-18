@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 # rubocop:disable Rails/InverseOf
+# rubocop:disable Naming/VariableNumber
 class EmployeeSerializer < ActiveModel::Serializer
-  # rubocop:disable Naming/VariableNumber
   attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :wellness_percentage, :pay_50, :inventory_prompts,
              :employees_inventories, :has_access_only_to, :pending_requests, :reference_number,
              :is_admin, :is_inv_manager, :is_mentor, :employee_mentors, :employee_locations, :profile_photo_url,
              :plan, :stripe_customer_id, :stripe_account_id, :instant_pay
-  # rubocop:enable Naming/VariableNumber
 
   has_many :invoices
   has_many :inventory_prompts, class_name: 'InventoryPrompt'
@@ -54,3 +53,4 @@ class EmployeeSerializer < ActiveModel::Serializer
   end
 end
 # rubocop:enable Rails/InverseOf
+# rubocop:enable Naming/VariableNumber

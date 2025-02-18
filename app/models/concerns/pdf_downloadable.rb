@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/BlockLength
 
 module PdfDownloadable
   extend ActiveSupport::Concern
@@ -259,3 +260,4 @@ module PdfDownloadable
 end
 
 # rubocop:enable Metrics/ModuleLength
+# rubocop:enable Metrics/BlockLength
