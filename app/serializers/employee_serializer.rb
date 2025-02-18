@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # rubocop:disable Rails/InverseOf
-# rubocop:disable Naming/VariableNumber
 class EmployeeSerializer < ActiveModel::Serializer
   attributes :id, :name, :vendor_name, :email, :password, :gfe,
              :service_percentage, :retail_percentage, :wellness_percentage, :pay_50, :inventory_prompts,
@@ -53,4 +52,3 @@ class EmployeeSerializer < ActiveModel::Serializer
   end
 end
 # rubocop:enable Rails/InverseOf
-# rubocop:enable Naming/VariableNumber

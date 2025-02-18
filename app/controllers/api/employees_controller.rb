@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Naming/VariableNumber
-
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
   before_action :find_employee, only: %i[update destroy locations]
@@ -281,5 +279,3 @@ class Api::EmployeesController < ApplicationController
     params[:password] == params[:confirmPassword]
   end
 end
-
-# rubocop:enable Naming/VariableNumber
