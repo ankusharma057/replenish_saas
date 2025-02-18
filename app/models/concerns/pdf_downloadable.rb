@@ -49,19 +49,23 @@ module PdfDownloadable
               <div style=\"text-align: left;\">Semaglutide Consultation Fee: #{semag_consult_fee ? 'Yes' : 'No'}</div>
       "
 
-      if is_old_invoice?
+      if old_invoice?
         str += '
                   <div style="text-align: right;">Client Cash: ' + paid_by_client_cash&.round(2).to_s + '</div>
                   <div style="text-align: left;">Client Credit: ' + paid_by_client_credit&.round(2).to_s + '</div>
-                  <div style="text-align: right;">Client Paid: ' + (paid_by_client_cash.to_f + paid_by_client_credit.to_f if paid_by_client_cash && paid_by_client_credit)&.round(2).to_s + '</div>
+                  <div style="text-align: right;">Client Paid: ' + (if paid_by_client_cash && paid_by_client_credit
+                                                                      paid_by_client_cash.to_f
+                                                                      + paid_by_client_credit.to_f
+                                                                    end)&.round(2).to_s + '</div>
               '
       end
 
       str += '
-            <div style="text-align: right;">  Total Amount Client Paid: ' + total_amount_paid_by_client&.round(2).to_s + '</div>
+            <div style="text-align: right;">
+              Total Amount Client Paid: ' + total_amount_paid_by_client&.round(2).to_s + '
+            </div>
             <div style="text-align: left;">  Payment Type: ' + payment_type.to_s + '</div>
             <div style="text-align: right;">  Tip: ' + tip.to_f + '</div>
-
           </div>
 
           <div></div>
@@ -75,14 +79,16 @@ module PdfDownloadable
 
             <table style="width: 100%; margin: 50px 0">
               <tbody>
-                <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
+                <tr style="line-height: 50px; text-align: center; border-bottom: 2px solid #302726;
+                    color: #323aa8; font-size: 22px;">
                   <th width="40%">Product Name</th>
                   <th width="20%">Quantity</th>
                   <th width="20%">Price</th>
                   <th width="20%">Total Price</th>
                 </tr>'
         value&.each do |data|
-          table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
+          table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726;
+                          text-align: center; padding: 30px 0px; color: #1c1818">
                   <td width="40%">' + data.first.to_s + '</td>
                   <td width="20%">' + data.second.to_s + '</td>
                   <td width="20%">' + data.last.to_s + '</td>
@@ -156,16 +162,26 @@ module PdfDownloadable
               <div style=\"text-align: left;\">Semaglutide Consultation Fee: #{semag_consult_fee ? 'Yes' : 'No'}</div>
       "
 
-      if is_old_invoice?
+      if old_invoice?
         str += '
-                  <div style="text-align: right;">Client Cash: ' + paid_by_client_cash&.round(2).to_s + '</div>
-                  <div style="text-align: left;">Client Credit: ' + paid_by_client_credit&.round(2).to_s + '</div>
-                  <div style="text-align: right;">Client Paid: ' + (paid_by_client_cash.to_f + paid_by_client_credit.to_f if paid_by_client_cash && paid_by_client_credit)&.round(2).to_s + '</div>
-              '
+          <div style="text-align: right;">
+            Client Cash: ' + paid_by_client_cash&.round(2).to_s + '
+          </div>
+          <div style="text-align: left;">
+            Client Credit: ' + paid_by_client_credit&.round(2).to_s + '
+          </div>
+          <div style="text-align: right;">
+            Client Paid: ' + (
+              paid_by_client_cash.to_f + paid_by_client_credit.to_f if paid_by_client_cash && paid_by_client_credit
+            )&.round(2).to_s + '
+          </div>
+        '
       end
 
       str += '
-            <div style="text-align: right;">  Total Amount Client Paid: ' + total_amount_paid_by_client&.round(2).to_s + '</div>
+            <div style="text-align: right;">
+              Total Amount Client Paid: ' + total_amount_paid_by_client&.round(2).to_s + '
+            </div>
             <div style="text-align: left;">  Payment Type: ' + payment_type.to_s + '</div>
             <div style="text-align: right;">  Tip: ' + tip.to_s + '</div>
             <div style="text-align: left;">  Overhead Fee Type: ' + overhead_fee_type&.capitalize.to_s + '</div>
@@ -183,14 +199,17 @@ module PdfDownloadable
 
             <table style="width: 100%;margin: 50px 0">
               <tbody>
-                <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
+              <tr style="line-height: 50px; text-align: center;
+                border-bottom: 2px solid #302726; color: #323aa8;
+                font-size: 22px;">
                   <th width="40%">Product Name</th>
                   <th width="20%">Quantity</th>
                   <th width="20%">Price</th>
                   <th width="20%">Total Price</th>
                 </tr>'
         value&.each do |data|
-          table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
+          table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726;
+                          text-align: center; padding: 30px 0px; color: #1c1818">
                   <td width="40%">' + data.first.to_s + '</td>
                   <td width="20%">' + data.second.to_s + '</td>
                   <td width="20%">' + data.last.to_s + '</td>
@@ -221,12 +240,18 @@ module PdfDownloadable
       </html>'
     end
 
-    def is_old_invoice?
-      amt_paid_for_mp_products.nil? && amt_paid_for_products.nil? && amt_paid_for_retail_products.nil? && amt_paid_for_wellness_products.nil?
+    def old_invoice?
+      amt_paid_for_mp_products.nil? &&
+        amt_paid_for_products.nil? &&
+        amt_paid_for_retail_products.nil? &&
+        amt_paid_for_wellness_products.nil?
     end
 
     def total_amount_paid_by_client
-      amt_paid_for_products.to_f + amt_paid_for_retail_products.to_f + amt_paid_for_wellness_products.to_f + amt_paid_for_mp_products.to_f
+      amt_paid_for_products.to_f +
+        amt_paid_for_retail_products.to_f +
+        amt_paid_for_wellness_products.to_f +
+        amt_paid_for_mp_products.to_f
     end
   end
 end

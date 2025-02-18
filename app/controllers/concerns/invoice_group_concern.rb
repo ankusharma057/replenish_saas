@@ -9,7 +9,7 @@ module InvoiceGroupConcern
                                       instant_pay].freeze
 
   included do
-    before_action :find_employee, only: :create
+    before_action :find_employee, only: :create, if: -> { respond_to?(:create) }
   end
 
   def create_invoice_group
@@ -33,7 +33,11 @@ module InvoiceGroupConcern
     end
 
     @invoice_group.generate_pdfs_and_send_mails
-    text = "An invoice group with Invoice IDs: #{@invoice_group.source_invoices.ids} has been recently created by #{@invoice_group.source_invoices.first.employee&.name}"
+    invoice_ids = @invoice_group.source_invoices.ids
+    creator_name = @invoice_group.source_invoices.first.employee&.name
+
+    text = "An invoice group with Invoice IDs: #{invoice_ids} has been recently created by #{creator_name}"
+
     send_message(text: text)
     render json: @invoice_group, status: :created
   rescue StandardError => e
@@ -50,7 +54,11 @@ module InvoiceGroupConcern
     invoice = Invoice.new(employee: employee, source_invoice_id: source_invoice_id)
     invoice.location_id = invoice_param[:location_id] if invoice_param[:location_id].present?
 
-    inventory_columns = source_invoice_id.blank? ? Invoice.column_names : (Invoice.column_names - MENTOR_INVOICE_EXCLUDE_COLUMNS)
+    inventory_columns = if source_invoice_id.blank?
+                          Invoice.column_names
+                        else
+                          Invoice.column_names - MENTOR_INVOICE_EXCLUDE_COLUMNS
+                        end
 
     inventory_columns.each do |attr|
       unless attr.eql?('id')
@@ -84,7 +92,10 @@ module InvoiceGroupConcern
       end
     end
 
-    invoice.date_of_service = Date.strptime(invoice_param[:date_of_service], '%m-%d-%Y') if invoice_param[:date_of_service].present?
+    if invoice_param[:date_of_service].present?
+      invoice.date_of_service = Date.strptime(invoice_param[:date_of_service],
+                                              '%m-%d-%Y')
+    end
 
     invoice.is_finalized = false
     invoice.is_paid ||= false

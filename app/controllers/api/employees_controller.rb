@@ -36,7 +36,7 @@ class Api::EmployeesController < ApplicationController
         render json: { message: 'Employee and Stripe account created successfully', employee: @employee },
                status: :created
       rescue StandardError => e
-        @employee.destroy
+        @employee.destroy!
         render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
       end
     else
@@ -97,14 +97,19 @@ class Api::EmployeesController < ApplicationController
 
       main_inventory = Inventory.find_or_create_by(product: product)
 
-      main_inventory.quantity = if emp_inventory_previous_quantity > quantity_hash['quantity'].to_f
-                                  main_inventory.quantity.to_f + (emp_inventory_previous_quantity.to_f - quantity_hash['quantity'].to_f)
-                                else
-                                  main_inventory.quantity.to_f - (quantity_hash['quantity'].to_f - emp_inventory_previous_quantity.to_f)
-                                end
+      main_inventory.quantity =
+        if emp_inventory_previous_quantity > quantity_hash['quantity'].to_f
+          main_inventory.quantity.to_f +
+            (emp_inventory_previous_quantity.to_f - quantity_hash['quantity'].to_f)
+        else
+          main_inventory.quantity.to_f -
+            (quantity_hash['quantity'].to_f - emp_inventory_previous_quantity.to_f)
+        end
 
       main_inventory.save
-      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} from #{quantity_hash['quantity']} for #{@selected_employee.name.capitalize}."
+      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} " \
+             "from #{quantity_hash['quantity']} for #{@selected_employee.name.capitalize}."
+
       send_message(text: text)
     end
 
@@ -117,7 +122,9 @@ class Api::EmployeesController < ApplicationController
       main_inventory.quantity -= product['quantity'].to_f
       main_inventory.save
 
-      text = "#{current_employee.name.capitalize} added #{product['quantity']} of #{record.name} for #{@selected_employee.name.capitalize}."
+      text = "#{current_employee.name.capitalize} added #{product['quantity']} of " \
+             "#{record.name} for #{@selected_employee.name.capitalize}."
+
       send_message(text: text)
     end
   end

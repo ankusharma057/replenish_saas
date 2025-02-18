@@ -51,10 +51,12 @@ module PdfGroupDownloadable
             <div style=\"text-align: right;\">Concierge Fee Paid: #{invoice.concierge_fee_paid ? 'Yes' : 'No'}</div>
             <div style=\"text-align: left;\">GFE: #{invoice.gfe ? 'Yes' : 'No'}</div>
             <div style=\"text-align: right;\">Provider Purchased: #{invoice.provider_purchased ? 'Yes' : 'No'}</div>
-            <div style=\"text-align: left;\">Semaglutide Consultation Fee: #{invoice.semag_consult_fee ? 'Yes' : 'No'}</div>
+            <div style=\"text-align: left;\">
+              Semaglutide Consultation Fee: #{invoice.semag_consult_fee ? 'Yes' : 'No'}
+            </div>
         "
 
-        if is_old_invoice?(invoice)
+        if old_invoice?(invoice)
           client_cash = invoice&.paid_by_client_cash.to_f.round(2)
           client_credit = invoice&.paid_by_client_credit.to_f.round(2)
           client_paid = (client_cash + client_credit).round(2)
@@ -66,7 +68,9 @@ module PdfGroupDownloadable
           "
         end
         complete_table_str += '
-                  <div style="text-align: right;">  Total Amount Client Paid: ' + total_amount_paid_by_client(invoice)&.round(2).to_s + '</div>
+                  <div style="text-align: right;">
+                    Total Amount Client Paid: ' + total_amount_paid_by_client(invoice)&.round(2).to_s + '
+                  </div>
                   <div style="text-align: left;">  Personal Discount: ' + invoice.personal_discount.to_s + '</div>
                   <div style="text-align: right;">  Tip: ' + invoice.tip.to_s + '</div>
                 </div>
@@ -82,14 +86,16 @@ module PdfGroupDownloadable
 
                     <table style="width: 100%;margin: 50px 0">
                       <tbody>
-                        <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
+                        <tr style="line-height: 50px; text-align: center; border-bottom: 2px solid #302726;
+                            color: #323aa8; font-size: 22px;">
                           <th width="40%">Product Name</th>
                           <th width="20%">Quantity</th>
                           <th width="20%">Price</th>
                           <th width="20%">Total Price</th>
                         </tr>'
           value&.each do |data|
-            table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
+            table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center;
+                              padding: 30px 0px; color: #1c1818">
                           <td width="40%">' + data.first.to_s + '</td>
                           <td width="20%">' + data.second.to_s + '</td>
                           <td width="20%">' + data.last.to_s + '</td>
@@ -108,7 +114,9 @@ module PdfGroupDownloadable
           end
 
           table_str += "<div style=\"margin: 20px 0; font-size: 20px; color: #323aa8;\">
-                <strong>Amount Client Paid for #{key.titleize}: $#{amt_paid.nil? ? '0.00' : amt_paid.to_f.round(2)}</strong>
+                <strong>
+                  Amount Client Paid for #{key.titleize}: $#{amt_paid.nil? ? '0.00' : amt_paid.to_f.round(2)}
+                </strong>
               </div>"
 
           complete_table_str += table_str
@@ -168,24 +176,38 @@ module PdfGroupDownloadable
             <div style=\"text-align: right;\">Concierge Fee Paid: #{invoice.concierge_fee_paid ? 'Yes' : 'No'}</div>
             <div style=\"text-align: left;\">GFE: #{invoice.gfe ? 'Yes' : 'No'}</div>
             <div style=\"text-align: right;\">Provider Purchased: #{invoice.provider_purchased ? 'Yes' : 'No'}</div>
-            <div style=\"text-align: left;\">Semaglutide Consultation Fee: #{invoice.semag_consult_fee ? 'Yes' : 'No'}</div>
+            <div style=\"text-align: left;\">
+              Semaglutide Consultation Fee: #{invoice.semag_consult_fee ? 'Yes' : 'No'}
+            </div>
         "
 
-        if is_old_invoice?(invoice)
+        if old_invoice?(invoice)
           complete_table_str += '
-                      <div style="text-align: right;">Client Cash: ' + paid_by_client_cash&.round(2).to_s + '</div>
-                      <div style="text-align: left;">Client Credit: ' + paid_by_client_credit&.round(2).to_s + '</div>
-                      <div style="text-align: right;">Client Paid: ' + (if paid_by_client_cash && paid_by_client_credit
-                                                                          paid_by_client_cash&.to_f&.+ paid_by_client_credit&.to_f
-                                                                        end)&.round(2).to_s + '</div>
-                  '
+            <div style="text-align: right;">
+              Client Cash: ' + paid_by_client_cash&.round(2).to_s + '
+            </div>
+            <div style="text-align: left;">
+              Client Credit: ' + paid_by_client_credit&.round(2).to_s + '
+            </div>
+            <div style="text-align: right;">
+              Client Paid: ' + (
+                if paid_by_client_cash && paid_by_client_credit
+                  paid_by_client_cash&.to_f&.+(paid_by_client_credit&.to_f)
+                end
+              )&.round(2).to_s + '
+            </div>
+          '
         end
 
         complete_table_str += '
-                <div style="text-align: right;">  Total Amount Client Paid: ' + total_amount_paid_by_client(invoice).round(2).to_s + '</div>
+                <div style="text-align: right;">
+                  Total Amount Client Paid: ' + total_amount_paid_by_client(invoice).round(2).to_s + '
+                </div>
                 <div style="text-align: left;">  Personal Discount: ' + invoice.personal_discount.to_s + '</div>
                 <div style="text-align: right;">  Tip: ' + invoice.tip.to_s + '</div>
-                <div style="text-align: left;">  Overhead Fee Type: ' + invoice.overhead_fee_type&.capitalize.to_s + '</div>
+                <div style="text-align: left;">
+                  Overhead Fee Type: ' + invoice.overhead_fee_type&.capitalize.to_s + '
+                </div>
                 <div style="text-align: right;">  Overhead Fee Value: ' + invoice.overhead_fee_value.to_s + '</di>
               </div>
 
@@ -200,14 +222,16 @@ module PdfGroupDownloadable
 
                   <table style="width: 100%;margin: 50px 0">
                     <tbody>
-                      <tr style="line-height: 50px; text-align: center; border-buttom: 2px solid #302726; color: #323aa8; font-size: 22px;">
+                      <tr style="line-height: 50px; text-align: center; border-bottom: 2px solid #302726;
+                          color: #323aa8; font-size: 22px;">
                         <th width="40%">Product Name</th>
                         <th width="20%">Quantity</th>
                         <th width="20%">Price</th>
                         <th width="20%">Total Price</th>
                       </tr>'
           value&.each do |data|
-            table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726; text-align: center; padding: 30px 0px; color: #1c1818">
+            table_str += '<tr style="line-height: 50px; border-top: 2px solid #302726;
+                              text-align: center; padding: 30px 0px; color: #1c1818">
                         <td width="40%">' + data.first.to_s + '</td>
                         <td width="20%">' + data.second.to_s + '</td>
                         <td width="20%">' + data.last.to_s + '</td>
@@ -225,7 +249,9 @@ module PdfGroupDownloadable
             0.0
           end
           table_str += "<div style=\"margin: 20px 0; font-size: 20px; color: #323aa8;\">
-                <strong>Amount Client Paid for #{key.titleize}: $#{amt_paid.nil? ? '0.00' : amt_paid.to_f.round(2)}</strong>
+                <strong>
+                  Amount Client Paid for #{key.titleize}: $#{amt_paid.nil? ? '0.00' : amt_paid.to_f.round(2)}
+                </strong>
               </div>"
 
           complete_table_str += table_str
@@ -238,12 +264,18 @@ module PdfGroupDownloadable
       str
     end
 
-    def is_old_invoice?(invoice)
-      invoice.amt_paid_for_mp_products.nil? && invoice.amt_paid_for_products.nil? && invoice.amt_paid_for_retail_products.nil? && invoice.amt_paid_for_wellness_products.nil?
+    def old_invoice?(invoice)
+      invoice.amt_paid_for_mp_products.nil? &&
+        invoice.amt_paid_for_products.nil? &&
+        invoice.amt_paid_for_retail_products.nil? &&
+        invoice.amt_paid_for_wellness_products.nil?
     end
 
     def total_amount_paid_by_client(invoice)
-      invoice.amt_paid_for_products.to_f + invoice.amt_paid_for_retail_products.to_f + invoice.amt_paid_for_mp_products.to_f + invoice.amt_paid_for_wellness_products.to_f
+      invoice.amt_paid_for_products.to_f +
+        invoice.amt_paid_for_retail_products.to_f +
+        invoice.amt_paid_for_mp_products.to_f +
+        invoice.amt_paid_for_wellness_products.to_f
     end
   end
 end
