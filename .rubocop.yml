@@ -64,3 +64,6 @@ Rails/HelperInstanceVariable:
 
 Naming/PredicateName:
   Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false

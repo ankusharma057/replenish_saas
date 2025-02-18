@@ -253,6 +253,7 @@ class Api::EmployeesController < ApplicationController
     account_link.url
   end
 
+  # rubocop:disable Naming/VariableNumber
   def employee_params
     params.permit(
       :name, :vendor_name, :email, :password, :gfe,
@@ -266,6 +267,7 @@ class Api::EmployeesController < ApplicationController
       ]
     )
   end
+  # rubocop:enable Naming/VariableNumber
 
   def find_employee
     @employee = Employee.find_by(id: params[:id] || session[:employee_id])
