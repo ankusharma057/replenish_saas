@@ -32,6 +32,7 @@ class Invoice < ApplicationRecord
   validates :overhead_fee_type, presence: { on: :update, if: ->(invoice) { invoice.overhead_fee_value.present? } }
 
   enum :payment_status, { pending: 'pending', initiated: 'initiated', completed: 'completed' }
+  enum :payment_type, { credit_card: 0, cherry: 1, other: 2 }
   # before_update :revise_charge
   before_create :set_default_status
   before_destroy -> { return_inventory unless is_finalized }, if: -> { !is_finalized }
@@ -136,8 +137,9 @@ class Invoice < ApplicationRecord
   def return_inventory
     return unless products_hash&.any?
 
-    products_hash.values.flatten(1).map { |arr| { arr[0] => arr[1] } }.each do |product_quantity|
-      emp_inventory = employee.employees_inventories.find_or_create_by(
+    products_hash.values.flatten(1).each do |arr|
+      product_quantity = { arr[0] => arr[1] }
+      emp_inventory = employee.employees_inventories.find_or_create_by!(
         product: Product.find_by(name: product_quantity.keys.first)
       )
 
@@ -153,5 +155,19 @@ class Invoice < ApplicationRecord
 
   def set_default_status
     self.payment_status ||= 'pending'
+  end
+
+  def old_invoice?
+    amt_paid_for_mp_products.nil? &&
+      amt_paid_for_products.nil? &&
+      amt_paid_for_retail_products.nil? &&
+      amt_paid_for_wellness_products.nil?
+  end
+
+  def amount_client_paid
+    amt_paid_for_products.to_f +
+      amt_paid_for_retail_products.to_f +
+      amt_paid_for_mp_products.to_f +
+      amt_paid_for_wellness_products.to_f
   end
 end

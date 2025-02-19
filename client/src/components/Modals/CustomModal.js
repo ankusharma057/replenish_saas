@@ -36,10 +36,14 @@ function CustomModal({
   const conciergeFeePaid = invoiceData.conciergeFeePaid;
   const providerPurchased = invoiceData.provider_purchased;
   const gfe = invoiceData.gfe;
+  const paymentType = invoiceData.payment_type;
   const paidByClientCash = invoiceData.paid_by_client_cash;
   const paidByClientCredit = invoiceData.paid_by_client_credit;
   const personalDiscount = invoiceData.personal_discount;
   const tip = invoiceData.tip;
+  const paidByClientProducts = invoiceData.amt_paid_for_products;
+  const paidByClientRetailProducts = invoiceData.amt_paid_for_retail_products;
+  const paidByClientWellnessProducts = invoiceData.amt_paid_for_wellness_products;
   const comments = invoiceData.comments;
   const overheadFeeType = invoiceData.overhead_fee_type;
   const overheadFeeValue = invoiceData.overhead_fee_value;
@@ -196,6 +200,19 @@ function CustomModal({
       setLoading(false);
     }
   };
+
+  function getPaymentLabel(paymentType) {
+    switch (paymentType) {
+      case "credit_card":
+        return "Credit/Debit Card";
+      case "cherry":
+        return "Cherry Payments/Affirm";
+      case "other":
+        return "Others";
+      default:
+        return "Unknown";
+    }
+  }
 
   const handleCollapse = () => {
     const elements = document.querySelectorAll(`.image_collapse`);
@@ -419,6 +436,12 @@ function CustomModal({
                       </tbody>
                     </table>
                   </div>
+                  <div className="flex justify-end pr-4">
+                    <p className="text-lg font-semibold text-cyan-500">
+                      Total Client Paid: $
+                      {Number(paidByClientProducts || 0).toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -452,81 +475,104 @@ function CustomModal({
                       </tbody>
                     </table>
                   </div>
+                  <div className="flex justify-end pr-4">
+                    <p className="text-lg font-semibold text-cyan-500">
+                      Total Client Paid: $
+                      {Number(paidByClientRetailProducts || 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {invoiceData?.products_hash?.wellness_products?.length > 0 && (
+                <div className=" border rounded-sm p-2 mb-4 flex flex-col ">
+                  <p>
+                    <b>Wellness Products</b>
+                  </p>
+
+                  <div className="overflow-x-auto rounded-sm p-2 mb-4 ">
+                    <table className="table-auto  w-full ">
+                      <thead className="whitespace-normal">
+                        <tr>
+                          <th className="min-w-[6rem]">Product</th>
+                          <th className="min-w-[6rem]">Quantity</th>
+                          <th className="min-w-[6rem]">Price</th>
+                          {authUserState.user.is_admin || authUserState.user.is_inv_manager &&<th className="min-w-[6rem]">Total Price</th>}
+                        </tr>
+                      </thead>
+                      <tbody className="whitespace-normal">
+                        {invoiceData?.products_hash?.wellness_products.map(
+                          (product, i) => (
+                            <tr key={i}>
+                              <td>{product[0]}</td>
+                              <td>{product[1]}</td>
+                              <td>{product[2]}</td>
+                              {authUserState.user.is_admin || authUserState.user.is_inv_manager && <td>{+(product[1] * product[2])}</td>}
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex justify-end pr-4">
+                    <p className="text-lg font-semibold text-cyan-500">
+                      Total Client Paid: $
+                      {Number(paidByClientWellnessProducts || 0).toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               )}
             </>
           )}
 
-          <div className=" border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
-            <div className="flex flex-col">
-              <span className="text-gray-700">Concierge Fee Paid:</span>
-              <span>{conciergeFeePaid ? "Yes" : "No"}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-700">Provider Purchased:</span>
-              <span>{providerPurchased ? "Yes" : "No"}</span>
+          <div className="border rounded-lg p-4 mb-4 bg-white shadow-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="flex flex-col items-center bg-gray-100 p-3 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Provider Purchased</span>
+                <span className={`font-semibold ${providerPurchased ? "text-green-600" : "text-red-500"}`}>
+                  {providerPurchased ? "Yes" : "No"}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center bg-gray-100 p-3 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Personal Discount:</span>
+                <span className={`font-semibold ${personalDiscount != 0 ? "text-green-600" : "text-red-500"}`}>
+                  {personalDiscount}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center bg-gray-100 p-3 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Pay Faster</span>
+                <span className={`font-semibold ${invoiceData?.instant_pay ? "text-green-600" : "text-red-500"}`}>
+                  {invoiceData?.instant_pay ? "Yes" : "No"}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center bg-gray-100 p-3 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Payment Method</span>
+                <span className="text-lg font-semibold text-cyan-500">
+                  {getPaymentLabel(paymentType)}
+                </span>
+              </div>
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-gray-700">GFE:</span>
-              <span>{gfe ? "Yes" : "No"}</span>
+            <div className="mt-6 bg-gray-50 p-4 rounded-lg shadow-sm">
+              <span className="text-gray-600 font-medium">Comments:</span>
+              <p className="font-semibold text-gray-700">{comments || "No comments available"}</p>
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-gray-700">Paid By Client Cash:</span>
-              <span>{paidByClientCash}</span>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 border-t pt-6">
+              <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Total Owed to Provider</span>
+                <span className="text-lg font-semibold text-red-500">${charge}</span>
+              </div>
 
-            <div className="flex flex-col">
-              <span className="text-gray-700">Paid By Client Credit:</span>
-              <span>{paidByClientCredit}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-gray-700">Total Paid by Client:</span>
-              <span>
-                {Number(
-                  paidByClientCredit + paidByClientCash || 0
-                )?.toFixed() || paidByClientCredit + paidByClientCash}
-              </span>
-            </div>
-            <label className="d-flex align-items-center ">
-              Pay Faster:
-              <input
-                type="checkbox"
-                name="instant_pay"
-                checked={invoiceData?.instant_pay}
-                className="ml-2"
-              />
-            </label>
-          </div>
-
-          <div className="border rounded-sm p-2 mb-4 gap-4 flex justify-around md:flex-row flex-wrap">
-            <div className="flex flex-col">
-              <span className="text-gray-700">Personal Discount:</span>
-              <span>{personalDiscount}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-gray-700">Tip:</span>
-              <span>{tip}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-gray-700">Comments:</span>
-              <span>{comments}</span>
-            </div>
-          </div>
-
-          <div className=" border rounded-sm p-2 mb-4 flex justify-content-around">
-            <div className="flex flex-col">
-              <span className="text-gray-700">Overhead Fee Type:</span>
-              <span>{overheadFeeType}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-gray-700">Overhead Fee Value:</span>
-              <span>{overheadFeeValue}</span>
+              <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm">
+                <span className="text-gray-600 font-medium">Total Client Paid</span>
+                <span className="text-lg font-semibold text-green-500">
+                  ${Number(paidByClientProducts + paidByClientRetailProducts + paidByClientWellnessProducts || 0).toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
           {/* <div className="border rounded-sm p-2 mb-4 flex align-items-center flex-column">

@@ -2,8 +2,8 @@
 
 class Api::EmployeesController < ApplicationController
   skip_before_action :authorized_employee
-  before_action :find_employee, only: %i(update destroy locations)
-  before_action :find_employee_to_be_updated, only: %i(update_inventories send_reset_password_link)
+  before_action :find_employee, only: %i[update destroy locations]
+  before_action :find_employee_to_be_updated, only: %i[update_inventories send_reset_password_link]
 
   def index
     type = params[:type].to_s.downcase
@@ -20,22 +20,23 @@ class Api::EmployeesController < ApplicationController
   end
 
   def show
-    if current_employee.present?
-      employee = Employee.get_employee(current_employee.id)
-      render json: employee, status: :ok
-    end
+    return if current_employee.blank?
+
+    employee = Employee.get_employee(current_employee.id)
+    render json: employee, status: :ok
   end
 
   def create
     @employee = Employee.new(employee_params)
-    default_role = Role.find_by(name: "mentor")
+    default_role = Role.find_by(name: 'mentor')
     @employee.roles << default_role if default_role.present? && @employee.roles.empty?
     if @employee.save
       begin
         @employee.send_reset_password_mail
-        render json: { message: 'Employee and Stripe account created successfully', employee: @employee}, status: :created
-      rescue => e
-        @employee.destroy
+        render json: { message: 'Employee and Stripe account created successfully', employee: @employee },
+               status: :created
+      rescue StandardError => e
+        @employee.destroy!
         render json: { error: "Employee creation failed: #{e.message}" }, status: :unprocessable_entity
       end
     else
@@ -43,18 +44,25 @@ class Api::EmployeesController < ApplicationController
     end
   end
 
-
   def locations
     locations = @employee.locations
 
     render json: locations, status: :ok
   end
 
+  def update
+    if @employee.update!(employee_params)
+      render json: @employee, status: :ok
+    else
+      render json: { 'error' => 'Could not upload the employee' }, status: :bad_request
+    end
+  end
+
   def destroy
     if @employee.destroy!
-      render json: {'message' => 'Employee deleted successfully!'}, status: :ok
+      render json: { 'message' => 'Employee deleted successfully!' }, status: :ok
     else
-      render json: { 'error': 'Record Not found' }, status: :bad_request
+      render json: { error: 'Record Not found' }, status: :bad_request
     end
   end
 
@@ -62,7 +70,7 @@ class Api::EmployeesController < ApplicationController
     if @selected_employee
       @selected_employee.send_reset_password_mail
     else
-      render json: { 'error': 'Record Not found' }, status: :bad_request
+      render json: { error: 'Record Not found' }, status: :bad_request
     end
   end
 
@@ -72,19 +80,11 @@ class Api::EmployeesController < ApplicationController
       if compare_passwords
         @employee.update!(password: params[:password])
         render json: @employee, status: :ok
-      else 
-        render json: {'error' => 'Passwords do not match, please try again.'}, status: 302
+      else
+        render json: { 'error' => 'Passwords do not match, please try again.' }, status: :found
       end
     else
-      render json: {'error' => 'Email is not found in our database, please try again.'}, status: :ok
-    end
-  end
-
-  def update
-    if @employee.update!(employee_params)
-      render json: @employee, status: :ok
-    else
-      render json: {'error' => 'Could not upload the employee'}, status: :bad_request
+      render json: { 'error' => 'Email is not found in our database, please try again.' }, status: :ok
     end
   end
 
@@ -93,31 +93,38 @@ class Api::EmployeesController < ApplicationController
       product = Product.find_by(id: product_id)
       emp_inventory = @selected_employee.employees_inventories.where(product_id: product_id).first
       emp_inventory_previous_quantity = emp_inventory.quantity.to_f
-      emp_inventory.update(quantity: quantity_hash["quantity"].to_f)
+      emp_inventory.update!(quantity: quantity_hash['quantity'].to_f)
 
-      main_inventory = Inventory.find_or_create_by(product: product)
+      main_inventory = Inventory.find_or_create_by!(product: product)
 
-      main_inventory.quantity = if emp_inventory_previous_quantity > quantity_hash["quantity"].to_f
-        main_inventory.quantity.to_f + (emp_inventory_previous_quantity.to_f - quantity_hash["quantity"].to_f)
-      else
-        main_inventory.quantity.to_f - (quantity_hash["quantity"].to_f - emp_inventory_previous_quantity.to_f)
-      end
+      main_inventory.quantity =
+        if emp_inventory_previous_quantity > quantity_hash['quantity'].to_f
+          main_inventory.quantity.to_f +
+            (emp_inventory_previous_quantity.to_f - quantity_hash['quantity'].to_f)
+        else
+          main_inventory.quantity.to_f -
+            (quantity_hash['quantity'].to_f - emp_inventory_previous_quantity.to_f)
+        end
 
-      main_inventory.save
-      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} from #{quantity_hash["quantity"]} for #{@selected_employee.name.capitalize}."
+      main_inventory.save!
+      text = "#{current_employee.name.capitalize} updated Quantity of #{product.name} " \
+             "from #{quantity_hash['quantity']} for #{@selected_employee.name.capitalize}."
+
       send_message(text: text)
     end
 
-    params["new_products"].each do |product|
-      record = Product.where(name: product["product_name"]).first
+    params['new_products'].each do |product|
+      record = Product.where(name: product['product_name']).first
       @selected_employee.employees_inventories
-        .create!(product: record, quantity: product["quantity"])
+                        .create!(product: record, quantity: product['quantity'])
 
-      main_inventory = Inventory.where(product: Product.where(name: product["product_name"])).first
-      main_inventory.quantity -= product["quantity"].to_f
-      main_inventory.save
+      main_inventory = Inventory.where(product: Product.where(name: product['product_name'])).first
+      main_inventory.quantity -= product['quantity'].to_f
+      main_inventory.save!
 
-      text = "#{current_employee.name.capitalize} added #{product["quantity"]} of #{record.name} for #{@selected_employee.name.capitalize}."
+      text = "#{current_employee.name.capitalize} added #{product['quantity']} of " \
+             "#{record.name} for #{@selected_employee.name.capitalize}."
+
       send_message(text: text)
     end
   end
@@ -125,7 +132,7 @@ class Api::EmployeesController < ApplicationController
   def mentors
     mentors = Employee.select(&:is_mentor?)
 
-    render json: mentors, only: [:id, :name]
+    render json: mentors, only: %i[id name]
   end
 
   def update_plan
@@ -175,7 +182,7 @@ class Api::EmployeesController < ApplicationController
       return
     end
 
-    employee.update(stripe_account_id: stripe_account_id)
+    employee.update!(stripe_account_id: stripe_account_id)
 
     render json: { message: 'Stripe account linked successfully', employee: employee }, status: :ok
   end
@@ -205,55 +212,63 @@ class Api::EmployeesController < ApplicationController
     rescue Stripe::StripeError => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
-    
   end
 
   def employees_invoice
     finalized = params[:is_finalized]
-    if current_employee.present?
-      invoices = Invoice.where(employee_id: current_employee.id, is_finalized: finalized).where.not(client_id: nil ).paginated_invoices(params)
-        render json: {
-        invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
-        current_page: invoices.current_page,
-        total_pages: invoices.total_pages,
-        total_entries: invoices.total_entries
-      }, status: :ok
-    end 
+    return if current_employee.blank?
+
+    invoices = Invoice.where(employee_id: current_employee.id,
+                             is_finalized: finalized).where.not(client_id: nil).paginated_invoices(params)
+    render json: {
+      invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
+      current_page: invoices.current_page,
+      total_pages: invoices.total_pages,
+      total_entries: invoices.total_entries
+    }, status: :ok
   end
 
   private
 
   def create_stripe_account(employee)
-    if employee.stripe_account_id.present?
-      raise StandardError, 'Stripe account already exists for this employee'
-    end
+    raise StandardError, 'Stripe account already exists for this employee' if employee.stripe_account_id.present?
 
-    account = Stripe::Account.create({
-      type: 'express',
-      country: 'US',
-      email: employee.email,
-      capabilities: {
-        transfers: { requested: true },
-        card_payments: { requested: true }
-      }
-    })
+    account = Stripe::Account.create!({
+                                        type: 'express',
+                                        country: 'US',
+                                        email: employee.email,
+                                        capabilities: {
+                                          transfers: { requested: true },
+                                          card_payments: { requested: true }
+                                        }
+                                      })
 
     return_url = "#{request.base_url}/#{employee.id}/#{account.id}"
-    account_link = Stripe::AccountLink.create({
-      account: account.id,
-      refresh_url: "#{request.base_url}/myprofile",
-      return_url: return_url,
-      type: 'account_onboarding'
-    })
+    account_link = Stripe::AccountLink.create!({
+                                                 account: account.id,
+                                                 refresh_url: "#{request.base_url}/myprofile",
+                                                 return_url: return_url,
+                                                 type: 'account_onboarding'
+                                               })
     account_link.url
   end
 
   def employee_params
-    params.permit(:name, :vendor_name, :email, :password, :gfe, :service_percentage, :retail_percentage, :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo, employee_mentors_attributes: [:id, :employee_id, :mentor_id, :mentor_percentage, :_destroy], employee_locations_attributes: [:id, :employee_id, :location_id, :_destroy])
+    params.permit(
+      :name, :vendor_name, :email, :password, :gfe,
+      :service_percentage, :retail_percentage, :wellness_percentage,
+      :is_admin, :is_inv_manager, :is_mentor, :pay_50, :profile_photo,
+      employee_mentors_attributes: %i[
+        id employee_id mentor_id mentor_percentage _destroy
+      ],
+      employee_locations_attributes: %i[
+        id employee_id location_id _destroy
+      ]
+    )
   end
 
   def find_employee
-    @employee = Employee.find_by(id: params[:id] || session[:employee_id]) 
+    @employee = Employee.find_by(id: params[:id] || session[:employee_id])
   end
 
   def find_employee_to_be_updated
@@ -261,7 +276,6 @@ class Api::EmployeesController < ApplicationController
   end
 
   def compare_passwords
-    params[:password] == params[:confirmPassword] 
+    params[:password] == params[:confirmPassword]
   end
 end
-  
