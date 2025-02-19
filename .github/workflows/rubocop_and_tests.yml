@@ -26,8 +26,8 @@ jobs:
 
       - name: Install Rubocop and dependencies
         run: |
-          echo "Installing only RuboCop and dependencies"
-          gem install rubocop rubocop-performance rubocop-rails
+          echo "Installing Gems"
+          bundle install --jobs 4 --retry 3
 
       - name: Fetch main branch
         run: |
