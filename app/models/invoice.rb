@@ -139,7 +139,7 @@ class Invoice < ApplicationRecord
 
     products_hash.values.flatten(1).each do |arr|
       product_quantity = { arr[0] => arr[1] }
-      emp_inventory = employee.employees_inventories.find_or_create_by(
+      emp_inventory = employee.employees_inventories.find_or_create_by!(
         product: Product.find_by(name: product_quantity.keys.first)
       )
 

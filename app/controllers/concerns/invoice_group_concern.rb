@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
+
 module InvoiceGroupConcern
   extend ActiveSupport::Concern
 
@@ -17,7 +19,7 @@ module InvoiceGroupConcern
     params['_json'].each do |invoice_param|
       clients = @employee.is_admin? ? Client.all : @employee.clients
       client = clients.find_by(name: invoice_param['clientname']) ||
-               clients.create(
+               clients.create!(
                  name: invoice_param['clientname'],
                  last_name: invoice_param['lastname'],
                  email: invoice_param['email']
@@ -88,7 +90,7 @@ module InvoiceGroupConcern
         emp_inventory = employee.employees_inventories
                                 .where(product: Product.find_by(name: product_quantity.keys.first))
                                 .first
-        emp_inventory&.update(quantity: (emp_inventory.quantity.to_f - product_quantity.values.first.to_f))
+        emp_inventory&.update!(quantity: (emp_inventory.quantity.to_f - product_quantity.values.first.to_f))
       end
     end
 
@@ -146,3 +148,4 @@ module InvoiceGroupConcern
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
