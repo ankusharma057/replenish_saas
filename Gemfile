@@ -50,9 +50,9 @@ group :development, :test do
   # To check for N+1 queries
   gem 'bullet', '~> 7.2'
   gem 'rspec-rails', '~> 7.0.0'
-  gem 'rubocop', require: false
-  gem 'rubocop-performance'
-  gem 'rubocop-rails'
+  gem 'rubocop', '~> 1.71', '>= 1.71.2', require: false
+  gem 'rubocop-performance', '~> 1.23'
+  gem 'rubocop-rails', '~> 2.23', '>= 2.23.1'
 end
 
 group :development do
