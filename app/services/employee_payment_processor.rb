@@ -42,8 +42,6 @@ class EmployeePaymentProcessor
       })
       Rails.logger.info "Payment sent successfully for Employee #{employee_id}, Invoice #{invoice_id}, Transfer ID: #{transfer.id}"
 
-      invoice.update(is_paid: 'true')
-
     rescue Stripe::StripeError => e
       Rails.logger.error "Stripe error for Employee #{employee_id}, Invoice #{invoice_id}: #{e.message}"
     end

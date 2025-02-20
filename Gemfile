@@ -53,6 +53,7 @@ group :development, :test do
   gem 'rubocop', '~> 1.71', '>= 1.71.2', require: false
   gem 'rubocop-performance', '~> 1.23'
   gem 'rubocop-rails', '~> 2.23', '>= 2.23.1'
+  gem 'factory_bot_rails'
 end
 
 group :development do

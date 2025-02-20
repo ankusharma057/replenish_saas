@@ -106,6 +106,7 @@ mount Sidekiq::Web => '/sidekiq'
         post :finalize_multiple
         get :print_receipt
         get :invoices_list
+        delete :destroy_multiple
       end
 
       member do

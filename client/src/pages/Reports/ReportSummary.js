@@ -367,7 +367,7 @@ const ReportSummary = () => {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th colSpan="4" className="text-start text-black-50 fs-4">Billing Summary Report</th>
+                <th colSpan="4" className="text-start text-black-50 fs-4">Sales by location</th>
               </tr>
               <tr>
                 <th>Location</th>
@@ -381,8 +381,8 @@ const ReportSummary = () => {
                 return <tr key={index} onClick={() => generateSingleSummaryReport(item.location_id)} className='cursor-pointer'>
                   <td style={{color:"#17a2b8"}}>{item.location_name}</td>
                   <td>{item.percentage_invoiced}%</td>
-                  <td>{item.total_invoiced}</td>
-                  <td>{item.total_applied}</td>
+                  <td>${item.total_invoiced}</td>
+                  <td>${item.total_applied}</td>
                 </tr>
               })}
               <tr className='cursor-pointer'>

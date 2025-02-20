@@ -187,6 +187,14 @@ export const deleteInvoice = async (id, refetch) =>
     },
   });
 
+export const deleteMultipleInvoices = async (invoiceIds, refetch) =>
+  api.delete('/api/invoices/destroy_multiple', {
+    data: { ids: invoiceIds },
+    cache: {
+      ignoreCache: refetch,
+    },
+  });
+
 export const getProductsList = async (refetch) =>
   api.get("/api/products", {
     cache: {

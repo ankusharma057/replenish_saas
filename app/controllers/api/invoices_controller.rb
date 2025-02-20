@@ -217,6 +217,17 @@ class Api::InvoicesController < ApplicationController
     
   end
 
+  def destroy_multiple
+    invoice_ids = params[:ids]
+    invoices = Invoice.where(id: invoice_ids)
+
+    if invoices.any? && invoices.destroy_all
+      render json: { message: "#{invoices.count} invoice(s) deleted successfully." }, status: :ok
+    else
+      render json: { error: 'Invoices not found or Unable to delete' }, status: :not_found
+    end
+  end
+
 
   private
 
