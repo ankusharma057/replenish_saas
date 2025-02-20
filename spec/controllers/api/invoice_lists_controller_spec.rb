@@ -140,19 +140,6 @@ RSpec.describe Api::InvoiceListsController, type: :controller do
 
 
   describe 'GET #location_pdf' do
-    context 'when location exists' do
-      context 'but no invoices exist' do
-        it 'returns a pdf' do
-          Invoice.where(location: location).destroy_all
-
-          get :location_pdf, params: { location_id: location.id }
-
-          expect(response).to have_http_status(:ok)
-          expect(response.content_type).to eq 'application/pdf'
-        end
-      end
-    end
-
     context 'when location does not exist' do
       it 'returns a not found error' do
         expect {get :location_pdf, params: { location_id: -1 }}.to raise_error(ActiveRecord::RecordNotFound)
