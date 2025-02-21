@@ -153,18 +153,6 @@ const Invoice = () => {
     setSelectedField(selectedOption);
     setSearchQuery('');
   };
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    if (value === '' || /^[0-9\b]+$/.test(value)) {
-      setInputValue(value);
-      const newPage = parseInt(value, 10);
-      if (newPage > 0 && newPage <= totalPages) {
-        setPageNumber(newPage);
-      }
-    }
-  };
 
   useEffect(() => {
     getInvoices();

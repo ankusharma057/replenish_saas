@@ -233,23 +233,23 @@ class Api::EmployeesController < ApplicationController
   def create_stripe_account(employee)
     raise StandardError, 'Stripe account already exists for this employee' if employee.stripe_account_id.present?
 
-    account = Stripe::Account.create!({
-                                        type: 'express',
-                                        country: 'US',
-                                        email: employee.email,
-                                        capabilities: {
-                                          transfers: { requested: true },
-                                          card_payments: { requested: true }
-                                        }
-                                      })
+    account = Stripe::Account.create({
+                                       type: 'express',
+                                       country: 'US',
+                                       email: employee.email,
+                                       capabilities: {
+                                         transfers: { requested: true },
+                                         card_payments: { requested: true }
+                                       }
+                                     })
 
     return_url = "#{request.base_url}/#{employee.id}/#{account.id}"
-    account_link = Stripe::AccountLink.create!({
-                                                 account: account.id,
-                                                 refresh_url: "#{request.base_url}/myprofile",
-                                                 return_url: return_url,
-                                                 type: 'account_onboarding'
-                                               })
+    account_link = Stripe::AccountLink.create({
+                                                account: account.id,
+                                                refresh_url: "#{request.base_url}/myprofile",
+                                                return_url: return_url,
+                                                type: 'account_onboarding'
+                                              })
     account_link.url
   end
 

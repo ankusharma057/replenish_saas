@@ -134,12 +134,6 @@ class Invoice < ApplicationRecord
     end
   end
 
-  def self.search(query)
-    return self if query.blank?
-
-    where(id: query.to_i)
-  end
-
   def return_inventory
     return unless products_hash&.any?
 
