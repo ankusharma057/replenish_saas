@@ -15,7 +15,6 @@ import AddInvoiceTemplate from "../components/AddInvoiceTemplate";
 import Loadingbutton from "../components/Buttons/Loadingbutton";
 // import BeforeAfterMediaModal from "../components/Modals/BeforeAfterMediaModal";
 import { useAuthContext } from "../context/AuthUserContext";
-import { MdOutlineCancel } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import Select from "react-select";
 import DatePicker from "react-multi-date-picker";
@@ -32,11 +31,15 @@ const initialFormState = {
   provider_purchased: false,
   paidByClientCash: 0,
   paidByClientCredit: 0,
+  paidByClientProducts: 0,
+  paidByClientRetailProducts: 0,
+  paidByClientWellnessProducts: 0,
   personalDiscount: 0,
   tip: 0,
   comments: "",
   products: [],
   retailProducts: [],
+  wellnessProducts: [],
 };
 
 export default function AddInvoices() {
@@ -53,10 +56,18 @@ export default function AddInvoices() {
     price: 0,
     quantity: 1,
   });
+  const [currentWellnessProduct, setCurrentWellnessProduct] = useState({
+    name: "",
+    price: 0,
+    quantity: 1,
+  });
   const suggestProductListRef = useRef(null);
   const suggestRetailProductListRef = useRef(null);
+  const suggestWellnessProductListRef = useRef(null);
   const [selectedRetailProduct, setSelectedRetailProduct] = useState(null);
   const [matchingRetailProducts, setMatchingRetailProducts] = useState([]);
+  const [selectedWellnessProduct, setSelectedWellnessProduct] = useState(null);
+  const [matchingWellnessProducts, setMatchingWellnessProducts] = useState([]);
   const [clientName, setClientName] = useState("");
   const [clientLastName, setClientLastName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -64,6 +75,7 @@ export default function AddInvoices() {
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
   const [retailProductList, setRetailProductList] = useState([]);
+  const [wellnessProductList, setWellnessProductList] = useState([]);
   const [dateOfService, setDateOfService] = useState("")
   const [locationName, setLocationName] = useState("")
   const [locationId, setLocationId] = useState("")
@@ -78,6 +90,7 @@ export default function AddInvoices() {
   const [isAlert, setIsAlert] = useState({
     retailShow: false,
     productUsedShow: false,
+    wellnessShow: false,
     message: "",
     isClient: false,
     maxInvoice: false,
@@ -86,6 +99,14 @@ export default function AddInvoices() {
   const [showModal, setShowModal] = useState(false);
   const [beforeImages, setBeforeImages] = useState([]);
   const [afterImages, setAfterImages] = useState([]);
+  const servicePercentage = (parseInt(authUserState.user?.service_percentage) || 60) / 100;
+  const retailPercentage = (parseInt(authUserState.user?.retail_percentage) || 10) / 100;
+  const wellnessPercentage = (parseInt(authUserState.user?.wellness_percentage) || 20) / 100;
+  const [isWellnessProductsVisible, setIsWellnessProductsVisible] = useState(false);
+
+  const handleCheckboxChange = (event) => {
+    setIsWellnessProductsVisible(event.target.checked);
+  };
 
   const [blobsForBefore, setBlobForBefore] = useState([]);
   const [blobsForAfter, setBlobForAfter] = useState([]);
@@ -121,37 +142,32 @@ export default function AddInvoices() {
   useEffect(() => {
     getEmployees()
     const newProducts = []
-    authUserState.user?.employees_inventories.forEach((inventory, index) => {
-      if (
-        inventory?.product !== undefined &&
-        inventory?.product !== null &&
-        inventory?.product !== "" &&
-        inventory?.product?.product_type !== undefined
-      ) {
-        if (!inventory?.product.product_type.includes("Retail")) {
-          newProducts.push({ ...inventory?.product, label: inventory?.product.name, value: index });
-        }
-      }
-      // change to only user
-    });
-    setProductList(newProducts);
     const newRetailProductList = [];
-    // change to only user
-
+    const newWellnessProducts = [];
     authUserState.user?.employees_inventories.forEach((inventory, index) => {
       if (
-        inventory?.product !== undefined &&
-        inventory?.product !== null &&
-        inventory?.product !== "" &&
+        inventory?.product &&
         inventory?.product?.product_type !== undefined
       ) {
-        if (inventory?.product.product_type.includes("Retail")) {
-          newRetailProductList.push({ ...inventory?.product, label: inventory?.product.name, value: index });
+        const productData = { 
+          ...inventory?.product, 
+          label: inventory?.product.name, 
+          value: index 
+        };
+        if (!inventory?.product.product_type.includes("Retail") && !inventory?.product.product_type.includes("Wellness")) {
+          newProducts.push(productData);
+        } else if (inventory?.product.product_type.includes("Retail")) {
+          newRetailProductList.push(productData);
+        } else if (inventory?.product.product_type.includes("Wellness")) {
+          newWellnessProducts.push(productData);
         }
       }
-      // change to only user
     });
-    setRetailProductList(newRetailProductList)
+  
+    setProductList(newProducts);
+    setRetailProductList(newRetailProductList);
+    setWellnessProductList(newWellnessProducts);
+
     const handleClickOutside = (event) => {
       if (
         suggestProductListRef.current &&
@@ -166,11 +182,16 @@ export default function AddInvoices() {
       ) {
         setMatchingRetailProducts([]);
       }
+  
+      if (
+        suggestWellnessProductListRef.current &&
+        !suggestWellnessProductListRef.current.contains(event.target)
+      ) {
+        setMatchingWellnessProducts([]);
+      }
     };
-    // Add the event listener when the component mounts.
+  
     document.addEventListener("click", handleClickOutside);
-
-    // Remove the event listener when the component unmounts.
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
@@ -186,7 +207,7 @@ export default function AddInvoices() {
         });
         return;
       }
-      if (selectedOption?.quantity > selectedOption?.maxQtantity) {
+      if (selectedOption?.quantity > selectedOption?.maxQuantity) {
         setIsAlert({
           productUsedShow: true,
           message: `Unable to add ${selectedOption?.name}, as the quantity is exhausted already`,
@@ -229,7 +250,7 @@ export default function AddInvoices() {
         });
         return;
       }
-      if (selectedOption?.quantity > selectedOption?.maxQtantity) {
+      if (selectedOption?.quantity > selectedOption?.maxQuantity) {
         setIsAlert({
           retailShow: true,
           message: `Unable to add ${selectedOption?.name}, as the quantity is exhausted already`,
@@ -263,6 +284,52 @@ export default function AddInvoices() {
     }
   };
 
+  const handleWellnessProductListChange = async (selectedOption) => {
+    setSelectedWellnessProduct(selectedOption)
+    if (selectedOption) {
+      if (Number(selectedOption?.quantity) <= 0.009) {
+        setIsAlert({
+          wellnessShow: true,
+          productUsedShow: false,
+          message: `Minimum quantity is 0.01`,
+        });
+        return;
+      }
+      if (selectedOption?.quantity > selectedOption?.maxQuantity) {
+        setIsAlert({
+          wellnessShow: true,
+          message: `Unable to add ${selectedOption?.name}, as the quantity is exhausted already`,
+        });
+        return;
+      }
+
+      setIsAlert({
+        productUsedShow: false,
+        retailShow: false,
+        message: "",
+      });
+      setCurrentWellnessProduct({ name: "", price: 0, quantity: 1 });
+      let wellnessProductToBeAdded = {
+        ...selectedOption,
+        quantity: 1,
+      };
+      setSelectedWellnessProduct(null);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        wellnessProducts: [...formData.wellnessProducts, wellnessProductToBeAdded],
+      }));
+      const newValues = wellnessProductList.filter(obj => obj.id !== selectedOption.id);
+
+      setWellnessProductList([...newValues])
+
+      setIsAlert({
+        productUsedShow: false,
+        wellnessShow: false,
+        message: "",
+      });
+    }
+  };
+
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     const inputValue =
@@ -270,7 +337,7 @@ export default function AddInvoices() {
     
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: inputValue,
+      [name]: inputValue || 0,
     }));
 
     if (name === "clientName" && !value) {
@@ -300,10 +367,23 @@ export default function AddInvoices() {
     }));
     setRetailProductList([...retailProductList, product]);
   };
+
+  const removeWellnessProduct = (index, product) => {
+    const updatedProducts = [...formData.wellnessProducts];
+    updatedProducts.splice(index, 1);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      wellnessProducts: updatedProducts,
+    }));
+    setWellnessProductList((prevList) => [...prevList, product]);
+  };
+
   const getTotalPaidByClient = () => {
-    let totalPaid = formData.paidByClientCash + formData.paidByClientCredit;
+    let totalPaid = formData.paidByClientProducts + formData.paidByClientRetailProducts + formData.paidByClientWellnessProducts;
     return totalPaid;
   };
+  
+  const totalAmountClientPaid = getTotalPaidByClient();
 
   const getTotalCostPrice = (product) => {
     return +product.cost_price * +product.quantity;
@@ -323,8 +403,9 @@ export default function AddInvoices() {
 
   const getProviderPurchasedCostPrice = () => {
     let sum = 0;
+    
     formData.products.forEach((product) => {
-      if(product.provider_purchased){
+      if(product.purchased_type == 'provider_purchased'){
         sum += getTotalCostPrice(product);
       }
     });
@@ -355,30 +436,28 @@ export default function AddInvoices() {
     return sum;
   };
 
+  const getWellnessCostPrice = () => {
+    let sum = 0;
+    formData.wellnessProducts.forEach((product) => {
+      sum += getTotalCostPrice(product);
+    });
+    return sum;
+  };
+
+  const getWellnessRetailPrice = () => {
+    let sum = 0;
+    formData.wellnessProducts.forEach((product) => {
+      sum += getTotalRetailPrice(product);
+    });
+    return sum;
+  };
+
   const calculateTax = (amountPaid) => {
-    let afterTaxprice = amountPaid - amountPaid * 0.031;
+    let afterTaxprice = amountPaid - amountPaid * percentage;
+
     return afterTaxprice;
   };
 
-  const cashCalculations = (obj) => {
-    let cashRemaining = obj.cashRemaining;
-    if (cashRemaining >= obj.retailTotal && cashRemaining != 0)
-      cashRemaining -= obj.retailTotal;
-    else obj.retailTotal = calculateTax(obj.retailTotal);
-    if (cashRemaining > obj.discount && cashRemaining != 0)
-      cashRemaining -= obj.retailTotal;
-    else obj.discount = calculateTax(obj.discount);
-    if (cashRemaining >= obj.tip && cashRemaining != 0)
-      cashRemaining -= obj.tip;
-    else obj.tip = calculateTax(obj.tip);
-    if (cashRemaining >= obj.gfeFee && cashRemaining != 0)
-      cashRemaining -= obj.gfeFee;
-    else obj.gfeFee = calculateTax(obj.gfeFee);
-    if (cashRemaining >= obj.semagConsultFee && cashRemaining != 0)
-      cashRemaining -= obj.semagConsultFee;
-    else obj.semagConsultFee = calculateTax(obj.semagConsultFee);
-    return;
-  };
 
   // eslint-disable-next-line no-unused-vars
   const getOverheadFeeAmount = (total) => {
@@ -389,121 +468,37 @@ export default function AddInvoices() {
     }
   };
 
-  const getTotal = () => {
-    let afterTax = {
-      cashRemaining: formData.paidByClientCash,
-      tip: formData.tip,
-      discount: formData.personalDiscount,
-      retailTotal: getRetailRetailPrice(),
-      conciergeFee: 0,
-      gfeFee: 0,
-      semagConsultFee: 0,
-    };
-    if (formData?.gfe) {
-      afterTax.gfeFee = 20;
-      if (authUserState.user?.email === "houstonbeautifulaesthetics@gmail.com")
-        afterTax.gfeFee = afterTax.gfeFee + 10;
-    }
-
-    if (formData?.semaglitudeConsultation) {
-      // Calculate semaglutide fee based on 20% of the gross client payment
-      const grossClientPayment = formData.paidByClientCash + formData.paidByClientCredit;
-      const semaglutideFee = grossClientPayment * 0.2
-      // afterTax.semagConsultFee = 5000
-    }
-
-    if (formData?.conciergeFeePaid) {
-      afterTax.conciergeFee = 50;
-    }
-    cashCalculations(afterTax);
+  const getTotal = () => {  
     const totalProductPriceSum = getConsumableCostPrice();
-    const totalPaidByClientAT =
-      formData.paidByClientCash + calculateTax(formData.paidByClientCredit);
+    const paidByClientProducts = calculateTax(formData.paidByClientProducts);
+  
+    let total = 0;
+    let providerPurchasedCostPrice = getProviderPurchasedCostPrice();
+    let productsTotal = ((paidByClientProducts - totalProductPriceSum) * servicePercentage) + providerPurchasedCostPrice;
+    let retailProductsTotal = calculateTax(formData.paidByClientRetailProducts) * retailPercentage; 
+    let wellnessTotal = calculateTax(formData.paidByClientWellnessProducts) * wellnessPercentage;
+    total = productsTotal + retailProductsTotal + wellnessTotal - ((formData.personalDiscount * 0.5) || 0);
 
-    const selected_product_types = formData.products.map((product) => {
-      return product?.product_type;
-    });
-
-    const semaglitude_percentage =
-      selectedProduct?.product_type === "Semaglitude" ||
-        selected_product_types.includes("Semaglitude") || formData?.semaglitudeConsultation
-        ? 20
-        : authUserState.user?.service_percentage;
-
-    let total =
-      (totalPaidByClientAT +
-        afterTax.discount -
-        afterTax.conciergeFee -
-        totalProductPriceSum -
-        afterTax.gfeFee -
-        afterTax.semagConsultFee -
-        afterTax.tip -
-        afterTax.retailTotal) *
-      (semaglitude_percentage / 100); //(replace with injector percentage)
-
-    formData?.products.forEach((product) => {
-      if(product?.provider_purchased) total += getProviderPurchasedCostPrice();
-    })
-
-    if (authUserState.user?.gfe)
-      total += afterTax.gfeFee + afterTax.semagConsultFee;
-    total =
-      total -
-      afterTax.discount +
-      afterTax.tip +
-      (afterTax.retailTotal *
-        (parseInt(authUserState.user?.retail_percentage) || 0)) /
-      100 +
-      afterTax.conciergeFee;
-
-    if (authUserState.user?.gfe && formData?.gfe && totalPaidByClientAT === 0) {
-      total = 20;
-      if (authUserState.user.email === "houstonbeautifulaesthetics@gmail.com")
-        total = total + 20;
+    if(formData.instant_pay) {
+      total = total - total/100
     }
-    if (
-      authUserState.user?.gfe &&
-      formData?.semaglitudeConsultation &&
-      totalPaidByClientAT === 0
-    )
-      total = 0;
-    if (
-      !authUserState.user?.gfe &&
-      formData?.semaglitudeConsultation &&
-      getTotalPaidByClient() === 75
-    )
-      total = 0;
-    if (
-      !authUserState.user?.gfe &&
-      formData?.gfe &&
-      getTotalPaidByClient() === 30
-    ) {
-      total = 0;
-    }
-    if(formData.instant_pay){
-      total=total- total/100
-    }
-    
-    // totalRef.current.charge =
     return total.toFixed(2);
   };
 
   const getExpectedReplenishIncome = () => {
-    let totalRetail = getConsumableRetailPrice() + getRetailCostPrice();
-    let totalCost = getConsumableCostPrice() + getRetailCostPrice();
+    let totalRetail = getConsumableRetailPrice() + getRetailRetailPrice() + getWellnessRetailPrice();
+    let totalCost = getConsumableCostPrice() + getRetailCostPrice() + getWellnessCostPrice();
     let expectedIncome = totalRetail - totalCost;
-    if ((formData.paidByClientCash = 0))
-      expectedIncome = expectedIncome - expectedIncome * 0.031;
-    expectedIncome =
-      expectedIncome * ((100 - authUserState.user?.service_percentage) / 100);
+    expectedIncome = expectedIncome - (expectedIncome * percentage);
+    expectedIncome = expectedIncome * (1 - servicePercentage);
     return expectedIncome;
   };
 
   const getActualReplenishIncome = () => {
     let injectorPay = getTotal();
     let actualIncome =
-      (injectorPay / (authUserState.user?.service_percentage / 100)) *
-      ((100 - authUserState.user?.service_percentage) / 100);
+      (injectorPay / (servicePercentage)) *
+      (1  - servicePercentage);
     return actualIncome;
   };
 
@@ -551,7 +546,7 @@ export default function AddInvoices() {
         name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity:
+        maxQuantity:
           selectedProduct.quantity -
           Number(
             (allInvoiceProductsList &&
@@ -592,7 +587,7 @@ export default function AddInvoices() {
         });
         return;
       }
-      if (currentProduct?.quantity > currentProduct?.maxQtantity) {
+      if (currentProduct?.quantity > currentProduct?.maxQuantity) {
         setIsAlert({
           productUsedShow: true,
           message: `Unable to add ${currentProduct?.name}, as the quantity is exhausted already`,
@@ -657,7 +652,7 @@ export default function AddInvoices() {
         name: selectedProduct?.product.name,
         price: selectedProduct?.product.cost_price,
         quantity: 1,
-        maxQtantity:
+        maxQuantity:
           selectedProduct.quantity -
           Number(
             (allInvoiceProductsList &&
@@ -681,6 +676,40 @@ export default function AddInvoices() {
     }
   };
 
+  const handleWellnessProductSelection = (selectedWellnessProductName) => {
+    const selectedProduct = authUserState.user?.employees_inventories?.find(
+      (product) => product?.product?.name === selectedWellnessProductName
+    );
+
+    if (selectedProduct.product) {
+      setCurrentWellnessProduct({
+        name: selectedProduct?.product.name,
+        price: selectedProduct?.product.cost_price,
+        quantity: 1,
+        maxQuantity:
+          selectedProduct.quantity -
+          Number(
+            (allInvoiceProductsList &&
+              allInvoiceProductsList?.wellnessProductQuantities[
+                selectedProduct?.product?.id
+              ]?.sumofQuantity) ||
+            0
+          ),
+        id: selectedProduct.product?.id,
+      });
+      setSelectedWellnessProduct(selectedProduct?.product);
+      setMatchingWellnessProducts([]);
+    } else {
+      setCurrentWellnessProduct({
+        name: selectedWellnessProductName,
+        price: 0,
+        quantity: 1,
+      });
+      setSelectedWellnessProduct(null);
+      setMatchingWellnessProducts([]);
+    }
+  };
+
   const handleRetailQuantityChange = (e, product) => {
     function changeObjectPropertyValue(objectId, propertyName, newValue) {
       let objectIndex = formData.retailProducts.findIndex(obj => obj.id === objectId); // Find the index of the object by its ID
@@ -694,6 +723,17 @@ export default function AddInvoices() {
     // setCurrentRetailProduct({ ...currentRetailProduct, quantity });
   };
 
+  const handleWellnessQuantityChange = (e, product) => {
+    function changeObjectPropertyValue(objectId, propertyName, newValue) {
+      let objectIndex = formData.wellnessProducts.findIndex(obj => obj.id === objectId);
+      
+      if (objectIndex !== -1) {
+        formData.wellnessProducts[objectIndex][propertyName] = newValue;
+      }
+    }
+    changeObjectPropertyValue(product.id, 'quantity', e.target.value);
+  };
+
   const handleAddRetailProduct = () => {
     if (selectedRetailProduct) {
       if (Number(currentRetailProduct?.quantity) <= 0.009) {
@@ -704,7 +744,7 @@ export default function AddInvoices() {
         });
         return;
       }
-      if (currentRetailProduct?.quantity > currentRetailProduct?.maxQtantity) {
+      if (currentRetailProduct?.quantity > currentRetailProduct?.maxQuantity) {
         setIsAlert({
           retailShow: true,
           message: `Unable to add ${currentRetailProduct?.name}, as the quantity is exhausted already`,
@@ -747,11 +787,13 @@ export default function AddInvoices() {
     });
     setCurrentProduct({ name: "", price: 0, quantity: 1 });
     setCurrentRetailProduct({ name: "", price: 0, quantity: 1 });
+    setCurrentWellnessProduct({ name: "", price: 0, quantity: 1 });
   };
 
   function calculateProductQuantities(data) {
     const productQuantities = {};
     const retailProductQuantities = {};
+    const wellnessProductQuantities = {};
 
     function calculateQuantities(arr, quantityMap) {
       for (const product of arr) {
@@ -773,9 +815,10 @@ export default function AddInvoices() {
     for (const obj of data) {
       calculateQuantities(obj.products, productQuantities);
       calculateQuantities(obj.retail_products, retailProductQuantities);
+      calculateQuantities(obj.wellness_products, wellnessProductQuantities);
     }
 
-    return { productQuantities, retailProductQuantities };
+    return { productQuantities, retailProductQuantities, wellnessProductQuantities };
   }
 
   const addMoreInvoice = (submit) => {
@@ -803,7 +846,7 @@ export default function AddInvoices() {
     //   return;
     // }
 
-    else if (formData?.products?.length == 0 && !formData?.semaglitudeConsultation) {
+    else if (formData?.products?.length == 0) {
       setIsAlert({
         productUsedShow: true,
         message: "Please select product",
@@ -820,24 +863,25 @@ export default function AddInvoices() {
       email:clientEmail,
       beforeImages: blobsForBefore,
       afterImages: blobsForAfter,
+      payment_type: selectedOption,
       date_of_service: formData?.dateOfService,
-      concierge_fee_paid: formData?.conciergeFeePaid,
-      gfe: formData?.gfe,
       semag_consult_fee: formData?.semaglitudeConsultation,
       provider_purchased: formData?.provider_purchased,
-      paid_by_client_cash: formData?.paidByClientCash,
-      paid_by_client_credit: formData?.paidByClientCredit,
+      amt_paid_for_products: formData?.paidByClientProducts,
+      amt_paid_for_retail_products: formData?.paidByClientRetailProducts,
+      amt_paid_for_wellness_products: formData?.paidByClientWellnessProducts,
       personal_discount: formData?.personalDiscount,
-      tip: formData?.tip,
       comments: formData?.comments,
       products: formData.products,
       retail_products: formData.retailProducts,
+      wellness_products: formData.wellnessProducts,
       charge: total,
       expected_income: getExpectedReplenishIncome(),
       actual_income: getActualReplenishIncome(),
       income_flag: replenishIncomeFlag(),
-      get_total_price_by_client: getTotalPaidByClient(),
-      total_consumable_cost: getConsumableRetailPrice(),
+      total_after_deduction: formData.totalAfterDeduction,
+      get_total_price_by_client: calculateTax(getTotalPaidByClient()),
+      total_consumable_cost: getConsumableRetailPrice() + getRetailRetailPrice() + getWellnessRetailPrice(),
       location_id:locationId,
       instant_pay: formData?.instant_pay
     };    
@@ -892,7 +936,7 @@ export default function AddInvoices() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const invoiceData = addMoreInvoice("submit");
-    if(invoiceData && (!Array.isArray(invoiceData[0].semag_consult_fee) || (Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0))){
+    if(invoiceData && ((Array.isArray(invoiceData[0].products) && invoiceData[0].products.length>0))){
       confirmAlert({
         title: "Confirm to submit",
         message: `Are you sure add ${invoiceData?.length} Invoices `,
@@ -1011,10 +1055,29 @@ export default function AddInvoices() {
     </div>
   }
 
+  const [selectedOption, setSelectedOption] = useState("credit_card");
+  const [percentage, setPercentage] = useState(0.06);
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setSelectedOption(value);
+    
+    switch (value) {
+      case "credit_card":
+        setPercentage(0.06);
+        break;
+      case "cherry":
+        setPercentage(0.15);
+        break;
+      case "other":
+        setPercentage(0.03);
+        break;
+      default:
+        setPercentage(0);
+    }
+  };
+
   return (
     <>
-      {/* <Header /> */}
-
       <div className="bg-blue-200 p-1 sm:p-4 position-relative" style={{position:"relative"}}>
       {screenLoading && <ScreenLoading />}
         <div className="bg-blue-200 min-h-screen pb-8 flex items-center justify-center flex-col md:p-4">
@@ -1101,60 +1164,7 @@ export default function AddInvoices() {
               className="flex flex-col-reverse md:grid"
             >
               <div className=" pb-4 md:pb-1 px-2">
-                <div className="border flex flex-col gap-3 rounded-lg p-2 mb-4 w-100">
-                  <label className=" flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Concierge Fee Paid:
-                    <input
-                      type="checkbox"
-                      name="conciergeFeePaid"
-                      checked={formData.conciergeFeePaid}
-                      onChange={(event) => handleInputChange(event)}
-                      className="ml-1"
-                    />
-                  </label>
-
-                  {/* <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Provider Purchased:
-                    <input
-                      type="checkbox"
-                      name="provider_purchased"
-                      checked={formData?.provider_purchased}
-                      onChange={(event) => handleInputChange(event)}
-                      className="ml-2"
-                    />
-                  </label> */}
-
-                  {/* <label className="mb-2 block">
-                    Provider Purchased:
-                    <input
-                      type="checkbox"
-                      name="providerPurchased"
-                      checked={formData.providerPurchased}
-                      onChange={(event) => handleInputChange(event)}
-                      className="ml-1"
-                    />
-                  </label> */}
-                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    GFE:
-                    <input
-                      type="checkbox"
-                      name="gfe"
-                      checked={formData?.gfe}
-                      onChange={(event) => handleInputChange(event)}
-                      className="ml-2"
-                    />
-                  </label>
-                  <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                    Semaglutide:
-                    <input
-                      type="checkbox"
-                      name="semaglitudeConsultation"
-                      disabled={(formData.products.length > 0 || formData.retailProducts.length > 0) ? true : false}
-                      checked={formData?.semaglitudeConsultation}
-                      onChange={(event) => handleInputChange(event)}
-                      className="ml-2"
-                    />
-                  </label>
+                <div className="border rounded-lg p-2 mb-4 w-100">
                   <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
                     Pay Faster:
                     <input
@@ -1165,38 +1175,6 @@ export default function AddInvoices() {
                       className="ml-2"
                     />
                   </label>
-
-
-                  <div className="border-t-[1px]"></div>
-                  <label className="mb-2 block font-medium px-2">
-                    Paid by Client Cash:
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="paidByClientCash"
-                      value={Number(formData.paidByClientCash).toString()}
-                      min="0"
-                      onChange={(event) => handleInputChange(event)}
-                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                    />
-                  </label>
-                  <label className="mb-2 block font-medium px-2">
-                    Paid by Client Credit:
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="paidByClientCredit"
-                      value={Number(formData.paidByClientCredit).toString()}
-                      min="0"
-                      onChange={(event) => handleInputChange(event)}
-                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                    />
-                  </label>
-                  <label className="block font-medium px-2">
-                    Total paid by client: {getTotalPaidByClient()}
-                  </label>
-                </div>
-                <div className="border rounded-lg p-2 mb-4 w-100">
                   <label className="mb-2 block font-medium p-2">
                     Personal Discount:
                     <input
@@ -1204,19 +1182,6 @@ export default function AddInvoices() {
                       onWheel={(e) => e.target.blur()}
                       name="personalDiscount"
                       value={Number(formData.personalDiscount).toString()}
-                      min="0"
-                      onChange={(event) => handleInputChange(event)}
-                      className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                    />
-                  </label>
-                  <label className="mb-2 block font-medium p-2">
-                    Tip:
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="tip"
-                      placeholder="0.00"
-                      // value={Number(formData.tip).toString()}
                       min="0"
                       onChange={(event) => handleInputChange(event)}
                       className="w-full mt-1 p-1 border-gray-300 border rounded-md"
@@ -1235,11 +1200,17 @@ export default function AddInvoices() {
                     />
                   </label>
                 </div>
-                <div className="border rounded-lg p-2 mb-4 w-100">
-                  <label className="block font-medium p-2">
-                    Total:
-                    <span ref={totalRef}>{Number(getTotal()).toFixed(2)}</span>
-                  </label>
+                <div className="border rounded-lg p-4 mb-4 w-full bg-transparent shadow-md">
+                  <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-2">Total</h3>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="font-medium text-gray-600">Total Owed to Provider:</span>
+                    <span className="font-semibold text-red-500" ref={totalRef}>{Number(getTotal()).toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2">
+                    <span className="font-medium text-gray-600">Total Amount Client Paid:</span>
+                    <span className="font-semibold text-green-600">{Number(totalAmountClientPaid).toFixed(2)}</span>
+                  </div>
                 </div>
 
                 <Loadingbutton
@@ -1266,6 +1237,64 @@ export default function AddInvoices() {
                     checked={createClient}
                     onChange={handleCreateClientCheckbox}
                   />
+                  </div>
+                  <div className="pb-4 bg-white rounded-lg">
+                    <h2 className="text-lg font-semibold mb-3">Select Payment Method</h2>
+                    <div className="flex w-full justify-between space-y-2">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          value="credit_card"
+                          checked={selectedOption === "credit_card"}
+                          onChange={handleChange}
+                          className="hidden"
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                            selectedOption === "credit_card" ? "bg-cyan-500" : ""
+                          }`}
+                        >
+                          {selectedOption === "credit_card" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                        </div>
+                        <span>Credit/Debit</span>
+                      </label>
+  
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          value="cherry"
+                          checked={selectedOption === "cherry"}
+                          onChange={handleChange}
+                          className="hidden"
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                            selectedOption === "cherry" ? "bg-cyan-500" : ""
+                          }`}
+                        >
+                          {selectedOption === "cherry" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                        </div>
+                        <span>Cherry Payments/Affirm</span>
+                      </label>
+  
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          value="other"
+                          checked={selectedOption === "other"}
+                          onChange={handleChange}
+                          className="hidden"
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                            selectedOption === "other" ? "bg-cyan-500" : ""
+                          }`}
+                        >
+                          {selectedOption === "other" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                        </div>
+                        <span>Other</span>
+                      </label>
+                    </div>
                   </div>
                  {/* {!createClient &&
                   <div className="border rounded-lg p-2 mb-4 products-used">
@@ -1394,8 +1423,7 @@ export default function AddInvoices() {
                       <tr>
                         <th>Products/Services</th>
                         <th>Product Quantity</th>
-                        <th>Price</th>
-                        <th>Total Price</th>
+                        <th className="text-center">MSRP</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -1406,7 +1434,6 @@ export default function AddInvoices() {
                             className="w-full z-50"
                             options={productList}
                             value={null}
-                            isDisabled={formData?.semaglitudeConsultation}
                             placeholder="Select Product Name"
                             onChange={handleProductListChange}
                           />
@@ -1450,8 +1477,7 @@ export default function AddInvoices() {
                             onWheel={(e) => e.target.blur()}
                             step="0.01"
                             name="productQuantity"
-                            disabled={formData?.semaglitudeConsultation}
-                            placeholder={`max:${currentProduct?.maxQtantity}`}
+                            placeholder={`max:${currentProduct?.maxQuantity}`}
                             value={currentProduct.quantity}
                             onChange={(e) => {
                               setIsAlert({
@@ -1459,31 +1485,21 @@ export default function AddInvoices() {
                                 retailShow: false,
                                 message: "",
                               });
-                              +e.target.value <= currentProduct?.maxQtantity
+                              +e.target.value <= currentProduct?.maxQuantity
                                 ? handleQuantityChange(e)
                                 : setIsAlert({
                                   productUsedShow: true,
-                                  message: ` You can only select quantity upto ${currentProduct?.maxQtantity || ""
+                                  message: ` You can only select quantity upto ${currentProduct?.maxQuantity || ""
                                     } for ${currentProduct?.name}`,
                                 });
                             }}
                             min={0.01}
-                            max={currentProduct?.maxQtantity?.toFixed(2)}
+                            max={currentProduct?.maxQuantity?.toFixed(2)}
                             className="w-full !py-1.5 px-1
                           border-gray-300 border rounded-md"
                           />
                         </td>
-                        <td>
-                          <input
-                            type="string"
-                            name="productPrice"
-                            autoComplete="off"
-                            disabled={formData?.semaglitudeConsultation}
-                            value={currentProduct.price}
-                            className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
-                          />
-                        </td>
-                        <td className="text-right">
+                        <td className="text-center">
                           {Number(
                             currentProduct.quantity * currentProduct.price || 0
                           )?.toFixed(2)}
@@ -1524,6 +1540,7 @@ export default function AddInvoices() {
                                 setIsAlert({
                                   productUsedShow: false,
                                   retailShow: false,
+                                  wellnessShow: false,
                                   message: "",
                                 });
                                 +e.target.value <= findProductQuantity(authUserState.user.employees_inventories, product.id)
@@ -1539,12 +1556,7 @@ export default function AddInvoices() {
                               className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                             />
                           </td>
-                          <td>
-                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                              {product.retail_price}
-                            </p>
-                          </td>
-                          <td className="text-right">
+                          <td className="text-center">
                             {Number(
                               product.quantity * product.retail_price || 0
                             )?.toFixed(2)}
@@ -1562,18 +1574,30 @@ export default function AddInvoices() {
                       ))}
                     </tbody>
                   </table>
+                  <hr />
+                  <div className="ml-[60%]">
+                    <h2 className="text-lg font-semibold mb-0 text-cyan-500">Amount Client Paid</h2>
+                    <input
+                      type="number"
+                      name="paidByClientProducts"
+                      className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                      min="0"
+                      value={Number(formData.paidByClientProducts).toString()}
+                      onChange={(event) => handleInputChange(event)}
+                    />
+                  </div>
                   {isAlert.productUsedShow && (
                     <span className="text-danger">{isAlert?.message}</span>
                   )}
                 </div>
+                <hr />
                 <div className="border rounded-lg p-2 mb-4 retail-products">
                   <table className="w-full table-autol">
                     <thead>
                       <tr>
                         <th>Retail Products</th>
                         <th>Product Quantity</th>
-                        <th>Price</th>
-                        <th>Total Price</th>
+                        <th className="text-center">MSRP</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -1584,22 +1608,9 @@ export default function AddInvoices() {
                             className="w-full z-40"
                             options={retailProductList}
                             value={null}
-                            isDisabled={formData?.semaglitudeConsultation}
                             placeholder="Select Product Name"
                             onChange={handleRetailProductListChange}
                           />
-                          {/* <input
-                            type="text"
-                            name="productName"
-                            id="retail_product_name"
-                            placeholder="Select Product Name"
-                            autoComplete="off"
-                            value={currentRetailProduct?.name}
-                            onClick={handleRetailProductNameChange}
-                            onChange={handleRetailProductNameChange}
-                            className="w-full p-1 border-gray-500 border rounded-md"
-                          // required
-                          /> */}
                           {matchingRetailProducts?.length > 0 && (
                             <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
                               {matchingRetailProducts
@@ -1631,41 +1642,32 @@ export default function AddInvoices() {
                             onWheel={(e) => e.target.blur()}
                             name="productQuantity"
                             step="0.01"
-                            disabled={formData?.semaglitudeConsultation}
-                            placeholder={`max:${currentRetailProduct?.maxQtantity}`}
+                            placeholder={`max:${currentRetailProduct?.maxQuantity}`}
                             value={currentRetailProduct.quantity}
                             onChange={(e) => {
                               setIsAlert({
                                 productUsedShow: false,
                                 retailShow: false,
+                                wellnessShow: false,
                                 message: "",
                               });
                               +e.target.value <=
-                                currentRetailProduct?.maxQtantity
+                                currentRetailProduct?.maxQuantity
                                 ? handleRetailQuantityChange(e)
                                 : setIsAlert({
                                   productUsedShow: false,
                                   retailShow: true,
-                                  message: ` You can only select quantity upto ${currentRetailProduct?.maxQtantity || ""
+                                  wellnessShow : false,
+                                  message: ` You can only select quantity upto ${currentRetailProduct?.maxQuantity || ""
                                     } for ${currentRetailProduct?.name}`,
                                 });
                             }}
                             min="0"
-                            max={currentRetailProduct?.maxQtantity?.toFixed(2)}
+                            max={currentRetailProduct?.maxQuantity?.toFixed(2)}
                             className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                           />
                         </td>
-                        <td>
-                          <input
-                            type="string"
-                            name="productPrice"
-                            autoComplete="off"
-                            disabled={formData?.semaglitudeConsultation}
-                            value={currentRetailProduct.price}
-                            className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
-                          />
-                        </td>
-                        <td className="text-right">
+                        <td className="text-center">
                           {Number(
                             currentRetailProduct.quantity *
                             currentRetailProduct.price || 0
@@ -1708,12 +1710,13 @@ export default function AddInvoices() {
                                 setIsAlert({
                                   productUsedShow: false,
                                   retailShow: false,
+                                  wellnessShow: false,
                                   message: "",
                                 });
                                 +e.target.value <= findProductQuantity(authUserState.user.employees_inventories, product.id)
                                   ? handleRetailQuantityChange(e, product)
                                   : setIsAlert({
-                                    productUsedShow: true,
+                                    retailShow: true,
                                     message: ` You can only select quantity upto ${findProductQuantity(authUserState.user.employees_inventories, product.id) || ""
                                       } for ${product?.name}`,
                                   });
@@ -1723,12 +1726,7 @@ export default function AddInvoices() {
                               className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
                             />
                           </td>
-                          <td>
-                            <p className="w-full p-1 border-gray-500 border rounded-md my-1">
-                              {product.cost_price}
-                            </p>
-                          </td>
-                          <td className="text-right">{product.quantity * product.cost_price}</td>
+                          <td className="text-center">{product.quantity * product.cost_price}</td>
                           <td>
                             <button
                               type="button"
@@ -1742,16 +1740,180 @@ export default function AddInvoices() {
                       ))}
                     </tbody>
                   </table>
+                  <hr />
+                  <div className="ml-[60%]">
+                    <h2 className="text-lg font-semibold mb-0 text-cyan-500">Amount Client Paid</h2>
+                    <input
+                      type="number"
+                      name="paidByClientRetailProducts"
+                      className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                      min="0"
+                      value={Number(formData.paidByClientRetailProducts).toString()}
+                      onChange={(event) => handleInputChange(event)}
+                    />
+                  </div>
                   {isAlert.retailShow && (
-                    <span className="text-sm">{isAlert?.message}</span>
+                    <span className="text-danger">{isAlert?.message}</span>
                   )}
                 </div>
-                <div className="border rounded-lg p-2 mb-4">
-                  <label className="block">
-                    Total Product Price Sum:{" "}
-                    {Number(getConsumableRetailPrice() || 0)?.toFixed(2)}
-                  </label>
-                </div>
+                <hr />
+                <label className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    checked={isWellnessProductsVisible}
+                    onChange={handleCheckboxChange} 
+                    className="form-checkbox" 
+                  />
+                  <span>Wellness</span>
+                </label>
+                <hr />
+
+                {isWellnessProductsVisible && (
+                  <div className="border rounded-lg p-2 mb-4 wellness-products">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr>
+                          <th>Wellness Products</th>
+                          <th>Quantity</th>
+                          <th className="text-center">MSRP</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="relative" ref={suggestWellnessProductListRef}>
+                            <Select
+                              className="w-full z-40"
+                              options={wellnessProductList}
+                              value={null}
+                              placeholder="Select Product Name"
+                              onChange={handleWellnessProductListChange}
+                            />
+                            {matchingWellnessProducts?.length > 0 && (
+                              <div className="absolute z-50 bg-white w-sm max-h-40 overflow-y-auto rounded-md mt-1 shadow-md">
+                                {matchingWellnessProducts
+                                  ?.filter(
+                                    (item1) =>
+                                      !formData?.wellnessProducts.some(
+                                        (item2) => item2?.name === item1?.name
+                                      )
+                                  )
+                                  ?.map((product) => (
+                                    <p
+                                      key={product.id}
+                                      className="p-2 cursor-pointer hover:bg-gray-100"
+                                      onClick={() =>
+                                        handleWellnessProductSelection(product?.name)
+                                      }
+                                    >
+                                      {product?.name}
+                                    </p>
+                                  ))}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              onWheel={(e) => e.target.blur()}
+                              name="productQuantity"
+                              step="0.01"
+                              placeholder={`max:${currentWellnessProduct?.maxQuantity}`}
+                              value={currentWellnessProduct.quantity}
+                              onChange={(e) => {
+                                setIsAlert({
+                                  productUsedShow: false,
+                                  retailShow: false,
+                                  wellnessAlertShow: false,
+                                  message: "",
+                                });
+                                +e.target.value <= currentWellnessProduct?.maxQuantity
+                                  ? handleWellnessQuantityChange(e)
+                                  : setIsAlert({
+                                      wellnessAlertShow: true,
+                                      message: `You can only select quantity up to ${currentWellnessProduct?.maxQuantity || ""} for ${currentWellnessProduct?.name}`,
+                                    });
+                              }}
+                              min="0"
+                              max={currentWellnessProduct?.maxQuantity?.toFixed(2)}
+                              className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                            />
+                          </td>
+                          <td className="text-center">
+                            {Number(
+                              currentWellnessProduct.quantity * currentWellnessProduct.price || 0
+                            ).toFixed(2)}
+                          </td>
+                        </tr>
+
+                        {formData.wellnessProducts.map((product, index) => (
+                          <tr key={index}>
+                            <td>
+                              <p className="w-full p-1 border-gray-500 border rounded-md my-1">
+                                {product?.name}
+                              </p>
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                onWheel={(e) => e.target.blur()}
+                                step="0.01"
+                                name="productQuantity"
+                                placeholder={`max:${findProductQuantity(authUserState.user.employees_inventories, product.id)}`}
+                                value={product.quantity}
+                                onChange={(e) => {
+                                  setIsAlert({
+                                    productUsedShow: false,
+                                    wellnessAlertShow: false,
+                                    retailShow: false,
+                                    message: "",
+                                  });
+                                  +e.target.value <=
+                                  findProductQuantity(authUserState.user.employees_inventories, product.id)
+                                    ? handleWellnessQuantityChange(e, product)
+                                    : setIsAlert({
+                                        wellnessAlertShow: true,
+                                        message: `You can only select quantity up to ${findProductQuantity(authUserState.user.employees_inventories, product.id) || ""} for ${product?.name}`,
+                                      });
+                                }}
+                                min={0.01}
+                                max={(findProductQuantity(authUserState.user.employees_inventories, product.id)).toFixed(2)}
+                                className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                              />
+                            </td>
+                            <td className="text-center">
+                              {product.quantity * product.cost_price}
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                onClick={() => removeWellnessProduct(index, product)}
+                                className="hover:text-red-500 text-cyan-400 flex px-2 transition duration-500 hover:animate-pulse"
+                              >
+                                <RxCross2 className="w-6 h-6" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <hr />
+                    <div className="ml-[60%]">
+                      <h2 className="text-lg font-semibold mb-0 text-cyan-500">Amount Client Paid</h2>
+                      <input
+                        type="number"
+                        name="paidByClientWellnessProducts"
+                        className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                        min="0"
+                        value={Number(formData.paidByClientWellnessProducts).toString()}
+                        onChange={(event) => handleInputChange(event)}
+                      />
+                    </div>
+                    {isAlert.wellnessAlertShow && (
+                      <span className="text-danger">{isAlert?.message}</span>
+                    )}
+                  </div>
+                )}
 
                 <Loadingbutton
                   isLoading={loading}
@@ -1783,17 +1945,22 @@ export default function AddInvoices() {
                   employee_id={invoice.employee_id}
                   clientname={invoice.clintname}
                   dateOfService={invoice?.date_of_service}
+                  payment_type={invoice?.payment_type}
                   conciergeFeePaid={invoice?.concierge_fee_paid}
                   gfe={invoice?.gfe}
                   semaglitudeConsultation={invoice?.semag_consult_fee}
                   providerpurchased={invoice?.provider_purchased}
                   paidByClientCash={invoice?.paid_by_client_cash}
                   paidByClientCredit={invoice?.paid_by_client_credit}
+                  paidByClientProducts={invoice?.amt_paid_for_products}
+                  paidByClientRetailProducts={invoice?.amt_paid_for_retail_products}
+                  paidByClientWellnessProducts={invoice?.amt_paid_for_wellness_products}
                   personalDiscount={invoice?.personal_discount}
                   tip={invoice?.tip}
                   comments={invoice?.comments}
                   products={invoice.products}
                   retailProducts={invoice.retail_products}
+                  wellnessProducts={invoice.wellness_products}
                   charge={invoice.charge}
                   getTotalPriceByClient={invoice.get_total_price_by_client}
                   totalConsumableCost={invoice.total_consumable_cost}

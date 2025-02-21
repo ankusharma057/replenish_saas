@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class EmployeesOnlySerializer < ActiveModel::Serializer
-  attributes :id, :name, :vendor_name, :email, :password, :gfe,
-  :service_percentage, :retail_percentage, :pay_50, :employees_inventories, :has_access_only_to, :reference_number,
-  :is_admin, :is_inv_manager, :is_mentor, :employee_locations, :employee_mentors, :stripe_account_id
+  attributes :id, :name, :vendor_name, :email, :password, :gfe, :wellness_percentage,
+             :service_percentage, :retail_percentage, :pay_50, :employees_inventories,
+             :has_access_only_to, :reference_number, :is_admin, :is_inv_manager, :is_mentor,
+             :employee_locations, :employee_mentors, :stripe_account_id
 
   def employee_locations
     object.employee_locations.map do |loc|
@@ -51,5 +54,5 @@ class EmployeesOnlySerializer < ActiveModel::Serializer
 
   def is_mentor
     object.is_mentor?
-  end 
+  end
 end

@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 class Api::InvoiceListsController < ApplicationController
   def index
-    invoices = Invoice.includes(:location).where(mentor_id: nil).search(params[:query]).paginated_invoices(params)
+    invoices = Invoice.includes(:location).where(mentor_id: nil).search(params[:query],
+                                                                        params[:field]).paginated_invoices(params)
     render json: {
       invoices: ActiveModelSerializers::SerializableResource.new(invoices, each_serializer: InvoiceListSerializer),
       current_page: invoices.current_page,
@@ -20,11 +23,11 @@ class Api::InvoiceListsController < ApplicationController
   end
 
   def mentorship_invoices
-    invoices = if params[:is_admin] == "true"
-      Invoice.where.not(mentor_id: nil).order(created_at: :desc)
-    else
-      Invoice.where(employee_id: params[:employee_id]).where.not(mentor_id: nil).order(created_at: :desc)
-    end
+    invoices = if params[:is_admin] == 'true'
+                 Invoice.where.not(mentor_id: nil).order(created_at: :desc)
+               else
+                 Invoice.where(employee_id: params[:employee_id]).where.not(mentor_id: nil).order(created_at: :desc)
+               end
 
     render json: invoices, each_serializer: MentorInvoiceSerializer, status: :ok
   end
@@ -35,10 +38,16 @@ class Api::InvoiceListsController < ApplicationController
     total_invoiced_sum = summary_data.sum { |data| data[:total_invoiced] }
     total_applied_sum = summary_data.sum { |data| data[:total_applied] }
 
-    start_date = params[:start_date].present? ? Date.strptime(params[:start_date], "%Y-%m-%d") : Date.today.beginning_of_month
-    end_date = params[:end_date].present? ? Date.strptime(params[:end_date], "%Y-%m-%d") : Date.today.end_of_month
+    start_date = if params[:start_date].present?
+                   Date.strptime(params[:start_date], '%Y-%m-%d')
+                 else
+                   Time.zone.today.beginning_of_month
+                 end
+    end_date = params[:end_date].present? ? Date.strptime(params[:end_date], '%Y-%m-%d') : Time.zone.today.end_of_month
 
-    schedules = Schedule.where(is_cancelled: false).where(created_at: start_date..end_date).includes(treatments: :product)
+    schedules = Schedule.where(is_cancelled: false)
+                        .where(created_at: start_date..end_date)
+                        .includes(treatments: :product)
 
     product_income = schedules.sum do |schedule|
       schedule.treatments.sum do |treatment|
@@ -64,7 +73,7 @@ class Api::InvoiceListsController < ApplicationController
       current_month_dates: {
         start_date: start_date.strftime('%Y-%m-%d'),
         end_date: end_date.strftime('%Y-%m-%d')
-      },
+      }
     }, status: :ok
   end
 
@@ -73,30 +82,38 @@ class Api::InvoiceListsController < ApplicationController
     summary_data = calculate_summary_data(invoices)
 
     package = generate_excel_file(summary_data)
-    timestamp = Time.now.strftime('%Y%m%d%H%M%S')
+    timestamp = Time.zone.now.strftime('%Y%m%d%H%M%S')
     send_data package.to_stream.read,
               filename: "invoices_summary_#{timestamp}.xlsx",
-              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              disposition: "attachment"
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              disposition: 'attachment'
   end
-
 
   def location_pdf
     location_id = params[:location_id]
     @location = Location.find(location_id)
     if @location.present?
-      @start_date = params[:start_date].present? ? Date.strptime(params[:start_date], "%Y-%m-%d") : Date.today.beginning_of_month
-      @end_date = params[:end_date].present? ? Date.strptime(params[:end_date], "%Y-%m-%d") : Date.today.end_of_month
+      @start_date = if params[:start_date].present?
+                      Date.strptime(params[:start_date], '%Y-%m-%d')
+                    else
+                      Time.zone.today.beginning_of_month
+                    end
+      @end_date = if params[:end_date].present?
+                    Date.strptime(params[:end_date], '%Y-%m-%d')
+                  else
+                    Time.zone.today.end_of_month
+                  end
       @invoices = Invoice.where(location_id: location_id, created_at: @start_date..@end_date)
+
       if @invoices.present?
         @product_income = @invoices.sum { |invoice| calculate_product_income(invoice) }
         @treatment_income = @invoices.sum { |invoice| calculate_charge(invoice) } - @product_income
-        @applied_income = @invoices.sum {|data| data[:charge] }
+        @applied_income = @invoices.sum { |data| data[:charge] }
         @total_invoiced = @treatment_income + @product_income
 
         pdf_html = ActionController::Base.new.render_to_string(
-          template: "api/invoice_lists/location_report",
-          layout: "pdf",
+          template: 'api/invoice_lists/location_report',
+          layout: 'pdf',
           locals: {
             location: @location,
             invoices: @invoices,
@@ -133,7 +150,7 @@ class Api::InvoiceListsController < ApplicationController
         send_data pdf, filename: "location_#{@location.id}_report.pdf", type: 'application/pdf', disposition: 'inline'
       end
     else
-      return render json: {'error' => 'Location not found'}, status: :not_found
+      render json: { 'error' => 'Location not found' }, status: :not_found
     end
   end
 
@@ -161,7 +178,7 @@ class Api::InvoiceListsController < ApplicationController
       total_entries: invoices.total_entries
     }, status: :ok
   end
-  
+
   private
 
   def calculate_summary_data(invoices)
@@ -169,7 +186,6 @@ class Api::InvoiceListsController < ApplicationController
     invoices_by_location = invoices.group_by(&:location_id)
     all_locations.map do |location_id, location|
       grouped_invoices = invoices_by_location[location_id] || []
-      
       total_invoiced = grouped_invoices.sum { |invoice| calculate_charge(invoice) }
       
       {
@@ -184,31 +200,34 @@ class Api::InvoiceListsController < ApplicationController
 
 
   def calculate_product_income(invoice)
-    products = invoice.products_hash["products"] || []
+    products = invoice.products_hash['products'] || []
     products.sum { |product| product[2].to_f }
   end
 
   def calculate_charge(invoice)
-    cash = invoice.paid_by_client_cash.to_f
-    credit = invoice.paid_by_client_credit.to_f
-    adjusted_credit = credit - (credit * 0.031)
-    consumable_cost = invoice.total_consumable_cost.to_f
-    tip = invoice.tip.to_f
-    discount = invoice.personal_discount.to_f
-    concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
-    gfe_fee = invoice.gfe? ? 20 : 0
-    semag_consult_fee = (cash + credit) * 0.2
+    if invoice.old_invoice?
+      cash = invoice.paid_by_client_cash.to_f
+      credit = invoice.paid_by_client_credit.to_f
+      adjusted_credit = credit - (credit * 0.031)
+      consumable_cost = invoice.total_consumable_cost.to_f
+      tip = invoice.tip.to_f
+      discount = invoice.personal_discount.to_f
+      concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
+      gfe_fee = invoice.gfe? ? 20 : 0
+      semag_consult_fee = (cash + credit) * 0.2
 
-    total_payment = cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
+      cash + adjusted_credit - consumable_cost + tip - discount + concierge_fee + gfe_fee + semag_consult_fee
+    else
+      invoice.charge
+    end
   end
-
 
   def filtered_invoices_with_date_range
     if params[:start_date].present? && params[:end_date].present?
-      start_date = Date.strptime(params[:start_date], "%Y-%m-%d")
-      end_date = Date.strptime(params[:end_date], "%Y-%m-%d")
+      start_date = Date.strptime(params[:start_date], '%Y-%m-%d')
+      end_date = Date.strptime(params[:end_date], '%Y-%m-%d')
     else
-      current_date = Date.today
+      current_date = Time.zone.today
       start_date = current_date.beginning_of_month
       end_date = current_date.end_of_month
     end
@@ -219,14 +238,12 @@ class Api::InvoiceListsController < ApplicationController
 
     invoices = invoices.filter_by_location(location_ids) if location_ids.present?
     invoices = invoices.filter_by_employee(employee_ids) if employee_ids.present?
-    invoices = invoices.where(created_at: start_date..end_date)
-    invoices
+    invoices.where(created_at: start_date..end_date)
   end
 
   def generate_excel_file(summary_data)
     Axlsx::Package.new.tap do |package|
       workbook = package.workbook
-
       workbook.add_worksheet(name: "Sales by Location") do |sheet|
         sheet.add_row ["Sales by Location"]
         sheet.add_row ["Location", "% Invoiced", "Invoiced", "Applied"]
@@ -234,13 +251,18 @@ class Api::InvoiceListsController < ApplicationController
           sheet.add_row [
             data[:location_name],
             "#{data[:percentage_invoiced]}%",
-            "$#{'%.2f' % data[:total_invoiced]}",
-            "$#{'%.2f' % data[:total_applied]}"
+            "$#{format('%.2f', total_invoiced)}",
+            "$#{format('%.2f', total_applied)}"
           ]
         end
         total_invoiced = summary_data.sum { |data| data[:total_invoiced] }
         total_applied = summary_data.sum { |data| data[:total_applied] }
-        sheet.add_row ["Total inclusive of taxes", nil, "$#{'%.2f' % total_invoiced}", "$#{'%.2f' % total_applied}"]
+        sheet.add_row [
+          'Total inclusive of taxes',
+          nil,
+          "$#{format('%.2f', total_invoiced)}",
+          "$#{format('%.2f', total_applied)}"
+        ]
       end
     end
   end
@@ -273,11 +295,17 @@ class Api::InvoiceListsController < ApplicationController
     invoices.sum do |invoice|
       concierge_fee = invoice.concierge_fee_paid? ? 50 : 0
       gfe_fee = invoice.gfe? ? 20 : 0
-      semag_consult_fee = (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+      semag_consult_fee = if invoice.old_invoice?
+                            (invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f) * 0.2
+                          else
+                            invoice.amt_paid_for_products.to_f +
+                              invoice.amt_paid_for_retail_products.to_f +
+                              invoice.amt_paid_for_wellness_products.to_f +
+                              invoice.amt_paid_for_mp_products.to_f
+                          end
       discount = invoice.personal_discount.to_f
 
       concierge_fee + gfe_fee + semag_consult_fee - discount
     end
   end
-
 end

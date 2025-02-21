@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import {
   getInvoiceList,
   getAllInvoiceList,
@@ -86,14 +87,25 @@ const Invoice = () => {
   const [inputValue, setInputValue] = useState(pageNumber);
   const [screenLoading, setScreenLoading] = useState(false)
   const getInvoices = async (refetch = false) => {
-    const { data } = await getAllInvoiceList({ is_finalized: finalized, page: pageNumber, query: searchQuery }, refetch);
-    setTotalPages(data?.total_pages)
-    const invoiceList = data.invoices || [];
-    if(!finalized){
-      setTotalEntries(data?.total_entries) 
+    const { data } = await getAllInvoiceList({
+      is_finalized: finalized,
+      page: pageNumber,
+      query: searchQuery,
+      field: selectedField.value
+    }, refetch);
+  
+    setTotalPages(data?.total_pages);
+  
+    if (!finalized) {
+      setTotalEntries(data?.total_entries);
     }
-    setInvoiceList(DataFilterService.invoiceGroupByFinalized(invoiceList));
+  
+    const invoiceList = data.invoices || [];
+    const groupedInvoices = DataFilterService.invoiceGroupByFinalized(invoiceList);
+
+    setInvoiceList(groupedInvoices);
   };
+  
 
   const getAllInvoices = async (refetch = false) => {
     const { data } = await getAllInvoiceList({ is_finalized: false, per_page: totalEntries }, true);
@@ -113,10 +125,39 @@ const Invoice = () => {
     }
   };
 
+  const [selectedField, setSelectedField] = useState({ value: 'invoice_id', label: 'Invoice ID' });
+
+  const options = [
+    { value: 'invoice_id', label: 'Invoice ID' },
+    { value: 'client_name', label: 'Client Name' },
+    { value: 'employee_name', label: 'Employee Name' }
+  ];
+
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      borderColor: '#06b6d4',
+      '&:hover': { borderColor: '#06b6d4' },
+      boxShadow: '0 0 0 1px #06b6d4',
+      height: '48px'
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#e0f7fa' : 'white',
+      color: state.isFocused ? '#06b6d4' : 'black'
+    })
+  };
+
+
+  const handleFieldChange = (selectedOption) => {
+    setSelectedField(selectedOption);
+    setSearchQuery('');
+  };
+
   useEffect(() => {
     getInvoices();
     return () => {};
-  }, [finalized,pageNumber, searchQuery]);
+  }, [finalized, pageNumber, searchQuery, selectedField]);
 
   const finalizeInvoiceSubmit = (invoice) => {
     confirmAlert({
@@ -273,11 +314,13 @@ const Invoice = () => {
   };
 
   useEffect(() => {
-    if (invoiceList[selectList]) {
+    if (invoiceList[selectList]?.length) {
       const sorted = sortInvoices(invoiceList[selectList], sortConfig.key, sortConfig.direction);
       setSortedInvoices(sorted);
+    } else {
+      setSortedInvoices([]);
     }
-  }, [sortConfig, invoiceList, selectList]);
+  }, [invoiceList, selectList, sortConfig]);  
 
   // Handle column header click to sort
   const handleSort = (key) => {
@@ -490,13 +533,25 @@ const Invoice = () => {
           />
         )}
 
-        <div className="flex justify-center items-center mb-4">
+        <div className="flex justify-center items-center mb-4 gap-4 p-4 bg-white shadow-md rounded-xl">
+          <div className="w-1/4">
+            <Select
+              className="z-50 h-full"
+              options={options}
+              value={selectedField}
+              placeholder="Select Search Field"
+              onChange={handleFieldChange}
+              styles={customStyles}
+            />
+          </div>
+
           <input
             type="text"
-            placeholder="Search invoice by ID, Client Name, Employee Name"
+            placeholder={selectedField ? `Search by ${selectedField.label}` : "Select a field first"}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-3/4 p-3 border-2 border-gray-300 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition duration-200"
+            className="w-3/4 p-3 border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition duration-200 h-12"
+            disabled={!selectedField}
           />
         </div>
 
@@ -630,7 +685,6 @@ const Invoice = () => {
 
       {/* Page Input */}
       <form
-        // onSubmit={handlePageSubmit}
         className="flex items-center">
         <span>Page</span>
         <input

@@ -58,3 +58,18 @@ Style/OptionalBooleanParameter:
 
 Style/BlockComments:
   Enabled: false
+
+Rails/HelperInstanceVariable:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Naming/VariableNumber:
+  Enabled: false
+  Exclude:
+    - 'app/serializers/**/*'
+    - 'app/models/**/*'

@@ -2,6 +2,27 @@ import React, { useState } from 'react'
 import { Button, Modal } from 'react-bootstrap';
 
 const MentorshipInvoiceModal = ({ invoice, showModal, handleCloseModal }) => {
+  const calculatePercentage = (value) => {
+    switch (value) {
+      case "credit_card":
+        return 0.06;
+      case "cherry":
+        return 0.15;
+      case "other":
+        return 0.03
+      default:
+        return 0
+    }
+  };
+
+  const calculateTax = (value) => {
+    let afterTaxprice = value - value * percentage;
+    console.log(invoice)
+    return afterTaxprice;
+  }
+
+  const percentage = calculatePercentage(invoice.payment_type);
+  
   return (
     <div>
       <Modal
@@ -85,29 +106,18 @@ const MentorshipInvoiceModal = ({ invoice, showModal, handleCloseModal }) => {
             </div>
             <hr />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="flex flex-col items-center">
-                <span className="text-gray-700 font-medium">Concierge Fee Paid:</span>
-                <span className="text-cyan-500 font-semibold">{invoice?.conciergeFeePaid ? "Yes" : "No"}</span>
+            <div className="flex flex-col items-center">
+                <span className="text-gray-700 font-medium">Payment Type:</span>
+                <span className="text-green-600 font-semibold">{invoice?.payment_type}</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-gray-700 font-medium">GFE:</span>
-                <span className="text-cyan-500 font-semibold">{invoice?.gfe ? "Yes" : "No"}</span>
-              </div>
-            </div>
-            <hr />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="flex flex-col items-center">
-                <span className="text-gray-700 font-medium">Paid By Client Cash:</span>
-                <span className="text-green-600 font-semibold">${invoice?.paid_by_client_cash}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-gray-700 font-medium">Paid By Client Credit:</span>
-                <span className="text-green-600 font-semibold">${(invoice?.paid_by_client_credit || 0)}</span>
+                <span className="text-gray-700 font-medium">Amount Client Paid for MP Products:</span>
+                <span className="text-green-600 font-semibold">${invoice?.amt_paid_for_mp_products}</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-gray-700 font-medium text-lg">Total Paid by Client:</span>
                 <span className="text-green-700 text-xl font-semibold">
-                  ${Number((invoice?.paid_by_client_cash || 0) + ((invoice?.paid_by_client_credit || 0) * (1 - 0.03))).toFixed(2)}
+                  ${Number(calculateTax(invoice?.amt_paid_for_mp_products) || 0)}
                 </span>
               </div>
             </div>

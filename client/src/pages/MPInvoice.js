@@ -16,15 +16,14 @@ import { RxCross2 } from "react-icons/rx";
 import Select from "react-select";
 import DatePicker from "react-multi-date-picker";
 import { SlCalender } from "react-icons/sl";
+import dayjs from 'dayjs';
 
 const initialFormState = {
   clientName: "",
-  dateOfService: new Date(),
-  conciergeFeePaid: false,
-  gfe: false,
+  dateOfService: dayjs().format('MM-DD-YYYY'),
   provider_purchased: false,
-  paidByClientCash: 0,
-  paidByClientCredit: 0,
+  payment_type: "",
+  paidByClientMPProducts: 0,
   comments: "",
   mpProducts: [],
   serviceExperience: null,
@@ -53,7 +52,8 @@ const MPInvoice = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     ...initialFormState,
-    dateOfService: Date.now()
+    dateOfService: dayjs().format('MM-DD-YYYY'),
+    instantPay: false
   });
   const [invoiceArray, setInvoiceArray] = useState([]);
   const [isAlert, setIsAlert] = useState({
@@ -216,10 +216,6 @@ const MPInvoice = () => {
     }));
     setMPProductList([...mpProductList, product]);
   };
-  const getTotalPaidByClient = () => {
-    let totalPaid = formData.paidByClientCash + (formData.paidByClientCredit * (1 - 0.03));
-    return totalPaid;
-  };
   const handleMPProductSelection = (selectedProductName) => {
     const selectedMPProduct = authUserState.user?.employees_inventories?.find(
       (product) => product?.product?.name === selectedProductName
@@ -329,6 +325,19 @@ const MPInvoice = () => {
     return { mpProductQuantities };
   }
 
+  const getTotalRetailPrice = (product) => {
+    return +product.retail_price * +product.quantity;
+  };
+
+  const totalConsumableCost = () => {
+    let sum = 0;
+    formData.mpProducts.forEach((product) => {
+      sum += getTotalRetailPrice(product);
+    });
+    return sum;
+  }
+
+
   const addMoreInvoice = (submit) => {
     if (!clientName) {
       setIsAlert({
@@ -353,24 +362,25 @@ const MPInvoice = () => {
       beforeImages: blobsForBefore,
       afterImages: blobsForAfter,
       date_of_service: formData?.dateOfService,
-      concierge_fee_paid: formData?.conciergeFeePaid,
-      gfe: formData?.gfe,
-      paid_by_client_cash: formData?.paidByClientCash,
-      paid_by_client_credit: formData?.paidByClientCredit,
+      amt_paid_for_mp_products: formData?.paidByClientMPProducts,
       personal_discount: formData?.personalDiscount,
       tip: formData?.tip,
       comments: formData?.comments,
       products: [],
       retail_products: [],
       mp_products: formData.mpProducts,
-      get_total_price_by_client: getTotalPaidByClient(),
+      wellness_products: [],
+      instant_pay: formData.instantPay,
+      payment_type: selectedOption,
+      get_total_price_by_client: calculateTax(formData.paidByClientMPProducts),
       service_experience: formData.serviceExperience,
       comfort_with_modality: formData.comfortWithModality,
       mentor_value_provided: formData.mentorValueProvided,
       mentor_id: selectedMentor?.value,
       service_experience_reason: formData.serviceExperienceReason,
       comfort_with_modality_reason: formData.comfortWithModalityReason,
-      mentor_value_provided_reason: formData.mentorValueProvidedReason
+      mentor_value_provided_reason: formData.mentorValueProvidedReason,
+      total_consumable_cost: totalConsumableCost()
     };
     const invoiceList = [
       ...invoiceArray,
@@ -494,6 +504,33 @@ const MPInvoice = () => {
     }
   }
 
+  const calculateTax = (amountPaid) => {
+    let afterTaxprice = amountPaid - amountPaid * percentage;
+    
+    return afterTaxprice;
+  };
+
+  const [selectedOption, setSelectedOption] = useState("credit_card");
+  const [percentage, setPercentage] = useState(0.06);
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setSelectedOption(value);
+    
+    switch (value) {
+      case "credit_card":
+        setPercentage(0.06);
+        break;
+      case "cherry":
+        setPercentage(0.15);
+        break;
+      case "other":
+        setPercentage(0.03);
+        break;
+      default:
+        setPercentage(0);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-center flex-col">
@@ -536,56 +573,6 @@ const MPInvoice = () => {
             className="flex flex-col-reverse md:grid"
           >
             <div className=" pb-4 md:pb-1 px-2">
-              <div className="border flex flex-col gap-3 rounded-lg p-2 mb-4 w-100">
-                <label className=" flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                  Concierge Fee Paid:
-                  <input
-                    type="checkbox"
-                    name="conciergeFeePaid"
-                    checked={formData.conciergeFeePaid}
-                    onChange={(event) => handleInputChange(event)}
-                    className="ml-1"
-                  />
-                </label>
-                <label className="flex justify-between font-medium px-2 p-2 rounded-md hover:bg-cyan-100 transition duration-500">
-                  GFE:
-                  <input
-                    type="checkbox"
-                    name="gfe"
-                    checked={formData?.gfe}
-                    onChange={(event) => handleInputChange(event)}
-                    className="ml-2"
-                  />
-                </label>
-                <div className="border-t-[1px]"></div>
-                <label className="mb-2 block font-medium px-2">
-                  Paid by Client Cash:
-                  <input
-                    type="number"
-                    onWheel={(e) => e.target.blur()}
-                    name="paidByClientCash"
-                    value={Number(formData.paidByClientCash).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-                <label className="mb-2 block font-medium px-2">
-                  Paid by Client Credit:
-                  <input
-                    type="number"
-                    onWheel={(e) => e.target.blur()}
-                    name="paidByClientCredit"
-                    value={Number(formData.paidByClientCredit).toString()}
-                    min="0"
-                    onChange={(event) => handleInputChange(event)}
-                    className="w-full mt-1 p-1 border-gray-300 border rounded-md"
-                  />
-                </label>
-                <label className="block font-medium px-2">
-                  Total paid by client: {getTotalPaidByClient()}
-                </label>
-              </div>
               <div className="border rounded-lg p-2 mb-4">
                 <label className="mb-2 block font-medium p-2">
                   Comments:
@@ -597,6 +584,19 @@ const MPInvoice = () => {
                     className="w-full p-1 border-gray-300 border rounded-md"
                   />
                 </label>
+              </div>
+              <div className="border rounded-lg p-4 mb-4 w-full bg-transparent shadow-md">
+                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-2">Total</h3>
+                
+                <div className="flex justify-between items-center py-2">
+                  <span className="font-medium text-gray-600">Total Amount Client Paid:</span>
+                  <span className="font-semibold text-green-600">{formData?.paidByClientMPProducts}</span>
+                </div>
+                
+                <div className="flex justify-between items-center py-2">
+                  <span className="font-medium text-gray-600">Total Amount: </span>
+                  <span className="font-semibold text-red-500">{calculateTax(formData?.paidByClientMPProducts)}</span>
+                </div>
               </div>
 
               <Loadingbutton
@@ -710,6 +710,65 @@ const MPInvoice = () => {
                   </Table>
                 </div>
               }
+
+              <div className="pb-4 bg-white rounded-lg">
+                <h2 className="text-lg font-semibold mb-3">Select Payment Method</h2>
+                <div className="flex w-full justify-between space-y-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="credit_card"
+                      checked={selectedOption === "credit_card"}
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                        selectedOption === "credit_card" ? "bg-cyan-500" : ""
+                      }`}
+                    >
+                      {selectedOption === "credit_card" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                    </div>
+                    <span>Credit/Debit</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="cherry"
+                      checked={selectedOption === "cherry"}
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                        selectedOption === "cherry" ? "bg-cyan-500" : ""
+                      }`}
+                    >
+                      {selectedOption === "cherry" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                    </div>
+                    <span>Cherry Payments/Affirm</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="other"
+                      checked={selectedOption === "other"}
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 border-cyan-500 flex items-center justify-center ${
+                        selectedOption === "other" ? "bg-cyan-500" : ""
+                      }`}
+                    >
+                      {selectedOption === "other" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                    </div>
+                    <span>Other</span>
+                  </label>
+                </div>
+              </div>
 
               <div className="border rounded-lg p-2 mb-4">
                 <label className="block font-medium p-2">Who the Mentor was:</label>
@@ -843,6 +902,18 @@ const MPInvoice = () => {
                     ))}
                   </tbody>
                 </table>
+                <hr />
+                <div className="ml-[60%]">
+                  <h2 className="text-lg font-semibold mb-0 text-cyan-500">Amount Client Paid</h2>
+                  <input
+                    type="number"
+                    name="paidByClientMPProducts"
+                    className="w-full !py-1.5 px-1 border-gray-300 border rounded-md"
+                    min="0"
+                    value={Number(formData.paidByClientMPProducts).toString()}
+                    onChange={(event) => handleInputChange(event)}
+                  />
+                </div>
                 {isAlert.productUsedShow && (
                   <span className="text-sm">{isAlert?.message}</span>
                 )}

@@ -931,6 +931,22 @@ setTitle(title)
                           </td>
                         </tr>}
 
+                        {!selectedEmployeeData?.is_admin &&  <tr>
+                          <th className="px-4">Wellness Percentage:</th>
+                          <td>
+                            <div className="flex items-center">
+                              <LineInput
+                                type="number"
+                                defaultValue={
+                                  selectedEmployeeData?.wellness_percentage || 0
+                                }
+                                onChange={handleUpdateChange}
+                                name="wellness_percentage"
+                              />
+                            </div>
+                          </td>
+                        </tr>}
+
                         <tr>
                           <th className="px-4">Mentors</th>
                           <td>
