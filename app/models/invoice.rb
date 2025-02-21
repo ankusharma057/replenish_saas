@@ -132,6 +132,13 @@ class Invoice < ApplicationRecord
         none
       end
     end
+
+    def old_invoice?
+      amt_paid_for_mp_products.nil? &&
+        amt_paid_for_products.nil? &&
+        amt_paid_for_retail_products.nil? &&
+        amt_paid_for_wellness_products.nil?
+    end
   end
 
   def return_inventory
@@ -155,19 +162,5 @@ class Invoice < ApplicationRecord
 
   def set_default_status
     self.payment_status ||= 'pending'
-  end
-
-  def old_invoice?
-    amt_paid_for_mp_products.nil? &&
-      amt_paid_for_products.nil? &&
-      amt_paid_for_retail_products.nil? &&
-      amt_paid_for_wellness_products.nil?
-  end
-
-  def amount_client_paid
-    amt_paid_for_products.to_f +
-      amt_paid_for_retail_products.to_f +
-      amt_paid_for_mp_products.to_f +
-      amt_paid_for_wellness_products.to_f
   end
 end
