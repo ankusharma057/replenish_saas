@@ -7,6 +7,9 @@ import { loginUser, stripeOnboardComplete } from "../../Server";
 import Loadingbutton from "../../components/Buttons/Loadingbutton";
 import { useAuthContext } from "../../context/AuthUserContext";
 import { LOGIN, LOGOUT } from "../../Constants/AuthConstants";
+import "./Login.css";
+import logo from '../../Assets/2replenishmdlogobrown.png';
+
 
 function Login() {
   const [isLoading, setLoading] = useState(false);
@@ -87,48 +90,75 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white shadow-lg rounded-lg">
-        <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Sign in to ReplenishMD
-          </h2>
+    <div className="signinpage-container">
+      <div className="signinpage-signinpage">
+        <img
+          src={logo}
+          className="signinpage-image2replenishmdlogobrown3"
+        />
+        <div className="signinpage-content-container">
+          <span className="signinpage-text1">Sign In To Tribeawl</span>
+          <span className="signinpage-text2">Forgot Password ?</span>
 
           <Form onSubmit={handleSubmit}>
-            <LabelInput
-              label="Email"
-              type="email"
-              placeholder="Enter your email"
-              controlId="email"
-              name="email"
-              onChange={handleChange}
-              required={true}
-            />
-            <LabelInput
-              label="Password"
-              type="password"
-              placeholder="Enter password"
-              controlId="password"
-              name="password"
-              onChange={handleChange}
-              required={true}
-            />
+            <div className="signinpage-frame2891">
+              <div className="signinpage-textfield3"></div>
+            </div>
+            <div className="signinpage-frame2892">
+              <div className="signinpage-textfield4">
+                <div className="signinpage-textfield5">
+                  {/* Replaced LabelInput with regular input */}
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    controlId="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="signinpage-text5"
+                  />
+                </div>
+              </div>
+            </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <Loadingbutton
+            <div className="signinpage-password-field-container">
+              <div className="signinpage-textfield1">
+                <div className="signinpage-textfield2">
+                  <div className="signinpage-password-field-label">
+                    {/* Replaced LabelInput with regular input */}
+                    <input
+                      type="password"
+                      placeholder="Enter password"
+                      controlId="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className="signinpage-text3"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button className="signinpage-button">
+              <div className="signinpage-button-text-container">
+              {/* <Loadingbutton
                 isLoading={isLoading}
                 loadingText="Login..."
                 title="Login"
                 type="submit"
-              />
-              <button
-                type="button"
-                className="text-sm font-medium text-cyan-500 hover:underline"
-                onClick={() => navigate('/signup')}
-              >
-                Sign Up
-              </button>
-            </div>
+              /> */}
+                <button
+                  type="submit"
+                  className="signinpage-text4"
+                  // onClick={() => navigate('/signup')}
+                >
+                  Continue
+                </button>
+              </div>
+            </button>
           </Form>
         </div>
       </div>
