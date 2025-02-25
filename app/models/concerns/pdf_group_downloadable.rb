@@ -184,17 +184,21 @@ module PdfGroupDownloadable
             </div>
         "
         if old_invoice?(invoice)
-          complete_table_str += <<~HTML
+          complete_table_str += '
             <div style="text-align: right;">
-              Client Cash: #{invoice.paid_by_client_cash&.round(2)}
+              Client Cash: ' + invoice.paid_by_client_cash&.round(2).to_s + '
             </div>
             <div style="text-align: left;">
-              Client Credit: #{invoice.paid_by_client_credit&.round(2)}
+              Client Credit: ' + invoice.paid_by_client_credit&.round(2).to_s + '
             </div>
             <div style="text-align: right;">
-              Client Paid: #{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f).round(2)}
+              Client Paid: ' + (
+                if invoice.paid_by_client_cash && invoice.paid_by_client_credit
+                  invoice.paid_by_client_cash&.to_f&.+(invoice.paid_by_client_credit&.to_f)
+                end
+              )&.round(2).to_s + '
             </div>
-          HTML
+          '
         end
 
         complete_table_str += '
