@@ -183,23 +183,18 @@ module PdfGroupDownloadable
               Semaglutide Consultation Fee: #{invoice.semag_consult_fee ? 'Yes' : 'No'}
             </div>
         "
-
         if old_invoice?(invoice)
-          complete_table_str += '
+          complete_table_str += <<~HTML
             <div style="text-align: right;">
-              Client Cash: ' + paid_by_client_cash&.round(2).to_s + '
+              Client Cash: #{invoice.paid_by_client_cash&.round(2).to_s}
             </div>
             <div style="text-align: left;">
-              Client Credit: ' + paid_by_client_credit&.round(2).to_s + '
+              Client Credit: #{invoice.paid_by_client_credit&.round(2).to_s}
             </div>
             <div style="text-align: right;">
-              Client Paid: ' + (
-                if paid_by_client_cash && paid_by_client_credit
-                  paid_by_client_cash&.to_f&.+(paid_by_client_credit&.to_f)
-                end
-              )&.round(2).to_s + '
+              Client Paid: #{(invoice.paid_by_client_cash.to_f + invoice.paid_by_client_credit.to_f).round(2).to_s}
             </div>
-          '
+          HTML
         end
 
         complete_table_str += '
