@@ -105,7 +105,10 @@ const Invoice = () => {
 
     setInvoiceList(groupedInvoices);
   };
-  
+
+  useEffect(() => {
+    setInputValue(pageNumber);
+  }, [pageNumber]);
 
   const getAllInvoices = async (refetch = false) => {
     const { data } = await getAllInvoiceList({ is_finalized: false, per_page: totalEntries }, true);
