@@ -139,6 +139,10 @@ export default function AddInvoices() {
     }
   };
 
+  const handleNavigation = (path) => {
+    Navigate(path)
+  }
+
   useEffect(() => {
     getEmployees()
     const newProducts = []
@@ -1119,10 +1123,22 @@ export default function AddInvoices() {
                 <label className="mb-2 block d-flex flex-column">
                   Location
                   <div className="w-full d-flex align-items-center">
-                    <Form.Select value={locationName} onChange={handleInvoiceLocationSelect} required className="h-[34px]">
-                      <option >Select location</option>
+                    <Form.Select 
+                      value={locationName}
+                      onChange={(e) => {
+                        if (e.target.value === "create_location") {
+                          handleNavigation(`/settings/locations/new`);
+                        } else {
+                          handleInvoiceLocationSelect(e);
+                        }
+                      }}
+                      required 
+                      className="h-[34px]"
+                    >
+                      <option>Select location</option>
+                      <option value="create_location">+ Create New Location</option>
                       {authUserState.user.employee_locations?.length >= 0 && authUserState.user.employee_locations.map((item) => (
-                        <option value={item.location.name}>{item.location.name}</option>
+                        <option key={item.location.id} value={item.location.name}>{item.location.name}</option>
                       ))}
                     </Form.Select>
                   </div>
